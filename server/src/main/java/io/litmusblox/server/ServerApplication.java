@@ -1,3 +1,6 @@
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
 package io.litmusblox.server;
 
 import org.springframework.boot.SpringApplication;

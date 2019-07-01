@@ -1,3 +1,6 @@
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
 package io.litmusblox.server.model;
 
 /**
@@ -8,6 +11,7 @@ package io.litmusblox.server.model;
  * Time : 11:18 AM
  * Class Name : User
  * Project Name : server
+ *
  */
 public class User {
 }

@@ -3,7 +3,14 @@
  */
 package io.litmusblox.server.controller;
 
-import org.springframework.stereotype.Controller;
+import io.litmusblox.server.model.Job;
+import io.litmusblox.server.service.IJobService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Controller class that exposes all REST endpoints for Job related operations
@@ -14,7 +21,15 @@ import org.springframework.stereotype.Controller;
  * Class Name : JobController
  * Project Name : server
  */
-@Controller
+@RestController
+@RequestMapping("/api/job")
 public class JobController {
 
+    @Autowired
+    IJobService jobService;
+
+    @GetMapping(value = "/all")
+    List<Job> findAll() throws Exception{
+        return jobService.findAll();
+    }
 }

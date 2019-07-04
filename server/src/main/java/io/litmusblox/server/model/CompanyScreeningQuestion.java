@@ -12,18 +12,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Entity class for Job table
- *
- * @author : Shital Raval
- * Date : 2/7/19
- * Time : 9:40 AM
- * Class Name : Job
+ * @author : Sumit
+ * Date : 4/7/19
+ * Time : 9:34 AM
+ * Class Name : CompanyScreeningQuestion
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "JOB")
-public class Job implements Serializable {
+@Table(name = "COMPANY_SCREENING_QUESTION")
+public class CompanyScreeningQuestion implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -33,20 +31,12 @@ public class Job implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "COMPANY_JOB_ID")
-    private String companyJobId;
-
     @NotNull
-    @Column(name = "JOB_TITLE")
-    private String jobTitle;
+    @Column(name = "QUESTION")
+    private String question;
 
-    @NotNull
-    @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
-
-    @NotNull
-    @Column(name = "JOB_DESCRIPTION")
-    private String jobDescription;
+    @Column(name = "OPTIONS")
+    private String options;
 
     @NotNull
     @Column(name = "COMPANY_ID")
@@ -54,13 +44,11 @@ public class Job implements Serializable {
     @PrimaryKeyJoinColumn
     private Company companyId;
 
-    @Column(name = "DATE_PUBLISHED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
-
-    @Column(name = "DATE_ARCHIVED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    @NotNull
+    @Column(name = "QUESTION_TYPE")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private MasterData questionType;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -81,5 +69,4 @@ public class Job implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
-
 }

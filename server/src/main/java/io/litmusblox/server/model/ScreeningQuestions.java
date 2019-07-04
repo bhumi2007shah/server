@@ -13,14 +13,14 @@ import java.io.Serializable;
 /**
  * @author : Sumit
  * Date : 3/7/19
- * Time : 3:04 PM
- * Class Name : Country
+ * Time : 3:59 PM
+ * Class Name : ScreeningQuestions
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "COUNTRY")
-public class Country implements Serializable {
+@Table(name = "SCREENING_QUESTIONS")
+public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -31,15 +31,16 @@ public class Country implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "COUNTRY_NAME")
-    private String countryName;
+    @Column(name = "QUESTION")
+    private String question;
+
+    @Column(name = "OPTIONS")
+    private String options;
 
     @NotNull
-    @Column(name = "COUNTRY_CODE")
-    private String countryCode;
-
-    @NotNull
-    @Column(name = "MAX_MOBILE_LENGTH")
-    private Long maxMobileLength;
+    @Column(name = "QUESTION_TYPE")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private MasterData questionType;
 
 }

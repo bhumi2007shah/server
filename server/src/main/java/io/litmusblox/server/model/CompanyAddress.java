@@ -10,20 +10,19 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Entity class for Job table
- *
- * @author : Shital Raval
- * Date : 2/7/19
- * Time : 9:40 AM
- * Class Name : Job
+ * @author : Sumit
+ * Date : 3/7/19
+ * Time : 5:08 PM
+ * Class Name : CompanyAddress
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "JOB")
-public class Job implements Serializable {
+@Table(name = "COMPANY_ADDRESS")
+public class CompanyAddress implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -33,34 +32,25 @@ public class Job implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "COMPANY_JOB_ID")
-    private String companyJobId;
+    @NotNull
+    @Column(name = "ADDRESS")
+    private String address;
+
+    @Column(name = "LATITUDE")
+    private Double latitude;
+
+    @Column(name = "LONGITUDE")
+    private Double longitude;
 
     @NotNull
-    @Column(name = "JOB_TITLE")
-    private String jobTitle;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    private List<Company> companyList;
 
     @NotNull
-    @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
-
-    @NotNull
-    @Column(name = "JOB_DESCRIPTION")
-    private String jobDescription;
-
-    @NotNull
-    @Column(name = "COMPANY_ID")
+    @Column(name = "ADDRESS_TYPE")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private Company companyId;
-
-    @Column(name = "DATE_PUBLISHED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
-
-    @Column(name = "DATE_ARCHIVED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    private MasterData addressType;
 
     @NotNull
     @Column(name = "CREATED_ON")

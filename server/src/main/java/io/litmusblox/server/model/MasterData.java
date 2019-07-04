@@ -11,16 +11,16 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * @author : Sumit
+ * @author : oem
  * Date : 3/7/19
- * Time : 3:04 PM
- * Class Name : Country
+ * Time : 3:44 PM
+ * Class Name : MasterData
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "COUNTRY")
-public class Country implements Serializable {
+@Table(name = "MASTER_DATA")
+public class MasterData implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -31,15 +31,11 @@ public class Country implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "COUNTRY_NAME")
-    private String countryName;
+    @Column(name = "TYPE")
+    private String type;
 
     @NotNull
-    @Column(name = "COUNTRY_CODE")
-    private String countryCode;
-
-    @NotNull
-    @Column(name = "MAX_MOBILE_LENGTH")
-    private Long maxMobileLength;
+    @Column(name = "VALUE")
+    private String value;
 
 }

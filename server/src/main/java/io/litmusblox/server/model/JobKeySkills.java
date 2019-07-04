@@ -12,18 +12,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Entity class for Job table
- *
- * @author : Shital Raval
- * Date : 2/7/19
- * Time : 9:40 AM
- * Class Name : Job
+ * @author : Sumit
+ * Date : 4/7/19
+ * Time : 1:05 PM
+ * Class Name : JobKeySkills
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "JOB")
-public class Job implements Serializable {
+@Table(name = "JOB_KEY_SKILLS")
+public class JobKeySkills implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -33,38 +31,23 @@ public class Job implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "COMPANY_JOB_ID")
-    private String companyJobId;
-
-    @NotNull
-    @Column(name = "JOB_TITLE")
-    private String jobTitle;
-
-    @NotNull
-    @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
-
-    @NotNull
-    @Column(name = "JOB_DESCRIPTION")
-    private String jobDescription;
-
-    @NotNull
-    @Column(name = "ML_DATA_AVAILABLE")
-    private Boolean mlDataAvailable;
-
-    @NotNull
-    @Column(name = "COMPANY_ID")
+    @Column(name = "SKILL_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private Company companyId;
+    private SkillsMaster skillId;
 
-    @Column(name = "DATE_PUBLISHED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
+    @Column(name = "SKILL_ID_FROM_TEMP")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private TempSkills skillIdFromTemp;
 
-    @Column(name = "DATE_ARCHIVED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    @NotNull
+    @Column(name = "ML_PROVIDED")
+    private Boolean mlProvided;
+
+    @NotNull
+    @Column(name = "SELECTED")
+    private Boolean selcted;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -85,5 +68,4 @@ public class Job implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
-
 }

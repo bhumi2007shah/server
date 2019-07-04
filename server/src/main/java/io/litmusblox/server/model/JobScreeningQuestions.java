@@ -12,18 +12,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Entity class for Job table
- *
- * @author : Shital Raval
- * Date : 2/7/19
- * Time : 9:40 AM
- * Class Name : Job
+ * @author : oem
+ * Date : 4/7/19
+ * Time : 12:53 PM
+ * Class Name : JobScreeningQuestions
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "JOB")
-public class Job implements Serializable {
+@Table(name = "JOB_SCREENING_QUESTIONS")
+public class JobScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -33,38 +31,26 @@ public class Job implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "COMPANY_JOB_ID")
-    private String companyJobId;
-
     @NotNull
-    @Column(name = "JOB_TITLE")
-    private String jobTitle;
-
-    @NotNull
-    @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
-
-    @NotNull
-    @Column(name = "JOB_DESCRIPTION")
-    private String jobDescription;
-
-    @NotNull
-    @Column(name = "ML_DATA_AVAILABLE")
-    private Boolean mlDataAvailable;
-
-    @NotNull
-    @Column(name = "COMPANY_ID")
+    @Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private Company companyId;
+    private Job jobId;
 
-    @Column(name = "DATE_PUBLISHED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
+    @Column(name = "MASTER_SCREENING_QUESTION_ID")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private ScreeningQuestions masterScreeningQuestionId;
 
-    @Column(name = "DATE_ARCHIVED")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    @Column(name = "COMPANY_SCREENING_QUESTION_ID")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private CompanyScreeningQuestion companyScreeningQuestionId;
+
+    @Column(name = "USER_SCREENING_QUESTION_ID")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private UserScreeningQuestion userScreeningQuestionId;
 
     @NotNull
     @Column(name = "CREATED_ON")

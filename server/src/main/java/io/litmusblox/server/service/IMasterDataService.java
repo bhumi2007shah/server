@@ -37,4 +37,14 @@ public interface IMasterDataService {
      * @throws Exception
      */
     MasterDataResponse fetchForItems(List<String> fetchItemList) throws Exception;
+
+    /**
+     * Method to add master data to database.
+     * Supported master data types:
+     * 1. RecruiterScreeningQuestion
+     *
+     * @param jsonData master data to be persisted (in json format)
+     * @param masterDataType the type of master data to be persisted
+     */
+    void addMasterData(String jsonData, String masterDataType);
 }

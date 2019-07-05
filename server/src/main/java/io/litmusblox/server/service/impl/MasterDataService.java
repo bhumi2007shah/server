@@ -36,6 +36,12 @@ public class MasterDataService implements IMasterDataService {
     @Autowired
     CountryRepository countryRepository;
 
+    /**
+     * Method that will be called during application startup
+     * Will read all master data from database and store them in internal cache
+     *
+     * @throws Exception
+     */
     @Override
     public void loadStaticMasterData() throws Exception {
 
@@ -54,8 +60,14 @@ public class MasterDataService implements IMasterDataService {
         MasterDataBean.getInstance().setLoaded(true);
     }
 
+    /**
+     * Method that will reload all master data in memory
+     *
+     * @throws Exception
+     */
     @Override
     public void reloadMasterData() throws Exception {
+
         MasterDataBean masterBean = MasterDataBean.getInstance();
 
         //field accessor for MasterDataBean
@@ -76,6 +88,13 @@ public class MasterDataService implements IMasterDataService {
         loadStaticMasterData();
     }
 
+    /**
+     * Method to fetch specific master data values from cache
+     *
+     * @param fetchItemList The items for which master data needs to be fetched from memory
+     * @return response bean with Maps containing requested master data values
+     * @throws Exception
+     */
     @Override
     public MasterDataResponse fetchForItems(List<String> fetchItemList) throws Exception {
         MasterDataResponse master = new MasterDataResponse();
@@ -84,8 +103,28 @@ public class MasterDataService implements IMasterDataService {
         return master;
     }
 
+    /**
+     * Method to add master data to database.
+     * Supported master data types:
+     * 1. RecruiterScreeningQuestion
+     *
+     * @param jsonData       master data to be persisted (in json format)
+     * @param masterDataType the type of master data to be persisted
+     */
+    @Override
+    public void addMasterData(String jsonData, String masterDataType) {
+
+    }
+
     private static final String COUNTRY_MASTER_DATA = "Countries";
-    private MasterDataResponse getMasterData(MasterDataResponse master, String input) {
+
+    /**
+     * Method to fetch specific master data from cache
+     * @param master the response bean to be populated
+     * @param input the requested master data
+     *
+     */
+    private void getMasterData(MasterDataResponse master, String input) {
 
         switch (input) {
             case COUNTRY_MASTER_DATA:
@@ -103,7 +142,5 @@ public class MasterDataService implements IMasterDataService {
                         (Map) mapAccessor.getPropertyValue(input)
                 );
         }
-
-        return master;
     }
 }

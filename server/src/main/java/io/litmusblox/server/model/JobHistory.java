@@ -33,7 +33,7 @@ public class JobHistory implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "JOB_ID")
+   // @Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Job jobId;
@@ -43,7 +43,7 @@ public class JobHistory implements Serializable {
     private String changeText;
 
     @NotNull
-    @Column(name = "MODIFIED_BY")
+   // @Column(name = "MODIFIED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User modifiedBy;

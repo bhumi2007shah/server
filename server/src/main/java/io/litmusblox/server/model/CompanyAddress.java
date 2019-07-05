@@ -42,12 +42,17 @@ public class CompanyAddress implements Serializable {
     @Column(name = "LONGITUDE")
     private Double longitude;
 
-    @NotNull
+    /*@NotNull
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
-    private List<Company> companyList;
+    private List<Company> companyList;*/
 
     @NotNull
-    @Column(name = "ADDRESS_TYPE")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Company companyId;
+
+    @NotNull
+    //@Column(name = "ADDRESS_TYPE")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData addressType;
@@ -58,7 +63,7 @@ public class CompanyAddress implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -67,7 +72,7 @@ public class CompanyAddress implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

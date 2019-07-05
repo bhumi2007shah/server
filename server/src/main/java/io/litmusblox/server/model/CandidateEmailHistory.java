@@ -32,7 +32,7 @@ public class CandidateEmailHistory implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "CANDIDATE_ID")
+    //@Column(name = "CANDIDATE_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Candidate candidateId;
@@ -51,7 +51,7 @@ public class CandidateEmailHistory implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;

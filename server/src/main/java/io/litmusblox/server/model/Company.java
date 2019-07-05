@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -44,7 +45,7 @@ public class Company implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -53,9 +54,17 @@ public class Company implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
+
+    @NotNull
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    private List<CompanyAddress> companyAddressList;
+
+    @NotNull
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    private List<CompanyBu> companyBuList;
 
 }

@@ -26,19 +26,19 @@ public class JobDetail implements Serializable {
 
     @Id
     @NotNull
-    @Column(name = "JOB_ID")
+    //@Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
     @NotNull
-    @Column(name = "BU_ID")
+   // @Column(name = "BU_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyBu buId;
 
     @NotNull
-    @Column(name = "FUNCTION")
+  //  @Column(name = "FUNCTION")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData function;
@@ -62,25 +62,25 @@ public class JobDetail implements Serializable {
     private Double maxExperience;
 
     @NotNull
-    @Column(name = "EDUCATION")
+  //  @Column(name = "EDUCATION")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData education;
 
     @NotNull
-    @Column(name = "JOB_LOCATION")
+  //  @Column(name = "JOB_LOCATION")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyAddress jobLocation;
 
     @NotNull
-    @Column(name = "INTERVIEW_LOCATION")
+  //  @Column(name = "INTERVIEW_LOCATION")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyAddress interviewLocation;
 
     @NotNull
-    @Column(name = "EXPERTISE")
+  //  @Column(name = "EXPERTISE")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData expertise;

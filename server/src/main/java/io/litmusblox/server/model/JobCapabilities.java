@@ -40,7 +40,7 @@ public class JobCapabilities implements Serializable {
     private Boolean selected;
 
     @NotNull
-    @Column(name = "IMPORTANCE_LEVEL")
+   // @Column(name = "IMPORTANCE_LEVEL")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData importanceLevel;
@@ -51,7 +51,7 @@ public class JobCapabilities implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -60,7 +60,7 @@ public class JobCapabilities implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

@@ -53,7 +53,7 @@ public class Job implements Serializable {
     private Boolean mlDataAvailable;
 
     @NotNull
-    @Column(name = "COMPANY_ID")
+   // @Column(name = "COMPANY_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Company companyId;
@@ -72,7 +72,7 @@ public class Job implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -81,7 +81,7 @@ public class Job implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

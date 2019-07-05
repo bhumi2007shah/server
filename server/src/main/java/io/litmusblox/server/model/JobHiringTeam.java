@@ -32,19 +32,19 @@ public class JobHiringTeam implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "JOB_ID")
+   // @Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Job jobId;
 
     @NotNull
-    @Column(name = "STAGE_STEP_ID")
+   // @Column(name = "STAGE_STEP_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyStageStep stageStepId;
 
     @NotNull
-    @Column(name = "USER_ID")
+ //   @Column(name = "USER_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User userId;
@@ -58,7 +58,7 @@ public class JobHiringTeam implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+ //   @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -67,7 +67,7 @@ public class JobHiringTeam implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

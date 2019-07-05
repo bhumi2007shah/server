@@ -32,22 +32,22 @@ public class JobScreeningQuestions implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "JOB_ID")
+   // @Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Job jobId;
 
-    @Column(name = "MASTER_SCREENING_QUESTION_ID")
+   // @Column(name = "MASTER_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private ScreeningQuestions masterScreeningQuestionId;
 
-    @Column(name = "COMPANY_SCREENING_QUESTION_ID")
+  //  @Column(name = "COMPANY_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyScreeningQuestion companyScreeningQuestionId;
 
-    @Column(name = "USER_SCREENING_QUESTION_ID")
+   // @Column(name = "USER_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private UserScreeningQuestion userScreeningQuestionId;
@@ -58,7 +58,7 @@ public class JobScreeningQuestions implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -67,7 +67,7 @@ public class JobScreeningQuestions implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+  //  @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

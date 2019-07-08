@@ -67,16 +67,16 @@ public class Job implements Serializable {
 
     @Column(name = "DATE_PUBLISHED")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
+    private Date datePublished;;
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    private Date dateArchived;
 
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn = new Date();
+    private Date createdOn;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
@@ -85,7 +85,7 @@ public class Job implements Serializable {
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="UPDATED_BY")

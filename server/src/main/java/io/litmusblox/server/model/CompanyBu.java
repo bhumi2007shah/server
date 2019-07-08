@@ -10,7 +10,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author : Sumit
@@ -31,10 +30,9 @@ public class CompanyBu implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Company companyId;
+    //@NotNull
+    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    private Long companyId;
 
     @NotNull
     @Column(name = "BUSINESS_UNIT")
@@ -47,7 +45,7 @@ public class CompanyBu implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -55,7 +53,7 @@ public class CompanyBu implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
 }

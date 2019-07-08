@@ -6,8 +6,6 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
 
-import java.util.List;
-
 /**
  * Interface definition for Job Service
  *

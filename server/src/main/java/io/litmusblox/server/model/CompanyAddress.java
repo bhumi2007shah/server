@@ -10,7 +10,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author : Sumit
@@ -42,13 +41,13 @@ public class CompanyAddress implements Serializable {
     private Double longitude;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Company companyId;
+/*    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="COMPANY_ID")*/
+    private Long companyId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="ADDRESS_TYPE")
     private MasterData addressType;
 
     @NotNull
@@ -58,7 +57,7 @@ public class CompanyAddress implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -66,7 +65,7 @@ public class CompanyAddress implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
 }

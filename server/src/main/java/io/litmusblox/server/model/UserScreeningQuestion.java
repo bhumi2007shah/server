@@ -23,6 +23,8 @@ import java.util.Date;
 @Table(name = "USER_SCREENING_QUESTION")
 public class UserScreeningQuestion implements Serializable {
 
+    public static final String IDENTIFIER = "UserScreeningQuestion";
+
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id

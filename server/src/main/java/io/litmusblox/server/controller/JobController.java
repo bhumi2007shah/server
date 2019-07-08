@@ -9,8 +9,6 @@ import io.litmusblox.server.service.JobResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 /**
  * Controller class that exposes all REST endpoints for Job related operations
  *
@@ -27,7 +25,7 @@ public class JobController {
     @Autowired
     IJobService jobService;
 
-    @GetMapping(value = "/createjob/{pageName}")
+    @PostMapping(value = "/createJob/{pageName}")
     JobResponseBean addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName){
         return jobService.addJob(job, pageName);
     }

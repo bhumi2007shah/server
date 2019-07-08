@@ -7,11 +7,9 @@ package io.litmusblox.server.model;
 import io.litmusblox.server.Constant.IConstant;
 import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
@@ -36,7 +34,7 @@ public class Job implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
     @Length(max = 10)
@@ -45,12 +43,12 @@ public class Job implements Serializable {
     private String companyJobId;
 
     @NotNull(message = "Job title " + IErrorMessages.NULL_MESSAGE)
-    @Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
+    //@Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
     @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
-    @Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
+    //@Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
     private Long noOfPositions;
 
@@ -93,11 +91,11 @@ public class Job implements Serializable {
     @PrimaryKeyJoinColumn
     private User updatedBy;
 
-    @NotNull(message = "Job screening questions " + IErrorMessages.NULL_MESSAGE)
+    //@NotNull(message = "Job screening questions " + IErrorMessages.NULL_MESSAGE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobScreeningQuestions> jobScreeningQuestionsList;
 
-    @NotNull(message = "Job key skills " + IErrorMessages.NULL_MESSAGE)
+    //@NotNull(message = "Job key skills " + IErrorMessages.NULL_MESSAGE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobKeySkills> jobKeySkillsList;
 

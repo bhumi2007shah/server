@@ -5,13 +5,17 @@
 package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.Constant.IConstant;
+import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * Implementation class for JobService
@@ -58,8 +62,19 @@ public class JobService implements IJobService {
         if(null!=oldJob){//only update existing job
             //set job id from the db object
             job.setId(oldJob.getId());
+            job.setUpdatedOn(new Date());
             jobRepository.save(job);
         }else{ //Create new entry for job
+            job.setCreatedOn(new Date());
+            job.setMlDataAvailable(false);
+            //TODO: Remove the following piece of code and set the user & company as obtained from login
+            User u = new User();
+            u.setId(1L);
+            job.setCreatedBy(u);
+            Company c = new Company();
+            c.setId(1L);
+            job.setCompanyId(c);
+            //End of code to be removed
             jobRepository.save(job);
         }
         JobResponseBean jb=new JobResponseBean();

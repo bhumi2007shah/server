@@ -31,7 +31,7 @@ public class User implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -66,12 +66,12 @@ public class User implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="COMPANY_ID")
     private Company companyId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "COUNTRY_ID")
     private Country countryId;
 
     @NotNull

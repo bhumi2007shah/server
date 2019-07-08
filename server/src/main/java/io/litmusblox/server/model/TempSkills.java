@@ -25,7 +25,6 @@ public class TempSkills implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

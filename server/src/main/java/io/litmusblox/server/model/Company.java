@@ -27,7 +27,6 @@ public class Company implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @NotNull
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
@@ -45,7 +44,6 @@ public class Company implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -54,7 +52,6 @@ public class Company implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

@@ -4,12 +4,19 @@
 
 package io.litmusblox.server.model;
 
+import io.litmusblox.server.Constant.IConstant;
+import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Entity class for Job table
@@ -28,23 +35,26 @@ public class Job implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    @Length(max = 10)
+    @Pattern(message = "Job_id "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;
 
-    @NotNull
+    @NotNull(message = "Job title " + IErrorMessages.NULL_MESSAGE)
+    @Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
-    @NotNull
+    @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
+    @Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
     private Long noOfPositions;
 
-    @NotNull
+    @NotNull(message = "Job description " + IErrorMessages.NULL_MESSAGE)
     @Column(name = "JOB_DESCRIPTION")
     private String jobDescription;
 
@@ -53,7 +63,6 @@ public class Job implements Serializable {
     private Boolean mlDataAvailable;
 
     @NotNull
-   // @Column(name = "COMPANY_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Company companyId;
@@ -72,7 +81,6 @@ public class Job implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -81,9 +89,16 @@ public class Job implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
+
+    @NotNull
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobScreeningQuestions> jobScreeningQuestionsList;
+
+    @NotNull
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobKeySkills> jobKeySkillsList;
 
 }

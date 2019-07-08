@@ -6,7 +6,6 @@ package io.litmusblox.server.model;
 
 import lombok.Data;
 
-import javax.jws.soap.SOAPBinding;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -27,13 +26,11 @@ public class JobHistory implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-   // @Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Job jobId;
@@ -43,7 +40,6 @@ public class JobHistory implements Serializable {
     private String changeText;
 
     @NotNull
-   // @Column(name = "MODIFIED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User modifiedBy;

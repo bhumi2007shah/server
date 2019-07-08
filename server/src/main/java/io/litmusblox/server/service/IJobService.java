@@ -23,5 +23,5 @@ public interface IJobService {
      * @return List of Jobs
      * @throws Exception
      */
-    List<Job> findAll() throws Exception;
+    JobResponseBean addJob(Job job, String pageName);
 }

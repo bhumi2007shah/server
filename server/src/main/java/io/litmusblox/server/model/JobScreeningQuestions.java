@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : oem
+ * @author : Sumit
  * Date : 4/7/19
  * Time : 12:53 PM
  * Class Name : JobScreeningQuestions
@@ -26,28 +26,28 @@ public class JobScreeningQuestions implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @NotNull
-   // @Column(name = "JOB_ID")
+    /*@NotNull
     @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Job jobId;*/
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Job jobId;
 
-   // @Column(name = "MASTER_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private ScreeningQuestions masterScreeningQuestionId;
 
-  //  @Column(name = "COMPANY_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private CompanyScreeningQuestion companyScreeningQuestionId;
 
-   // @Column(name = "USER_SCREENING_QUESTION_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private UserScreeningQuestion userScreeningQuestionId;
@@ -58,7 +58,6 @@ public class JobScreeningQuestions implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -67,7 +66,6 @@ public class JobScreeningQuestions implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-  //  @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

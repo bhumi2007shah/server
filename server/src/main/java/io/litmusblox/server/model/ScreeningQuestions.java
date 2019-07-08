@@ -25,7 +25,6 @@ public class ScreeningQuestions implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -38,7 +37,6 @@ public class ScreeningQuestions implements Serializable {
     private String options;
 
     @NotNull
-   // @Column(name = "QUESTION_TYPE")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData questionType;

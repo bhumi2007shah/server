@@ -5,12 +5,9 @@ package io.litmusblox.server.controller;
 
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.service.IJobService;
+import io.litmusblox.server.service.JobResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller class that exposes all REST endpoints for Job related operations
@@ -28,8 +25,8 @@ public class JobController {
     @Autowired
     IJobService jobService;
 
-    @GetMapping(value = "/all")
-    List<Job> findAll() throws Exception{
-        return jobService.findAll();
+    @PostMapping(value = "/createJob/{pageName}")
+    JobResponseBean addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName){
+        return jobService.addJob(job, pageName);
     }
 }

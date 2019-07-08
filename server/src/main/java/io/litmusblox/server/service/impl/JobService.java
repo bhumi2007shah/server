@@ -5,13 +5,19 @@
 package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.Constant.IConstant;
+import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.User;
+import io.litmusblox.server.repository.CompanyRepository;
 import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
+import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * Implementation class for JobService
@@ -27,6 +33,12 @@ public class JobService implements IJobService {
 
     @Autowired
     JobRepository jobRepository;
+
+    @Autowired
+    CompanyRepository companyRepository;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
@@ -49,17 +61,25 @@ public class JobService implements IJobService {
 
     private JobResponseBean addJobOverview(Job job, Job oldJob) { //method for add job for Overview page
 
-        String title=job.getJobTitle();
-        //validate title
-       if(title.length()>IConstant.TITLE_MAX_LENGTH){  //Truncate job title if it is greater than max length
-            title=title.substring(0,IConstant.TITLE_MAX_LENGTH);
-        }
+       //validate title
+       if(job.getJobTitle().length()>IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
+            job.setJobTitle(job.getJobTitle().substring(0,IConstant.TITLE_MAX_LENGTH));
+
 
         if(null!=oldJob){//only update existing job
             //set job id from the db object
             job.setId(oldJob.getId());
+            job.setUpdatedOn(new Date());
             jobRepository.save(job);
         }else{ //Create new entry for job
+            job.setCreatedOn(new Date());
+            job.setMlDataAvailable(false);
+            //TODO: Remove the following piece of code and set the user & company as obtained from login
+            User u = userRepository.getOne(2L);
+            job.setCreatedBy(u);
+            Company c = companyRepository.getOne(1L);
+            job.setCompanyId(c);
+            //End of code to be removed
             jobRepository.save(job);
         }
         JobResponseBean jb=new JobResponseBean();

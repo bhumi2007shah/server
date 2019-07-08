@@ -61,4 +61,9 @@ public class JobCapabilities implements Serializable {
     @PrimaryKeyJoinColumn
     private User updatedBy;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Job jobId;
+
 }

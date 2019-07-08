@@ -26,19 +26,13 @@ public class CompanyBu implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    /*@NotNull
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
-    private List<Company> companyList;*/
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Company companyId;
+    //@NotNull
+    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    private Long companyId;
 
     @NotNull
     @Column(name = "BUSINESS_UNIT")
@@ -50,18 +44,16 @@ public class CompanyBu implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
 }

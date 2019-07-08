@@ -6,8 +6,6 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
 
-import java.util.List;
-
 /**
  * Interface definition for Job Service
  *
@@ -23,5 +21,5 @@ public interface IJobService {
      * @return List of Jobs
      * @throws Exception
      */
-    List<Job> findAll() throws Exception;
+    JobResponseBean addJob(Job job, String pageName);
 }

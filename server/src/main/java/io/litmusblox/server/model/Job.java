@@ -93,12 +93,15 @@ public class Job implements Serializable {
     @PrimaryKeyJoinColumn
     private User updatedBy;
 
-    @NotNull
+    @NotNull(message = "Job screening questions " + IErrorMessages.NULL_MESSAGE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobScreeningQuestions> jobScreeningQuestionsList;
 
-    @NotNull
+    @NotNull(message = "Job key skills " + IErrorMessages.NULL_MESSAGE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobKeySkills> jobKeySkillsList;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobCapabilities> jobCapabilityList;
 
 }

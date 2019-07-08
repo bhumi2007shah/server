@@ -63,4 +63,9 @@ public class JobKeySkills implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Job jobId;
 }

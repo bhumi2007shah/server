@@ -12,18 +12,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : Sumit
+ * @author : oem
  * Date : 4/7/19
- * Time : 9:49 AM
- * Class Name : UserScreeningQuestion
+ * Time : 2:23 PM
+ * Class Name : CandidateEmailHistory
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "USER_SCREENING_QUESTION")
-public class UserScreeningQuestion implements Serializable {
-
-    public static final String IDENTIFIER = "UserScreeningQuestion";
+@Table(name = "CANDIDATE_EMAIL_HISTORY")
+public class CandidateEmailHistory implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -33,29 +31,25 @@ public class UserScreeningQuestion implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "QUESTION")
-    private String question;
-
-    @Column(name = "OPTIONS")
-    private String options;
-
-    @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private User userId;
+    private Candidate candidateId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private MasterData questionType;
+    @Column(name = "EMAIL")
+    private String email;
+
+    @NotNull
+    @Column(name = "COUNTRY_CODE")
+    private String countryCode;
 
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn = new Date();
 
-    @Column(name = "UPDATED_ON")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
-
+    @NotNull
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private User createdBy;
 }

@@ -3,7 +3,8 @@
  */
 package io.litmusblox.server.model;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,7 +21,8 @@ import java.util.Date;
  * Project Name : server
  *
  */
-@Data
+
+@Getter @Setter
 @Entity
 @Table(name = "USERS")
 public class User implements Serializable {
@@ -28,7 +30,6 @@ public class User implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -64,13 +65,11 @@ public class User implements Serializable {
     private String status;
 
     @NotNull
-    @Column(name = "COMPANY_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Company companyId;
 
     @NotNull
-    @Column(name = "COUNTRY_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Country countryId;

@@ -13,48 +13,30 @@ import java.util.Date;
 
 /**
  * @author : Sumit
- * Date : 3/7/19
- * Time : 5:08 PM
- * Class Name : CompanyAddress
+ * Date : 4/7/19
+ * Time : 2:14 PM
+ * Class Name : Candidate
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "COMPANY_ADDRESS")
-public class CompanyAddress implements Serializable {
+@Table(name = "CANDIDATE")
+public class Candidate implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-    @Column(name = "ADDRESS")
-    private String address;
-
-    @Column(name = "LATITUDE")
-    private Double latitude;
-
-    @Column(name = "LONGITUDE")
-    private Double longitude;
-
-    /*@NotNull
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
-    private List<Company> companyList;*/
+    @Column(name = "FIRST_NAME")
+    private String firstName;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Company companyId;
-
-    @NotNull
-    //@Column(name = "ADDRESS_TYPE")
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private MasterData addressType;
+    @Column(name = "LAST_NAME")
+    private String lastName;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -62,7 +44,6 @@ public class CompanyAddress implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -71,9 +52,7 @@ public class CompanyAddress implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;
-
 }

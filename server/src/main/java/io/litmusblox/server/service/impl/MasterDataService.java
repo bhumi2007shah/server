@@ -4,9 +4,12 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.MasterData;
+import io.litmusblox.server.model.UserScreeningQuestion;
 import io.litmusblox.server.repository.CountryRepository;
 import io.litmusblox.server.repository.MasterDataRepository;
+import io.litmusblox.server.repository.UserScreeningQuestionRepository;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
@@ -14,8 +17,10 @@ import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +40,9 @@ public class MasterDataService implements IMasterDataService {
 
     @Autowired
     CountryRepository countryRepository;
+
+    @Autowired
+    UserScreeningQuestionRepository screeningQuestionRepository;
 
     /**
      * Method that will be called during application startup
@@ -106,14 +114,24 @@ public class MasterDataService implements IMasterDataService {
     /**
      * Method to add master data to database.
      * Supported master data types:
-     * 1. RecruiterScreeningQuestion
+     * 1. UserScreeningQuestion
      *
      * @param jsonData       master data to be persisted (in json format)
      * @param masterDataType the type of master data to be persisted
      */
-    @Override
-    public void addMasterData(String jsonData, String masterDataType) {
-
+    @Transactional
+    public void addMasterData(String jsonData, String masterDataType) throws Exception {
+        switch (masterDataType) {
+            case UserScreeningQuestion.IDENTIFIER:
+                //create a Java object from the json string
+                UserScreeningQuestion objToSave = new ObjectMapper().readValue(jsonData, UserScreeningQuestion.class);
+                objToSave.setCreatedOn(new Date());
+                //persist to database
+                screeningQuestionRepository.save(objToSave);
+                break;
+            default:
+                throw new Exception("Unsupported action");
+        }
     }
 
     private static final String COUNTRY_MASTER_DATA = "Countries";

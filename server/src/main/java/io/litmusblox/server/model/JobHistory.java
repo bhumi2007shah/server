@@ -9,18 +9,19 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author : Sumit
- * Date : 3/7/19
- * Time : 3:59 PM
- * Class Name : ScreeningQuestions
+ * Date : 4/7/19
+ * Time : 2:09 PM
+ * Class Name : JobHistory
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "SCREENING_QUESTIONS")
-public class ScreeningQuestions implements Serializable {
+@Table(name = "JOB_HISTORY")
+public class JobHistory implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -30,15 +31,22 @@ public class ScreeningQuestions implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "QUESTION")
-    private String question;
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
+    private Job jobId;
 
-    @Column(name = "OPTIONS")
-    private String options;
+    @NotNull
+    @Column(name = "CHANGE_TEXT")
+    private String changeText;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
-    private MasterData questionType;
+    private User modifiedBy;
+
+    @NotNull
+    @Column(name = "MODIFIED_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modifiedOn = new Date();
 
 }

@@ -12,15 +12,15 @@ import java.io.Serializable;
 
 /**
  * @author : Sumit
- * Date : 3/7/19
- * Time : 3:59 PM
- * Class Name : ScreeningQuestions
+ * Date : 4/7/19
+ * Time : 3:26 PM
+ * Class Name : TempSkills
  * Project Name : server
  */
 @Data
 @Entity
-@Table(name = "SCREENING_QUESTIONS")
-public class ScreeningQuestions implements Serializable {
+@Table(name = "TEMP_SKILLS")
+public class TempSkills implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -30,15 +30,10 @@ public class ScreeningQuestions implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "QUESTION")
-    private String question;
-
-    @Column(name = "OPTIONS")
-    private String options;
+    @Column(name = "SKILL_NAME")
+    private String skillName;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private MasterData questionType;
-
+    @Column(name = "REVIEWED")
+    private Boolean reviewed;
 }

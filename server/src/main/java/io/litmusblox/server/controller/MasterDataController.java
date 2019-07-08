@@ -54,14 +54,14 @@ public class MasterDataController {
 
     /**
      * Add master data value. Supported for the following types:
-     * 1. RecruiterScreeningQuestion
+     * 1. UserScreeningQuestion
      *
      * @param jsonData data to persist
      * @param masterDataType the type of master data to be added
      */
     @PostMapping(value="/add/{masterDataType}")
     @ResponseStatus(value = HttpStatus.OK)
-    void addMasterData(@RequestBody String jsonData, @PathVariable("masterDataType") String masterDataType) {
+    void addMasterData(@RequestBody String jsonData, @PathVariable("masterDataType") String masterDataType) throws Exception {
         masterDataService.addMasterData(jsonData, masterDataType);
     }
 }

@@ -36,13 +36,13 @@ public class CompanyStageStep implements Serializable {
     private String step;
 
     @NotNull
-    @Column(name = "COMPANY_ID")
+    //@Column(name = "COMPANY_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Company companyId;
 
     @NotNull
-    @Column(name = "STAGE")
+   // @Column(name = "STAGE")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private MasterData stage;
@@ -53,7 +53,7 @@ public class CompanyStageStep implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @Column(name = "CREATED_BY")
+    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;
@@ -62,7 +62,7 @@ public class CompanyStageStep implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @Column(name = "UPDATED_BY")
+    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User updatedBy;

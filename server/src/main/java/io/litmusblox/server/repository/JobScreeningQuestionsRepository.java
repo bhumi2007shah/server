@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.repository;
 
+import io.litmusblox.server.model.JobScreeningQuestions;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -13,5 +14,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Class Name : JobScreeningQuestionsRepository
  * Project Name : server
  */
-public interface JobScreeningQuestionsRepository extends JpaRepository {
+public interface JobScreeningQuestionsRepository extends JpaRepository<JobScreeningQuestions, Long> {
 }

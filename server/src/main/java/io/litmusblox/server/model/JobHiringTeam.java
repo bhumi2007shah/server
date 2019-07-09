@@ -31,18 +31,18 @@ public class JobHiringTeam implements Serializable {
     private Long id;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    //@OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "STAGE_STEP_ID")
     private CompanyStageStep stageStepId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "USER_ID")
     private User userId;
 
     @Column(name = "SEQUENCE")
@@ -55,7 +55,7 @@ public class JobHiringTeam implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -63,7 +63,7 @@ public class JobHiringTeam implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
 }

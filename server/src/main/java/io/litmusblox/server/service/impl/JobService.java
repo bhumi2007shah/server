@@ -14,10 +14,14 @@ import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
+import io.litmusblox.server.service.JobWorspaceBean;
+import io.litmusblox.server.service.JobWorspaceResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Implementation class for JobService
@@ -44,7 +48,7 @@ public class JobService implements IJobService {
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
 
     @Override
-    public JobResponseBean addJob(Job job, String pageName) {//add job with respective pageName
+    public JobResponseBean addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
         Job oldJob = null;
         if(null!=job.getId()){
@@ -55,8 +59,54 @@ public class JobService implements IJobService {
             return addJobOverview(job,oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.SCREENING_QUESTIONS)){
             return addJobScreeningQuestions(job, oldJob);
+        }else {
+            //throw an operation not supported exception
         }
         return null;
+    }
+
+    /**
+     * Fetch details of currently logged in user and
+     * query the repository to find the list of all jobs
+     *
+     * @param archived flag indicating if only archived jobs need to be fetched
+     * @return List of jobs created by the logged in user
+     */
+    @Override
+    public JobWorspaceResponseBean findAllJobsForUser(boolean archived) throws Exception {
+        //TODO: replace user id code below with values from logged in user
+        Long userId = 2L;
+        //end of code to be replaced
+        User loggedInUser = userRepository.getOne(userId);
+        JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
+        if(archived) {
+            responseBean.setListOfJobs(convertToResponseBeans(jobRepository.findByCreatedByAndDateArchivedIsNotNull(loggedInUser)));
+            responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
+            responseBean.setOpenJobs((jobRepository.countByCreatedByAndDateArchivedIsNull(loggedInUser)).intValue());
+        }
+        else {
+            responseBean.setListOfJobs(convertToResponseBeans(jobRepository.findByCreatedByAndDateArchivedIsNull(loggedInUser)));
+            responseBean.setOpenJobs(responseBean.getListOfJobs().size());
+            responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
+        }
+
+        return responseBean;
+    }
+
+    private List<JobWorspaceBean> convertToResponseBeans(List<Job> allJobs) {
+        List<JobWorspaceBean> responseBeanList = new ArrayList<>(allJobs.size());
+        allJobs.stream().forEach(job -> {
+            JobWorspaceBean responseBean = new JobWorspaceBean(job.getId(), job.getStatus(),
+                    job.getJobTitle(), job.getCompanyJobId(),
+                    job.getNoOfPositions(), job.getDatePublished(), job.getCreatedBy().getDisplayName());
+            if (null != job.getJobDetail()) {
+                responseBean.setJobLocation(job.getJobDetail().getJobLocation().getAddress());
+                responseBean.setBusinessUnit(job.getJobDetail().getBuId().getBusinessUnit());
+                responseBean.setFunction(job.getJobDetail().getFunction().getValue());
+            }
+            responseBeanList.add(responseBean);
+        });
+        return responseBeanList;
     }
 
     private JobResponseBean addJobOverview(Job job, Job oldJob) { //method for add job for Overview page

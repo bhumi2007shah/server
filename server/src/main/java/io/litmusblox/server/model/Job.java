@@ -50,7 +50,7 @@ public class Job implements Serializable {
     @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
     //@Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
+    private Integer noOfPositions;
 
     @NotNull(message = "Job description " + IErrorMessages.NULL_MESSAGE)
     @Column(name = "JOB_DESCRIPTION")
@@ -68,6 +68,10 @@ public class Job implements Serializable {
     @Column(name = "DATE_PUBLISHED")
     @Temporal(TemporalType.TIMESTAMP)
     private Date datePublished;;
+
+    @NotNull
+    @Column(name = "STATUS")
+    private String status;
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)
@@ -91,11 +95,12 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    //@NotNull(message = "Job screening questions " + IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private JobDetail jobDetail;
+
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobScreeningQuestions> jobScreeningQuestionsList;
 
-    //@NotNull(message = "Job key skills " + IErrorMessages.NULL_MESSAGE)
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobKeySkills> jobKeySkillsList;
 

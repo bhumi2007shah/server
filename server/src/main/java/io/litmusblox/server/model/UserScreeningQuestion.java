@@ -41,12 +41,12 @@ public class UserScreeningQuestion implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "USER_ID")
     private User userId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
     @NotNull

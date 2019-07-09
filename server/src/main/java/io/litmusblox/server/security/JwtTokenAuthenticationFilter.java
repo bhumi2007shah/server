@@ -44,7 +44,6 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
             if (header == null || !header.startsWith(jwtConfig.getPrefix())) {
                 chain.doFilter(request, response);
-                return;
             }
 
             String token = header.replace(jwtConfig.getPrefix(), "");

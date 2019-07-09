@@ -69,11 +69,13 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
             User user = new ObjectMapper().readValue(request.getInputStream(), User.class);
 
+            user = userService.getUserByEmail(user.getEmail());
+
             List<GrantedAuthority> grantedAuthorities = AuthorityUtils
                     .commaSeparatedStringToAuthorityList(user.getRole());
 
             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                    user.getEmail(), user.getPassword(), grantedAuthorities);
+                    user.getEmail(), null, grantedAuthorities);
 
 //            try {
 //                User user1 = userService.getUserByEmail(user.getEmail());
@@ -86,7 +88,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
             return authManager.authenticate((authToken));
         }
-        catch (IOException e){
+        catch (Exception e){
             throw new RuntimeException(e);
         }
     }
@@ -114,8 +116,10 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
         //response.addHeader(jwtConfig.getHeader(), jwtConfig.getPrefix()+token);
         response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(token);
+        logger.info(jwtConfig.getPrefix());
+        logger.info(token);
+        logger.info(jwtConfig.getPrefix()+token);
+        response.getWriter().write((jwtConfig.getPrefix()+token));
         response.getWriter().flush();
-        response.getWriter().close();
     }
 }

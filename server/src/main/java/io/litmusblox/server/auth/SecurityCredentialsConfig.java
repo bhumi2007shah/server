@@ -7,23 +7,13 @@ package io.litmusblox.server.auth;
 /**
  * @author : sameer
  * Date : 8/7/19
- * Time : 10:12 AM
+ * Time : 11:18 PM
  * Class Name : SecurityCredentialsConfig
- * Project Name : server
- */
-/*
- * Copyright © Litmusblox 2019. All rights reserved.
- */
-
-/**
- * @author : sameer
- * Date : 6/7/19
- * Time : 8:16 PM
- * Class Name : SecurityConfigCredentials
  * Project Name : server
  */
 import javax.servlet.http.HttpServletResponse;
 
+import io.litmusblox.server.security.JwtTokenAuthenticationFilter;
 import io.litmusblox.server.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -38,9 +28,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import io.litmusblox.server.security.JwtConfig;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Order(99)
-@EnableWebSecurity 	// Enable security config. This annotation denotes config for spring security.
+@Order(2)
+@EnableWebSecurity
 public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -50,7 +41,10 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
     private JwtConfig jwtConfig;
 
     @Autowired
-    IUserService userService;
+    private IUserService userService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -60,28 +54,14 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .exceptionHandling().authenticationEntryPoint((req, rsp, e) -> rsp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, userService))
+                .addFilterBefore(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, userService), UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, jwtConfig.getUri()).permitAll()
-                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                 .anyRequest().authenticated();
     }
 
-    // Spring has UserDetailsService interface, which can be overriden to provide our implementation for fetching user from database (or any other source).
-    // The UserDetailsService object is used by the auth manager to load the user from database.
-    // In addition, we need to define the password encoder also. So, auth manager can compare and verify passwords.
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-    }
-
-    @Bean
-    public JwtConfig jwtConfig() {
-        return new JwtConfig();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
     }
 }

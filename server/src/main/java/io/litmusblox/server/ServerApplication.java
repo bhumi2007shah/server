@@ -3,8 +3,12 @@
  */
 package io.litmusblox.server;
 
+import io.litmusblox.server.security.JwtConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 /**
  * Main application class
  *
@@ -22,4 +26,13 @@ public class ServerApplication {
 		SpringApplication.run(ServerApplication.class, args);
 	}
 
+	@Bean
+	public JwtConfig jwtConfig() {
+		return new JwtConfig();
+	}
+
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

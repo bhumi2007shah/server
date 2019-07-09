@@ -28,14 +28,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import javax.servlet.http.HttpServletResponse;
 
+@Order(1)
 @EnableWebSecurity
-@Order(100)
 public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
-
-    private static final Logger logger = LoggerFactory.getLogger(SecurityTokenConfig.class);
 
     @Autowired
     private JwtConfig jwtConfig;
+
 
     @Override
     protected void configure(HttpSecurity http)throws Exception{
@@ -50,18 +49,6 @@ public class SecurityTokenConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers("/noAuth/**").permitAll()
                 .anyRequest().authenticated();
-
-        logger.info("Initiated Security token config filter");
-    }
-
-    @Bean
-    public JwtConfig jwtConfig() {
-        return new JwtConfig();
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
 }

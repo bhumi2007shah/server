@@ -107,17 +107,17 @@ VALUES
  ( 'Education','PR/Advertising'),
  ( 'Education','Tourism'),
 
- ( 'Question Type','Multiple choice'),
- ( 'Question Type','Radio button'),
- ( 'Question Type','User enterable'),
+ ( 'QuestionType','Checkbox'),
+ ( 'QuestionType','Radio button'),
+ ( 'QuestionType','InputBox'),
 
- ( 'Address Type','Job Location'),
- ( 'Address Type','Interview Location'),
- ( 'Address Type','Both'),
+ ( 'AddressType','Job Location'),
+ ( 'AddressType','Interview Location'),
+ ( 'AddressType','Both'),
 
- ( 'Importance Level','Low'),
- ( 'Importance Level','Mid'),
- ( 'Importance Level','High'),
+ ( 'ImportanceLevel','Low'),
+ ( 'ImportanceLevel','Mid'),
+ ( 'ImportanceLevel','High'),
 
  ( 'Stage','Source'),
  ( 'Stage','Screen'),
@@ -135,9 +135,9 @@ VALUES
  ( 'Expertise','Competent'),
  ( 'Expertise','Expert'),
 
- ( 'Experience Range', '0 - 3 yrs'),
- ( 'Experience Range', '4 - 7 yrs'),
- ( 'Experience Range', '8 - 12 yrs'),
- ( 'Experience Range', '13 - 15 yrs'),
- ( 'Experience Range', '17 - 20 yrs'),
- ( 'Experience Range', '20+ yrs');
+ ( 'ExperienceRange', '0 - 3 yrs'),
+ ( 'ExperienceRange', '4 - 7 yrs'),
+ ( 'ExperienceRange', '8 - 12 yrs'),
+ ( 'ExperienceRange', '13 - 15 yrs'),
+ ( 'ExperienceRange', '17 - 20 yrs'),
+ ( 'ExperienceRange', '20+ yrs');

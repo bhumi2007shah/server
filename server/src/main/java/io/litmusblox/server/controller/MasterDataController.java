@@ -25,7 +25,7 @@ import java.util.List;
  * Project Name : server
  */
 @RestController
-@RequestMapping("/api/resources/masterdata")
+@RequestMapping("/api/masterdata")
 public class MasterDataController {
 
     @Autowired

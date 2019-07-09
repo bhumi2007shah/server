@@ -36,38 +36,38 @@ public class JobScreeningQuestions implements Serializable {
     private Job jobId;*/
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "MASTER_SCREENING_QUESTION_ID")
     private ScreeningQuestions masterScreeningQuestionId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "COMPANY_SCREENING_QUESTION_ID")
     private CompanyScreeningQuestion companyScreeningQuestionId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "USER_SCREENING_QUESTION_ID")
     private UserScreeningQuestion userScreeningQuestionId;
 
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn = new Date();
+    private Date createdOn;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
 }

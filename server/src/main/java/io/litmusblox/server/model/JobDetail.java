@@ -32,12 +32,12 @@ public class JobDetail implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "BU_ID")
     private CompanyBu buId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "FUNCTION")
     private MasterData function;
 
     @NotNull
@@ -60,26 +60,22 @@ public class JobDetail implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "EDUCATION")
     private MasterData education;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "JOB_LOCATION")
     private CompanyAddress jobLocation;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "INTERVIEW_LOCATION")
     private CompanyAddress interviewLocation;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
-
-    @NotNull
-    @Column(name = "STATUS")
-    private String status;
 
 }

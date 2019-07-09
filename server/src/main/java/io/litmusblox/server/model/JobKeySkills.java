@@ -31,11 +31,11 @@ public class JobKeySkills implements Serializable {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "SKILL_ID")
     private SkillsMaster skillId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "SKILL_ID_FROM_TEMP")
     private TempSkills skillIdFromTemp;
 
     @NotNull
@@ -53,7 +53,7 @@ public class JobKeySkills implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -61,11 +61,11 @@ public class JobKeySkills implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")
     private Job jobId;
 }

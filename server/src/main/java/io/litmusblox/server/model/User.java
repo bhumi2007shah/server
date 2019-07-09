@@ -3,8 +3,7 @@
  */
 package io.litmusblox.server.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,7 +21,7 @@ import java.util.Date;
  *
  */
 
-@Getter @Setter
+@Data
 @Entity
 @Table(name = "USERS")
 public class User implements Serializable {
@@ -65,9 +64,9 @@ public class User implements Serializable {
     private String status;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="COMPANY_ID")
-    private Company companyId;
+    //@OneToOne(fetch = FetchType.LAZY)
+    //@JoinColumn(name="COMPANY_ID")
+    private Long companyId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
@@ -88,5 +87,9 @@ public class User implements Serializable {
 
     @Column(name = "UPDATED_BY")
     private Long updatedBy;
+
+    public String getDisplayName() {
+        return firstName + " " + lastName;
+    }
 
 }

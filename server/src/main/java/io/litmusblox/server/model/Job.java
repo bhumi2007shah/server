@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.litmusblox.server.Constant.IConstant;
 import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
@@ -13,6 +14,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -37,18 +39,17 @@ public class Job implements Serializable {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Length(max = 10)
+    @Length(max = IConstant.JOB_ID_MAX_LENGTH)
     @Pattern(message = "Job_id "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;
 
     @NotNull(message = "Job title " + IErrorMessages.NULL_MESSAGE)
-    //@Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
+    @Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE, regexp = IConstant.REGEX_FOR_JOB_TITLE)
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
     @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
-    //@Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
     private Integer noOfPositions;
 
@@ -98,13 +99,13 @@ public class Job implements Serializable {
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "jobId")
     private JobDetail jobDetail;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobScreeningQuestions> jobScreeningQuestionsList;
+    @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
+    private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobKeySkills> jobKeySkillsList;
+    private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobCapabilities> jobCapabilityList;
+    private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
 
 }

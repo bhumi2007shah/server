@@ -15,16 +15,19 @@ public interface IConstant {
 
 
      // Regex
-     String REGEX_FOR_JOB_TITLE = "^[a-zA-Z0-9.,-]*$";
-     String REGEX_FOR_JOB_ID = "^[a-zA-Z0-9]*$";
-     String REGEX_FOR_NO_OF_POSITIONS = "^[0-9]$";
+     String REGEX_FOR_JOB_TITLE ="^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+     String REGEX_FOR_JOB_ID = "^[a-zA-Z0-9]+$";
 
      // lengths
      Integer TITLE_MAX_LENGTH=100;
-     Integer JOB_ID_MAX_LENGTH=10;
+
+    // Integer JOB_ID_MAX_LENGTH=10;  (Currently Wrapper class does not work so we use "int" data type)
+     int JOB_ID_MAX_LENGTH=10;
+     Integer SCREENING_QUESTIONS_LIST_MAX_SIZE=10;
 
      String OVERVIEW="overview";
-     String SCREENING_QUESTIONS="screening question";
+     String SCREENING_QUESTIONS="screening_question";
+     String SKILLS="skills";
 
 
 }

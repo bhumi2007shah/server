@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -27,7 +28,7 @@ public class JobScreeningQuestions implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /*@NotNull
@@ -36,7 +37,7 @@ public class JobScreeningQuestions implements Serializable {
     private Job jobId;*/
 
     @NotNull
-    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
     private Job jobId;
 

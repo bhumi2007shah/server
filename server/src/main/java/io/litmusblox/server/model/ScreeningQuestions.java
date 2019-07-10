@@ -38,7 +38,7 @@ public class ScreeningQuestions implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
 }

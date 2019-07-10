@@ -24,6 +24,7 @@ import java.util.List;
  * Class Name : MasterDataController
  * Project Name : server
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/api/masterdata")
 public class MasterDataController {

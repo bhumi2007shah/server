@@ -141,7 +141,7 @@ public class MasterDataService implements IMasterDataService {
         }
     }
 
-    private static final String COUNTRY_MASTER_DATA = "Countries";
+    private static final String COUNTRY_MASTER_DATA = "countries";
 
     /**
      * Method to fetch specific master data from cache

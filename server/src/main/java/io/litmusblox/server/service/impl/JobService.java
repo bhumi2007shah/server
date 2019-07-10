@@ -16,6 +16,7 @@ import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
 import io.litmusblox.server.service.JobWorspaceBean;
 import io.litmusblox.server.service.JobWorspaceResponseBean;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ import java.util.List;
  * Project Name : server
  */
 @Service
+@Log4j2
 public class JobService implements IJobService {
 
     @Autowired
@@ -50,19 +52,26 @@ public class JobService implements IJobService {
     @Override
     public JobResponseBean addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
+        log.info("Received request to add job for page "+pageName);
+        long startTime = System.currentTimeMillis();
+
         Job oldJob = null;
         if(null!=job.getId()){
              oldJob = jobRepository.findById(job.getId()).orElse(new Job());
         }
 
+        JobResponseBean responseBean = null;
+
         if(pageName.equalsIgnoreCase(IConstant.OVERVIEW)){
-            return addJobOverview(job,oldJob);
+            responseBean = addJobOverview(job,oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.SCREENING_QUESTIONS)){
-            return addJobScreeningQuestions(job, oldJob);
+            responseBean = addJobScreeningQuestions(job, oldJob);
         }else {
             //throw an operation not supported exception
         }
-        return null;
+
+        log.info("Completed processing request to add job in " + (System.currentTimeMillis() - startTime) + "ms");
+        return responseBean;
     }
 
     /**

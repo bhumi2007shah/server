@@ -3,6 +3,12 @@
  */
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
@@ -13,6 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Optional;
 
 /**
@@ -55,13 +64,32 @@ public class JobController {
      *
      * @param jobCandidateMapping The payload consisting of job id and stage
      *
-     * @return response bean with all details
+     * @return response bean with all details as a json string
      * @throws Exception
      */
     @GetMapping(value = "/singleJobView")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    SingleJobViewResponseBean getJobViewById(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
-        return jobService.getJobViewById(jobCandidateMapping);
+    String getJobViewById(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
+        SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
+
+        ObjectMapper mapper = new ObjectMapper();
+        // and then serialize using that filter provider:
+        String json="";
+        try {
+
+            FilterProvider filters = new SimpleFilterProvider().addFilter("UserClassFilter", SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<String>(Arrays
+                    .asList("displayName"))));
+            json = mapper.writer(filters).writeValueAsString(responseBean);
+
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return json;
     }
 }

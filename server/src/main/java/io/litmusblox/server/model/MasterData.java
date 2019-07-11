@@ -22,7 +22,7 @@ import java.io.Serializable;
 @Table(name = "MASTER_DATA")
 public class MasterData implements Serializable {
 
-    private static final long serialVersionUID = 6868521896546285046L;
+    private static final long serialVersionUID = 6868521896546285041L;
 
     @Id
     @Column(name = "ID")

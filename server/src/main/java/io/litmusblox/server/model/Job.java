@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.litmusblox.server.Constant.IConstant;
 import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
@@ -13,6 +15,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -63,6 +66,7 @@ public class Job implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_ID")
+    @JsonIgnore
     private Company companyId;
 
     @Column(name = "DATE_PUBLISHED")
@@ -71,7 +75,7 @@ public class Job implements Serializable {
 
     @NotNull
     @Column(name = "STATUS")
-    private String status;
+    private String status = "Draft";
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)
@@ -99,12 +103,13 @@ public class Job implements Serializable {
     private JobDetail jobDetail;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobScreeningQuestions> jobScreeningQuestionsList;
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobKeySkills> jobKeySkillsList;
+    private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobCapabilities> jobCapabilityList;
+    private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
 
 }

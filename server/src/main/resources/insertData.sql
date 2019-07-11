@@ -123,6 +123,7 @@ VALUES
  ( 'stage','Screen'),
  ( 'stage','Interview'),
  ( 'stage','Offer'),
+ ( 'stage','Reject'),
 
  ( 'process','Hiring Manager'),
  ( 'process','Lead Recruiter'),

@@ -7,19 +7,18 @@ package io.litmusblox.server.service.impl;
 import io.litmusblox.server.Constant.IConstant;
 import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.CompanyRepository;
-import io.litmusblox.server.repository.JobRepository;
-import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
-import io.litmusblox.server.repository.UserRepository;
-import io.litmusblox.server.service.IJobService;
-import io.litmusblox.server.service.JobResponseBean;
-import io.litmusblox.server.service.JobWorspaceBean;
-import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.repository.*;
+import io.litmusblox.server.service.*;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +47,9 @@ public class JobService implements IJobService {
 
     @Autowired
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
+
+    @Resource
+    JobCandidateMappingRepository jobCandidateMappingRepository;
 
     @Override
     public JobResponseBean addJob(Job job, String pageName) throws Exception {//add job with respective pageName
@@ -81,7 +83,7 @@ public class JobService implements IJobService {
      * @param archived flag indicating if only archived jobs need to be fetched
      * @return List of jobs created by the logged in user
      */
-    @Override
+    @Transactional
     public JobWorspaceResponseBean findAllJobsForUser(boolean archived) throws Exception {
         //TODO: replace user id code below with values from logged in user
         Long userId = 2L;
@@ -102,9 +104,34 @@ public class JobService implements IJobService {
         return responseBean;
     }
 
+    /**
+     * For the specified job, retrieve
+     * 1. list candidates for job for specified stage
+     * 2. count of candidates by each stage
+     *
+     * @return response bean with all details
+     * @throws Exception
+     */
+    @Transactional
+    public SingleJobViewResponseBean getJobViewById(JobCandidateMapping jobCandidateMapping) throws Exception {
+
+        SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
+       responseBean.setCandidateList(jobCandidateMappingRepository.findByJobIdAndStage(jobCandidateMapping.getJobId(), jobCandidateMapping.getStage()));
+
+        List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJobId().getId());
+
+        stageCountList.stream().forEach(objArray -> {
+            responseBean.getCandidateCountByStage().put(((Integer)objArray[0]).longValue(),((BigInteger)objArray[1]).intValue());
+        });
+
+        return responseBean;
+    }
+
     private List<JobWorspaceBean> convertToResponseBeans(List<Job> allJobs) {
         List<JobWorspaceBean> responseBeanList = new ArrayList<>(allJobs.size());
         allJobs.stream().forEach(job -> {
+            if(null == job.getCreatedBy())
+                Hibernate.initialize(job.getCreatedBy());
             JobWorspaceBean responseBean = new JobWorspaceBean(job.getId(), job.getStatus(),
                     job.getJobTitle(), job.getCompanyJobId(),
                     job.getNoOfPositions(), job.getDatePublished(), job.getCreatedBy().getDisplayName());

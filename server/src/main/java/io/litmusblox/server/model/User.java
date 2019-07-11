@@ -3,6 +3,7 @@
  */
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -71,6 +72,7 @@ public class User implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COUNTRY_ID")
+    @JsonIgnore
     private Country countryId;
 
     @NotNull

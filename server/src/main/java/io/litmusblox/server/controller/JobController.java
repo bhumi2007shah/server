@@ -4,10 +4,13 @@
 package io.litmusblox.server.controller;
 
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
 import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.service.SingleJobViewResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -43,5 +46,22 @@ public class JobController {
     @GetMapping(value = "/listOfJobs")
     JobWorspaceResponseBean listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
         return jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false);
+    }
+
+    /**
+     * Api to retrieve
+     * 1. list candidates for job for specified stage
+     * 2. count of candidates by each stage
+     *
+     * @param jobCandidateMapping The payload consisting of job id and stage
+     *
+     * @return response bean with all details
+     * @throws Exception
+     */
+    @GetMapping(value = "/singleJobView")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    SingleJobViewResponseBean getJobViewById(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
+        return jobService.getJobViewById(jobCandidateMapping);
     }
 }

@@ -67,10 +67,10 @@ public class JobController {
      * @return response bean with all details as a json string
      * @throws Exception
      */
-    @GetMapping(value = "/singleJobView")
+    @GetMapping(value = "/jobViewByStage")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    String getJobViewById(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
+    String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
         SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
 
         ObjectMapper mapper = new ObjectMapper();
@@ -79,7 +79,8 @@ public class JobController {
         try {
 
             FilterProvider filters = new SimpleFilterProvider().addFilter("UserClassFilter", SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<String>(Arrays
-                    .asList("displayName"))));
+                    .asList("displayName"))))
+                    .addFilter("JobClassFilter", SimpleBeanPropertyFilter.serializeAllExcept(new HashSet<String>(Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList"))));
             json = mapper.writer(filters).writeValueAsString(responseBean);
 
         } catch (JsonGenerationException e) {

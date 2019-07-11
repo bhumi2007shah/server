@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.litmusblox.server.Constant.IConstant;
@@ -31,6 +32,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "JOB")
+@JsonFilter("JobClassFilter")
 public class Job implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -107,9 +109,11 @@ public class Job implements Serializable {
     private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
 
 }

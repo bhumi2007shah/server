@@ -10,16 +10,17 @@ import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.service.*;
+import io.litmusblox.server.service.IJobService;
+import io.litmusblox.server.service.JobResponseBean;
+import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.service.SingleJobViewResponseBean;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -91,12 +92,12 @@ public class JobService implements IJobService {
         User loggedInUser = userRepository.getOne(userId);
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
         if(archived) {
-            responseBean.setListOfJobs(convertToResponseBeans(jobRepository.findByCreatedByAndDateArchivedIsNotNull(loggedInUser)));
+            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNull(loggedInUser));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
             responseBean.setOpenJobs((jobRepository.countByCreatedByAndDateArchivedIsNull(loggedInUser)).intValue());
         }
         else {
-            responseBean.setListOfJobs(convertToResponseBeans(jobRepository.findByCreatedByAndDateArchivedIsNull(loggedInUser)));
+            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNull(loggedInUser));
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
@@ -127,25 +128,7 @@ public class JobService implements IJobService {
         return responseBean;
     }
 
-    private List<JobWorspaceBean> convertToResponseBeans(List<Job> allJobs) {
-        List<JobWorspaceBean> responseBeanList = new ArrayList<>(allJobs.size());
-        allJobs.stream().forEach(job -> {
-            if(null == job.getCreatedBy())
-                Hibernate.initialize(job.getCreatedBy());
-            JobWorspaceBean responseBean = new JobWorspaceBean(job.getId(), job.getStatus(),
-                    job.getJobTitle(), job.getCompanyJobId(),
-                    job.getNoOfPositions(), job.getDatePublished(), job.getCreatedBy().getDisplayName());
-            if (null != job.getJobDetail()) {
-                responseBean.setJobLocation(job.getJobDetail().getJobLocation().getAddress());
-                responseBean.setBusinessUnit(job.getJobDetail().getBuId().getBusinessUnit());
-                responseBean.setFunction(job.getJobDetail().getFunction().getValue());
-            }
-            responseBeanList.add(responseBean);
-        });
-        return responseBeanList;
-    }
-
-    private JobResponseBean addJobOverview(Job job, Job oldJob) { //method for add job for Overview page
+       private JobResponseBean addJobOverview(Job job, Job oldJob) { //method for add job for Overview page
 
        //validate title
        if(job.getJobTitle().length()>IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length

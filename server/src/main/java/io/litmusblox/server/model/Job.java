@@ -89,7 +89,7 @@ public class Job implements Serializable {
     private Date createdOn;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
 

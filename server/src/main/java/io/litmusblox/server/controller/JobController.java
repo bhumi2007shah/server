@@ -13,7 +13,6 @@ import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
-import io.litmusblox.server.service.JobWorspaceResponseBean;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,8 +52,9 @@ public class JobController {
      * @throws Exception
      */
     @GetMapping(value = "/listOfJobs")
-    JobWorspaceResponseBean listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
-        return jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false);
+    String listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
+
+        return stripExtraInfoFromResponseBean(jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false));
     }
 
     /**
@@ -73,14 +73,20 @@ public class JobController {
     String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
         SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
 
+        return stripExtraInfoFromResponseBean(responseBean);
+    }
+
+
+    private String stripExtraInfoFromResponseBean(Object responseBean) {
+
         ObjectMapper mapper = new ObjectMapper();
-        // and then serialize using that filter provider:
+
         String json="";
         try {
 
             FilterProvider filters = new SimpleFilterProvider().addFilter("UserClassFilter", SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<String>(Arrays
                     .asList("displayName"))))
-                    .addFilter("JobClassFilter", SimpleBeanPropertyFilter.serializeAllExcept(new HashSet<String>(Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList"))));
+                    .addFilter("JobClassFilter", SimpleBeanPropertyFilter.serializeAllExcept(new HashSet<String>(Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"))));
             json = mapper.writer(filters).writeValueAsString(responseBean);
 
         } catch (JsonGenerationException e) {

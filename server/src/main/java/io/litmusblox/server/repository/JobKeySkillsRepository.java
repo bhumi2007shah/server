@@ -35,4 +35,9 @@ public interface JobKeySkillsRepository extends JpaRepository<JobKeySkills, Long
     @Modifying
     @Query(value = "UPDATE JOB_KEY_SKILLS jks set SELECTED =:newBoolValue where jks.ML_PROVIDED =:oldBoolValue and jks.JOB_ID =:jobId", nativeQuery=true)
     void updateJobKeySkills(@Param("newBoolValue") Boolean newBoolValue, @Param("oldBoolValue") Boolean oldBoolValue, @Param("jobId") Long jobId);
+
+    @Transactional
+    @Modifying
+    @Query(value = "UPDATE JOB_KEY_SKILLS jks set SELECTED =:selectedValue where jks.ID=:id", nativeQuery=true)
+    void updateJobKeySkillById(@Param("selectedValue") Boolean selectedValue, @Param("id") Long id);
 }

@@ -222,10 +222,9 @@ public class JobService implements IJobService {
 
         }
 
-        job.getJobKeySkillsList().forEach(jobSkill->{jobSkill.setSelected(true);jobSkill.setCreatedBy(u);jobSkill.setCreatedOn(new Date());jobSkill.setUpdatedOn(new Date());jobSkill.setUpdatedBy(u);jobSkill.setJobId(job.getId());});
-       // jobKeySkillsRepository.saveAll(job.getJobKeySkillsList());
-        oldJob.getJobKeySkillsList().addAll(job.getJobKeySkillsList());
-        jobRepository.save(oldJob);
+        job.getJobKeySkillsList().forEach(jobSkill->{jobKeySkillsRepository.updateJobKeySkillById(true,jobSkill.getId());/*jobSkill.setCreatedBy(u);jobSkill.setCreatedOn(new Date());jobSkill.setUpdatedOn(new Date());jobSkill.setUpdatedBy(u);jobSkill.setJobId(job.getId());*/});
+       /* oldJob.getJobKeySkillsList().addAll(job.getJobKeySkillsList());
+        jobRepository.save(oldJob);*/
         JobResponseBean jb=new JobResponseBean();
         jb.setJobId(job.getId());
         return jb;

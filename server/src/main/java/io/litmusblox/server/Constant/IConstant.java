@@ -28,6 +28,8 @@ public interface IConstant {
      String OVERVIEW="overview";
      String SCREENING_QUESTIONS="screening_question";
      String SKILLS="skills";
+     String CAPABILITIES ="capabilities";
+     String PUBLISHED="Published";
 
 
 }

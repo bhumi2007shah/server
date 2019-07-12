@@ -9,7 +9,9 @@ import lombok.Data;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -27,7 +29,7 @@ public class JobKeySkills implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -44,7 +46,7 @@ public class JobKeySkills implements Serializable {
 
     @NotNull
     @Column(name = "SELECTED")
-    private Boolean selcted;
+    private Boolean selected;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -65,7 +67,8 @@ public class JobKeySkills implements Serializable {
     private User updatedBy;
 
     @NotNull
-    //@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_ID")
-    private Job jobId;
+  /*  @ManyToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")*/
+    private Long jobId;
+
 }

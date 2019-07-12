@@ -62,7 +62,7 @@ public class JobCapabilities implements Serializable {
     private User updatedBy;
 
     @NotNull
-    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
     private Job jobId;
 

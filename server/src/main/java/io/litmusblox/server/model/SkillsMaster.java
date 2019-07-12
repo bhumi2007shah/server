@@ -31,5 +31,5 @@ public class SkillsMaster implements Serializable {
 
     @NotNull
     @Column(name = "SKILL_NAME")
-    private String skillsMaster;
+    private String skillsName;
 }

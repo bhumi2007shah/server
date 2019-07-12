@@ -100,7 +100,7 @@ public class Job implements Serializable {
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
     private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobId")
+    @OneToMany(/*cascade = {CascadeType.MERGE},*/fetch = FetchType.LAZY, mappedBy = "jobId")
     private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobId")

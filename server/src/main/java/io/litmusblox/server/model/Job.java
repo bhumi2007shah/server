@@ -4,12 +4,17 @@
 
 package io.litmusblox.server.model;
 
+import io.litmusblox.server.Constant.IConstant;
+import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Entity class for Job table
@@ -28,23 +33,26 @@ public class Job implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
+    @Length(max = 10)
+    @Pattern(message = "Job_id "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;
 
-    @NotNull
+    @NotNull(message = "Job title " + IErrorMessages.NULL_MESSAGE)
+    //@Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
-    @NotNull
+    @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
+    //@Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
-    private Long noOfPositions;
+    private Integer noOfPositions;
 
-    @NotNull
+    @NotNull(message = "Job description " + IErrorMessages.NULL_MESSAGE)
     @Column(name = "JOB_DESCRIPTION")
     private String jobDescription;
 
@@ -53,37 +61,50 @@ public class Job implements Serializable {
     private Boolean mlDataAvailable;
 
     @NotNull
-   // @Column(name = "COMPANY_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "COMPANY_ID")
     private Company companyId;
 
     @Column(name = "DATE_PUBLISHED")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date datePublished = new Date();
+    private Date datePublished;;
+
+    @NotNull
+    @Column(name = "STATUS")
+    private String status;
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date dateArchived = new Date();
+    private Date dateArchived;
 
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn = new Date();
+    private Date createdOn;
 
     @NotNull
-   // @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
-    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private JobDetail jobDetail;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobScreeningQuestions> jobScreeningQuestionsList;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobKeySkills> jobKeySkillsList;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
+    private List<JobCapabilities> jobCapabilityList;
 
 }

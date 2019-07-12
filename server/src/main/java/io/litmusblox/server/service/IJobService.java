@@ -6,8 +6,6 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
 
-import java.util.List;
-
 /**
  * Interface definition for Job Service
  *
@@ -19,9 +17,18 @@ import java.util.List;
  */
 public interface IJobService {
     /**
-     * List all Jobs
-     * @return List of Jobs
+     * Add a new job
+     * @return Response bean with jobId, and optionally list of skills and capabilities from ML
      * @throws Exception
      */
-    List<Job> findAll() throws Exception;
+    JobResponseBean addJob(Job job, String pageName) throws Exception;
+
+    /**
+     * Find all jobs for logged in user
+     *
+     * @param archived flag indicating if only archived jobs need to be fetched
+     * @return response bean with list of jobs created by the user, count of active jobs and count of archived jobs
+     * @throws Exception
+     */
+    JobWorspaceResponseBean findAllJobsForUser(boolean archived) throws Exception;
 }

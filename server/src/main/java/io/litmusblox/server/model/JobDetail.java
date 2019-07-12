@@ -26,21 +26,18 @@ public class JobDetail implements Serializable {
 
     @Id
     @NotNull
-    //@Column(name = "JOB_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
     @NotNull
-   // @Column(name = "BU_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "BU_ID")
     private CompanyBu buId;
 
     @NotNull
-  //  @Column(name = "FUNCTION")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "FUNCTION")
     private MasterData function;
 
     @NotNull
@@ -62,31 +59,23 @@ public class JobDetail implements Serializable {
     private Double maxExperience;
 
     @NotNull
-  //  @Column(name = "EDUCATION")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "EDUCATION")
     private MasterData education;
 
     @NotNull
-  //  @Column(name = "JOB_LOCATION")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "JOB_LOCATION")
     private CompanyAddress jobLocation;
 
     @NotNull
-  //  @Column(name = "INTERVIEW_LOCATION")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "INTERVIEW_LOCATION")
     private CompanyAddress interviewLocation;
 
     @NotNull
-  //  @Column(name = "EXPERTISE")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
-
-    @NotNull
-    @Column(name = "STATUS")
-    private String status;
 
 }

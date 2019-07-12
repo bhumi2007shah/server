@@ -1,0 +1,51 @@
+package io.litmusblox.server.service;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.model.Country;
+import lombok.Data;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author : Shital Raval
+ * Date : 4/7/19
+ * Time : 1:34 PM
+ * Class Name : MasterDataBean
+ * Project Name : server
+ */
+@Data
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
+public class MasterDataBean {
+    @JsonIgnore
+    private static MasterDataBean instance;
+
+    private boolean loaded = false;
+
+    public static MasterDataBean getInstance() {
+        if (instance == null) {
+            synchronized (MasterDataBean.class) {
+                if (instance == null) {
+                    instance = new MasterDataBean();
+                }
+            }
+        }
+        return instance;
+    }
+
+    private List<Country> countryList = new ArrayList<Country>();
+
+    //names in the class variable below do not follow camel case to leverage reflection
+    private Map<Long, String> importanceLevel = new HashMap<>();
+    private Map<Long, String> questionType = new HashMap<>();
+    private Map<Long, String> experienceRange = new HashMap<>();
+    private Map<Long, String> addressType = new HashMap<>();
+    private Map<Long, String> stage = new HashMap<>();
+    private Map<Long, String> process = new HashMap<>();
+    private Map<Long, String> function = new HashMap<>();
+    private Map<Long, String> expertise = new HashMap<>();
+    private Map<Long, String> education = new HashMap<>();
+}

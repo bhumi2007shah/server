@@ -26,13 +26,11 @@ public class CandidateEmailHistory implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-    //@Column(name = "CANDIDATE_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private Candidate candidateId;
@@ -51,7 +49,6 @@ public class CandidateEmailHistory implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     private User createdBy;

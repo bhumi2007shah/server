@@ -5,8 +5,11 @@
 package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Repository class for Job table related CRUD operations
@@ -20,4 +23,17 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
+    //find all jobs created by a user
+    List<Job> findByCreatedBy(User createdBy);
+    //find all jobs that are not archived
+    List<Job> findByCreatedByAndDateArchivedIsNull(User createdBy);
+    //find all archived jobs
+    List<Job> findByCreatedByAndDateArchivedIsNotNull(User createdBy);
+
+    //count of archived jobs
+    Long countByCreatedByAndDateArchivedIsNotNull(User createdBy);
+
+    //count of active jobs
+    Long countByCreatedByAndDateArchivedIsNull(User createdBy);
+
 }

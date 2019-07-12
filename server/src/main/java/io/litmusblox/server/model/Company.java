@@ -27,8 +27,7 @@ public class Company implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @NotNull
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -45,25 +44,23 @@ public class Company implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    //@Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    //@Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @NotNull
+    //@NotNull
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
     private List<CompanyAddress> companyAddressList;
 
-    @NotNull
+    //@NotNull
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
     private List<CompanyBu> companyBuList;
 

@@ -26,19 +26,16 @@ public class JobKeySkills implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-   // @Column(name = "SKILL_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "SKILL_ID")
     private SkillsMaster skillId;
 
-  //  @Column(name = "SKILL_ID_FROM_TEMP")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "SKILL_ID_FROM_TEMP")
     private TempSkills skillIdFromTemp;
 
     @NotNull
@@ -55,17 +52,20 @@ public class JobKeySkills implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
- //   @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
+
+    @NotNull
+    //@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")
+    private Job jobId;
 }

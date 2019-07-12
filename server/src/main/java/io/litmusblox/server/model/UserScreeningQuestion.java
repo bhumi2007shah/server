@@ -23,10 +23,11 @@ import java.util.Date;
 @Table(name = "USER_SCREENING_QUESTION")
 public class UserScreeningQuestion implements Serializable {
 
+    public static final String IDENTIFIER = "UserScreeningQuestion";
+
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -39,15 +40,13 @@ public class UserScreeningQuestion implements Serializable {
     private String options;
 
     @NotNull
-   // @Column(name = "USER_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "USER_ID")
     private User userId;
 
     @NotNull
-   // @Column(name = "QUESTION_TYPE")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
     @NotNull

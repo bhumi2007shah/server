@@ -27,7 +27,6 @@ public class CandidateDetails implements Serializable {
 
     @Id
     @NotNull
-    //@Column(name = "CANDIDATE_ID")
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CANDIDATE_ID")
     private Candidate candidateId;

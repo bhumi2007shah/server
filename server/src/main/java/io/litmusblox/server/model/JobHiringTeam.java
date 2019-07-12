@@ -26,27 +26,23 @@ public class JobHiringTeam implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
     @Column(name = "ID")
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NotNull
-   // @Column(name = "JOB_ID")
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    //@OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
     @NotNull
-   // @Column(name = "STAGE_STEP_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "STAGE_STEP_ID")
     private CompanyStageStep stageStepId;
 
     @NotNull
- //   @Column(name = "USER_ID")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "USER_ID")
     private User userId;
 
     @Column(name = "SEQUENCE")
@@ -58,18 +54,16 @@ public class JobHiringTeam implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
- //   @Column(name = "CREATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-   // @Column(name = "UPDATED_BY")
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
 }

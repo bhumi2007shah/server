@@ -26,8 +26,8 @@ public interface IConstant {
      Integer SCREENING_QUESTIONS_LIST_MAX_SIZE=10;
 
      String OVERVIEW="overview";
-     String SCREENING_QUESTIONS="screening_question";
-     String SKILLS="skills";
+     String SCREENING_QUESTIONS="screeningQuestions";
+     String KEY_SKILLS="keySkills";
      String CAPABILITIES ="capabilities";
      String PUBLISHED="Published";
 

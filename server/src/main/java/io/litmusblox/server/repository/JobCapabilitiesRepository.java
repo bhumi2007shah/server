@@ -35,4 +35,7 @@ public interface JobCapabilitiesRepository extends JpaRepository<JobCapabilities
     void deleteByJobId(Long jobId);
 
     List<JobCapabilities> findByJobId(Long jobId) throws Exception;
+
+    @Query(value = "update job_capabilities set selected = false where job_id=:jobId", nativeQuery = true)
+    void setSelectedFalseForJobId(Long jobId) throws Exception;
 }

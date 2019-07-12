@@ -85,6 +85,12 @@ public class JobService implements IJobService {
             case IConstant.SCREENING_QUESTIONS:
                 addJobScreeningQuestions(job, oldJob);
                 break;
+            case IConstant.KEY_SKILLS:
+                addJobKeySkills(job,oldJob);
+                break;
+            case IConstant.CAPABILITIES:
+                addJobCapabilities(job, oldJob);
+                break;
             default:
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
         }
@@ -202,8 +208,6 @@ public class JobService implements IJobService {
             throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE+job.getId());
         }
 
-        //load the jobscreeningquestion list
-       // Hibernate.initialize(job.getJobScreeningQuestionsList());
         if(null!=oldJob.getJobScreeningQuestionsList() && oldJob.getJobScreeningQuestionsList().size()>0){
             jobScreeningQuestionsRepository.deleteAll(oldJob.getJobScreeningQuestionsList());//delete old job screening question list
         }
@@ -287,23 +291,40 @@ public class JobService implements IJobService {
         jobKeySkillsRepository.save(jobKeySkills);
     }
 
-    private JobResponseBean addJobCapabilities(Job job,Job oldJob){ //add job capabilities
+    private Job addJobCapabilities(Job job,Job oldJob){ //add job capabilities
 
         if(null!=job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()){
             throw new ValidationException("Job Capabilities "+ IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId());
         }
+
+        //For each capability in the request, update the values for selected and importance_level
+        Map<Long, JobCapabilities> newCapabilityValues = new HashMap();
+        job.getJobCapabilityList().stream().forEach(jobCapability -> newCapabilityValues.put(jobCapability.getId(), jobCapability));
+
         List<Long> capabilityList = new ArrayList<>();
         job.getJobCapabilityList().forEach(jobCapabilities->capabilityList.add(jobCapabilities.getId()));
 
+        oldJob.getJobCapabilityList().forEach(oldCapability -> {
+            JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
+            oldCapability.setImportanceLevel(newValue.getImportanceLevel());
+            oldCapability.setSelected(newValue.getSelected());
+            oldCapability.setUpdatedOn(new Date());
+            oldCapability.setUpdatedBy(userRepository.getOne(2L)); //TODO: replace this by getting the logged in user
+        });
+/*
         //update all capability list as unselected
         jobCapabilitiesRepository.updateJobCapabilitiesForUnSelected(false, job.getId());
 
         //update all capability list as selected
         jobCapabilitiesRepository.updateJobCapabilitiesForSelected(true,job.getId(),capabilityList);
+*/
         oldJob.setStatus(IConstant.PUBLISHED);
+        oldJob.setDatePublished(new Date());
         jobRepository.save(oldJob);
-        JobResponseBean jb=new JobResponseBean();
-        jb.setJobId(job.getId());
-        return jb;
+
+        job.getJobCapabilityList().clear();
+        job.getJobCapabilityList().addAll(oldJob.getJobCapabilityList());
+
+        return oldJob;
     }
 }

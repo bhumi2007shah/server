@@ -6,9 +6,11 @@ package io.litmusblox.server.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.MasterData;
+import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
 import io.litmusblox.server.repository.CountryRepository;
 import io.litmusblox.server.repository.MasterDataRepository;
+import io.litmusblox.server.repository.SkillMasterRepository;
 import io.litmusblox.server.repository.UserScreeningQuestionRepository;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
@@ -46,6 +48,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     UserScreeningQuestionRepository screeningQuestionRepository;
 
+    @Resource
+    SkillMasterRepository skillMasterRepository;
+
     /**
      * Method that will be called during application startup
      * Will read all master data from database and store them in internal cache
@@ -58,6 +63,11 @@ public class MasterDataService implements IMasterDataService {
         MasterDataBean.getInstance().getCountryList().addAll(countryRepository.findAll());
 
         List<MasterData> masterDataFromDb = masterDataRepository.findAll();
+
+        List<SkillsMaster> keySkillsList = skillMasterRepository.findAll();
+        keySkillsList.stream().forEach(keySkill ->
+                MasterDataBean.getInstance().getKeySkills().put(keySkill.getId(), keySkill.getSkillName())
+                );
 
         //handle to the getter method of the map in the master data singleton instance class
         ConfigurablePropertyAccessor mapAccessor = PropertyAccessorFactory.forDirectFieldAccess(MasterDataBean.getInstance());

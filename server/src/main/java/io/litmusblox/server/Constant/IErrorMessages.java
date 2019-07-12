@@ -15,6 +15,7 @@ public interface IErrorMessages {
 
     String NULL_MESSAGE="should not be null";
     String ALPHANUMERIC_MESSAGE="should be alphanumeric";
-    String NUMERIC_MESSAGE= "should be numeric";
     String SPECIAL_CHARACTER_MESSAGE="should not contain special character";
+    String EMPTY_AND_NULL_MESSAGE="should not be null or empty ";
+    String SCREENING_QUESTIONS_VALIDATION_MESSAGE="Screening questions should not be more than 10 ";
 }

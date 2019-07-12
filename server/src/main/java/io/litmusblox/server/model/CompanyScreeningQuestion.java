@@ -39,12 +39,12 @@ public class CompanyScreeningQuestion implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "COMPANY_ID")
     private Company companyId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
     @NotNull
@@ -54,7 +54,7 @@ public class CompanyScreeningQuestion implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -62,6 +62,6 @@ public class CompanyScreeningQuestion implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 }

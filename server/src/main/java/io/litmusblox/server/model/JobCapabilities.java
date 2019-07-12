@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : oem
+ * @author : Sumit
  * Date : 4/7/19
  * Time : 1:53 PM
  * Class Name : JobCapabilities
@@ -62,7 +62,7 @@ public class JobCapabilities implements Serializable {
     private User updatedBy;
 
     @NotNull
-    //@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
     private Job jobId;
 

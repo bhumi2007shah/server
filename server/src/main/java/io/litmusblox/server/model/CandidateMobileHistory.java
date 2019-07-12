@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : oem
+ * @author : Sumit
  * Date : 4/7/19
  * Time : 2:19 PM
  * Class Name : CandidateMobileHistory
@@ -32,7 +32,7 @@ public class CandidateMobileHistory implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CANDIDATE_ID")
     private Candidate candidateId;
 
     @NotNull
@@ -50,6 +50,6 @@ public class CandidateMobileHistory implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name="CREATED_BY")
     private User createdBy;
 }

@@ -5,10 +5,8 @@
 package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.model.Company;
-import io.litmusblox.server.model.Job;
-import io.litmusblox.server.model.JobCandidateMapping;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.Constant.IErrorMessages;
+import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
@@ -19,9 +17,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.validation.ValidationException;
 import java.math.BigInteger;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation class for JobService
@@ -51,6 +49,19 @@ public class JobService implements IJobService {
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
+    @Resource
+    TempSkillsRepository tempSkillsRepository;
+
+    @Resource
+    JobKeySkillsRepository jobKeySkillsRepository;
+
+    @Resource
+    JobCapabilitiesRepository jobCapabilitiesRepository;
+
+    @Resource
+    SkillMasterRepository skillMasterRepository;
+
+
     @Override
     public JobResponseBean addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
@@ -68,7 +79,11 @@ public class JobService implements IJobService {
             responseBean = addJobOverview(job,oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.SCREENING_QUESTIONS)){
             responseBean = addJobScreeningQuestions(job, oldJob);
-        }else {
+        }else if(pageName.equalsIgnoreCase(IConstant.SKILLS)){
+            responseBean = addJobKeySkills(job, oldJob);
+        }else if(pageName.equalsIgnoreCase(IConstant.CAPABILITIES)){
+            responseBean = addJobCapabilities(job,oldJob);
+        } else {
             //throw an operation not supported exception
         }
 
@@ -158,10 +173,105 @@ public class JobService implements IJobService {
 
     private JobResponseBean addJobScreeningQuestions(Job job, Job oldJob){ //method for add screening questions
 
-        if(null!=oldJob.getJobScreeningQuestionsList()){
+        if(job.getJobScreeningQuestionsList().size()>IConstant.SCREENING_QUESTIONS_LIST_MAX_SIZE){
+            throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE+job.getId());
+        }
+        if(null!=oldJob.getJobScreeningQuestionsList() && oldJob.getJobScreeningQuestionsList().size()>0){
             jobScreeningQuestionsRepository.deleteAll(oldJob.getJobScreeningQuestionsList());//delete old job screening question list
         }
-        oldJob.getJobScreeningQuestionsList().addAll(job.getJobScreeningQuestionsList());//add new screening question list
+        //TODO:User is need to change
+        User u = userRepository.getOne(1L);
+
+        job.getJobScreeningQuestionsList().forEach(n->{n.setCreatedBy(u);n.setCreatedOn(new Date());n.setUpdatedOn(new Date());n.setUpdatedBy(u);});
+        jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
+        JobResponseBean jb=new JobResponseBean();
+        jb.setJobId(job.getId());
+        return jb;
+    }
+
+    @Transactional
+    private JobResponseBean addJobKeySkills(Job job, Job oldJob){ //update and add new key skill
+        if(null!=job.getJobKeySkillsList() && job.getJobKeySkillsList().isEmpty()){
+            throw new ValidationException("Job key skills "+ IErrorMessages.EMPTY_AND_NULL_MESSAGE + oldJob.getId());
+        }
+        Map<String,Long> skillsMasterMap=new HashMap<>();
+        Map<String,Long> tempSkillsMap=new HashMap<>();
+
+        // update ML_PROVIDED value from true to false
+        jobKeySkillsRepository.updateJobKeySkills(false, true,job.getId());
+
+        List<JobKeySkills> falseJobKeySkillslist = jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), false);
+
+        if(falseJobKeySkillslist.size()>0){
+            //delete all key skills where MlProvided=false
+            jobKeySkillsRepository.deleteAll(falseJobKeySkillslist);
+        }
+        skillMasterRepository.findAll().forEach(skillsMaster -> skillsMasterMap.put(skillsMaster.getSkillName(),skillsMaster.getId()));
+        tempSkillsRepository.findAll().forEach(tempSkill-> tempSkillsMap.put(tempSkill.getSkillName(),tempSkill.getId()));
+
+        User u = userRepository.getOne(1L);
+        for (String userSkills:job.getUserEnteredKeySkill()) {
+
+            if(skillsMasterMap.keySet().contains(userSkills)){
+                SkillsMaster skillsMaster=skillMasterRepository.getOne(skillsMasterMap.get(userSkills));
+                JobKeySkills jobKeySkills=jobKeySkillsRepository.findByJobIdAndSkillId(job.getId(), skillsMaster);
+                if(null!=jobKeySkills){
+                    continue;
+                }else{
+                    setJobKeySkills(u,null, skillsMaster,job);
+                }
+
+            }else if(tempSkillsMap.keySet().contains(userSkills)){
+                TempSkills tempSkills=tempSkillsRepository.getOne(tempSkillsMap.get(userSkills));
+                setJobKeySkills(u,tempSkills, null,job);
+            }else{
+                TempSkills tempSkills=new TempSkills();
+                tempSkills.setReviewed(false);
+                tempSkills.setSkillName(userSkills);
+                tempSkills=tempSkillsRepository.save(tempSkills);
+                setJobKeySkills(u,tempSkills, null,job);
+            }
+
+        }
+
+        job.getJobKeySkillsList().forEach(jobSkill->{jobSkill.setSelected(true);jobSkill.setCreatedBy(u);jobSkill.setCreatedOn(new Date());jobSkill.setUpdatedOn(new Date());jobSkill.setUpdatedBy(u);jobSkill.setJobId(job.getId());});
+       // jobKeySkillsRepository.saveAll(job.getJobKeySkillsList());
+        oldJob.getJobKeySkillsList().addAll(job.getJobKeySkillsList());
+        jobRepository.save(oldJob);
+        JobResponseBean jb=new JobResponseBean();
+        jb.setJobId(job.getId());
+        return jb;
+    }
+
+    private void setJobKeySkills(User u,TempSkills temp,SkillsMaster skill,Job job){
+        JobKeySkills jobKeySkills=new JobKeySkills();
+        jobKeySkills.setMlProvided(false);
+        jobKeySkills.setSelected(true);
+        jobKeySkills.setCreatedOn(new Date());
+        jobKeySkills.setCreatedBy(u);
+        if(null!=skill){
+            jobKeySkills.setSkillId(skill);
+        }else if(null!=temp){
+            jobKeySkills.setSkillIdFromTemp(temp);
+        }
+        jobKeySkills.setJobId(job.getId());
+        jobKeySkillsRepository.save(jobKeySkills);
+    }
+
+    private JobResponseBean addJobCapabilities(Job job,Job oldJob){ //add job capabilities
+
+        if(null!=job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()){
+            throw new ValidationException("Job Capabilities "+ IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId());
+        }
+        List<Long> capabilityList = new ArrayList<>();
+        job.getJobCapabilityList().forEach(jobCapabilities->capabilityList.add(jobCapabilities.getId()));
+
+        //update all capability list as unselected
+        jobCapabilitiesRepository.updateJobCapabilitiesForUnSelected(false, job.getId());
+
+        //update all capability list as selected
+        jobCapabilitiesRepository.updateJobCapabilitiesForSelected(true,job.getId(),capabilityList);
+        oldJob.setStatus(IConstant.PUBLISHED);
         jobRepository.save(oldJob);
         JobResponseBean jb=new JobResponseBean();
         jb.setJobId(job.getId());

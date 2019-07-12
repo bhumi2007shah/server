@@ -5,11 +5,7 @@
 package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.JobKeySkills;
-import io.litmusblox.server.model.SkillsMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -23,18 +19,12 @@ import java.util.List;
  */
 public interface JobKeySkillsRepository extends JpaRepository<JobKeySkills, Long> {
 
+    @Transactional
     List<JobKeySkills> findByJobIdAndMlProvided(Long jobId, Boolean mlProvided);
 
-    JobKeySkills findByJobIdAndSkillId(Long jobId, SkillsMaster skillsMaster);
-
-   // JobKeySkills findByJobIdAndSkillIdFromTemp(Long jobId, TempSkills tempSkills);
-
     @Transactional
-    @Modifying
-    @Query(value = "UPDATE JOB_KEY_SKILLS jks set SELECTED =:newBoolValue where jks.ML_PROVIDED =:oldBoolValue and jks.JOB_ID =:jobId", nativeQuery=true)
-    void updateJobKeySkills(@Param("newBoolValue") Boolean newBoolValue, @Param("oldBoolValue") Boolean oldBoolValue, @Param("jobId") Long jobId);
-
     void deleteByJobId(Long jobId);
 
+    @Transactional
     List<JobKeySkills> findByJobId(Long jobId);
 }

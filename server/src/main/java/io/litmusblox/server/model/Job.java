@@ -7,6 +7,7 @@ package io.litmusblox.server.model;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
@@ -16,7 +17,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Entity class for Job table
@@ -114,5 +117,6 @@ public class Job implements Serializable {
     private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
 
     @Transient
-    private Set<String> userEnteredKeySkill=new HashSet<>();
+    @JsonInclude
+    private List<String> userEnteredKeySkill=new ArrayList<>();
 }

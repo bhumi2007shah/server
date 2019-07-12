@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.CompanyScreeningQuestion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,5 +20,6 @@ import java.util.List;
  * Project Name : server
  */
 public interface CompanyScreeningQuestionsRepository extends JpaRepository<CompanyScreeningQuestion, Long> {
+    @Transactional
     List<CompanyScreeningQuestion> findByCompanyId(Long companyId);
 }

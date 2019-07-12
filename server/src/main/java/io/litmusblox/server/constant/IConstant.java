@@ -21,15 +21,30 @@ public interface IConstant {
      // lengths
      Integer TITLE_MAX_LENGTH=100;
 
-    // Integer JOB_ID_MAX_LENGTH=10;  (Currently Wrapper class does not work so we use "int" data type)
      int JOB_ID_MAX_LENGTH=10;
      Integer SCREENING_QUESTIONS_LIST_MAX_SIZE=10;
 
-     String OVERVIEW="overview";
-     String SCREENING_QUESTIONS="screeningQuestions";
-     String KEY_SKILLS="keySkills";
-     String CAPABILITIES ="capabilities";
-     String PUBLISHED="Published";
+/*     enum AddJobPages {
+         OVERVIEW("overview"),SCREENING_QUESTIONS("screeningQuestions"),KEY_SKILLS("keySkills"),CAPABILITIES("capabilities");
+
+        private String value;
+
+        AddJobPages(String val) {this.value = val;}
+        public String getValue() {return this.value;}
+     }*/
+
+    enum AddJobPages {
+        overview,screeningQuestions,keySkills,capabilities;
+    }
+
+     enum JobStatus {
+         DRAFT("Draft"),PUBLISHED ("Published"),ARCHIVED("Archived");
+         private String value;
+
+         JobStatus(String val) {this.value = val;}
+
+         public String getValue() {return this.value;}
+     }
 
 
 }

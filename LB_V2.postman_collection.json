@@ -28,7 +28,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n\"Countries\",\"ImportanceLevel\",\"QuestionType\",\"Stage\",\"ExperienceRange\",\"Function\",\"AddressType\",\"Process\",\"Expertise\",\"Education\"\n]"
+					"raw": "[\n\"countries\",\"importanceLevel\",\"questionType\",\"stage\",\"experienceRange\",\"function\",\"addressType\",\"process\",\"expertise\",\"education\",\"keySkills\", \"screeningQuestions\"\n]"
 				},
 				"url": {
 					"raw": "http://localhost:8080/api/masterdata/fetch/items",
@@ -70,7 +70,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n\"Countries\",\"ImportanceLevel\",\"QuestionType\",\"Stage\",\"ExperienceRange\",\"Function\",\"AddressType\",\"Process\",\"Expertise\",\"Education\"\n]"
+					"raw": "[\n\"countries\",\"importanceLevel\",\"questionType\",\"stage\",\"experienceRange\",\"function\",\"addressType\",\"process\",\"expertise\",\"education\",\"keySkills\"\n]"
 				},
 				"url": {
 					"raw": "http://13.90.151.97:8080/api/masterdata/fetch/items",
@@ -102,7 +102,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/resources/masterdata/reload",
+					"raw": "http://localhost:8080/api/masterdata/reload",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -110,7 +110,6 @@
 					"port": "8080",
 					"path": [
 						"api",
-						"resources",
 						"masterdata",
 						"reload"
 					]
@@ -165,7 +164,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"jobTitle\":\"test title\",\n\"companyJobId\":\"123\",\n\"noOfPositions\":1,\n\"jobDescription\":\"Some test description\" \n}"
+					"raw": "{\n\"id\":22,\n\"jobTitle\":\"test12\",\n\"companyJobId\":\"99999\",\n\"noOfPositions\":3,\n\"jobDescription\":\"yet another job for user 2\" \n}"
 				},
 				"url": {
 					"raw": "http://localhost:8080/api/job/createJob/overview",
@@ -194,7 +193,7 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/listOfJobs?archived=true",
+					"raw": "http://localhost:8080/api/job/listOfJobs?",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -208,8 +207,164 @@
 					"query": [
 						{
 							"key": "archived",
-							"value": "true"
+							"value": "true",
+							"disabled": true
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Job View By Stage",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"jobId\":{\n\t\t\"id\":9\n\t},\n\t\"stage\":{\n\t\t\"id\":106\n\t}\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/job/jobViewByStage",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"job",
+						"jobViewByStage"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add job : screening questions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"id\":24,\n\"jobTitle\":\"test99\",\n\"companyJobId\":\"1111\",\n\"noOfPositions\":10,\n\"jobDescription\":\"new job\", \n\"jobScreeningQuestionsList\": [\n        {\n            \"masterScreeningQuestionId\": {\"id\":1}\n        },\n        {\n         \"companyScreeningQuestionId\":{\"id\":2}\n        },\n        {\n           \"userScreeningQuestionId\":{\"id\":1}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/job/createJob/screeningQuestions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"job",
+						"createJob",
+						"screeningQuestions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add job : capabilities",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"id\":23,\n\"jobTitle\":\"test13\",\n\"companyJobId\":\"99999\",\n\"noOfPositions\":3,\n\"jobDescription\":\"yet another job for user 2\",\n\"jobCapabilityList\": [\n        {\n        \t\"id\":\"1\",\n        \t\"selected\":true,\n        \t\"importanceLevel\": {\n        \t\t\"id\":\"104\"\n        \t}\n        },\n        {\n        \t\"id\":\"2\",\n        \t\"selected\":true,\n        \t\"importanceLevel\":{\n        \t\t\"id\":\"105\"\n        \t}\n        },\n        {\n        \t\"id\":\"3\",\n        \t\"selected\":false,\n        \t\"importanceLevel\":{\n        \t\t\"id\":\"103\"\n        \t}\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/job/createJob/capabilities",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"job",
+						"createJob",
+						"capabilities"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add job : Key skills",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"id\":23,\n\"jobTitle\":\"test13\",\n\"companyJobId\":\"99999\",\n\"noOfPositions\":3,\n\"jobDescription\":\"yet another job for user 2\",\n\"jobKeySkillsList\": [\n        {\n            \"skillId\":{\"id\":2},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n         \"skillId\":{\"id\":3},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n          \"skillId\":{\"id\":4},\n            \"mlProvided\":true,\n            \"selected\":true\n        },\n        {\n        \t\"skillId\":{\"id\":5},\n            \"mlProvided\":true,\n            \"selected\":true\n        }\n    ],\n\"userEnteredKeySkill\": [\"Test\",\"Test1\"]\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/job/createJob/keySkills",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"job",
+						"createJob",
+						"keySkills"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company and user screeningQuestions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/company/screeningQuestions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"company",
+						"screeningQuestions"
 					]
 				}
 			},

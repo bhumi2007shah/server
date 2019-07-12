@@ -7,8 +7,6 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.TempSkills;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 /**
  * @author : Sumit
  * Date : 8/7/19
@@ -18,5 +16,4 @@ import java.util.List;
  */
 public interface TempSkillsRepository extends JpaRepository<TempSkills, Long> {
 
-    List<TempSkills> findBySkillName(String skillName);
 }

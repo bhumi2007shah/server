@@ -3,6 +3,7 @@
  */
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.Util;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
@@ -35,7 +36,9 @@ public class JobController {
     IJobService jobService;
 
     @PostMapping(value = "/createJob/{pageName}")
-    String addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName) throws Exception {
+    String addJob(@RequestBody String jobStr, @PathVariable ("pageName") String pageName) throws Exception {
+        Job job = new ObjectMapper().readValue(jobStr, Job.class);
+
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{

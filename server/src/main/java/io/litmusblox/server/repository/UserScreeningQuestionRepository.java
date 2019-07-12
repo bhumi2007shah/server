@@ -7,6 +7,7 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.model.UserScreeningQuestion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,6 +21,6 @@ import java.util.List;
  * Project Name : server
  */
 public interface UserScreeningQuestionRepository extends JpaRepository<UserScreeningQuestion,Long> {
-
+    @Transactional
     List<UserScreeningQuestion> findByUserId(User user);
 }

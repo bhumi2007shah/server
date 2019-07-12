@@ -3,12 +3,7 @@
  */
 package io.litmusblox.server.controller;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
-import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+import io.litmusblox.server.Util;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
@@ -18,9 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -54,7 +49,15 @@ public class JobController {
     @GetMapping(value = "/listOfJobs")
     String listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
 
-        return stripExtraInfoFromResponseBean(jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false));
+        return Util.stripExtraInfoFromResponseBean(
+                jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false),
+                (new HashMap<String, List<String>>(){{
+                    put("UserClassFilter",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                }})
+        );
     }
 
     /**
@@ -73,30 +76,16 @@ public class JobController {
     String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
         SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
 
-        return stripExtraInfoFromResponseBean(responseBean);
+        return Util.stripExtraInfoFromResponseBean(responseBean,
+                (new HashMap<String, List<String>>(){{
+                    put("UserClassFilter",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                }})
+        );
     }
 
 
-    private String stripExtraInfoFromResponseBean(Object responseBean) {
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        String json="";
-        try {
-
-            FilterProvider filters = new SimpleFilterProvider().addFilter("UserClassFilter", SimpleBeanPropertyFilter.filterOutAllExcept(new HashSet<String>(Arrays
-                    .asList("displayName"))))
-                    .addFilter("JobClassFilter", SimpleBeanPropertyFilter.serializeAllExcept(new HashSet<String>(Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"))));
-            json = mapper.writer(filters).writeValueAsString(responseBean);
-
-        } catch (JsonGenerationException e) {
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return json;
-    }
 }

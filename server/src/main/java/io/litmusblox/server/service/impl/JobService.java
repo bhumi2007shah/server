@@ -15,7 +15,6 @@ import io.litmusblox.server.service.JobResponseBean;
 import io.litmusblox.server.service.JobWorspaceResponseBean;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,16 +36,16 @@ import java.util.List;
 @Log4j2
 public class JobService implements IJobService {
 
-    @Autowired
+    @Resource
     JobRepository jobRepository;
 
-    @Autowired
+    @Resource
     CompanyRepository companyRepository;
 
-    @Autowired
+    @Resource
     UserRepository userRepository;
 
-    @Autowired
+    @Resource
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
 
     @Resource

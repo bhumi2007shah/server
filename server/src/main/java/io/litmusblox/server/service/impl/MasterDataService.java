@@ -16,10 +16,10 @@ import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -37,13 +37,13 @@ import java.util.Map;
 @Log4j2
 @Service
 public class MasterDataService implements IMasterDataService {
-    @Autowired
+    @Resource
     MasterDataRepository masterDataRepository;
 
-    @Autowired
+    @Resource
     CountryRepository countryRepository;
 
-    @Autowired
+    @Resource
     UserScreeningQuestionRepository screeningQuestionRepository;
 
     /**

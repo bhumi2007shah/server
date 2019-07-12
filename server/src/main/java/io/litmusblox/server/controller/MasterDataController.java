@@ -6,6 +6,7 @@ package io.litmusblox.server.controller;
 
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,10 @@ import java.util.List;
  * Class Name : MasterDataController
  * Project Name : server
  */
+@CrossOrigin
 @RestController
-@RequestMapping("/api/resources/masterdata")
+@RequestMapping("/api/masterdata")
+@Log4j2
 public class MasterDataController {
 
     @Autowired
@@ -37,7 +40,10 @@ public class MasterDataController {
      */
     @GetMapping(value="/reload")
     void reloadMasterData() throws Exception {
+        log.info("Received request to reload master data");
+        long startTime = System.currentTimeMillis();
         masterDataService.reloadMasterData();
+        log.info("Completed request to reload master data in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
     /**
@@ -62,6 +68,9 @@ public class MasterDataController {
     @PostMapping(value="/add/{masterDataType}")
     @ResponseStatus(value = HttpStatus.OK)
     void addMasterData(@RequestBody String jsonData, @PathVariable("masterDataType") String masterDataType) throws Exception {
+        log.info("Received request to add master data type: " + masterDataType);
+        long startTime = System.currentTimeMillis();
         masterDataService.addMasterData(jsonData, masterDataType);
+        log.info("Completed request to add master data type in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 }

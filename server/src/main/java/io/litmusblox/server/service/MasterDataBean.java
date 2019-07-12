@@ -39,13 +39,13 @@ public class MasterDataBean {
     private List<Country> countryList = new ArrayList<Country>();
 
     //names in the class variable below do not follow camel case to leverage reflection
-    private Map<Long, String> ImportanceLevel = new HashMap<>();
-    private Map<Long, String> QuestionType = new HashMap<>();
-    private Map<Long, String> ExperienceRange = new HashMap<>();
-    private Map<Long, String> AddressType = new HashMap<>();
-    private Map<Long, String> Stage = new HashMap<>();
-    private Map<Long, String> Process = new HashMap<>();
-    private Map<Long, String> Function = new HashMap<>();
-    private Map<Long, String> Expertise = new HashMap<>();
-    private Map<Long, String> Education = new HashMap<>();
+    private Map<Long, String> importanceLevel = new HashMap<>();
+    private Map<Long, String> questionType = new HashMap<>();
+    private Map<Long, String> experienceRange = new HashMap<>();
+    private Map<Long, String> addressType = new HashMap<>();
+    private Map<Long, String> stage = new HashMap<>();
+    private Map<Long, String> process = new HashMap<>();
+    private Map<Long, String> function = new HashMap<>();
+    private Map<Long, String> expertise = new HashMap<>();
+    private Map<Long, String> education = new HashMap<>();
 }

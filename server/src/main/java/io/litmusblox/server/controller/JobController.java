@@ -21,6 +21,7 @@ import java.util.Optional;
  * Class Name : JobController
  * Project Name : server
  */
+@CrossOrigin
 @RestController
 @RequestMapping("/api/job")
 public class JobController {

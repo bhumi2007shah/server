@@ -13,6 +13,7 @@ import io.litmusblox.server.repository.UserScreeningQuestionRepository;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,7 @@ import java.util.Map;
  * Class Name : MasterDataService
  * Project Name : server
  */
+@Log4j2
 @Service
 public class MasterDataService implements IMasterDataService {
     @Autowired
@@ -105,9 +107,14 @@ public class MasterDataService implements IMasterDataService {
      */
     @Override
     public MasterDataResponse fetchForItems(List<String> fetchItemList) throws Exception {
+        log.info("Received request to fetch master data");
+        long startTime = System.currentTimeMillis();
+
         MasterDataResponse master = new MasterDataResponse();
         //populate data for each of the required items
         fetchItemList.stream().forEach(item -> getMasterData(master, item));
+
+        log.info("Completed request to fetch master data in " + (System.currentTimeMillis() - startTime) + "ms");
         return master;
     }
 
@@ -134,7 +141,7 @@ public class MasterDataService implements IMasterDataService {
         }
     }
 
-    private static final String COUNTRY_MASTER_DATA = "Countries";
+    private static final String COUNTRY_MASTER_DATA = "countries";
 
     /**
      * Method to fetch specific master data from cache

@@ -4,7 +4,6 @@
 
 package io.litmusblox.server.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.litmusblox.server.Constant.IConstant;
 import io.litmusblox.server.Constant.IErrorMessages;
 import lombok.Data;
@@ -70,7 +69,7 @@ public class Job implements Serializable {
 
     @NotNull
     @Column(name = "STATUS")
-    private String status;
+    private String status = "Draft";
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)

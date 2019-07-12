@@ -8,6 +8,8 @@ import io.litmusblox.server.model.Country;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
+import lombok.NoArgsConstructor;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Class Name : MasterDataControllerTest
  * Project Name : server
  */
+@Ignore
+@NoArgsConstructor
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = MasterDataController.class, secure = false)
 class MasterDataControllerTest {

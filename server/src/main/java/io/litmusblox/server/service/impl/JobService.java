@@ -5,22 +5,20 @@
 package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.model.*;
 import io.litmusblox.server.Constant.IErrorMessages;
+import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.JobResponseBean;
 import io.litmusblox.server.service.JobWorspaceBean;
 import io.litmusblox.server.service.JobWorspaceResponseBean;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
 import javax.validation.ValidationException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Implementation class for JobService
@@ -32,6 +30,7 @@ import java.util.List;
  * Project Name : server
  */
 @Service
+@Log4j2
 public class JobService implements IJobService {
 
     @Autowired
@@ -61,24 +60,30 @@ public class JobService implements IJobService {
     @Override
     public JobResponseBean addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
+        log.info("Received request to add job for page "+pageName);
+        long startTime = System.currentTimeMillis();
+
         Job oldJob = null;
         if(null!=job.getId()){
              oldJob = jobRepository.findById(job.getId()).orElse(new Job());
         }
 
+        JobResponseBean responseBean = null;
+
         if(pageName.equalsIgnoreCase(IConstant.OVERVIEW)){
-            return addJobOverview(job,oldJob);
+            responseBean = addJobOverview(job,oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.SCREENING_QUESTIONS)){
-            return addJobScreeningQuestions(job, oldJob);
+            responseBean = addJobScreeningQuestions(job, oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.SKILLS)){
-            return addJobKeySkills(job, oldJob);
+            responseBean = addJobKeySkills(job, oldJob);
         }else if(pageName.equalsIgnoreCase(IConstant.CAPABILITIES)){
-            return addJobCapabilities(job,oldJob);
+            responseBean = addJobCapabilities(job,oldJob);
         } else {
             //throw an operation not supported exception
         }
 
-        return null;
+        log.info("Completed processing request to add job in " + (System.currentTimeMillis() - startTime) + "ms");
+        return responseBean;
     }
 
     /**
@@ -141,7 +146,7 @@ public class JobService implements IJobService {
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);
             //TODO: Remove the following piece of code and set the user & company as obtained from login
-            User u = userRepository.getOne(1L);
+            User u = userRepository.getOne(2L);
             job.setCreatedBy(u);
             Company c = companyRepository.getOne(1L);
             job.setCompanyId(c);
@@ -260,6 +265,4 @@ public class JobService implements IJobService {
         jb.setJobId(job.getId());
         return jb;
     }
-
-
 }

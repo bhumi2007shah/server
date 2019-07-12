@@ -31,4 +31,8 @@ public interface JobCapabilitiesRepository extends JpaRepository<JobCapabilities
     @Modifying
     @Query(value = "UPDATE JOB_CAPABILITIES jb set SELECTED =:boolValue where jb.JOB_ID =:jobId and jb.ID IN :jobCapabilitiesIdList", nativeQuery=true)
     void updateJobCapabilitiesForSelected(@Param("boolValue") Boolean boolValue, @Param("jobId") Long jobId, @Param("jobCapabilitiesIdList")List<Long> jobCapabilitiesIdList);
+
+    void deleteByJobId(Long jobId);
+
+    List<JobCapabilities> findByJobId(Long jobId) throws Exception;
 }

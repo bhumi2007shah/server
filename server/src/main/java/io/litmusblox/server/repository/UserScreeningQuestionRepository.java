@@ -4,17 +4,22 @@
 
 package io.litmusblox.server.repository;
 
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.model.UserScreeningQuestion;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 /**
  * Repository class for UserScreeningQuestion
  *
  * @author : Shital Raval
- * Date : 5/7/19
- * Time : 12:29 PM
+ * Date : 12/7/19
+ * Time : 4:05 PM
  * Class Name : UserScreeningQuestionRepository
  * Project Name : server
  */
 public interface UserScreeningQuestionRepository extends JpaRepository<UserScreeningQuestion,Long> {
+
+    List<UserScreeningQuestion> findByUserId(User user);
 }

@@ -8,10 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
-import io.litmusblox.server.repository.CountryRepository;
-import io.litmusblox.server.repository.MasterDataRepository;
-import io.litmusblox.server.repository.SkillMasterRepository;
-import io.litmusblox.server.repository.UserScreeningQuestionRepository;
+import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
@@ -46,10 +43,13 @@ public class MasterDataService implements IMasterDataService {
     CountryRepository countryRepository;
 
     @Resource
-    UserScreeningQuestionRepository screeningQuestionRepository;
+    UserScreeningQuestionRepository userScreeningQuestionRepository;
 
     @Resource
     SkillMasterRepository skillMasterRepository;
+
+    @Resource
+    ScreeningQuestionsRepository screeningQuestionsRepository;
 
     /**
      * Method that will be called during application startup
@@ -68,6 +68,8 @@ public class MasterDataService implements IMasterDataService {
         keySkillsList.stream().forEach(keySkill ->
                 MasterDataBean.getInstance().getKeySkills().put(keySkill.getId(), keySkill.getSkillName())
                 );
+
+        MasterDataBean.getInstance().getScreeningQuestions().addAll(screeningQuestionsRepository.findAll());
 
         //handle to the getter method of the map in the master data singleton instance class
         ConfigurablePropertyAccessor mapAccessor = PropertyAccessorFactory.forDirectFieldAccess(MasterDataBean.getInstance());
@@ -144,7 +146,7 @@ public class MasterDataService implements IMasterDataService {
                 UserScreeningQuestion objToSave = new ObjectMapper().readValue(jsonData, UserScreeningQuestion.class);
                 objToSave.setCreatedOn(new Date());
                 //persist to database
-                screeningQuestionRepository.save(objToSave);
+                userScreeningQuestionRepository.save(objToSave);
                 break;
             default:
                 throw new Exception("Unsupported action");
@@ -152,6 +154,7 @@ public class MasterDataService implements IMasterDataService {
     }
 
     private static final String COUNTRY_MASTER_DATA = "countries";
+    private static final String SCREENING_QUESTIONS_MASTER_DATA = "screeningQuestions";
 
     /**
      * Method to fetch specific master data from cache
@@ -164,6 +167,9 @@ public class MasterDataService implements IMasterDataService {
         switch (input) {
             case COUNTRY_MASTER_DATA:
                 master.getCountries().addAll(MasterDataBean.getInstance().getCountryList());
+                break;
+            case SCREENING_QUESTIONS_MASTER_DATA:
+                master.getScreeningQuestions().addAll(MasterDataBean.getInstance().getScreeningQuestions());
                 break;
             default: //for all other properties, use reflection
 

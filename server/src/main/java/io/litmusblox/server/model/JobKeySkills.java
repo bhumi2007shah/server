@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -30,11 +31,11 @@ public class JobKeySkills implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "SKILL_ID")
     private SkillsMaster skillId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "SKILL_ID_FROM_TEMP")
     private TempSkills skillIdFromTemp;
 
@@ -49,24 +50,25 @@ public class JobKeySkills implements Serializable {
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createdOn = new Date();
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATED_BY")
+    @JsonIgnore
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UPDATED_BY")
+    @JsonIgnore
     private User updatedBy;
 
     @NotNull
-  /*  @ManyToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_ID")*/
     private Long jobId;
-
 }

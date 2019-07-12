@@ -2,7 +2,7 @@
  * Copyright © Litmusblox 2019. All rights reserved.
  */
 
-package io.litmusblox.server.Constant;
+package io.litmusblox.server.constant;
 
 /**
  * @author : Sumit

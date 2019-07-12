@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -30,15 +31,8 @@ public class JobScreeningQuestions implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*@NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Job jobId;*/
-
-    @NotNull
-    @ManyToOne(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
-    private Job jobId;
+    private Long jobId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MASTER_SCREENING_QUESTION_ID")
@@ -55,19 +49,23 @@ public class JobScreeningQuestions implements Serializable {
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createdOn;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATED_BY")
+    @JsonIgnore
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date updatedOn;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UPDATED_BY")
+    @JsonIgnore
     private User updatedBy;
 
 }

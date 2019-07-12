@@ -2,7 +2,7 @@
  * Copyright © Litmusblox 2019. All rights reserved.
  */
 
-package io.litmusblox.server.Error;
+package io.litmusblox.server.error;
 
 import lombok.Data;
 

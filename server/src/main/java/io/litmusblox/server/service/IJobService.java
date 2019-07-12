@@ -22,7 +22,7 @@ public interface IJobService {
      * @return Response bean with jobId, and optionally list of skills and capabilities from ML
      * @throws Exception
      */
-    JobResponseBean addJob(Job job, String pageName) throws Exception;
+    Job addJob(Job job, String pageName) throws Exception;
 
     /**
      * Find all jobs for logged in user

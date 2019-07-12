@@ -7,8 +7,8 @@ package io.litmusblox.server.model;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.Constant.IErrorMessages;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -115,5 +115,4 @@ public class Job implements Serializable {
 
     @Transient
     private Set<String> userEnteredKeySkill=new HashSet<>();
-
 }

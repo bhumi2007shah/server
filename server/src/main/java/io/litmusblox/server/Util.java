@@ -58,13 +58,13 @@ public class Util {
             json = mapper.writer(filter).writeValueAsString(responseBean);
 
         } catch (JsonGenerationException e) {
-            log.error("Error generating JSON string from response object: " + e.getMessage());
+            log.error("error generating JSON string from response object: " + e.getMessage());
             e.printStackTrace();
         } catch (JsonMappingException e) {
-            log.error("Error generating JSON string from response object: " + e.getMessage());
+            log.error("error generating JSON string from response object: " + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            log.error("Error generating JSON string from response object: " + e.getMessage());
+            log.error("error generating JSON string from response object: " + e.getMessage());
             e.printStackTrace();
         }
 

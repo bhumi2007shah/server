@@ -7,7 +7,6 @@ import io.litmusblox.server.Util;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
-import io.litmusblox.server.service.JobResponseBean;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,8 +35,20 @@ public class JobController {
     IJobService jobService;
 
     @PostMapping(value = "/createJob/{pageName}")
-    JobResponseBean addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName) throws Exception {
-        return jobService.addJob(job, pageName);
+    String addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName) throws Exception {
+        return Util.stripExtraInfoFromResponseBean(
+            jobService.addJob(job, pageName),
+            (new HashMap<String, List<String>>(){{
+                put("UserClassFilter",Arrays.asList("displayName"));
+            }}),
+            (new HashMap<String, List<String>>(){{
+                put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
+                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","companyId"));
+                put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+            }})
+        );
+
+       // return jobService.addJob(job, pageName);
     }
 
     /**

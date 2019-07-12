@@ -5,6 +5,7 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Country;
+import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -32,4 +33,5 @@ public class MasterDataResponse {
     private Map<Long,String> expertise  = new HashMap<>();
     private Map<Long,String> education  = new HashMap<>();
     private Map<Long, String> keySkills = new HashMap<>();
+    private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
 }

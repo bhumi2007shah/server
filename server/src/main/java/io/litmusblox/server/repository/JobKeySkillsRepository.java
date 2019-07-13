@@ -25,19 +25,12 @@ import java.util.List;
  */
 public interface JobKeySkillsRepository extends JpaRepository<JobKeySkills, Long> {
 
+    @Transactional
     List<JobKeySkills> findByJobIdAndMlProvided(Long jobId, Boolean mlProvided);
 
-    JobKeySkills findByJobIdAndSkillId(Long jobId, SkillsMaster skillsMaster);
-
-   // JobKeySkills findByJobIdAndSkillIdFromTemp(Long jobId, TempSkills tempSkills);
+    @Transactional
+    void deleteByJobId(Long jobId);
 
     @Transactional
-    @Modifying
-    @Query(value = "UPDATE JOB_KEY_SKILLS jks set SELECTED =:newBoolValue where jks.ML_PROVIDED =:oldBoolValue and jks.JOB_ID =:jobId", nativeQuery=true)
-    void updateJobKeySkills(@Param("newBoolValue") Boolean newBoolValue, @Param("oldBoolValue") Boolean oldBoolValue, @Param("jobId") Long jobId);
-
-    @Transactional
-    @Modifying
-    @Query(value = "UPDATE JOB_KEY_SKILLS jks set SELECTED =:selectedValue where jks.ID=:id", nativeQuery=true)
-    void updateJobKeySkillById(@Param("selectedValue") Boolean selectedValue, @Param("id") Long id);
+    List<JobKeySkills> findByJobId(Long jobId);
 }

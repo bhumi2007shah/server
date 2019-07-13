@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 @Data
 @Entity
-@Table(name = "SCREENING_QUESTIONS")
+@Table(name = "SCREENING_QUESTION")
 public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -37,7 +37,7 @@ public class ScreeningQuestions implements Serializable {
     private String options;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 

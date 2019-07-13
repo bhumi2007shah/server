@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service;
 
+import io.litmusblox.server.model.Job;
 import lombok.Data;
 
 import java.util.List;
@@ -21,5 +22,5 @@ import java.util.List;
 public class JobWorspaceResponseBean {
     private int openJobs;
     private int archivedJobs;
-    private List<JobWorspaceBean> listOfJobs;
+    private List<Job> listOfJobs;
 }

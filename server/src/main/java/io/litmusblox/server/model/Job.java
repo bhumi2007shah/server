@@ -4,8 +4,12 @@
 
 package io.litmusblox.server.model;
 
-import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.Constant.IErrorMessages;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -13,7 +17,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Entity class for Job table
@@ -27,6 +33,7 @@ import java.util.*;
 @Data
 @Entity
 @Table(name = "JOB")
+@JsonFilter("JobClassFilter")
 public class Job implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -61,6 +68,7 @@ public class Job implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_ID")
+    @JsonIgnore
     private Company companyId;
 
     @Column(name = "DATE_PUBLISHED")
@@ -81,7 +89,7 @@ public class Job implements Serializable {
     private Date createdOn;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
@@ -97,15 +105,18 @@ public class Job implements Serializable {
     private JobDetail jobDetail;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
     @OneToMany(/*cascade = {CascadeType.MERGE},*/fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
 
     @Transient
-    private Set<String> userEnteredKeySkill=new HashSet<>();
-
+    @JsonInclude
+    private List<String> userEnteredKeySkill=new ArrayList<>();
 }

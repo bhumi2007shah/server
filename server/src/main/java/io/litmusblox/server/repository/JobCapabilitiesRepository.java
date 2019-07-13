@@ -6,9 +6,6 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.JobCapabilities;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -23,12 +20,9 @@ import java.util.List;
 public interface JobCapabilitiesRepository extends JpaRepository<JobCapabilities, Long> {
 
     @Transactional
-    @Modifying
-    @Query(value = "UPDATE JOB_CAPABILITIES jb set SELECTED =:boolValue where jb.JOB_ID =:jobId", nativeQuery=true)
-    void updateJobCapabilitiesForUnSelected(@Param("boolValue") Boolean boolValue, @Param("jobId") Long jobId);
+    void deleteByJobId(Long jobId);
 
     @Transactional
-    @Modifying
-    @Query(value = "UPDATE JOB_CAPABILITIES jb set SELECTED =:boolValue where jb.JOB_ID =:jobId and jb.ID IN :jobCapabilitiesIdList", nativeQuery=true)
-    void updateJobCapabilitiesForSelected(@Param("boolValue") Boolean boolValue, @Param("jobId") Long jobId, @Param("jobCapabilitiesIdList")List<Long> jobCapabilitiesIdList);
+    List<JobCapabilities> findByJobId(Long jobId) throws Exception;
+
 }

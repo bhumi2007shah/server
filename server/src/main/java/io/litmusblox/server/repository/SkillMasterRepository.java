@@ -7,9 +7,6 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.SkillsMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * @author : Sumit
  * Date : 11/7/19
@@ -18,9 +15,5 @@ import java.util.Optional;
  * Project Name : server
  */
 public interface SkillMasterRepository extends JpaRepository<SkillsMaster, Long> {
-
-    List<SkillsMaster> findBySkillsName(String skillMaster);
-
-    Optional<SkillsMaster> findById(Long id);
 
 }

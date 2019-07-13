@@ -4,14 +4,14 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author : Sumit
@@ -21,6 +21,7 @@ import java.util.List;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "JOB_KEY_SKILLS")
 public class JobKeySkills implements Serializable {
@@ -32,11 +33,11 @@ public class JobKeySkills implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "SKILL_ID")
     private SkillsMaster skillId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "SKILL_ID_FROM_TEMP")
     private TempSkills skillIdFromTemp;
 
@@ -51,24 +52,43 @@ public class JobKeySkills implements Serializable {
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createdOn = new Date();
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CREATED_BY")
+    @JsonIgnore
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UPDATED_BY")
+    @JsonIgnore
     private User updatedBy;
 
     @NotNull
-  /*  @ManyToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY)
-    @JoinColumn(name = "JOB_ID")*/
     private Long jobId;
 
+    public JobKeySkills(SkillsMaster skillId, @NotNull Boolean mlProvided, @NotNull Boolean selected, @NotNull Date createdOn, @NotNull User createdBy, @NotNull Long jobId) {
+        this.skillId = skillId;
+        this.mlProvided = mlProvided;
+        this.selected = selected;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+        this.jobId = jobId;
+    }
+
+    public JobKeySkills(TempSkills skillIdFromTemp, @NotNull Boolean mlProvided, @NotNull Boolean selected, @NotNull Date createdOn, @NotNull User createdBy, @NotNull Long jobId) {
+        this.skillIdFromTemp = skillIdFromTemp;
+        this.mlProvided = mlProvided;
+        this.selected = selected;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+        this.jobId = jobId;
+    }
 }

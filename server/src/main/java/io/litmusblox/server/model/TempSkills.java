@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -18,6 +19,7 @@ import java.io.Serializable;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "TEMP_SKILLS")
 public class TempSkills implements Serializable {
@@ -36,4 +38,9 @@ public class TempSkills implements Serializable {
     @NotNull
     @Column(name = "REVIEWED")
     private Boolean reviewed;
+
+    public TempSkills(@NotNull String skillName, @NotNull Boolean reviewed) {
+        this.skillName = skillName;
+        this.reviewed = reviewed;
+    }
 }

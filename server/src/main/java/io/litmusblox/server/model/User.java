@@ -3,6 +3,8 @@
  */
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -24,6 +26,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "USERS")
+@JsonFilter("UserClassFilter")
 public class User implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -71,6 +74,7 @@ public class User implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COUNTRY_ID")
+    @JsonIgnore
     private Country countryId;
 
     @NotNull

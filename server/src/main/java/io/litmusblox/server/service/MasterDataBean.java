@@ -3,6 +3,7 @@ package io.litmusblox.server.service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.model.Country;
+import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -38,7 +39,8 @@ public class MasterDataBean {
 
     private List<Country> countryList = new ArrayList<Country>();
 
-    //names in the class variable below do not follow camel case to leverage reflection
+    private Map<Long, String> keySkills = new HashMap<>();
+
     private Map<Long, String> importanceLevel = new HashMap<>();
     private Map<Long, String> questionType = new HashMap<>();
     private Map<Long, String> experienceRange = new HashMap<>();
@@ -48,4 +50,5 @@ public class MasterDataBean {
     private Map<Long, String> function = new HashMap<>();
     private Map<Long, String> expertise = new HashMap<>();
     private Map<Long, String> education = new HashMap<>();
+    private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
 }

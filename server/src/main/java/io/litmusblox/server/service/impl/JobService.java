@@ -146,18 +146,18 @@ public class JobService implements IJobService {
      */
     @Transactional
     public SingleJobViewResponseBean getJobViewById(JobCandidateMapping jobCandidateMapping) throws Exception {
-        log.info("Received request to request to find a list of all candidates for job: " + jobCandidateMapping.getJobId().getId() + " and stage: " + jobCandidateMapping.getStage().getId());
+        log.info("Received request to request to find a list of all candidates for job: " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId());
         long startTime = System.currentTimeMillis();
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
-       responseBean.setCandidateList(jobCandidateMappingRepository.findByJobIdAndStage(jobCandidateMapping.getJobId(), jobCandidateMapping.getStage()));
+       responseBean.setCandidateList(jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage()));
 
-        List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJobId().getId());
+        List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
 
         stageCountList.stream().forEach(objArray -> {
             responseBean.getCandidateCountByStage().put(((Integer)objArray[0]).longValue(),((BigInteger)objArray[1]).intValue());
         });
-        log.info("Completed processing request to find candidates for job " + jobCandidateMapping.getJobId().getId() + " and stage: " + jobCandidateMapping.getStage().getId() + (System.currentTimeMillis() - startTime) + "ms");
+        log.info("Completed processing request to find candidates for job " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId() + (System.currentTimeMillis() - startTime) + "ms");
 
         return responseBean;
     }

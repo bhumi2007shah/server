@@ -84,7 +84,7 @@ public class JobController {
      * @return response bean with all details as a json string
      * @throws Exception
      */
-    @GetMapping(value = "/jobViewByStage")
+    @PostMapping(value = "/jobViewByStage")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {

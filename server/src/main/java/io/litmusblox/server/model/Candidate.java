@@ -55,4 +55,8 @@ public class Candidate implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
+
+    public String getDisplayName() {
+        return firstName + " " + lastName;
+    }
 }

@@ -35,12 +35,12 @@ public class JobCandidateMapping implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "JOB_ID")
-    private Job jobId;
+    private Job job;
 
     @NotNull
     @OneToOne
     @JoinColumn(name = "CANDIDATE_ID")
-    private Candidate candidateId;
+    private Candidate candidate;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)

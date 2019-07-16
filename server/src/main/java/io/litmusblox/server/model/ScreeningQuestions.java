@@ -4,11 +4,13 @@
 
 package io.litmusblox.server.model;
 
+import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -34,7 +36,8 @@ public class ScreeningQuestions implements Serializable {
     private String question;
 
     @Column(name = "OPTIONS")
-    private String options;
+    @Convert(converter = ListToArrayConverter.class)
+    private List<String> options;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)

@@ -1,0 +1,22 @@
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
+
+package io.litmusblox.server.repository;
+
+import io.litmusblox.server.model.CompanyAddress;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+/**
+ * @author : Sumit
+ * Date : 13/7/19
+ * Time : 1:48 PM
+ * Class Name : CompanyAddressRepository
+ * Project Name : server
+ */
+public interface CompanyAddressRepository extends JpaRepository<CompanyAddress, Long> {
+
+    List<CompanyAddress> findByCompanyId(Long companyId);
+}

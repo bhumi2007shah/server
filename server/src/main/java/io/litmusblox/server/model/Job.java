@@ -32,6 +32,10 @@ import java.util.List;
  */
 @Data
 @Entity
+/*@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="type",discriminatorType=DiscriminatorType.INTEGER)
+@DiscriminatorValue(value="JOB")*/
+//@Access(value=AccessType.FIELD)
 @Table(name = "JOB")
 @JsonFilter("JobClassFilter")
 public class Job implements Serializable {
@@ -101,7 +105,7 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "jobId")
+    @OneToOne(cascade = {CascadeType.PERSIST},fetch = FetchType.LAZY, mappedBy = "jobId"/*,orphanRemoval = true*/)
     private JobDetail jobDetail;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")

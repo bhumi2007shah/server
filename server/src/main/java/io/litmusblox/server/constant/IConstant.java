@@ -34,7 +34,7 @@ public interface IConstant {
      }*/
 
     enum AddJobPages {
-        overview,screeningQuestions,keySkills,capabilities;
+        overview,screeningQuestions,keySkills,capabilities,jobDetail;
     }
 
      enum JobStatus {

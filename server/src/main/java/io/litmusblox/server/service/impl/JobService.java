@@ -4,20 +4,21 @@
 
 package io.litmusblox.server.service.impl;
 
-import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.Constant.IErrorMessages;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.service.IJobService;
-import io.litmusblox.server.service.JobResponseBean;
-import io.litmusblox.server.service.JobWorspaceBean;
-import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import javax.naming.OperationNotSupportedException;
 import javax.validation.ValidationException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -60,6 +61,12 @@ public class JobService implements IJobService {
     @Resource
     SkillMasterRepository skillMasterRepository;
 
+    @Resource
+    CompanyAddressRepository companyAddressRepository;
+
+    @Resource
+    CompanyBuRepository companyBuRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
@@ -90,6 +97,9 @@ public class JobService implements IJobService {
                 break;
             case capabilities:
                 addJobCapabilities(job, oldJob);
+                break;
+            case jobDetail:
+                addJobDetail(job, oldJob);
                 break;
             default:
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
@@ -319,5 +329,73 @@ public class JobService implements IJobService {
 
         job.getJobCapabilityList().clear();
         job.getJobCapabilityList().addAll(oldJob.getJobCapabilityList());
+    }
+
+    private void addJobDetail(Job job,Job oldJob){//add job details
+
+        if(null==job.getJobDetail()){
+            throw new ValidationException("Job detail "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        MasterDataBean masterDataBean=MasterDataBean.getInstance();
+        if(null==masterDataBean.getFunction().get(job.getJobDetail().getFunction().getId())){
+            throw new ValidationException("In Job detail, function "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        if(null==masterDataBean.getEducation().get(job.getJobDetail().getEducation().getId())){
+            throw new ValidationException("In Job detail, education "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        if(null==masterDataBean.getExpertise().get(job.getJobDetail().getExpertise().getId())){
+            throw new ValidationException("In Job detail, expertise "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        //TODO:replace companyId by getting the logged in user
+        List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(1l);
+        List<CompanyBu> companyBuList = companyBuRepository.findByCompanyId(1l);
+
+        Map<Long, CompanyBu> companyBuMap = new HashMap<>();
+        Map<Long, CompanyAddress> companyAddressMap = new HashMap<>();
+
+        companyBuList.forEach(companyBu -> companyBuMap.put(companyBu.getId(), companyBu));
+        companyAddressList.forEach(companyAddress -> companyAddressMap.put(companyAddress.getId(), companyAddress));
+
+        if(companyAddressList.isEmpty() || null==companyAddressMap.get(job.getJobDetail().getJobLocation().getId())
+                || null==companyAddressMap.get(job.getJobDetail().getInterviewLocation().getId())){
+            throw new ValidationException("In Job detail, company address "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        if(companyBuList.isEmpty() || null==companyBuMap.get(job.getJobDetail().getBuId().getId())){
+            throw new ValidationException("In Job detail, company bu "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        String expRange = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId());
+
+        if(null == expRange){
+            throw new ValidationException("In Job detail, experience Range "+IErrorMessages.NULL_MESSAGE +job.getId());
+        }
+
+        List<User> userList = userRepository.findByCompanyId(1l);
+
+        JobDetail detail=job.getJobDetail();
+        detail.getUserList().addAll(userList);
+        String[] range = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId()).split(" ");
+        detail.setMinExperience(Double.parseDouble(range[0]));
+        detail.setMaxExperience(Double.parseDouble(range[2]));
+        detail.setJobId(oldJob.getId());
+        oldJob.setJobDetail(detail);
+        /*oldJob.getJobDetail().setBuId(job.getJobDetail().getBuId());
+        oldJob.getJobDetail().setEducation(detail.getEducation());
+        oldJob.getJobDetail().setExpertise(detail.getExpertise());
+        oldJob.getJobDetail().setFunction(detail.getFunction());
+        oldJob.getJobDetail().setInterviewLocation(detail.getInterviewLocation());
+        oldJob.getJobDetail().setJobLocation(detail.getJobLocation());
+        oldJob.getJobDetail().setMaxSalary(detail.getMaxSalary());
+        oldJob.getJobDetail().setMinSalary(detail.getMinSalary());*/
+
+        oldJob.setUpdatedOn(new Date());
+
+        jobRepository.save(oldJob);
+
     }
 }

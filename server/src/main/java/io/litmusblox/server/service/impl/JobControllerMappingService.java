@@ -36,6 +36,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId) throws Exception {
         //TODO: Add relevant code here
+        //for each candidate, check if it is new or old
+        //for the combination of jobid + candidateId, check that a record doesnot exist in jcm
+        //else, add a jcm row with stage = Source
         return null;
     }
 

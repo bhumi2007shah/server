@@ -425,7 +425,7 @@ public class JobService implements IJobService {
         //TODO:Check Lead Recruiter and Hiring manager are selected or not
 
         job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
-        job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
+        //job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
 
         CompanyStageStep companyStageStep=job.getJobHiringTeam().getStageStepId();
 

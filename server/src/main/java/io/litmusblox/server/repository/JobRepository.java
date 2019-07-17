@@ -40,4 +40,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     //count of active jobs
     @Transactional
     Long countByCreatedByAndDateArchivedIsNull(User createdBy);
+
+    //find all jobs for which ml data is not available
+    List<Job> findByMlDataAvailable(Boolean mlDataFlag);
 }

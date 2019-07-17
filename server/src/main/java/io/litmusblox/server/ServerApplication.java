@@ -5,6 +5,8 @@ package io.litmusblox.server;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 /**
  * Main application class
  *
@@ -14,7 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * Class Name : ServerApplication
  * Project Name : server
  */
-
+@EnableScheduling
 @SpringBootApplication
 public class ServerApplication {
 

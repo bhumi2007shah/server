@@ -67,6 +67,12 @@ public class JobService implements IJobService {
     @Resource
     CompanyBuRepository companyBuRepository;
 
+    @Resource
+    CompanyStageStepRepository companyStageStepRepository;
+
+    @Resource
+    JobHiringTeamRepository jobHiringTeamRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
@@ -100,6 +106,9 @@ public class JobService implements IJobService {
                 break;
             case jobDetail:
                 addJobDetail(job, oldJob);
+                break;
+            case hiringTeam:
+                addJobHiringTeam(job, oldJob);
                 break;
             default:
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
@@ -396,6 +405,31 @@ public class JobService implements IJobService {
         oldJob.setUpdatedOn(new Date());
 
         jobRepository.save(oldJob);
+    }
 
+    private void addJobHiringTeam(Job job, Job oldJob) throws Exception{
+
+        //TODO: replace this code to use the logged in user
+        User u = userRepository.getOne(1L);
+        List<User> userList = userRepository.findByCompanyId(1l);
+        job.getJobHiringTeam().setUserId(u);//temp code for testing
+        if(null==job.getJobHiringTeam().getUserId() || !userList.contains(job.getJobHiringTeam().getUserId())){
+            throw new ValidationException("Not valid User" +job.getId());
+        }
+
+        if(null == MasterDataBean.getInstance().getProcess().get(job.getJobHiringTeam().getStageStepId().getStage().getId())){
+            throw new ValidationException("In Job hiring team, process "+IErrorMessages.NULL_MESSAGE +job.getId());
+
+        }
+
+        //TODO:Check Lead Recruiter and Hiring manager are selected or not
+
+        job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
+        job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
+
+        CompanyStageStep companyStageStep=job.getJobHiringTeam().getStageStepId();
+
+        companyStageStep=companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(),companyStageStep.getCompanyId(),companyStageStep.getStage(), new Date(),u));
+        jobHiringTeamRepository.save(new JobHiringTeam(oldJob/*.getId()*/,companyStageStep,u,job.getJobHiringTeam().getSequence(),new Date(),u));
     }
 }

@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.annotation.Id;
+
 
 /**
  * @author : Sumit
@@ -22,13 +22,14 @@ import org.springframework.data.annotation.Id;
  * Class Name : JobDetail
  * Project Name : server
  */
-@Data
-@Entity
+
 //@Embeddable
 //@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 //@DiscriminatorColumn(name = "JOB_ID")
 //@Access(value=AccessType.FIELD)
 //@DiscriminatorValue("JOB_DETAIL")
+@Data
+@Entity
 @Table(name = "JOB_DETAIL")
 public class JobDetail implements Serializable {
 

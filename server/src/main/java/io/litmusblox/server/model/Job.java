@@ -30,12 +30,13 @@ import java.util.List;
  * Class Name : Job
  * Project Name : server
  */
-@Data
-@Entity
+
 /*@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="type",discriminatorType=DiscriminatorType.INTEGER)
 @DiscriminatorValue(value="JOB")*/
 //@Access(value=AccessType.FIELD)
+@Data
+@Entity
 @Table(name = "JOB")
 @JsonFilter("JobClassFilter")
 public class Job implements Serializable {
@@ -105,8 +106,11 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(cascade = {CascadeType.PERSIST},fetch = FetchType.LAZY, mappedBy = "jobId"/*,orphanRemoval = true*/)
+    @OneToOne(cascade=CascadeType.ALL,fetch = FetchType.LAZY, mappedBy = "jobId"/*,orphanRemoval = true*/)
     private JobDetail jobDetail;
+
+    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "jobId")
+    private JobHiringTeam jobHiringTeam;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

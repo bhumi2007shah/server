@@ -27,7 +27,7 @@ public class CompanyStageStep implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -62,4 +62,15 @@ public class CompanyStageStep implements Serializable {
     @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
+    public CompanyStageStep(@NotNull String step, @NotNull Company companyId, @NotNull MasterData stage, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.step = step;
+        this.companyId = companyId;
+        this.stage = stage;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
+
+    public CompanyStageStep() {
+        super();
+    }
 }

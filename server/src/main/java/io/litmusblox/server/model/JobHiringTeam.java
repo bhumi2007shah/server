@@ -27,11 +27,11 @@ public class JobHiringTeam implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
-    //@OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
     private Job jobId;
 
@@ -66,4 +66,16 @@ public class JobHiringTeam implements Serializable {
     @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
+    public JobHiringTeam(@NotNull Job jobId, @NotNull CompanyStageStep stageStepId, @NotNull User userId, Long sequence, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.jobId = jobId;
+        this.stageStepId = stageStepId;
+        this.userId = userId;
+        this.sequence = sequence;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
+
+    public JobHiringTeam() {
+        super();
+    }
 }

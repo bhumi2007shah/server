@@ -68,6 +68,9 @@ public class JobService implements IJobService {
     CompanyBuRepository companyBuRepository;
 
     @Resource
+    JobDetailRepository jobDetailRepository;
+
+    @Resource
     CompanyStageStepRepository companyStageStepRepository;
 
     @Resource
@@ -346,6 +349,9 @@ public class JobService implements IJobService {
             throw new ValidationException("Job detail "+IErrorMessages.NULL_MESSAGE +job.getId());
         }
 
+        //delete existing jobDetail record from the database
+        jobDetailRepository.deleteByJobId(oldJob);
+
         MasterDataBean masterDataBean=MasterDataBean.getInstance();
         if(null==masterDataBean.getFunction().get(job.getJobDetail().getFunction().getId())){
             throw new ValidationException("In Job detail, function "+IErrorMessages.NULL_MESSAGE +job.getId());
@@ -384,27 +390,21 @@ public class JobService implements IJobService {
             throw new ValidationException("In Job detail, experience Range "+IErrorMessages.NULL_MESSAGE +job.getId());
         }
 
-        List<User> userList = userRepository.findByCompanyId(1l);
-
         JobDetail detail=job.getJobDetail();
-        detail.getUserList().addAll(userList);
         String[] range = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId()).split(" ");
         detail.setMinExperience(Double.parseDouble(range[0]));
         detail.setMaxExperience(Double.parseDouble(range[2]));
-        detail.setJobId(oldJob.getId());
+        detail.setJobId(oldJob);
+        detail.setCreatedBy(userRepository.getOne(2L));
+        detail.setCreatedOn(new Date());
         oldJob.setJobDetail(detail);
-        /*oldJob.getJobDetail().setBuId(job.getJobDetail().getBuId());
-        oldJob.getJobDetail().setEducation(detail.getEducation());
-        oldJob.getJobDetail().setExpertise(detail.getExpertise());
-        oldJob.getJobDetail().setFunction(detail.getFunction());
-        oldJob.getJobDetail().setInterviewLocation(detail.getInterviewLocation());
-        oldJob.getJobDetail().setJobLocation(detail.getJobLocation());
-        oldJob.getJobDetail().setMaxSalary(detail.getMaxSalary());
-        oldJob.getJobDetail().setMinSalary(detail.getMinSalary());*/
-
         oldJob.setUpdatedOn(new Date());
 
         jobRepository.save(oldJob);
+
+        //populate all users for the company of current user
+        List<User> userList = userRepository.findByCompanyId(1l);
+        job.getUsersForCompany().addAll(userList);
     }
 
     private void addJobHiringTeam(Job job, Job oldJob) throws Exception{

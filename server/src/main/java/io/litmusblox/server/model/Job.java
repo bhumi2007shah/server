@@ -30,11 +30,6 @@ import java.util.List;
  * Class Name : Job
  * Project Name : server
  */
-
-/*@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name="type",discriminatorType=DiscriminatorType.INTEGER)
-@DiscriminatorValue(value="JOB")*/
-//@Access(value=AccessType.FIELD)
 @Data
 @Entity
 @Table(name = "JOB")
@@ -106,7 +101,7 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(cascade=CascadeType.ALL,fetch = FetchType.LAZY, mappedBy = "jobId"/*,orphanRemoval = true*/)
+    @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
     private JobDetail jobDetail;
 
     @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "jobId")
@@ -127,4 +122,7 @@ public class Job implements Serializable {
     @Transient
     @JsonInclude
     private List<String> userEnteredKeySkill=new ArrayList<>();
+
+    @Transient
+    private List<User> usersForCompany=new ArrayList<>();
 }

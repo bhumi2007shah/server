@@ -165,6 +165,7 @@ CREATE TABLE JOB(
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 CREATE TABLE JOB_DETAIL(
+   ID serial PRIMARY KEY NOT NULL,
    JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
    BU_ID INTEGER REFERENCES COMPANY_BU(ID) NOT NULL,
    FUNCTION INTEGER REFERENCES MASTER_DATA(ID) NOT NULL,
@@ -177,9 +178,11 @@ CREATE TABLE JOB_DETAIL(
    JOB_LOCATION INTEGER REFERENCES COMPANY_ADDRESS(ID) NOT NULL,
    INTERVIEW_LOCATION INTEGER REFERENCES COMPANY_ADDRESS(ID) NOT NULL,
    EXPERTISE INTEGER REFERENCES MASTER_DATA(ID) NOT NULL,
-   PRIMARY KEY (JOB_ID)
-)
-INHERITS (JOB);
+   CREATED_ON TIMESTAMP NOT NULL,
+   CREATED_BY INTEGER REFERENCES USERS(ID) NOT NULL,
+   UPDATED_ON TIMESTAMP,
+   UPDATED_BY INTEGER REFERENCES USERS(ID)
+ );
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 

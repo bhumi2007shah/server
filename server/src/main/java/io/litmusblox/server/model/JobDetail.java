@@ -4,16 +4,14 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
-
+import java.util.Date;
 
 /**
  * @author : Sumit
@@ -22,12 +20,6 @@ import java.util.List;
  * Class Name : JobDetail
  * Project Name : server
  */
-
-//@Embeddable
-//@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-//@DiscriminatorColumn(name = "JOB_ID")
-//@Access(value=AccessType.FIELD)
-//@DiscriminatorValue("JOB_DETAIL")
 @Data
 @Entity
 @Table(name = "JOB_DETAIL")
@@ -36,11 +28,14 @@ public class JobDetail implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
-    //@OneToOne(fetch = FetchType.LAZY)
-    //@EmbeddedId
-    @Column(name = "JOB_ID")
-    private Long jobId;
+    @Column(name = "ID")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "JOB_ID")
+    @JsonIgnore
+    private Job jobId;
 
     @NotNull(message = "Company bu "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.LAZY)
@@ -88,11 +83,26 @@ public class JobDetail implements Serializable {
     @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
 
+    @NotNull
+    @Column(name = "CREATED_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdOn;
+
+    @NotNull
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="CREATED_BY")
+    private User createdBy;
+
+    @Column(name = "UPDATED_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedOn;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="UPDATED_BY")
+    private User updatedBy;
+
     //@NotNull(message = "Experience Range "+ IErrorMessages.NULL_MESSAGE)
     @Transient
     private MasterData experienceRange;
-
-    @Transient
-    private List<User> userList=new ArrayList<>();
 
 }

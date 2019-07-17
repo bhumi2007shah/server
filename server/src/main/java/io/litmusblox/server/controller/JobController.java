@@ -42,7 +42,7 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
-                put("UserClassFilter",Arrays.asList("displayName"));
+                put("UserClassFilter",Arrays.asList("displayName","id"));
             }}),
             (new HashMap<String, List<String>>(){{
                 put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));

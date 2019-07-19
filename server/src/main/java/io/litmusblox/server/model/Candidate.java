@@ -59,4 +59,40 @@ public class Candidate implements Serializable {
     public String getDisplayName() {
         return firstName + " " + lastName;
     }
+
+    @Transient
+    private String email;
+
+    @Transient
+    private String mobile;
+
+    @Transient
+    private String countryCode;
+
+    @Transient
+    private String uploadErrorMessage;
+
+    @Transient
+    private String candidateSource;
+
+    @Transient
+    private String telephone;
+
+    public Candidate(@NotNull String firstName, @NotNull String lastName, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
+
+    public Candidate(@NotNull String firstName, @NotNull String lastName, String email, String mobile) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.mobile = mobile;
+    }
+
+    public Candidate() {
+        super();
+    }
 }

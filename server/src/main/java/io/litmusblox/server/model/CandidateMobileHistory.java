@@ -52,4 +52,12 @@ public class CandidateMobileHistory implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
+
+    public CandidateMobileHistory(@NotNull Candidate candidateId, @NotNull String mobile, @NotNull String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.candidateId = candidateId;
+        this.mobile = mobile;
+        this.countryCode = countryCode;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
 }

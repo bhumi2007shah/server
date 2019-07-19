@@ -6,18 +6,19 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
-import javax.validation.ValidationException;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -206,10 +207,11 @@ public class JobService implements IJobService {
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);
             //TODO: Remove the following piece of code and set the user & company as obtained from login
-            User u = userRepository.getOne(2L);
+            User u = userRepository.getOne(1L);
             job.setCreatedBy(u);
             Company c = companyRepository.getOne(1L);
             job.setCompanyId(c);
+            job.setCreatedBy(u);
             //End of code to be removed
             jobRepository.save(job);
         }
@@ -220,7 +222,7 @@ public class JobService implements IJobService {
     private void addJobScreeningQuestions(Job job, Job oldJob) throws Exception { //method for add screening questions
 
         if(job.getJobScreeningQuestionsList().size()>IConstant.SCREENING_QUESTIONS_LIST_MAX_SIZE){
-            throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE+job.getId());
+            throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE+job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         if(null!=oldJob.getJobScreeningQuestionsList() && oldJob.getJobScreeningQuestionsList().size()>0){
@@ -238,7 +240,7 @@ public class JobService implements IJobService {
 
     private void addJobKeySkills(Job job, Job oldJob) throws Exception { //update and add new key skill
         if(null!=job.getJobKeySkillsList() && job.getJobKeySkillsList().isEmpty()){
-            throw new ValidationException("Job key skills "+ IErrorMessages.EMPTY_AND_NULL_MESSAGE + oldJob.getId());
+            throw new ValidationException("Job key skills "+ IErrorMessages.EMPTY_AND_NULL_MESSAGE + oldJob.getId(), HttpStatus.BAD_REQUEST);
         }
 
         //TODO: replace this code to use the logged in user
@@ -346,7 +348,7 @@ public class JobService implements IJobService {
     private void addJobDetail(Job job,Job oldJob){//add job details
 
         if(null==job.getJobDetail()){
-            throw new ValidationException("Job detail "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("Job detail "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         //delete existing jobDetail record from the database
@@ -354,15 +356,15 @@ public class JobService implements IJobService {
 
         MasterDataBean masterDataBean=MasterDataBean.getInstance();
         if(null==masterDataBean.getFunction().get(job.getJobDetail().getFunction().getId())){
-            throw new ValidationException("In Job detail, function "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, function "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         if(null==masterDataBean.getEducation().get(job.getJobDetail().getEducation().getId())){
-            throw new ValidationException("In Job detail, education "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, education "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         if(null==masterDataBean.getExpertise().get(job.getJobDetail().getExpertise().getId())){
-            throw new ValidationException("In Job detail, expertise "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, expertise "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         //TODO:replace companyId by getting the logged in user
@@ -377,17 +379,17 @@ public class JobService implements IJobService {
 
         if(companyAddressList.isEmpty() || null==companyAddressMap.get(job.getJobDetail().getJobLocation().getId())
                 || null==companyAddressMap.get(job.getJobDetail().getInterviewLocation().getId())){
-            throw new ValidationException("In Job detail, company address "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, company address "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         if(companyBuList.isEmpty() || null==companyBuMap.get(job.getJobDetail().getBuId().getId())){
-            throw new ValidationException("In Job detail, company bu "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, company bu "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         String expRange = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId());
 
         if(null == expRange){
-            throw new ValidationException("In Job detail, experience Range "+IErrorMessages.NULL_MESSAGE +job.getId());
+            throw new ValidationException("In Job detail, experience Range "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         JobDetail detail=job.getJobDetail();
@@ -412,24 +414,28 @@ public class JobService implements IJobService {
         //TODO: replace this code to use the logged in user
         User u = userRepository.getOne(1L);
         List<User> userList = userRepository.findByCompanyId(1l);
-        job.getJobHiringTeam().setUserId(u);//temp code for testing
-        if(null==job.getJobHiringTeam().getUserId() || !userList.contains(job.getJobHiringTeam().getUserId())){
-            throw new ValidationException("Not valid User" +job.getId());
+        for (JobHiringTeam jobHiringTeam:job.getJobHiringTeamList()) {
+
+            jobHiringTeam.setUserId(u);//temp code for testing
+            if(null==jobHiringTeam.getUserId() || !userList.contains(jobHiringTeam.getUserId())){
+                throw new ValidationException("Not valid User" +job.getId(), HttpStatus.BAD_REQUEST);
+            }
+
+            if(null == MasterDataBean.getInstance().getProcess().get(jobHiringTeam.getStageStepId().getStage().getId())){
+                throw new ValidationException("In Job hiring team, process "+IErrorMessages.NULL_MESSAGE +job.getId(), HttpStatus.BAD_REQUEST);
+
+            }
+
+            //TODO:Check Lead Recruiter and Hiring manager are selected or not
+
+            job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
+            //job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
+
+            CompanyStageStep companyStageStep=jobHiringTeam.getStageStepId();
+
+            companyStageStep=companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(),companyStageStep.getCompanyId(),companyStageStep.getStage(), new Date(),u));
+            jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(),companyStageStep,jobHiringTeam.getUserId(),jobHiringTeam.getSequence(),new Date(),u));
         }
 
-        if(null == MasterDataBean.getInstance().getProcess().get(job.getJobHiringTeam().getStageStepId().getStage().getId())){
-            throw new ValidationException("In Job hiring team, process "+IErrorMessages.NULL_MESSAGE +job.getId());
-
-        }
-
-        //TODO:Check Lead Recruiter and Hiring manager are selected or not
-
-        job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
-        //job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
-
-        CompanyStageStep companyStageStep=job.getJobHiringTeam().getStageStepId();
-
-        companyStageStep=companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(),companyStageStep.getCompanyId(),companyStageStep.getStage(), new Date(),u));
-        jobHiringTeamRepository.save(new JobHiringTeam(oldJob/*.getId()*/,companyStageStep,u,job.getJobHiringTeam().getSequence(),new Date(),u));
     }
 }

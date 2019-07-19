@@ -4,15 +4,36 @@
 
 package io.litmusblox.server.service.impl;
 
-import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.Util;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.WebException;
+import io.litmusblox.server.model.*;
+import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
+import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
+import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
+import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
+import javax.annotation.Resource;
+import java.io.File;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
 
 /**
  * Implementation class for methods exposed by IJobControllerMappingService
@@ -23,8 +44,40 @@ import java.util.List;
  * Class Name : JobControllerMappingService
  * Project Name : server
  */
+@PropertySource("classpath:appConfig.properties")
+@Log4j2
 @Service
 public class JobControllerMappingService implements IJobControllerMappingService {
+
+    @Resource
+    CandidateRepository candidateRepository;
+
+    @Resource
+    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
+
+    @Resource
+    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+
+    @Resource
+    JobCandidateMappingRepository jobCandidateMappingRepository;
+
+    @Resource
+    UserRepository userRepository;
+
+    @Resource
+    MasterDataRepository masterDataRepository;
+
+    @Resource
+    JobRepository jobRepository;
+
+    @Autowired
+    IUploadDataProcessService iUploadDataProcessService;
+
+    @Autowired
+    Environment environment;
+
+
+
     /**
      * Service method to add a individually added candidates to a job
      *
@@ -39,7 +92,99 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //for each candidate, check if it is new or old
         //for the combination of jobid + candidateId, check that a record doesnot exist in jcm
         //else, add a jcm row with stage = Source
-        return null;
+
+        UploadResponseBean uploadResponseBean = new UploadResponseBean();
+        User u = userRepository.getOne(1L);
+        Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,u);
+
+        try {
+            processCandidateData(candidates, uploadResponseBean, jobId, candidateProcessed);
+        } catch (Exception ex) {
+            log.error("Error while processing candidates uploaded :: " + ex.getMessage());
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Failure.name());
+        }
+        return uploadResponseBean;
+    }
+
+    private void processCandidateData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, Long jobId, int candidateProcessed){
+
+        if (null != candidateList && candidateList.size() > 0) {
+            iUploadDataProcessService.processData(candidateList, uploadResponseBean, candidateProcessed);
+        }
+
+        //TODO: replace this code to use the logged in user
+        User u = userRepository.getOne(1L);
+        Map<String, CandidateEmailHistory> candidateEmailHistoryMap=new HashMap<>();
+        Map<String, CandidateMobileHistory> candidateMobileHistoryMap=new HashMap<>();
+        candidateEmailHistoryRepository.findAll().forEach(candidateEmailHistory ->
+                candidateEmailHistoryMap.put(candidateEmailHistory.getEmail(),candidateEmailHistory));
+        candidateMobileHistoryRepository.findAll().forEach(candidateMobileHistory ->
+                candidateMobileHistoryMap.put(candidateMobileHistory.getMobile(),candidateMobileHistory));
+
+        Job job=jobRepository.getOne(jobId);
+        MasterData masterData =null;
+       /* MasterDataBean.getInstance().getStage().entrySet().forEach(masterData->{
+            if(masterData.getValue().equals(IConstant.STAGE.Source.toString())){
+                m=masterDataRepository.getOne(masterData.getKey());
+            }
+        });*/
+        for (Map.Entry<Long,String> masterEntry:MasterDataBean.getInstance().getStage().entrySet()) {
+            if(masterEntry.getValue().equals(IConstant.STAGE.Source.toString())){
+                masterData=masterDataRepository.getOne(masterEntry.getKey());
+                break;
+            }
+        }
+        int failureCount=uploadResponseBean.getFailureCount();
+
+        for (Candidate candidate:candidateList) {
+
+            Candidate candidate1=null;
+            if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                //Create Candidate, CandidateEmailHistory, CandidateMobileHistory
+                 candidate1 = candidateRepository.save(new Candidate(candidate.getFirstName(),candidate.getLastName(), new Date(),u));
+                candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1,candidate.getEmail(),candidate.getCountryCode(),new Date(),u));
+                candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
+
+            }else if(null!=candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                //only create CandidateMobileHistory because CandidateEmailHistory already present
+                CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryMap.get(candidate.getEmail());
+                candidate1 = candidateEmailHistory.getCandidateId();
+                candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
+
+            }else if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null!=candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                //only create CandidateEmailHistory because CandidateMobileHistory already present
+                CandidateMobileHistory candidateMobileHistory=candidateMobileHistoryMap.get(candidate.getMobile());
+                candidate1 = candidateMobileHistory.getCandidateId();
+                candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1,candidate.getEmail(),candidate.getCountryCode(),new Date(),u));
+            }
+
+            if(null!=jobCandidateMappingRepository.findByJobAndCandidate(job,candidate1)){
+                uploadResponseBean.getFailedCandidates().add(candidate1);
+                failureCount++;
+                throw new DataIntegrityViolationException("Duplicate entry in Job candidate mapping "+"JobId:"+jobId+" candidateId:"+candidate1.getId());
+            }else{
+                //Create new entry for JobCandidateMapping
+                jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidate1,masterData, candidate1.getCandidateSource(),new Date(),u));
+            }
+
+        }
+
+        uploadResponseBean.setFailureCount(failureCount);
+
+        if(uploadResponseBean.getFailureCount() == 0)
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Success.name());
+        else if(uploadResponseBean.getSuccessCount() == 0)
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Failure.name());
+        else
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Partial_Success.name());
+
+        if(uploadResponseBean.getFailedCandidates().size() > 0)
+            uploadResponseBean.getFailedCandidates().addAll(uploadResponseBean.getFailedCandidates());
     }
 
     /**
@@ -54,7 +199,118 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadCandidatesFromFile(MultipartFile multipartFile, Long jobId, String fileFormat) throws Exception {
         //TODO: Add relevant code here
+
+        //validate the file source is supported by application
+        if(!Arrays.stream(IConstant.UPLOAD_FORMATS_SUPPORTED.values()).anyMatch(format->format.equals(fileFormat))) {
+            log.error(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat);
+            throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        //validate that the file has an extension that is supported by the application
+        Util.validateUploadFileType(multipartFile.getOriginalFilename());
+
+        User u = userRepository.getOne(1L);
+        Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        UploadResponseBean uploadResponseBean = new UploadResponseBean();
+
+        int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, u);
+
+        if (candidatesProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
+            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + u.getId() + " : not saving file " + multipartFile);
+            throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        //Save file
+        String fileName = storeFile(multipartFile, u.getId(), environment.getProperty(IConstant.REPO_LOCATION));
+        log.info("User " + u.getDisplayName() + " uploaded " + fileName);
+        List<Candidate> candidateList = processUploadedFile(fileName, uploadResponseBean, u, fileFormat, environment.getProperty(IConstant.REPO_LOCATION));
+
+        try {
+            processCandidateData(candidateList, uploadResponseBean, jobId, candidatesProcessed);
+
+        } catch (Exception ex) {
+            log.error("Error while processing file " + fileName + " :: " + ex.getMessage());
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Failure.name());
+        }
+
+
+
         return null;
+    }
+
+    private String storeFile(MultipartFile multipartFile, long userId, String repoLocation) throws Exception {
+        try {
+            InputStream is = multipartFile.getInputStream();
+            String filePath = getFileName(multipartFile.getOriginalFilename(), userId, repoLocation);
+            Util.storeFile(is, filePath);
+            return filePath;
+        }
+        catch (WebException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            throw new WebException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,e);
+        }
+    }
+
+
+    private String getFileName(String fileName, long userId, String repoLocation) throws Exception {
+
+        try {
+            String filePath = null;
+            String staticRepoPath = null;
+            if (Util.isNull(repoLocation)) {
+                throw new WebException(IErrorMessages.INVALID_SETTINGS);
+            }
+            staticRepoPath = repoLocation;
+
+            String time = Calendar.getInstance().getTimeInMillis() + "";
+            filePath = "User" + File.separator + userId + File.separator + userId;
+
+            File file = new File(staticRepoPath + File.separator + filePath);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+
+            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + userId + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+            return filePath;
+        }
+        catch (Exception e) {
+            log.error(e.getMessage());
+            throw new WebException(IErrorMessages.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, e);
+        }
+    }
+
+    private List<Candidate> processUploadedFile(String fileName, UploadResponseBean responseBean, User user, String fileSource, String repoLocation) {
+        //code to parse through the records and save data in database
+        String fileExtension = Util.getFileExtension(fileName).toLowerCase();
+        List<Candidate> candidateList = null;
+        switch (fileExtension) {
+            case "csv":
+                candidateList = new CsvFileProcessorService().process(fileName, responseBean, !user.getCountryId().getCountryName().equalsIgnoreCase(IConstant.STR_INDIA), repoLocation);
+                break;
+            case "xls":
+            case "xlsx":
+                switch (IConstant.UPLOAD_FORMATS_SUPPORTED.valueOf(fileSource)) {
+                    case LitmusBlox:
+                        candidateList = new ExcelFileProcessorService().process(fileName, responseBean, !user.getCountryId().getCountryName().equalsIgnoreCase(IConstant.STR_INDIA), repoLocation);
+                        break;
+                    case Naukri:
+                        log.info("Reached the naukri parser");
+                        candidateList = new NaukriExcelFileProcessorService().process(fileName, responseBean, !user.getCountryId().getCountryName().equalsIgnoreCase(IConstant.STR_INDIA), repoLocation);
+
+                        break;
+                }
+                break;
+            //TODO: add handling for files of xml type
+            //case "xml":
+            //    break;
+            default:
+                log.error(IErrorMessages.UNSUPPORTED_FILE_TYPE  + " - "+ fileExtension);
+                throw new WebException(IErrorMessages.UNSUPPORTED_FILE_TYPE + " - " + fileExtension, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return candidateList;
     }
 
     /**

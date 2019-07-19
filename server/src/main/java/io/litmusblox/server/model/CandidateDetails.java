@@ -88,16 +88,10 @@ public class CandidateDetails implements Serializable {
     @Column(name = "CV_FILE_TYPE")
     private String cvFileType;
 
-    @NotNull
-    @Column(name = "CANDIDATE_SOURCE")
-    private String candidateSource;
-
     @Column(name = "LAST_ACTIVE")
     private Date lastActive;
 
     @Column(name = "CANDIDATE_TYPE")
     private String candidateType;
-
-
 
 }

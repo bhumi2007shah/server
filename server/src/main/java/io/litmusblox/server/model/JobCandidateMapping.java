@@ -48,6 +48,10 @@ public class JobCandidateMapping implements Serializable {
     private MasterData stage;
 
     @NotNull
+    @Column(name = "CANDIDATE_SOURCE")
+    private String candidateSource;
+
+    @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
@@ -64,4 +68,13 @@ public class JobCandidateMapping implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
+
+    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.job = job;
+        this.candidate = candidate;
+        this.stage = stage;
+        this.candidateSource = candidateSource;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
 }

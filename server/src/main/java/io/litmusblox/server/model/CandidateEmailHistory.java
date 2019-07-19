@@ -27,7 +27,7 @@ public class CandidateEmailHistory implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -52,4 +52,12 @@ public class CandidateEmailHistory implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
+
+    public CandidateEmailHistory(@NotNull Candidate candidateId, @NotNull String email, @NotNull String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.candidateId = candidateId;
+        this.email = email;
+        this.countryCode = countryCode;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
 }

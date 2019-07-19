@@ -11,6 +11,7 @@ import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.repository.UserScreeningQuestionRepository;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.service.ScreeningQuestionResponseBean;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -46,14 +47,12 @@ public class ScreeningQuestionService implements IScreeningQuestionService {
      */
     @Override
     public ScreeningQuestionResponseBean fetchScreeningQuestionsForCompanyAndUser() throws Exception {
-        ScreeningQuestionResponseBean responseBean = new ScreeningQuestionResponseBean();
-        //TODO: replace the following code with values corresponding to currently logged in user
-        Long companyId =1L;
-        User user = userRepository.getOne(2L);
-        //end of code to be replaced
 
-        responseBean.setCompanyScreeningQuestion(companyScreeningQuestionsRepository.findByCompanyId(companyId));
-        responseBean.setUserScreeningQuestion(userScreeningQuestionRepository.findByUserId(user));
+        User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        ScreeningQuestionResponseBean responseBean = new ScreeningQuestionResponseBean();
+        responseBean.setCompanyScreeningQuestion(companyScreeningQuestionsRepository.findByCompanyId(loggedInUser.getCompanyId()));
+        responseBean.setUserScreeningQuestion(userScreeningQuestionRepository.findByUserId(loggedInUser));
 
         return responseBean;
     }

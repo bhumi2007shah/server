@@ -14,37 +14,61 @@ package io.litmusblox.server.constant;
 public interface IConstant {
 
 
-     // Regex
-     String REGEX_FOR_JOB_TITLE ="^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
-     String REGEX_FOR_JOB_ID = "^[a-zA-Z0-9]+$";
+    // Regex
+    String REGEX_FOR_JOB_TITLE = "^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+    String REGEX_FOR_JOB_ID = "^[a-zA-Z0-9]+$";
 
-     // lengths
-     Integer TITLE_MAX_LENGTH=100;
+    // lengths
+    Integer TITLE_MAX_LENGTH = 100;
 
-     int JOB_ID_MAX_LENGTH=10;
-     Integer SCREENING_QUESTIONS_LIST_MAX_SIZE=10;
+    int JOB_ID_MAX_LENGTH = 10;
+    Integer SCREENING_QUESTIONS_LIST_MAX_SIZE = 10;
+    String TOKEN_HEADER = "Authorization";
+    String TOKEN_PREFIX = "Bearer";
 
-/*     enum AddJobPages {
-         OVERVIEW("overview"),SCREENING_QUESTIONS("screeningQuestions"),KEY_SKILLS("keySkills"),CAPABILITIES("capabilities");
 
-        private String value;
-
-        AddJobPages(String val) {this.value = val;}
-        public String getValue() {return this.value;}
-     }*/
-
-    enum AddJobPages {
-        overview,screeningQuestions,keySkills,capabilities,jobDetail,hiringTeam;
+    enum UserStatus {
+        New, Active, Blocked;
     }
 
-     enum JobStatus {
-         DRAFT("Draft"),PUBLISHED ("Published"),ARCHIVED("Archived");
-         private String value;
+    public enum UserRole {
+        RECRUITER(Names.RECRUITER),
+        SUPER_ADMIN(Names.SUPER_ADMIN),
+        CLIENT_ADMIN(Names.CLIENT_ADMIN);
 
-         JobStatus(String val) {this.value = val;}
+        public class Names{
+            public static final String RECRUITER = "Recruiter";
+            public static final String SUPER_ADMIN = "SuperAdmin";
+            public static final String CLIENT_ADMIN = "ClientAdmin";
+        }
 
-         public String getValue() {return this.value;}
-     }
+        private final String label;
+
+        private UserRole(String label) {
+            this.label = label;
+        }
+
+        public String toString() {
+            return this.label;
+        }
+    }
+
+    enum AddJobPages {
+        overview, screeningQuestions, keySkills, capabilities, jobDetail, hiringTeam;
+    }
+
+    enum JobStatus {
+        DRAFT("Draft"), PUBLISHED("Published"), ARCHIVED("Archived");
+        private String value;
+
+        JobStatus(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
 
 
 }

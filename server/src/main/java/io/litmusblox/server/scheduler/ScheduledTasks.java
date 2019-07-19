@@ -9,7 +9,7 @@ import io.litmusblox.server.repository.JobCapabilitiesRepository;
 import io.litmusblox.server.repository.JobKeySkillsRepository;
 import io.litmusblox.server.repository.JobRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +40,7 @@ public class ScheduledTasks {
     @Resource
     JobCapabilitiesRepository jobCapabilitiesRepository;
 
-    @Scheduled(fixedRate = 3000, initialDelay = 5000)
+    //@Scheduled(fixedRate = 3000, initialDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRED)
     public void performMlApiCall() {
         log.info("ML Api call scheduled task trigerred");
@@ -51,8 +51,8 @@ public class ScheduledTasks {
 
             //TODO: Replace the whole of this piece with actual ML api call
 
-            User u = new User();
-            u.setId(2L);
+
+            User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             String[] capabilityName = {"Java", "Dot Net", "Testing"};
             MasterData importance = new MasterData();
@@ -63,7 +63,7 @@ public class ScheduledTasks {
                 //add key skills
                 SkillsMaster skillsMaster = new SkillsMaster();
                 skillsMaster.setId(Integer.valueOf(i + 1).longValue());
-                jobKeySkillsRepository.save(new JobKeySkills(skillsMaster, true, false, new Date(), u, job.getId()));
+                jobKeySkillsRepository.save(new JobKeySkills(skillsMaster, true, false, new Date(), loggedInUser, job.getId()));
 
                 //add capabilities
                 JobCapabilities jc = new JobCapabilities();
@@ -72,13 +72,13 @@ public class ScheduledTasks {
                 jc.setSelected(false);
                 jc.setImportanceLevel(importance);
                 jc.setCreatedOn(new Date());
-                jc.setCreatedBy(u);
+                jc.setCreatedBy(loggedInUser);
                 jobCapabilitiesRepository.save(jc);
             }
 
             job.setMlDataAvailable(true);
             job.setUpdatedOn(new Date());
-            job.setUpdatedBy(u);
+            job.setUpdatedBy(loggedInUser);
             jobRepository.save(job);
 
             log.info("Added job key skills and capabilities for job with id: " + job.getId());

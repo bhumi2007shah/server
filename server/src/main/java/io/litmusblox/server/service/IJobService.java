@@ -44,4 +44,11 @@ public interface IJobService {
      * @throws Exception
      */
     SingleJobViewResponseBean getJobViewById(JobCandidateMapping jobCandidateMapping) throws Exception;
+
+    /**
+     * Service method to publish a job
+     *
+     * @param jobId id of the job to be published
+     */
+    void publishJob(Long jobId) throws Exception;
 }

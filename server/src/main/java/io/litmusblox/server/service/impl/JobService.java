@@ -426,4 +426,26 @@ public class JobService implements IJobService {
         jobHiringTeamRepository.save(new JobHiringTeam(oldJob,companyStageStep,loggedInUser,job.getJobHiringTeam().getSequence(),new Date(),loggedInUser));
         */
     }
+
+    /**
+     * Service method to publish a job
+     *
+     * @param jobId id of the job to be published
+     */
+    @Transactional
+    public void publishJob(Long jobId) throws Exception {
+        log.info("Received request to publish job with id: " + jobId);
+
+        Job job = jobRepository.getOne(jobId);
+        if(null == job) {
+            throw new Exception("Job with id " + jobId + "does not exist");
+        }
+        job.setDatePublished(new Date());
+        job.setUpdatedOn(new Date());
+        job.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
+        job.setUpdatedBy((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        jobRepository.save(job);
+
+        log.info("Completed publishing job with id: " + jobId);
+    }
 }

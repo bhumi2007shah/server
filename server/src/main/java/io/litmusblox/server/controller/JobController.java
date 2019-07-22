@@ -102,6 +102,16 @@ public class JobController {
         );
     }
 
-
+    /**
+     * Api to set the status of a job as published.
+     *
+     * @param jobId id of the job which is to be published
+     * @throws Exception
+     */
+    @PutMapping(value = "/publishJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void publishJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.publishJob(jobId);
+    }
 
 }

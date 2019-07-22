@@ -1,11 +1,11 @@
-INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH)
+INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHORT_CODE)
  VALUES
- ('Australia','+61', 9),
- ('Canada','+1', 10),
- ('India','+91', 10),
- ('Singapore','+65', 8),
- ('United Kingdom','+44', 10),
- ('United States','+1', 10);
+ ('Australia','+61', 9,'au'),
+ ('Canada','+1', 10,'ca'),
+ ('India','+91', 10,'in'),
+ ('Singapore','+65', 8,'sg'),
+ ('United Kingdom','+44', 10,'gb'),
+ ('United States','+1', 10,'us');
 
 INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES

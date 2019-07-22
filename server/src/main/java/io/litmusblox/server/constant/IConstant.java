@@ -14,9 +14,9 @@ package io.litmusblox.server.constant;
 public interface IConstant {
 
 
-    // Regex
-    String REGEX_FOR_JOB_TITLE = "^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
-    String REGEX_FOR_JOB_ID = "^[a-zA-Z0-9]+$";
+     // Regex
+     String REGEX_FOR_JOB_TITLE ="^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+     String REGEX_FOR_COMPANY_JOB_ID = "^[a-zA-Z0-9]|$+$";
 
     // lengths
     Integer TITLE_MAX_LENGTH = 100;

@@ -43,7 +43,7 @@ public class ScheduledTasks {
     //@Scheduled(fixedRate = 3000, initialDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRED)
     public void performMlApiCall() {
-        log.info("ML Api call scheduled task trigerred");
+        //log.info("ML Api call scheduled task trigerred");
 
         List<Job> jobsWithoutMlData = jobRepository.findByMlDataAvailable(false);
 

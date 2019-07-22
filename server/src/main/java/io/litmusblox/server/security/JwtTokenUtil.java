@@ -77,7 +77,7 @@ public class JwtTokenUtil implements Serializable {
         return Jwts.builder()
                 .claim("roles",role)
                 .claim("userId", userId)
-                .claim("companyId", companyId)
+                .claim("company", companyId)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))

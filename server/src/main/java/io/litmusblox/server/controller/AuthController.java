@@ -7,10 +7,10 @@ package io.litmusblox.server.controller;
 import io.litmusblox.server.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.User;
+import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +48,7 @@ public class AuthController {
     @PostMapping(value = "/login")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity login(@RequestBody User user) throws Exception {
+    LoginResponseBean login(@RequestBody User user) throws Exception {
         return userDetailsService.login(user);
     }
 

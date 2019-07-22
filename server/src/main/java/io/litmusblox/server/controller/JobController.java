@@ -46,7 +46,7 @@ public class JobController {
             }}),
             (new HashMap<String, List<String>>(){{
                 put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","companyId"));
+                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
                 put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
             }})
         );
@@ -70,6 +70,7 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }
@@ -96,6 +97,7 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }

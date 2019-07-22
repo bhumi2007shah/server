@@ -8,7 +8,10 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.service.*;
+import io.litmusblox.server.service.IJobService;
+import io.litmusblox.server.service.IScreeningQuestionService;
+import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.service.SingleJobViewResponseBean;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -205,7 +208,7 @@ public class JobService implements IJobService {
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);
             job.setCreatedBy(loggedInUser);
-            Company c = companyRepository.getOne(loggedInUser.getCompanyId());
+            Company c = companyRepository.getOne(loggedInUser.getCompany().getId());
             job.setCompanyId(c);
             //End of code to be removed
             jobRepository.save(job);
@@ -336,7 +339,7 @@ public class JobService implements IJobService {
     }
 
     private void addJobDetail(Job job,Job oldJob, User loggedInUser){//add job details
-
+/*
         if(null==job.getJobDetail()){
             throw new ValidationException("Job detail "+IErrorMessages.NULL_MESSAGE +job.getId());
         }
@@ -357,8 +360,8 @@ public class JobService implements IJobService {
             throw new ValidationException("In Job detail, expertise "+IErrorMessages.NULL_MESSAGE +job.getId());
         }
 
-        List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(loggedInUser.getCompanyId());
-        List<CompanyBu> companyBuList = companyBuRepository.findByCompanyId(loggedInUser.getCompanyId());
+        List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(loggedInUser.getCompany().getId());
+        List<CompanyBu> companyBuList = companyBuRepository.findByCompanyId(loggedInUser.getCompany().getId());
 
         Map<Long, CompanyBu> companyBuMap = new HashMap<>();
         Map<Long, CompanyAddress> companyAddressMap = new HashMap<>();
@@ -394,13 +397,14 @@ public class JobService implements IJobService {
         jobRepository.save(oldJob);
 
         //populate all users for the company of current user
-        List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompanyId());
+        List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
         job.getUsersForCompany().addAll(userList);
+        */
     }
 
     private void addJobHiringTeam(Job job, Job oldJob, User loggedInUser) throws Exception{
-
-        List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompanyId());
+/*
+        List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
 
         if(null==job.getJobHiringTeam().getUserId() || !userList.contains(job.getJobHiringTeam().getUserId())){
             throw new ValidationException("Not valid User" +job.getId());
@@ -419,6 +423,7 @@ public class JobService implements IJobService {
         CompanyStageStep companyStageStep=job.getJobHiringTeam().getStageStepId();
 
         companyStageStep=companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(),companyStageStep.getCompanyId(),companyStageStep.getStage(), new Date(),loggedInUser));
-        jobHiringTeamRepository.save(new JobHiringTeam(oldJob/*.getId()*/,companyStageStep,loggedInUser,job.getJobHiringTeam().getSequence(),new Date(),loggedInUser));
+        jobHiringTeamRepository.save(new JobHiringTeam(oldJob,companyStageStep,loggedInUser,job.getJobHiringTeam().getSequence(),new Date(),loggedInUser));
+        */
     }
 }

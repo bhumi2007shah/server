@@ -51,7 +51,7 @@ public class ScreeningQuestionService implements IScreeningQuestionService {
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         ScreeningQuestionResponseBean responseBean = new ScreeningQuestionResponseBean();
-        responseBean.setCompanyScreeningQuestion(companyScreeningQuestionsRepository.findByCompanyId(loggedInUser.getCompanyId()));
+        responseBean.setCompanyScreeningQuestion(companyScreeningQuestionsRepository.findByCompanyId(loggedInUser.getCompany().getId()));
         responseBean.setUserScreeningQuestion(userScreeningQuestionRepository.findByUserId(loggedInUser));
 
         return responseBean;

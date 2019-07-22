@@ -31,7 +31,7 @@ public class CompanyBu implements Serializable {
     private Long id;
 
     //@NotNull
-    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "company")
     private Long companyId;
 
     @NotNull

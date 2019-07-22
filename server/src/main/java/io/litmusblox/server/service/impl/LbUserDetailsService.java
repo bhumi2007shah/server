@@ -7,10 +7,9 @@ package io.litmusblox.server.service.impl;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.security.JwtTokenUtil;
-import io.litmusblox.server.security.LbAuthResponse;
+import io.litmusblox.server.service.LoginResponseBean;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -21,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -56,19 +56,20 @@ public class LbUserDetailsService implements UserDetailsService {
      * 2. generate and return the jwt token
      *
      * @param user the user to be logged in
-     * @return response with jwt token
+     * @return responsebean with jwt token
      * @throws Exception
      */
-    public ResponseEntity login(User user) throws Exception {
+    @Transactional
+    public LoginResponseBean login(User user) throws Exception {
         log.info("Received login request from " + user.getEmail());
         long startTime = System.currentTimeMillis();
         authenticate(user.getEmail(), user.getPassword());
 
         final User userDetails = (User)loadUserByUsername(user.getEmail());
-        final String token = jwtTokenUtil.generateToken(userDetails, user.getId(), user.getCompanyId());
+        final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
-        return ResponseEntity.ok(new LbAuthResponse(token));
+        return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),0);
     }
 
 
@@ -101,7 +102,7 @@ public class LbUserDetailsService implements UserDetailsService {
         u.setLastName(user.getLastName());
         u.setEmail(user.getEmail());
         u.setPassword(passwordEncoder.encode(user.getPassword()));
-        u.setCompanyId(user.getCompanyId());
+        u.setCompany(user.getCompany());
         u.setRole(user.getRole());
         u.setCountryId(user.getCountryId());
         u.setMobile(user.getMobile());

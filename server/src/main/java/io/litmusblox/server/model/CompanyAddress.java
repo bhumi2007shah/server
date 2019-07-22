@@ -46,7 +46,7 @@ public class CompanyAddress implements Serializable {
     private Long companyId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="ADDRESS_TYPE")
     private MasterData addressType;
 

@@ -101,11 +101,12 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
-    private JobDetail jobDetail;
+    //TODO: These two have been commented out because in the 'lite' version, they do not have data and this breaks the workspace flow
+    //@OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
+    //private JobDetail jobDetail;
 
-    @OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "jobId")
-    private JobHiringTeam jobHiringTeam;
+    //@OneToOne(cascade = CascadeType.ALL,fetch = FetchType.LAZY,mappedBy = "jobId")
+    //private JobHiringTeam jobHiringTeam;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

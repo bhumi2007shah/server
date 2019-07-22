@@ -73,9 +73,9 @@ public class User implements Serializable, UserDetails {
     private String status = IConstant.UserStatus.New.name();
 
     @NotNull
-    //@OneToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name="COMPANY_ID")
-    private Long companyId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="COMPANY_ID")
+    private Company company;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)

@@ -30,8 +30,15 @@ public class ListToArrayConverter implements AttributeConverter<List<String>, Ob
             return null;
 
         List<String> rst = new ArrayList<>();
+
         try {
-            String[] elements = (String[]) (((PgArray) dbData).getArray());
+            String[] elements = null;
+            if(dbData.getClass().equals(io.litmusblox.server.psql.PostgreSQLTextArray.class)) {
+                elements = (String[]) ((PostgreSQLTextArray) dbData).getArray();
+            }
+            else {
+                elements = (String[]) (((PgArray) dbData).getArray());
+            }
             for (String element : elements) {
 
                 rst.add(element);

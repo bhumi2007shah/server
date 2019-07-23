@@ -10,6 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Model class for JOB_CANDIDATE_MAPPING table
@@ -64,4 +65,15 @@ public class JobCandidateMapping implements Serializable {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
+
+    @Column(name="JCM_UUID")
+    @org.hibernate.annotations.Type(type = "pg-uuid")
+    private UUID jcmUuid;
+
+    @Column(name="CANDIDATE_INTEREST")
+    private boolean candidateInterest;
+
+    @Column(name = "CANDIDATE_INTEREST_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date candidateInterestDate;
 }

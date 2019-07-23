@@ -227,7 +227,7 @@ public class JobService implements IJobService {
             jobScreeningQuestionsRepository.deleteAll(oldJob.getJobScreeningQuestionsList());//delete old job screening question list
         }
 
-        job.getJobScreeningQuestionsList().forEach(n->{n.setCreatedBy(loggedInUser);n.setCreatedOn(new Date());n.setJobId(job.getId());});
+        job.getJobScreeningQuestionsList().forEach(n->{n.setCreatedBy(loggedInUser.getId());n.setCreatedOn(new Date());n.setJobId(job.getId());});
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
 
         //populate capabilities and key skills for the job

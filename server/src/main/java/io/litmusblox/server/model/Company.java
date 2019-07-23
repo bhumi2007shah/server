@@ -44,17 +44,17 @@ public class Company implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="CREATED_BY")
-    private User createdBy;
+   // @OneToOne(fetch = FetchType.LAZY)
+    @Column(name="CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="UPDATED_BY")
-    private User updatedBy;
+   // @OneToOne(fetch = FetchType.LAZY)
+    @Column(name="UPDATED_BY")
+    private Long updatedBy;
 
     //@NotNull
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")

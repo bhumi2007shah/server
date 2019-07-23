@@ -5,12 +5,14 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -37,7 +39,8 @@ public class CompanyScreeningQuestion implements Serializable {
     private String question;
 
     @Column(name = "OPTIONS")
-    private String options;
+    @Convert(converter = ListToArrayConverter.class)
+    private List<String> options;
 
     //@NotNull
     //@OneToOne(fetch = FetchType.EAGER)
@@ -55,15 +58,15 @@ public class CompanyScreeningQuestion implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "CREATED_BY")
-    private User createdBy;
+    //@OneToOne(fetch = FetchType.EAGER)
+    @Column(name = "CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="UPDATED_BY")
-    private User updatedBy;
+   // @OneToOne(fetch = FetchType.EAGER)
+    @Column(name="UPDATED_BY")
+    private Long updatedBy;
 }

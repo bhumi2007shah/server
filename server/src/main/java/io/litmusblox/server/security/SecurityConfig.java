@@ -65,8 +65,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         // We don't need CSRF for this example
         httpSecurity.csrf().disable()
+                .authorizeRequests()
+                //all no auth controller request do not require authentication
+                .antMatchers("/api/noAuth/*").permitAll()
                 // dont authenticate this particular request
-                .authorizeRequests().antMatchers("/api/auth/login").permitAll()
+                .antMatchers("/api/auth/login").permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(lbAuthenticationEntryPoint)

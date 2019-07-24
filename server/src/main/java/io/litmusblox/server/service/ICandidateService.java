@@ -5,6 +5,7 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.User;
 
 /**
  * Service class for operations on candidate
@@ -25,4 +26,17 @@ public interface ICandidateService {
      * @throws Exception
      */
     Candidate findByMobileOrEmail(String email, String mobile, String countryCode) throws Exception;
+
+    /**
+     * Method to create a new candidate, candidateEmailHistory and candidateMobileHistory
+     *
+     * @param firstName first name of candidate
+     * @param lastName last name of candidate
+     * @param email email of candidate
+     * @param mobile mobile number of candidate
+     * @param countryCode country code of candidate
+     * @param loggedInUser
+     * @return
+     */
+    Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser) throws Exception;
 }

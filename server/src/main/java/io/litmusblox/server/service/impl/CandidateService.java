@@ -12,6 +12,7 @@ import io.litmusblox.server.model.CandidateMobileHistory;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.CandidateEmailHistoryRepository;
 import io.litmusblox.server.repository.CandidateMobileHistoryRepository;
+import io.litmusblox.server.repository.CandidateRepository;
 import io.litmusblox.server.service.ICandidateService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,9 @@ public class CandidateService implements ICandidateService {
     @Resource
     CandidateMobileHistoryRepository candidateMobileHistoryRepository;
 
+    @Resource
+    CandidateRepository candidateRepository;
+
     /**
      * Method to find a candidate using email or mobile number + country code
      *
@@ -60,7 +64,7 @@ public class CandidateService implements ICandidateService {
         Candidate dupCandidateByMobile = null;
         if (Util.isNotNull(mobile)) {
             CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(mobile, countryCode);
-            if (null != dupCandidateByMobile)
+            if (null != candidateMobileHistory)
                 dupCandidateByMobile = candidateMobileHistory.getCandidate();
         }
 
@@ -85,5 +89,26 @@ public class CandidateService implements ICandidateService {
             }
         }
         return dupCandidateByEmail;
+    }
+
+    /**
+     * Method to create a new candidate, candidateEmailHistory and candidateMobileHistory
+     *
+     * @param firstName    first name of candidate
+     * @param lastName     last name of candidate
+     * @param email        email of candidate
+     * @param mobile       mobile number of candidate
+     * @param countryCode  country code of candidate
+     * @param loggedInUser
+     * @return
+     */
+    @Override
+    public Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser) throws Exception {
+
+        Candidate candidate = candidateRepository.save(new Candidate(firstName, lastName, email, mobile, countryCode, new Date(), loggedInUser));
+        candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate, email, new Date(), loggedInUser));
+        candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate, mobile, countryCode, new Date(), loggedInUser));
+
+        return candidate;
     }
 }

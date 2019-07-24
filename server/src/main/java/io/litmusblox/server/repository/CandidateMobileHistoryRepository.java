@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.CandidateMobileHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author : Sumit
@@ -15,5 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface CandidateMobileHistoryRepository extends JpaRepository<CandidateMobileHistory, Long> {
+
+    @Transactional
     CandidateMobileHistory findByMobileAndCountryCode(String mobile, String countryCode);
 }

@@ -153,14 +153,14 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
                 //create a candidate if no history found for email and mobile
                 long candidateId;
-                Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getMobile(),candidate.getEmail(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
+                Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
                 Candidate candidateObjToUse = existingCandidate;
                 if(null == existingCandidate) {
                     candidate.setCreatedOn(new Date());
                     candidate.setCreatedBy(loggedInUser);
                     if(Util.isNull(candidate.getCountryCode()))
                         candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
-                    candidateObjToUse = candidateRepository.save(new Candidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), new Date(), loggedInUser));
+                    candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser);
                     msg.append(" New");
                 }
                 else {

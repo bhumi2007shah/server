@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ import java.util.Date;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE_MOBILE_HISTORY")
 public class CandidateMobileHistory implements Serializable {
@@ -59,9 +61,5 @@ public class CandidateMobileHistory implements Serializable {
         this.countryCode = countryCode;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
-    }
-
-    public CandidateMobileHistory() {
-        super();
     }
 }

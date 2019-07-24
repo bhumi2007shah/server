@@ -5,9 +5,12 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.JobScreeningQuestions;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Interface class for following services:
@@ -52,4 +55,29 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception;
+
+
+    /**
+     * Rest api to capture candidate consent from chatbot
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @param interest boolean to capture candidate consent
+     * @throws Exception
+     */
+    void captureCandidateInterest(UUID uuid, boolean interest) throws Exception;
+
+    /**
+     * Rest api to capture candidate response to screening questions from chatbot
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @param candidateResponse the response provided by a candidate against each screening question
+     * @throws Exception
+     */
+    void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception;
+
+    /**
+     * Rest api to get all screening questions for the job
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @return the list of job screening questions
+     * @throws Exception
+     */
+    List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception;
 }

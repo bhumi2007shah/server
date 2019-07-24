@@ -34,15 +34,15 @@ public class JobScreeningQuestions implements Serializable {
     @JoinColumn(name = "JOB_ID")
     private Long jobId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MASTER_SCREENING_QUESTION_ID")
     private ScreeningQuestions masterScreeningQuestionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "COMPANY_SCREENING_QUESTION_ID")
     private CompanyScreeningQuestion companyScreeningQuestionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_SCREENING_QUESTION_ID")
     private UserScreeningQuestion userScreeningQuestionId;
 
@@ -53,19 +53,15 @@ public class JobScreeningQuestions implements Serializable {
     private Date createdOn;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CREATED_BY")
-    @JsonIgnore
-    private User createdBy;
+    @Column(name = "CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonIgnore
     private Date updatedOn;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UPDATED_BY")
-    @JsonIgnore
-    private User updatedBy;
+    @Column(name = "UPDATED_BY")
+    private Long updatedBy;
 
 }

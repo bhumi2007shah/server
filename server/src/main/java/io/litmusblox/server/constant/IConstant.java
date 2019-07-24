@@ -43,29 +43,51 @@ public interface IConstant {
      String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
      String STR_INDIA = "India";
 
+    String TOKEN_HEADER = "Authorization";
+    String TOKEN_PREFIX = "Bearer";
 
 
-/*     enum AddJobPages {
-         OVERVIEW("overview"),SCREENING_QUESTIONS("screeningQuestions"),KEY_SKILLS("keySkills"),CAPABILITIES("capabilities");
-
-        private String value;
-
-        AddJobPages(String val) {this.value = val;}
-        public String getValue() {return this.value;}
-     }*/
-
-    enum AddJobPages {
-        overview,screeningQuestions,keySkills,capabilities,jobDetail,hiringTeam;
+    enum UserStatus {
+        New, Active, Blocked;
     }
 
-     enum JobStatus {
-         DRAFT("Draft"),PUBLISHED ("Published"),ARCHIVED("Archived");
-         private String value;
+    public enum UserRole {
+        RECRUITER(Names.RECRUITER),
+        SUPER_ADMIN(Names.SUPER_ADMIN),
+        CLIENT_ADMIN(Names.CLIENT_ADMIN);
+        public class Names{
+            public static final String RECRUITER = "Recruiter";
+            public static final String SUPER_ADMIN = "SuperAdmin";
+            public static final String CLIENT_ADMIN = "ClientAdmin";
+        }
 
-         JobStatus(String val) {this.value = val;}
+        private final String label;
 
-         public String getValue() {return this.value;}
-     }
+        private UserRole(String label) {
+            this.label = label;
+        }
+
+        public String toString() {
+            return this.label;
+        }
+    }
+
+    enum AddJobPages {
+        overview, screeningQuestions, keySkills, capabilities, jobDetail, hiringTeam;
+    }
+
+    enum JobStatus {
+        DRAFT("Draft"), PUBLISHED("Published"), ARCHIVED("Archived");
+        private String value;
+
+        JobStatus(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
 
     enum UPLOAD_STATUS {
         Success, Failure, Partial_Success

@@ -27,7 +27,7 @@ import java.util.Optional;
  * Class Name : JobController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/job")
 public class JobController {
@@ -46,7 +46,7 @@ public class JobController {
             }}),
             (new HashMap<String, List<String>>(){{
                 put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","companyId"));
+                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
                 put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
             }})
         );
@@ -70,6 +70,7 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }
@@ -96,10 +97,21 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }
 
-
+    /**
+     * Api to set the status of a job as published.
+     *
+     * @param jobId id of the job which is to be published
+     * @throws Exception
+     */
+    @PutMapping(value = "/publishJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void publishJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.publishJob(jobId);
+    }
 
 }

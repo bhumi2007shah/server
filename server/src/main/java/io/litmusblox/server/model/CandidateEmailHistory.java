@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ import java.util.Date;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE_EMAIL_HISTORY")
 public class CandidateEmailHistory implements Serializable {
@@ -54,9 +56,5 @@ public class CandidateEmailHistory implements Serializable {
         this.email = email;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
-    }
-
-    public CandidateEmailHistory() {
-        super();
     }
 }

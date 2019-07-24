@@ -21,4 +21,5 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByCompanyId(Long companyId);
+    User findByEmail(String email);
 }

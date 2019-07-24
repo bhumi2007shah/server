@@ -46,7 +46,7 @@ public class CompanyAddress implements Serializable {
     private Long companyId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="ADDRESS_TYPE")
     private MasterData addressType;
 
@@ -56,16 +56,13 @@ public class CompanyAddress implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="CREATED_BY")
-    private User createdBy;
+    @Column(name="CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="UPDATED_BY")
-    private User updatedBy;
-
+    @Column(name="UPDATED_BY")
+    private Long updatedBy;
 }

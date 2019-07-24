@@ -38,12 +38,12 @@ public class JobDetail implements Serializable {
     private Job jobId;
 
     @NotNull(message = "Company bu "+ IErrorMessages.NULL_MESSAGE)
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "BU_ID")
     private CompanyBu buId;
 
     @NotNull(message = "Function "+ IErrorMessages.NULL_MESSAGE)
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FUNCTION")
     private MasterData function;
 
@@ -64,12 +64,12 @@ public class JobDetail implements Serializable {
     private Double maxExperience;
 
     @NotNull(message = "Education "+ IErrorMessages.NULL_MESSAGE)
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "EDUCATION")
     private MasterData education;
 
     @NotNull(message = "Job location "+ IErrorMessages.NULL_MESSAGE)
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "JOB_LOCATION")
     private CompanyAddress jobLocation;
 
@@ -101,7 +101,6 @@ public class JobDetail implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    //@NotNull(message = "Experience Range "+ IErrorMessages.NULL_MESSAGE)
     @Transient
     private MasterData experienceRange;
 

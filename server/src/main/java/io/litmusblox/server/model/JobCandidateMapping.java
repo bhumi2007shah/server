@@ -5,11 +5,13 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Model class for JOB_CANDIDATE_MAPPING table
@@ -21,6 +23,7 @@ import java.util.Date;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name="JOB_CANDIDATE_MAPPING")
 public class JobCandidateMapping implements Serializable {
@@ -69,6 +72,17 @@ public class JobCandidateMapping implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
+    @Column(name="JCM_UUID")
+    @org.hibernate.annotations.Type(type = "pg-uuid")
+    private UUID jcmUuid;
+
+    @Column(name="CANDIDATE_INTEREST")
+    private boolean candidateInterest;
+
+    @Column(name = "CANDIDATE_INTEREST_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date candidateInterestDate;
+
     public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy) {
         this.job = job;
         this.candidate = candidate;
@@ -76,9 +90,5 @@ public class JobCandidateMapping implements Serializable {
         this.candidateSource = candidateSource;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
-    }
-
-    public JobCandidateMapping() {
-        super();
     }
 }

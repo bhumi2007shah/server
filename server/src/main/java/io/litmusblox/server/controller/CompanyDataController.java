@@ -40,7 +40,7 @@ public class CompanyDataController {
                 put("UserClassFilter", Arrays.asList("displayName"));
             }}),
             new HashMap<String, List<String>>() {{
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","companyId"));
+                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
                 put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
             }}
         );

@@ -43,8 +43,8 @@ import java.util.*;
  * Project Name : server
  */
 @PropertySource("classpath:appConfig.properties")
-@Log4j2
 @Service
+@Log4j2
 public class JobControllerMappingService implements IJobControllerMappingService {
 
     @Resource
@@ -74,6 +74,11 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Autowired
     Environment environment;
 
+    @Resource
+    CandidateScreeningQuestionResponseRepository candidateScreeningQuestionResponseRepository;
+
+    @Resource
+    JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
 
 
     /**
@@ -253,5 +258,61 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception {
         //TODO: Add relevant code here
         return null;
+    }
+
+    /**
+     * Rest api to capture candidate consent from chatbot
+     *
+     * @param uuid     the uuid corresponding to a unique jcm record
+     * @param interest boolean to capture candidate consent
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        if (null == objFromDb)
+            throw new Exception("No mapping found for uuid " + uuid);
+        objFromDb.setCandidateInterest(interest);
+        objFromDb.setCandidateInterestDate(new Date());
+        jobCandidateMappingRepository.save(objFromDb);
+    }
+
+    /**
+     * Rest api to capture candidate response to screening questions from chatbot
+     *
+     * @param uuid              the uuid corresponding to a unique jcm record
+     * @param candidateResponse the response provided by a candidate against each screening question
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        if (null == objFromDb)
+            throw new Exception("No mapping found for uuid " + uuid);
+
+        candidateResponse.forEach((key,value) -> {
+            if (value.length() > 100) {
+                log.error("Length of user response is greater than 100 " + value);
+                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value.substring(0,100)));
+            }
+            else
+                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value));
+        });
+    }
+
+    /**
+     * Rest api to get all screening questions for the job
+     *
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @return the list of job screening questions
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        if (null == objFromDb)
+            throw new Exception("No mapping found for uuid " + uuid);
+
+        return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
     }
 }

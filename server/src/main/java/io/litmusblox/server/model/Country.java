@@ -41,4 +41,6 @@ public class Country implements Serializable {
     @Column(name = "MAX_MOBILE_LENGTH")
     private Long maxMobileLength;
 
+    @Column(name = "COUNTRY_SHORT_CODE")
+    private String countryShortCode;
 }

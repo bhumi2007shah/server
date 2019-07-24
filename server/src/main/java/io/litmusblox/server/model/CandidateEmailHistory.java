@@ -40,10 +40,6 @@ public class CandidateEmailHistory implements Serializable {
     private String email;
 
     @NotNull
-    @Column(name = "COUNTRY_CODE")
-    private String countryCode;
-
-    @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn = new Date();
@@ -53,11 +49,14 @@ public class CandidateEmailHistory implements Serializable {
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
-    public CandidateEmailHistory(@NotNull Candidate candidateId, @NotNull String email, @NotNull String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
+    public CandidateEmailHistory(@NotNull Candidate candidateId, @NotNull String email, @NotNull Date createdOn, @NotNull User createdBy) {
         this.candidateId = candidateId;
         this.email = email;
-        this.countryCode = countryCode;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
+    }
+
+    public CandidateEmailHistory() {
+        super();
     }
 }

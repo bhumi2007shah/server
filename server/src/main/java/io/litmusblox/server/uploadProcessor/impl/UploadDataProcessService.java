@@ -8,7 +8,9 @@ import io.litmusblox.server.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
-import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.*;
+import io.litmusblox.server.repository.*;
+import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import lombok.extern.log4j.Log4j2;
@@ -18,8 +20,8 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.annotation.Resource;
+import java.util.*;
 
 /**
  * @author : Sumit
@@ -36,15 +38,55 @@ public class UploadDataProcessService implements IUploadDataProcessService {
     @Autowired
     Environment environment;
 
+    @Resource
+    UserRepository userRepository;
+
+    @Resource
+    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+
+    @Resource
+    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
+
+    @Resource
+    JobRepository jobRepository;
+
+    @Resource
+    MasterDataRepository masterDataRepository;
+
+    @Resource
+    CandidateRepository candidateRepository;
+
+    @Resource
+    JobCandidateMappingRepository jobCandidateMappingRepository;
 
     @Override
-    public void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed){
+    public void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed, Long jobId, boolean ignoreMobile){
         log.info("inside processData");
 
         int recordsProcessed = 0;
         int successCount = 0;
         int failureCount = uploadResponseBean.getFailureCount();
-        List<Candidate> failedCandidateList = new ArrayList();
+
+        //TODO: replace this code to use the logged in user
+        User u = userRepository.getOne(1L);
+        Map<String, CandidateEmailHistory> candidateEmailHistoryMap=new HashMap<>();
+        Map<String, CandidateMobileHistory> candidateMobileHistoryMap=new HashMap<>();
+
+        candidateEmailHistoryRepository.findAll().forEach(candidateEmailHistory ->
+                candidateEmailHistoryMap.put(candidateEmailHistory.getEmail(),candidateEmailHistory));
+        candidateMobileHistoryRepository.findAll().forEach(candidateMobileHistory ->
+                candidateMobileHistoryMap.put(candidateMobileHistory.getMobile(),candidateMobileHistory));
+
+        Job job=jobRepository.getOne(jobId);
+        MasterData masterData =null;
+
+        for (Map.Entry<Long,String> masterEntry: MasterDataBean.getInstance().getStage().entrySet()) {
+            if(masterEntry.getValue().equals(IConstant.STAGE.Source.toString())){
+                masterData=masterDataRepository.getOne(masterEntry.getKey());
+                break;
+            }
+        }
+
 
         for (Candidate candidate:candidateList) {
 
@@ -52,7 +94,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " +  candidate.getCreatedBy().getId());
                 candidate.setUploadErrorMessage(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + ". Max number of " +
                         "candidates per file is "+environment.getProperty("maxCandidatesPerFile")+". All candidates from this candidate onwards have not been processed");
-                failedCandidateList.add(candidate);
+                uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
                 break;
             }
@@ -60,7 +102,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             if ((recordsProcessed + candidateProcessed) >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
                 log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED  + " : user id : " +  candidate.getCreatedBy().getId());
                 candidate.setUploadErrorMessage(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED);
-                failedCandidateList.add(candidate);
+                uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
                 break;
             }
@@ -102,7 +144,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());
 
                 if(Util.isNotNull(candidate.getMobile())) {
-                    if (!Util.validateMobile(candidate.getMobile(), candidate.getCountryCode())) {
+                    if (!Util.validateMobile(candidate.getMobile(), u.getCountryId().getCountryCode())) {
                         String cleanMobile = candidate.getMobile().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                         log.error("Special characters found, cleaning mobile number \"" + candidate.getMobile() + "\" to " + cleanMobile);
                         if (!Util.validateMobile(cleanMobile, candidate.getCountryCode()))
@@ -110,29 +152,86 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                         candidate.setMobile(cleanMobile);
                     }
                     msg.append("-").append(candidate.getMobile());
+                }else {
+                    //mobile number of candidate is null
+                    //check if ignore mobile flag is set
+                    if(ignoreMobile) {
+                        log.info("Ignoring check for mobile number required for " + candidate.getEmail());
+                    }
+                    else {
+                        //ignore mobile flag is false, throw an exception
+                        throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + candidate.getMobile(), HttpStatus.BAD_REQUEST);
+                    }
+
+                }
+                log.info(msg);
+
+                if(null==candidate.getCountryCode())
+                    candidate.setCountryCode(u.getCountryId().getCountryCode());
+
+                Candidate candidate1=null;
+                JobCandidateMapping jobCandidateMapping =null;
+                if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                    //Create Candidate, CandidateEmailHistory, CandidateMobileHistory
+                    candidate1 = candidateRepository.save(new Candidate(candidate.getFirstName(),candidate.getLastName(), new Date(),u));
+                    candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1, candidate.getEmail(),new Date(),u));
+                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
+
+                }else if(null!=candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                    //only create CandidateMobileHistory because CandidateEmailHistory already present
+                    CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryMap.get(candidate.getEmail());
+                    candidate1 = candidateEmailHistory.getCandidateId();
+                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
+
+                }else if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null!=candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                    //only create CandidateEmailHistory because CandidateMobileHistory already present
+                    CandidateMobileHistory candidateMobileHistory=candidateMobileHistoryMap.get(candidate.getMobile());
+                    candidate1 = candidateMobileHistory.getCandidateId();
+                    candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1,candidate.getEmail(),new Date(),u));
+                }else if(null!=candidateEmailHistoryMap.get(candidate.getEmail()) && null!=candidateMobileHistoryMap.get(candidate.getMobile())){
+
+                    CandidateMobileHistory candidateMobileHistory=candidateMobileHistoryMap.get(candidate.getMobile());
+                    jobCandidateMapping = jobCandidateMappingRepository.findByJobAndCandidate(job,candidateMobileHistory.getCandidateId());
+
+                }
+
+                if(null!=jobCandidateMapping){
+                    //log.error(IErrorMessages.DUPLICATE_CANDIDATE+ " : " + candidate1.getId() + candidate.getEmail() + " : " + candidate.getMobile());
+                    candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
+                    throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
+                }else{
+                    //Create new entry for JobCandidateMapping
+                    jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidate1,masterData, candidate.getCandidateSource(),new Date(),u));
                 }
 
                 successCount++;
-                log.info(msg);
-
             }catch(ValidationException ve) {
-                log.error("Error while processing candidate : " + candidate.getEmail() + " : " + ve.getLocalizedMessage(), HttpStatus.BAD_REQUEST);
-                candidate.setUploadErrorMessage(ve.getLocalizedMessage());
-                failedCandidateList.add(candidate);
+                log.error("Error while processing candidate : " + candidate.getEmail() + " : " + ve.getErrorMessage(), HttpStatus.BAD_REQUEST);
+                candidate.setUploadErrorMessage(ve.getErrorMessage());
+                uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
             } catch(Exception e) {
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
                 candidate.setUploadErrorMessage(IErrorMessages.INTERNAL_SERVER_ERROR);
-                failedCandidateList.add(candidate);
+                uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
             }
         }
 
         uploadResponseBean.setFailureCount(failureCount);
         uploadResponseBean.setSuccessCount(successCount);
-        if(failedCandidateList.size()>0){
-            uploadResponseBean.getFailedCandidates().addAll(failedCandidateList);
-        }
-    }
 
+        if(uploadResponseBean.getFailureCount() == 0)
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Success.name());
+        else if(uploadResponseBean.getSuccessCount() == 0)
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Failure.name());
+        else
+            uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Partial_Success.name());
+
+        uploadResponseBean.setCandidatesProcessedCount(candidateProcessed + successCount);
+
+    }
 }

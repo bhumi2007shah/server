@@ -37,5 +37,7 @@ public class ValidationException extends RuntimeException implements Serializabl
 
     public ValidationException(String errorMessage, HttpStatus badRequest) {
         super();
+        this.errorMessage = errorMessage;
+        this.errorCode = badRequest.value();
     }
 }

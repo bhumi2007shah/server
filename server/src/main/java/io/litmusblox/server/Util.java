@@ -15,11 +15,8 @@ import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 
 import java.io.*;
@@ -42,9 +39,6 @@ import java.util.regex.Pattern;
 @PropertySource("classpath:appConfig.properties")
 @Log4j2
 public class Util {
-
-    /*@Value("${repoLocation}")
-    public static String environment;*/
 
     private static Pattern INDIAN_MOBILE_PATTERN = Pattern.compile(IConstant.INDIAN_MOBILE_PATTERN);
 
@@ -162,7 +156,7 @@ public class Util {
         return true;
     }
 
-    public static File storeFile(InputStream is, String filePath) throws IOException {
+    public static File storeFile(InputStream is, String filePath, String repoLocation) throws IOException {
         File targetFile =  null;
         try {
             //String staticRepoPath = null;
@@ -171,7 +165,7 @@ public class Util {
                 throw new WebException(IErrorMessages.INVALID_SETTINGS);
 
 
-            targetFile = new File(filePath + File.separator + filePath);
+            targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
             new WebException(e.getMessage());

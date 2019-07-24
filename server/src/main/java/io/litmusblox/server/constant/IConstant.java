@@ -80,7 +80,7 @@ public interface IConstant {
     }
 
     enum CandidateSource {
-        SingleCandidateUpload("Single Candidate Upload"), File("File Upload"), Plugin("Plugin Upload");
+        SingleCandidateUpload("Single"), File("File"), Plugin("Plugin");
         private String value;
 
         CandidateSource(String val) {

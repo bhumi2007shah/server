@@ -18,5 +18,5 @@ import java.util.List;
  */
 public interface IUploadDataProcessService {
 
-    void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed);
+    void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed, Long jobId, boolean ignoreMobile);
 }

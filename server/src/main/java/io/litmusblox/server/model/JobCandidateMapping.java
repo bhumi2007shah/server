@@ -77,4 +77,8 @@ public class JobCandidateMapping implements Serializable {
         this.createdOn = createdOn;
         this.createdBy = createdBy;
     }
+
+    public JobCandidateMapping() {
+        super();
+    }
 }

@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -27,7 +29,7 @@ public class Candidate implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -61,21 +63,27 @@ public class Candidate implements Serializable {
     }
 
     @Transient
+    @JsonProperty
     private String email;
 
     @Transient
+    @JsonProperty
     private String mobile;
 
     @Transient
+    @JsonProperty
     private String countryCode;
 
     @Transient
+    @JsonProperty
     private String uploadErrorMessage;
 
     @Transient
+    @JsonProperty
     private String candidateSource;
 
     @Transient
+    @JsonProperty
     private String telephone;
 
     public Candidate(@NotNull String firstName, @NotNull String lastName, @NotNull Date createdOn, @NotNull User createdBy) {

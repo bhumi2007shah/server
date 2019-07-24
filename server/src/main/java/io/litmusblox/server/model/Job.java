@@ -105,6 +105,7 @@ public class Job implements Serializable {
     private JobDetail jobDetail;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY,mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobHiringTeam> jobHiringTeamList=new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")

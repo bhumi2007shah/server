@@ -58,7 +58,7 @@ public interface IJobControllerMappingService {
 
 
     /**
-     * Rest api to capture candidate consent from chatbot
+     * Service method to capture candidate consent from chatbot
      * @param uuid the uuid corresponding to a unique jcm record
      * @param interest boolean to capture candidate consent
      * @throws Exception
@@ -66,7 +66,7 @@ public interface IJobControllerMappingService {
     void captureCandidateInterest(UUID uuid, boolean interest) throws Exception;
 
     /**
-     * Rest api to capture candidate response to screening questions from chatbot
+     * Service method to capture candidate response to screening questions from chatbot
      * @param uuid the uuid corresponding to a unique jcm record
      * @param candidateResponse the response provided by a candidate against each screening question
      * @throws Exception
@@ -74,7 +74,7 @@ public interface IJobControllerMappingService {
     void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception;
 
     /**
-     * Rest api to get all screening questions for the job
+     * Service method to get all screening questions for the job
      * @param uuid the uuid corresponding to a unique jcm record
      * @return the list of job screening questions
      * @throws Exception

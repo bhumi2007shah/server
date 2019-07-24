@@ -40,7 +40,7 @@ public class Candidate implements Serializable {
 
     @NotNull
     @Column(name = "LAST_NAME")
-    private String lastName;
+    private String lastName = "-";
 
     @NotNull
     @Column(name = "CREATED_ON")

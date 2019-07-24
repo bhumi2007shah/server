@@ -203,7 +203,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 file.mkdirs();
             }
 
-            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + userId + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
             return filePath;
         }
         catch (Exception e) {
@@ -255,7 +255,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     }
 
     /**
-     * Rest api to capture candidate consent from chatbot
+     * Service method to capture candidate consent from chatbot
      *
      * @param uuid     the uuid corresponding to a unique jcm record
      * @param interest boolean to capture candidate consent
@@ -272,7 +272,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     }
 
     /**
-     * Rest api to capture candidate response to screening questions from chatbot
+     * Service method to capture candidate response to screening questions from chatbot
      *
      * @param uuid              the uuid corresponding to a unique jcm record
      * @param candidateResponse the response provided by a candidate against each screening question
@@ -295,7 +295,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     }
 
     /**
-     * Rest api to get all screening questions for the job
+     * Service method to get all screening questions for the job
      *
      * @param uuid the uuid corresponding to a unique jcm record
      * @return the list of job screening questions
@@ -305,7 +305,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
     }

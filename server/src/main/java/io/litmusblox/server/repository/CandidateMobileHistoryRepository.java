@@ -15,4 +15,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface CandidateMobileHistoryRepository extends JpaRepository<CandidateMobileHistory, Long> {
+    CandidateMobileHistory findByMobileAndCountryCode(String mobile, String countryCode);
 }

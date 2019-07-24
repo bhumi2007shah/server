@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,24 +92,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId) throws Exception {
-        //TODO: Add relevant code here
-        //for each candidate, check if it is new or old
-        //for the combination of jobid + candidateId, check that a record doesnot exist in jcm
-        //else, add a jcm row with stage = Source
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
-        User u = userRepository.getOne(1L);
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-        int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,u);
+        int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,loggedInUser);
 
         if (candidateProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
-            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + u.getId() + " : not processing records");
+            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not processing records");
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         try {
-            processCandidateData(candidates, uploadResponseBean, u, jobId, candidateProcessed);
+            processCandidateData(candidates, uploadResponseBean, loggedInUser, jobId, candidateProcessed);
         } catch (Exception ex) {
             log.error("Error while processing candidates uploaded :: " + ex.getMessage());
             uploadResponseBean.setStatus(IConstant.UPLOAD_STATUS.Failure.name());
@@ -144,25 +141,25 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //validate that the file has an extension that is supported by the application
         Util.validateUploadFileType(multipartFile.getOriginalFilename());
 
-        User u = userRepository.getOne(1L);
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
 
-        int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, u);
+        int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);
 
         if (candidatesProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
-            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + u.getId() + " : not saving file " + multipartFile);
+            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not saving file " + multipartFile);
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         //Save file
-        String fileName = storeFile(multipartFile, u.getId(), environment.getProperty(IConstant.REPO_LOCATION));
-        log.info("User " + u.getDisplayName() + " uploaded " + fileName);
-        List<Candidate> candidateList = processUploadedFile(fileName, uploadResponseBean, u, fileFormat, environment.getProperty(IConstant.REPO_LOCATION));
+        String fileName = storeFile(multipartFile, loggedInUser.getId(), environment.getProperty(IConstant.REPO_LOCATION));
+        log.info("User " + loggedInUser.getDisplayName() + " uploaded " + fileName);
+        List<Candidate> candidateList = processUploadedFile(fileName, uploadResponseBean, loggedInUser, fileFormat, environment.getProperty(IConstant.REPO_LOCATION));
 
         try {
-            processCandidateData(candidateList, uploadResponseBean, u, jobId, candidatesProcessed);
+            processCandidateData(candidateList, uploadResponseBean, loggedInUser, jobId, candidatesProcessed);
 
         } catch (Exception ex) {
             log.error("Error while processing file " + fileName + " :: " + ex.getMessage());
@@ -236,9 +233,6 @@ public class JobControllerMappingService implements IJobControllerMappingService
                         break;
                 }
                 break;
-            //TODO: add handling for files of xml type
-            //case "xml":
-            //    break;
             default:
                 log.error(IErrorMessages.UNSUPPORTED_FILE_TYPE  + " - "+ fileExtension);
                 throw new WebException(IErrorMessages.UNSUPPORTED_FILE_TYPE + " - " + fileExtension, HttpStatus.UNPROCESSABLE_ENTITY);

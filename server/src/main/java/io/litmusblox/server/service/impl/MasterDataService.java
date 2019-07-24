@@ -5,6 +5,7 @@
 package io.litmusblox.server.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
@@ -77,6 +78,11 @@ public class MasterDataService implements IMasterDataService {
         //For every master data record from database, populate the corresponding map with key-value pairs
         masterDataFromDb.forEach(data -> {
             ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
+
+            //special handling for Source stage
+            if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
+                MasterDataBean.getInstance().setSourceStage(data);
+            }
         });
 
         MasterDataBean.getInstance().setLoaded(true);

@@ -35,7 +35,7 @@ public class CandidateMobileHistory implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="CANDIDATE_ID")
-    private Candidate candidateId;
+    private Candidate candidate;
 
     @NotNull
     @Column(name = "MOBILE")
@@ -56,7 +56,7 @@ public class CandidateMobileHistory implements Serializable {
     private User createdBy;
 
     public CandidateMobileHistory(@NotNull Candidate candidateId, @NotNull String mobile, @NotNull String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
-        this.candidateId = candidateId;
+        this.candidate = candidateId;
         this.mobile = mobile;
         this.countryCode = countryCode;
         this.createdOn = createdOn;

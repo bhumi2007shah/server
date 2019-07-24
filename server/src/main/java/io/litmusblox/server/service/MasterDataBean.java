@@ -3,6 +3,7 @@ package io.litmusblox.server.service;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.model.Country;
+import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
@@ -51,4 +52,7 @@ public class MasterDataBean {
     private Map<Long, String> expertise = new HashMap<>();
     private Map<Long, String> education = new HashMap<>();
     private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
+
+    //added the master data for 'Source' status as that will be used for all candidates uploaded
+    private MasterData sourceStage = null;
 }

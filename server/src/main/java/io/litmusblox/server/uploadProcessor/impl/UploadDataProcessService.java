@@ -8,8 +8,14 @@ import io.litmusblox.server.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
-import io.litmusblox.server.model.*;
-import io.litmusblox.server.repository.*;
+import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.JobCandidateMapping;
+import io.litmusblox.server.model.User;
+import io.litmusblox.server.repository.CandidateRepository;
+import io.litmusblox.server.repository.JobCandidateMappingRepository;
+import io.litmusblox.server.repository.JobRepository;
+import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
@@ -18,13 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author : Sumit
@@ -42,19 +50,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
     Environment environment;
 
     @Resource
-    UserRepository userRepository;
-
-    @Resource
-    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
-
-    @Resource
-    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
-
-    @Resource
     JobRepository jobRepository;
-
-    @Resource
-    MasterDataRepository masterDataRepository;
 
     @Resource
     CandidateRepository candidateRepository;
@@ -62,7 +58,10 @@ public class UploadDataProcessService implements IUploadDataProcessService {
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
-    @Override
+    @Autowired
+    ICandidateService candidateService;
+
+    @Transactional(propagation = Propagation.REQUIRED)
     public void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed, Long jobId, boolean ignoreMobile){
         log.info("inside processData");
 
@@ -70,26 +69,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         int successCount = 0;
         int failureCount = uploadResponseBean.getFailureCount();
 
-        //TODO: replace this code to use the logged in user
-        User u = userRepository.getOne(1L);
-        Map<String, CandidateEmailHistory> candidateEmailHistoryMap=new HashMap<>();
-        Map<String, CandidateMobileHistory> candidateMobileHistoryMap=new HashMap<>();
-
-        candidateEmailHistoryRepository.findAll().forEach(candidateEmailHistory ->
-                candidateEmailHistoryMap.put(candidateEmailHistory.getEmail(),candidateEmailHistory));
-        candidateMobileHistoryRepository.findAll().forEach(candidateMobileHistory ->
-                candidateMobileHistoryMap.put(candidateMobileHistory.getMobile(),candidateMobileHistory));
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Job job=jobRepository.getOne(jobId);
-        MasterData masterData =null;
-
-        for (Map.Entry<Long,String> masterEntry: MasterDataBean.getInstance().getStage().entrySet()) {
-            if(masterEntry.getValue().equals(IConstant.STAGE.Source.toString())){
-                masterData=masterDataRepository.getOne(masterEntry.getKey());
-                break;
-            }
-        }
-
 
         for (Candidate candidate:candidateList) {
 
@@ -147,7 +129,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());
 
                 if(Util.isNotNull(candidate.getMobile())) {
-                    if (!Util.validateMobile(candidate.getMobile(), u.getCountryId().getCountryCode())) {
+                    if (!Util.validateMobile(candidate.getMobile(), loggedInUser.getCountryId().getCountryCode())) {
                         String cleanMobile = candidate.getMobile().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                         log.error("Special characters found, cleaning mobile number \"" + candidate.getMobile() + "\" to " + cleanMobile);
                         if (!Util.validateMobile(cleanMobile, candidate.getCountryCode()))
@@ -169,45 +151,34 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 }
                 log.info(msg);
 
-                if(null==candidate.getCountryCode())
-                    candidate.setCountryCode(u.getCountryId().getCountryCode());
-
-                Candidate candidate1=null;
-                JobCandidateMapping jobCandidateMapping =null;
-                if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
-
-                    //Create Candidate, CandidateEmailHistory, CandidateMobileHistory
-                    candidate1 = candidateRepository.save(new Candidate(candidate.getFirstName(),candidate.getLastName(), new Date(),u));
-                    candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1, candidate.getEmail(),new Date(),u));
-                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
-
-                }else if(null!=candidateEmailHistoryMap.get(candidate.getEmail()) && null==candidateMobileHistoryMap.get(candidate.getMobile())){
-
-                    //only create CandidateMobileHistory because CandidateEmailHistory already present
-                    CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryMap.get(candidate.getEmail());
-                    candidate1 = candidateEmailHistory.getCandidateId();
-                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate1,candidate.getMobile(),candidate.getCountryCode(),new Date(),u));
-
-                }else if(null==candidateEmailHistoryMap.get(candidate.getEmail()) && null!=candidateMobileHistoryMap.get(candidate.getMobile())){
-
-                    //only create CandidateEmailHistory because CandidateMobileHistory already present
-                    CandidateMobileHistory candidateMobileHistory=candidateMobileHistoryMap.get(candidate.getMobile());
-                    candidate1 = candidateMobileHistory.getCandidateId();
-                    candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate1,candidate.getEmail(),new Date(),u));
-                }else if(null!=candidateEmailHistoryMap.get(candidate.getEmail()) && null!=candidateMobileHistoryMap.get(candidate.getMobile())){
-
-                    CandidateMobileHistory candidateMobileHistory=candidateMobileHistoryMap.get(candidate.getMobile());
-                    jobCandidateMapping = jobCandidateMappingRepository.findByJobAndCandidate(job,candidateMobileHistory.getCandidateId());
-
+                //create a candidate if no history found for email and mobile
+                long candidateId;
+                Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getMobile(),candidate.getEmail(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
+                Candidate candidateObjToUse = existingCandidate;
+                if(null == existingCandidate) {
+                    candidate.setCreatedOn(new Date());
+                    candidate.setCreatedBy(loggedInUser);
+                    if(Util.isNull(candidate.getCountryCode()))
+                        candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
+                    candidateObjToUse = candidateRepository.save(new Candidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), new Date(), loggedInUser));
+                    msg.append(" New");
+                }
+                else {
+                    log.info("Found existing candidate: " + existingCandidate.getId());
                 }
 
+                log.info(msg);
+
+                //find duplicate candidate for job
+                JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobAndCandidate(job, candidateObjToUse);
+
                 if(null!=jobCandidateMapping){
-                    //log.error(IErrorMessages.DUPLICATE_CANDIDATE+ " : " + candidate1.getId() + candidate.getEmail() + " : " + candidate.getMobile());
+                    log.error(IErrorMessages.DUPLICATE_CANDIDATE + " : " + candidateObjToUse.getId() + candidate.getEmail() + " : " + candidate.getMobile());
                     candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
                     throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
                 }else{
                     //Create new entry for JobCandidateMapping
-                    jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidate1,masterData, candidate.getCandidateSource(),new Date(),u));
+                    jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
                 }
 
                 successCount++;
@@ -217,6 +188,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
             } catch(Exception e) {
+                e.printStackTrace();
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
                 candidate.setUploadErrorMessage(IErrorMessages.INTERNAL_SERVER_ERROR);
                 uploadResponseBean.getFailedCandidates().add(candidate);

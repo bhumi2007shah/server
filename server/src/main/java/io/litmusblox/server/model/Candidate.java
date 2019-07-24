@@ -5,7 +5,9 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -20,6 +22,7 @@ import java.util.Date;
  * Project Name : server
  */
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE")
 public class Candidate implements Serializable {
@@ -51,7 +54,7 @@ public class Candidate implements Serializable {
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="UPDATED_BY")
@@ -79,27 +82,18 @@ public class Candidate implements Serializable {
 
     @Transient
     @JsonProperty
-    private String candidateSource;
+    private String candidateSource = IConstant.CandidateSource.SingleCandidateUpload.getValue();
 
     @Transient
     @JsonProperty
     private String telephone;
 
-    public Candidate(@NotNull String firstName, @NotNull String lastName, @NotNull Date createdOn, @NotNull User createdBy) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.createdOn = createdOn;
-        this.createdBy = createdBy;
-    }
-
-    public Candidate(@NotNull String firstName, @NotNull String lastName, String email, String mobile) {
+    public Candidate(@NotNull String firstName, @NotNull String lastName, String email, String mobile, String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.mobile = mobile;
-    }
-
-    public Candidate() {
-        super();
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
     }
 }

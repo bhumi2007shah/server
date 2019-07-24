@@ -8,6 +8,7 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.UploadResponseBean;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
@@ -24,6 +26,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -60,12 +63,16 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
                 throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
             }
 
+            User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             for (CSVRecord record : parser.getRecords()) {
                 try {
                     Candidate candidate = new Candidate(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim(),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim(),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).trim(),
-                            record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).trim());
+                            record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).trim(),
+                            loggedInUser.getCountryId().getCountryCode(),
+                            new Date(),
+                            loggedInUser);
                     candidate.setCandidateSource(IConstant.CandidateSource.File.getValue());
                     candidateList.add(candidate);
                 } catch (Exception pe) {

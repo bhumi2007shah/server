@@ -38,4 +38,5 @@ public interface IErrorMessages {
     String MISSING_COLUMN_NAMES_FIRST_ROW = "First row in the file does not have correct column names";
     String DUPLICATE_CANDIDATE = "Candidate already exists ";
 
+    String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
 }

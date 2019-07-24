@@ -83,12 +83,13 @@ public class JobCandidateMapping implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date candidateInterestDate;
 
-    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy) {
+    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID jcmUuid) {
         this.job = job;
         this.candidate = candidate;
         this.stage = stage;
         this.candidateSource = candidateSource;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
+        this.jcmUuid = jcmUuid;
     }
 }

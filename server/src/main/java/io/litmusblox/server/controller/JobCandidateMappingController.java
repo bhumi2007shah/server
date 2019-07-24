@@ -26,7 +26,7 @@ import java.util.List;
  * Class Name : JobCandidateMappingController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/jcm")
 @Log4j2

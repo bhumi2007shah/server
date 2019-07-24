@@ -13,6 +13,7 @@ import io.litmusblox.server.repository.JobCandidateMappingRepository;
 import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +35,7 @@ import java.util.UUID;
  * Project Name : server
  */
 @Service
+@Log4j2
 public class JobControllerMappingService implements IJobControllerMappingService {
 
     @Resource
@@ -122,7 +124,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new Exception("No mapping found for uuid " + uuid);
 
         candidateResponse.forEach((key,value) -> {
-            candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value));
+            if (value.length() > 100) {
+                log.error("Length of user response is greater than 100 " + value);
+                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value.substring(0,100)));
+            }
+            else
+                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value));
         });
     }
 

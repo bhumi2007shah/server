@@ -31,7 +31,7 @@ import java.util.List;
  * Class Name : AuthController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

@@ -28,7 +28,7 @@ import java.util.*;
  * Class Name : NoAuthController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/noAuth")
 @Log4j2

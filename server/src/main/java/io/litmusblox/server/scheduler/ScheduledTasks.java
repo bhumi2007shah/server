@@ -8,8 +8,9 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.JobCapabilitiesRepository;
 import io.litmusblox.server.repository.JobKeySkillsRepository;
 import io.litmusblox.server.repository.JobRepository;
+import io.litmusblox.server.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,9 @@ import java.util.List;
 public class ScheduledTasks {
 
     @Resource
+    UserRepository userRepository;
+
+    @Resource
     JobRepository jobRepository;
 
     @Resource
@@ -40,7 +44,7 @@ public class ScheduledTasks {
     @Resource
     JobCapabilitiesRepository jobCapabilitiesRepository;
 
-    //@Scheduled(fixedRate = 3000, initialDelay = 5000)
+    @Scheduled(fixedRate = 3000, initialDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRED)
     public void performMlApiCall() {
         //log.info("ML Api call scheduled task trigerred");
@@ -52,7 +56,7 @@ public class ScheduledTasks {
             //TODO: Replace the whole of this piece with actual ML api call
 
 
-            User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User loggedInUser = (User)userRepository.getOne(2L);//SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             String[] capabilityName = {"Java", "Dot Net", "Testing"};
             MasterData importance = new MasterData();

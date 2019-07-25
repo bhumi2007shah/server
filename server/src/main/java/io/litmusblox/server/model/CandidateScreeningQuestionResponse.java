@@ -40,9 +40,13 @@ public class CandidateScreeningQuestionResponse {
     @Column(name = "RESPONSE")
     private String response;
 
-    public CandidateScreeningQuestionResponse(@NotNull Long jobCandidateMappingId, @NotNull Long jobScreeningQuestionId, @NotNull String response) {
+    @Column(name = "COMMENT")
+    private String comment;
+
+    public CandidateScreeningQuestionResponse(@NotNull Long jobCandidateMappingId, @NotNull Long jobScreeningQuestionId, @NotNull String response, String comment) {
         this.jobCandidateMappingId = jobCandidateMappingId;
         this.jobScreeningQuestionId = jobScreeningQuestionId;
         this.response = response;
+        this.comment = comment;
     }
 }

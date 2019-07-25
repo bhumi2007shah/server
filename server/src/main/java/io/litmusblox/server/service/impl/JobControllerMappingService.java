@@ -279,18 +279,21 @@ public class JobControllerMappingService implements IJobControllerMappingService
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception {
+    public void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         candidateResponse.forEach((key,value) -> {
-            if (value.length() > 100) {
-                log.error("Length of user response is greater than 100 " + value);
-                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value.substring(0,100)));
+            String[] valuesToSave = new String[value.size()];
+            for(int i=0;i<value.size();i++) {
+                valuesToSave[i] = value.get(i);
+                if(valuesToSave[i].length() > 100) {
+                    log.error("Length of user response is greater than 100 " + value);
+                    valuesToSave[i] = valuesToSave[i].substring(0,100);
+                }
             }
-            else
-                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value));
+            candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
         });
     }
 

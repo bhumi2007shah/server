@@ -71,7 +71,7 @@ public interface IJobControllerMappingService {
      * @param candidateResponse the response provided by a candidate against each screening question
      * @throws Exception
      */
-    void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception;
+    void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception;
 
     /**
      * Service method to get all screening questions for the job

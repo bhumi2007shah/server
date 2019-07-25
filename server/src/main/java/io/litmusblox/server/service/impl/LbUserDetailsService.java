@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service.impl;
 
+import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
 import io.litmusblox.server.repository.UserRepository;
@@ -93,9 +94,9 @@ public class LbUserDetailsService implements UserDetailsService {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (DisabledException e) {
-            throw new Exception("USER_DISABLED", e);
+            throw new WebException("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
+            throw new WebException("INVALID_CREDENTIALS", e);
         }
     }
 

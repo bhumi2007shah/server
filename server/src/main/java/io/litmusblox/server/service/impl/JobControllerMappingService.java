@@ -265,7 +265,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
@@ -282,7 +282,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         candidateResponse.forEach((key,value) -> {
             if (value.length() > 100) {

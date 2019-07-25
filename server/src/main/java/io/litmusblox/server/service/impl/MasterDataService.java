@@ -6,6 +6,7 @@ package io.litmusblox.server.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
@@ -16,6 +17,7 @@ import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -155,7 +157,7 @@ public class MasterDataService implements IMasterDataService {
                 userScreeningQuestionRepository.save(objToSave);
                 break;
             default:
-                throw new Exception("Unsupported action");
+                throw new WebException("Unsupported action", HttpStatus.BAD_REQUEST);
         }
     }
 

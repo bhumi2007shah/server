@@ -7,6 +7,7 @@ package io.litmusblox.server.service.impl;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
+import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
@@ -439,7 +440,7 @@ public class JobService implements IJobService {
 
         Job job = jobRepository.getOne(jobId);
         if(null == job) {
-            throw new Exception("Job with id " + jobId + "does not exist");
+            throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
         job.setDatePublished(new Date());
         job.setUpdatedOn(new Date());

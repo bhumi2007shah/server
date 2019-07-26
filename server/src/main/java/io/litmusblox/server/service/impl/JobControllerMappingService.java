@@ -9,7 +9,9 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
-import io.litmusblox.server.repository.*;
+import io.litmusblox.server.repository.CandidateScreeningQuestionResponseRepository;
+import io.litmusblox.server.repository.JobCandidateMappingRepository;
+import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
@@ -49,25 +51,7 @@ import java.util.*;
 public class JobControllerMappingService implements IJobControllerMappingService {
 
     @Resource
-    CandidateRepository candidateRepository;
-
-    @Resource
-    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
-
-    @Resource
-    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
-
-    @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
-
-    @Resource
-    UserRepository userRepository;
-
-    @Resource
-    MasterDataRepository masterDataRepository;
-
-    @Resource
-    JobRepository jobRepository;
 
     @Autowired
     IUploadDataProcessService iUploadDataProcessService;
@@ -283,6 +267,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        //delete existing response for chatbot for the jcm
+        candidateScreeningQuestionResponseRepository.deleteByJobCandidateMappingId(objFromDb.getId());
 
         candidateResponse.forEach((key,value) -> {
             String[] valuesToSave = new String[value.size()];

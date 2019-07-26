@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.CandidateScreeningQuestionResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Repository class for CandidateScreeningQuestionResponse
@@ -17,4 +18,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface CandidateScreeningQuestionResponseRepository extends JpaRepository<CandidateScreeningQuestionResponse,Long> {
+    @Transactional
+    void deleteByJobCandidateMappingId(Long id);
 }

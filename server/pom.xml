@@ -98,11 +98,13 @@
         </dependency>
 
 		<!-- For postgresql json datatype handling -->
+		<!--
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.5.0</version>
 		</dependency>
+		-->
 
 		<!-- for unit testing -->
 		<dependency>

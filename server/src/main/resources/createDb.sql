@@ -27,7 +27,7 @@ CREATE TABLE SCREENING_QUESTION(
    QUESTION VARCHAR (150) NOT NULL,
    QUESTION_TYPE INTEGER REFERENCES MASTER_DATA(ID) NOT NULL,
    OPTIONS VARCHAR(100)[],
-   MULTILEVELOPTIONS JSON
+   MULTILEVELOPTIONS VARCHAR(500)
 );
 
 ---------------------------------------------------------------------------------------------------------------------

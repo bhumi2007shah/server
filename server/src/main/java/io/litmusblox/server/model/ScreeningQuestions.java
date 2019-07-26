@@ -4,11 +4,8 @@
 
 package io.litmusblox.server.model;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -25,10 +22,6 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "SCREENING_QUESTION")
-@TypeDef(
-        name = "jsonb",
-        typeClass = JsonBinaryType.class
-)
 public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -51,7 +44,6 @@ public class ScreeningQuestions implements Serializable {
     @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
-    @Type(type = "jsonb")
-    @Column(name = "MULTILEVELOPTIONS",columnDefinition = "jsonb")
+    @Column(name = "MULTILEVELOPTIONS")
     private String multiLevelOptions;
 }

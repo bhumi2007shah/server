@@ -69,8 +69,8 @@ public class JobController {
                     put("UserClassFilter",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("UserClassFilter", Arrays.asList("company","countryId"));
+                    put("JobClassFilter",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }

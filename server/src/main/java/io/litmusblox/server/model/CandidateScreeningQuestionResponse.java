@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,6 +22,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Table(name = "CANDIDATE_SCREENING_QUESTION_RESPONSE")
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CandidateScreeningQuestionResponse {
 
     @Id

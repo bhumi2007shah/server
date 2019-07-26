@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -22,6 +23,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "JOB_CAPABILITIES")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class JobCapabilities implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

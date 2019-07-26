@@ -4,6 +4,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,6 +34,7 @@ import java.util.Set;
 @Entity
 @Table(name = "USERS")
 @JsonFilter("UserClassFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class User implements Serializable, UserDetails {
 
     private static final long serialVersionUID = 6868521896546285046L;

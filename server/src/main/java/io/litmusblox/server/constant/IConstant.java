@@ -78,7 +78,7 @@ public interface IConstant {
     }
 
     enum JobStatus {
-        DRAFT("Draft"), PUBLISHED("Published"), ARCHIVED("Archived");
+        DRAFT("Draft"), PUBLISHED("Live"), ARCHIVED("Archived");
         private String value;
 
         JobStatus(String val) {

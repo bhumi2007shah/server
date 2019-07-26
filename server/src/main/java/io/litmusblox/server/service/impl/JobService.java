@@ -174,7 +174,7 @@ public class JobService implements IJobService {
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
         else if(!job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
-            throw new WebException("Selected job is not published", HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();

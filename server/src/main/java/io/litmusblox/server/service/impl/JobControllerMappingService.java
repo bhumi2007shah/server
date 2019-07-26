@@ -11,6 +11,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.CandidateScreeningQuestionResponseRepository;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
+import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.JobScreeningQuestionsRepository;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
@@ -51,6 +52,9 @@ import java.util.*;
 public class JobControllerMappingService implements IJobControllerMappingService {
 
     @Resource
+    JobRepository jobRepository;
+
+    @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
     @Autowired
@@ -76,6 +80,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId) throws Exception {
+
+        //verify that the job is live before processing candidates
+        Job job = jobRepository.getOne(jobId);
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -120,6 +130,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
         if(!Arrays.asList(IConstant.UPLOAD_FORMATS_SUPPORTED.values()).contains(IConstant.UPLOAD_FORMATS_SUPPORTED.valueOf(fileFormat))) {
             log.error(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat);
             throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        //verify that the job is live before processing candidates
+        Job job = jobRepository.getOne(jobId);
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         //validate that the file has an extension that is supported by the application

@@ -39,4 +39,5 @@ public interface IErrorMessages {
     String DUPLICATE_CANDIDATE = "Candidate already exists ";
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
+    String JOB_NOT_LIVE = "Selected job is not live";
 }

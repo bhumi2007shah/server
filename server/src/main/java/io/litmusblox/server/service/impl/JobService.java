@@ -142,12 +142,12 @@ public class JobService implements IJobService {
         User loggedInUser =  (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
         if(archived) {
-            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNull(loggedInUser));
+            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNullOrderByCreatedOnDesc(loggedInUser));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
             responseBean.setOpenJobs((jobRepository.countByCreatedByAndDateArchivedIsNull(loggedInUser)).intValue());
         }
         else {
-            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNull(loggedInUser));
+            responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNullOrderByCreatedOnDesc(loggedInUser));
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }

@@ -55,7 +55,8 @@ public class MasterDataController {
      */
     @PostMapping(value="/fetch/items")
     MasterDataResponse fetchForItems(@RequestBody List<String> requestItems) throws Exception {
-        return masterDataService.fetchForItems(requestItems);
+        MasterDataResponse response = masterDataService.fetchForItems(requestItems);
+        return response;
     }
 
     /**

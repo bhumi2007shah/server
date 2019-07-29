@@ -110,6 +110,9 @@ VALUES
  ( 'questionType','Checkbox'),
  ( 'questionType','Radio button'),
  ( 'questionType','InputBox'),
+ ( 'questionType','Location'),
+ ( 'questionType','Slider'),
+ ( 'questionType','Calendar'),
 
  ( 'addressType','Job Location'),
  ( 'addressType','Interview Location'),
@@ -142,6 +145,16 @@ VALUES
  ( 'experienceRange', '13 - 15 yrs'),
  ( 'experienceRange', '17 - 20 yrs'),
  ( 'experienceRange', '20+ yrs');
+
+
+-- max limits for various parameters
+insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
+('maxScreeningQuestionsLimit',10),
+('dailyCandidateUploadPerUserLimit',500),
+('dailyCandidateInviteLimit',500),
+('candidatesPerFileLimit',100),
+('sendEmail',1),
+('sendSms',1);
 
 
  -- key skill master data

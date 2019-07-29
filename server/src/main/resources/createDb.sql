@@ -7,6 +7,13 @@ CREATE TABLE MASTER_DATA(
 
 ----------------------------------------------------
 
+CREATE TABLE CONFIGURATION_SETTINGS(
+  ID serial PRIMARY KEY NOT NULL,
+   CONFIG_NAME VARCHAR (50) NOT NULL UNIQUE,
+   CONFIG_VALUE SMALLINT NOT NULL
+);
+
+----------------------------------------------------
 CREATE TABLE SKILLS_MASTER(
   ID serial PRIMARY KEY NOT NULL,
    SKILL_NAME VARCHAR (100) NOT NULL

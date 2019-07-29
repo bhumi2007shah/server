@@ -2,7 +2,7 @@
  * Copyright © Litmusblox 2019. All rights reserved.
  */
 
-package io.litmusblox.server;
+package io.litmusblox.server.utils;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;

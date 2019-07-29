@@ -1,0 +1,45 @@
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
+
+package io.litmusblox.server.model;
+
+import lombok.Data;
+
+import javax.persistence.*;
+
+/**
+ * @author : Sumit
+ * Date : 24/7/19
+ * Time : 4:43 PM
+ * Class Name : CandidateEducationDetails
+ * Project Name : server
+ */
+@Data
+@Entity
+@Table(name = "CANDIDATE_EDUCATION_DETAILS")
+public class CandidateEducationDetails {
+
+    private static final long serialVersionUID = 6868521896546285046L;
+
+    @Id
+    @Column(name = "ID")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "CANDIDATE_ID")
+    private Long candidateId;
+
+    @Column(name = "DEGREE")
+    private String degree;
+
+    @Column(name = "SPECIALIZATION")
+    private String specialization;
+
+    @Column(name = "INSTITUTE_NAME")
+    private String instituteName;
+
+    @Column(name = "YEAR_OF_PASSING")
+    private String yearOfPassing;
+
+}

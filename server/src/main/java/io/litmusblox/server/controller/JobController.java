@@ -4,7 +4,7 @@
 package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.litmusblox.server.Util;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;

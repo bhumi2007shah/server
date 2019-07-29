@@ -3,7 +3,7 @@
  */
 
 package io.litmusblox.server.model;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -87,6 +89,37 @@ public class Candidate implements Serializable {
     @Transient
     @JsonProperty
     private String telephone;
+
+    @Transient
+    @JsonProperty
+    private String candidateName;
+
+    //@PrimaryKeyJoinColumn
+   // @OneToOne(fetch = FetchType.LAZY/*, mappedBy = "candidateId"*/)
+    @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "candidateId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+    private CandidateDetails candidateDetails;
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateEducationDetails> candidateEducationDetails = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateCompanyDetails> candidateCompanyDetails = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateProjectDetails> candidateProjectDetails = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateOnlineProfile> candidateOnlineProfiles = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateWorkAuthorization> candidateWorkAuthorizations = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateLanguageProficiency> candidateLanguageProficiencies = new ArrayList<>(0);
+
+    @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    private List<CandidateSkillDetails> candidateSkillDetails = new ArrayList<>(0);
 
     public Candidate(@NotNull String firstName, @NotNull String lastName, String email, String mobile, String countryCode, @NotNull Date createdOn, @NotNull User createdBy) {
         this.firstName = firstName;

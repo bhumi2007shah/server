@@ -80,7 +80,7 @@ public class JobCandidateMappingController {
      * @throws Exception
      */
     @PostMapping(value = "/addCandidate/plugin")
-    UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception {
+    UploadResponseBean uploadCandidateFromPlugin(@RequestBody Candidate candidate, @RequestParam("jobId") Long jobId) throws Exception {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadCandidateFromPlugin(candidate, jobId);

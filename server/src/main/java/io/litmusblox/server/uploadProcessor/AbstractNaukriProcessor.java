@@ -4,7 +4,7 @@
 
 package io.litmusblox.server.uploadProcessor;
 
-import io.litmusblox.server.Util;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.CandidateDetails;

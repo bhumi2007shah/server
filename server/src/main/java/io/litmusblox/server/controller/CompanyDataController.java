@@ -4,7 +4,7 @@
 
 package io.litmusblox.server.controller;
 
-import io.litmusblox.server.Util;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

@@ -4,9 +4,9 @@
 
 package io.litmusblox.server.controller;
 
-import io.litmusblox.server.Util;
 import io.litmusblox.server.model.JobScreeningQuestions;
 import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

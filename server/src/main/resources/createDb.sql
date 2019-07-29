@@ -299,6 +299,7 @@ CREATE TABLE CANDIDATE_EMAIL_HISTORY(
 
 
 CREATE TABLE CANDIDATE_DETAILS(
+  ID serial PRIMARY KEY NOT NULL,
    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL, 
    DATE_OF_BIRTH DATE,
    GENDER CHAR (1),
@@ -320,8 +321,7 @@ CREATE TABLE CANDIDATE_DETAILS(
    OTHER_CERTIFICATES VARCHAR (50), 
    CV_FILE_TYPE VARCHAR (10),
    LAST_ACTIVE DATE,
-   CANDIDATE_TYPE VARCHAR (25),
-   PRIMARY KEY (CANDIDATE_ID)
+   CANDIDATE_TYPE VARCHAR (25)
 );
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -349,3 +349,80 @@ CREATE TABLE CANDIDATE_SCREENING_QUESTION_RESPONSE(
   JOB_SCREENING_QUESTION_ID INTEGER REFERENCES JOB_SCREENING_QUESTIONS(ID) NOT NULL,
   RESPONSE VARCHAR(100) NOT NULL
 );
+
+------------------------------------------------------------------------------------------------------------------------------
+
+--Add create db script for plugin
+CREATE TABLE CANDIDATE_EDUCATION_DETAILS (
+	 ID serial PRIMARY KEY NOT NULL,
+	  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+	  DEGREE VARCHAR(50),
+	  SPECIALIZATION VARCHAR(50),
+	  INSTITUTE_NAME VARCHAR(50),
+	  YEAR_OF_PASSING VARCHAR(4)
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_COMPANY_DETAILS (
+  ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  COMPANY_NAME VARCHAR(50),
+  DESIGNATION VARCHAR(50),
+  SALARY VARCHAR(20),
+  LOCATION VARCHAR(100),
+  NOTICE_PERIOD VARCHAR(15),
+  START_DATE DATE,
+  END_DATE DATE
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_PROJECT_DETAILS (
+  ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  COMPANY_NAME VARCHAR(50),
+  FROM_DATE DATE,
+  TO_DATE DATE,
+  CLIENT_NAME VARCHAR(50),
+  ROLE VARCHAR(40),
+  ROLE_DESCRIPTION VARCHAR(255),
+  SKILLS_USED VARCHAR(255),
+  EMPLOYMENT_STATUS VARCHAR(10)
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_ONLINE_PROFILE (
+  ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  PROFILE_TYPE VARCHAR(20),
+  URL VARCHAR(255)
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_WORK_AUTHORIZATION (
+  ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  COUNTRY_NAME VARCHAR(60),
+  AUTHORIZED_TO_WORK BOOLEAN
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_LANGUAGE_PROFICIENCY (
+ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  LANGUAGE VARCHAR(15),
+  PROFICIENCY VARCHAR(50)
+  );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_SKILL_DETAILS (
+ ID serial PRIMARY KEY NOT NULL,
+  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+  SKILL VARCHAR(50),
+  LAST_USED DATE
+  );

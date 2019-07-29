@@ -13,10 +13,9 @@ package io.litmusblox.server.constant;
  */
 public interface IConstant {
 
-
-    // Regex
-    String REGEX_FOR_JOB_TITLE = "^[\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
-    String REGEX_FOR_COMPANY_JOB_ID = "^[a-zA-Z0-9]|$+$";
+     // Regex
+     String REGEX_FOR_JOB_TITLE ="^[\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+     String REGEX_FOR_COMPANY_JOB_ID = "^[a-zA-Z0-9]*$";
 
     String INDIA_CODE = "+91";
     String INDIAN_MOBILE_PATTERN = "(0/91)?[6-9][0-9]{9}";
@@ -37,11 +36,11 @@ public interface IConstant {
     Integer CANDIDATE_NAME_MAX_LENGTH = 45;
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 
-    String MAX_CANDIDATES_PER_FILE = "maxCandidatesPerFile";
-    String MAX_CANDIDATES_PER_USER_PER_DAY = "maxCandidatesPerUserPerDay";
-    String REPO_LOCATION = "repoLocation";
-    String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
-    String STR_INDIA = "India";
+     String MAX_CANDIDATES_PER_FILE = "maxCandidatesPerFile";
+     String MAX_CANDIDATES_PER_USER_PER_DAY = "maxCandidatesPerUserPerDay";
+     String REPO_LOCATION = "repoLocation";
+     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
+     String STR_INDIA = "India";
 
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer";
@@ -119,41 +118,44 @@ public interface IConstant {
         FirstName("First Name"), LastName("Last Name"), Email("Email"), Mobile("Mobile");
         private String value;
 
-        LITMUSBLOX_FILE_COLUMNS(String val) {
-            this.value = val;
-        }
+        LITMUSBLOX_FILE_COLUMNS(String val) { this.value = val; }
 
-        public String getValue() {
-            return this.value;
-        }
+        public String getValue() { return this.value; }
     }
 
     enum NAUKRI_FILE_COLUMNS {
         SerialNumber("Serial Number"), CandidateName("Name of the Candidate"), ResumeId("Resume ID"), PostalAddress("Postal Address"), Telephone("Telephone No."), Mobile("Mobile No."), DOB("Date of Birth"), Email("Email"), WorkExperience("Work Experience"), ResumeTitle("Resume Title"), CurrentLocation("Current Location"), PreferredLocation("Preferred Location"), CurrentEmployer("Current Employer"), CurrentDesignation("Current Designation"), AnnualSalary("Annual Salary"), UGCourse("U.G. Course"), PGCourse("P. G. Course"), PPGCourse("P.P.G. Course"), LastActive("Last Active Date");
         private String value;
 
-        NAUKRI_FILE_COLUMNS(String val) {
-            this.value = val;
-        }
+        NAUKRI_FILE_COLUMNS(String val) { this.value = val; }
 
-        public String getValue() {
-            return this.value;
-        }
+        public String getValue() { return this.value; }
     }
 
     enum NAUKRI_XLS_FILE_COLUMNS {
         SerialNumber("Serial Number"), CandidateName("Name of the Candidate"), ResumeId("Resume ID"), PostalAddress("Postal Address"), Telephone("Telephone No."), Mobile("Mobile No."), DOB("Date of Birth"), Email("Email"), WorkExperience("Work Experience"), ResumeTitle("Resume Title"), CurrentLocation("Current Location"), PreferredLocation("Preferred Location"), CurrentEmployer("Current Employer"), CurrentDesignation("Current Designation"), AnnualSalary("Annual Salary"), UGCourse("U.G. Course"), PGCourse("P. G. Course"), PPGCourse("Post P. G. Course"), LastActive("Last Active Date");
         private String value;
 
-        NAUKRI_XLS_FILE_COLUMNS(String val) {
+        NAUKRI_XLS_FILE_COLUMNS(String val) { this.value = val; }
+
+        public String getValue() { return this.value; }
+    }
+
+    String[] supportedExtensions = new String[] {"xls", "xlsx", "xml", "csv"};
+
+
+    enum MAX_FIELD_LENGTHS {
+        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), WORK_SUMMARY(255);
+
+        private int value;
+
+        MAX_FIELD_LENGTHS(int val) {
             this.value = val;
         }
 
-        public String getValue() {
+        public int getValue() {
             return this.value;
         }
     }
-
-    String[] supportedExtensions = new String[]{"xls", "xlsx", "xml", "csv"};
 
 }

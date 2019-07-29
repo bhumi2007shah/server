@@ -37,6 +37,7 @@ public interface IErrorMessages {
     String INVALID_SETTINGS = "Invalid System Settings";
     String MISSING_COLUMN_NAMES_FIRST_ROW = "First row in the file does not have correct column names";
     String DUPLICATE_CANDIDATE = "Candidate already exists ";
+    String INVALID_REQUEST_FROM_PLUGIN = "Invalid request object from plugin, missing Candidate info";
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
 }

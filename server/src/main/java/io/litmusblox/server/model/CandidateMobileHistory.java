@@ -62,4 +62,10 @@ public class CandidateMobileHistory implements Serializable {
         this.createdOn = createdOn;
         this.createdBy = createdBy;
     }
+
+    public CandidateMobileHistory(Long id, @NotNull String mobile, @NotNull String countryCode) {
+        this.id = id;
+        this.mobile = mobile;
+        this.countryCode = countryCode;
+    }
 }

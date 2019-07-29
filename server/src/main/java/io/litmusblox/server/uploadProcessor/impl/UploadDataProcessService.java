@@ -4,7 +4,7 @@
 
 package io.litmusblox.server.uploadProcessor.impl;
 
-import io.litmusblox.server.Util;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;

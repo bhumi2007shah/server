@@ -4,16 +4,13 @@
 
 package io.litmusblox.server.service.impl;
 
-import io.litmusblox.server.Util;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.model.*;
+import io.litmusblox.server.repository.*;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.constant.IErrorMessages;
-import io.litmusblox.server.model.Candidate;
-import io.litmusblox.server.model.CandidateEmailHistory;
-import io.litmusblox.server.model.CandidateMobileHistory;
-import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.CandidateEmailHistoryRepository;
-import io.litmusblox.server.repository.CandidateMobileHistoryRepository;
-import io.litmusblox.server.repository.CandidateRepository;
 import io.litmusblox.server.service.ICandidateService;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -21,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Service class for Candidate related operations
@@ -31,6 +31,7 @@ import java.util.Date;
  * Class Name : CandidateService
  * Project Name : server
  */
+@Log4j2
 @Service
 public class CandidateService implements ICandidateService {
 
@@ -42,6 +43,30 @@ public class CandidateService implements ICandidateService {
 
     @Resource
     CandidateRepository candidateRepository;
+
+    @Resource
+    CandidateDetailsRepository candidateDetailsRepository;
+
+    @Resource
+    CandidateEducationDetailsRepository candidateEducationDetailsRepository;
+
+    @Resource
+    CandidateProjectDetailsRepository candidateProjectDetailsRepository;
+
+    @Resource
+    CandidateOnlineProfilesRepository candidateOnlineProfilesRepository;
+
+    @Resource
+    CandidateLanguageProficiencyRepository candidateLanguageProficiencyRepository;
+
+    @Resource
+    CandidateWorkAuthorizationRepository candidateWorkAuthorizationRepository;
+
+    @Resource
+    CandidateSkillDetailsRepository candidateSkillDetailsRepository;
+
+    @Resource
+    CandidateCompanyDetailsRepository candidateCompanyDetailsRepository;
 
     /**
      * Method to find a candidate using email or mobile number + country code
@@ -111,4 +136,119 @@ public class CandidateService implements ICandidateService {
 
         return candidate;
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public CandidateDetails saveUpdateCandidateDetails(CandidateDetails candidateDetails, Candidate candidate){
+        //delete from CandidateDetails
+        candidateDetailsRepository.deleteByCandidateId(candidate);
+
+        if(!Util.isNull(candidateDetails.getCurrentAddress()) && candidateDetails.getCurrentAddress().length() > IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue()) {
+            candidateDetails.setCurrentAddress(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.ADDRESS.name(), IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue(), candidateDetails.getCurrentAddress()));
+        }
+        if(!Util.isNull(candidateDetails.getKeySkills()) && candidateDetails.getKeySkills().length() > IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.getValue()) {
+            candidateDetails.setKeySkills(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.name(), IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.getValue(), candidateDetails.getKeySkills()));
+        }
+        if(!Util.isNull(candidateDetails.getWorkSummary()) && candidateDetails.getWorkSummary().length() > IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue()) {
+            candidateDetails.setWorkSummary(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.name(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue(), candidateDetails.getWorkSummary()));
+        }
+        candidateDetails.setCandidateId(candidate);
+        candidateDetailsRepository.save(candidateDetails);
+        return candidateDetails;
+    }
+
+    @Override
+    @Transactional
+    public void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Long candidateId) throws Exception {
+        //delete existing records
+        candidateEducationDetailsRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateEducationDetails.forEach(obj -> {
+            //check if institute name is more than 75 characters
+            if (!Util.isNull(obj.getInstituteName()) && obj.getInstituteName().length() > IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue()){
+                obj.setInstituteName(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.name(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue(), obj.getInstituteName()));
+            }
+            obj.setCandidateId(candidateId);
+            candidateEducationDetailsRepository.save(obj);});
+    }
+
+    @Transactional
+    @Override
+    public void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetails, Long candidateId) throws Exception {
+        //delete existing records
+        candidateProjectDetailsRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateProjectDetails.forEach(obj -> {obj.setCandidateId(candidateId);candidateProjectDetailsRepository.save(obj);});
+    }
+
+    @Transactional
+    @Override
+    public void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfiles, Long candidateId) throws Exception {
+        //delete existing records
+        candidateOnlineProfilesRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateOnlineProfiles.forEach(obj -> {
+            if(!Util.isNull(obj.getUrl()) && obj.getUrl().length() > IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue()) {
+                obj.setUrl(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.name(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue(), obj.getUrl()));
+            }
+            obj.setCandidateId(candidateId);candidateOnlineProfilesRepository.save(obj);});
+    }
+
+    @Transactional
+    @Override
+    public void saveUpdateCandidateLanguageProficiency(List<CandidateLanguageProficiency> candidateLanguageProficiencies, Long candidateId) throws Exception {
+        //delete existing records
+        candidateLanguageProficiencyRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateLanguageProficiencies.forEach(obj -> {obj.setCandidateId(candidateId);candidateLanguageProficiencyRepository.save(obj);});
+    }
+
+    @Transactional
+    public void saveUpdateCandidateWorkAuthorization(List<CandidateWorkAuthorization> candidateWorkAuthorizations, Long candidateId) throws Exception {
+        //delete existing records
+        candidateWorkAuthorizationRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateWorkAuthorizations.forEach(obj -> {obj.setCandidateId(candidateId);candidateWorkAuthorizationRepository.save(obj);});
+    }
+
+    @Transactional
+    public void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception {
+        //delete existing records
+        candidateSkillDetailsRepository.deleteByCandidateId(candidateId);
+        //insert new ones
+        candidateSkillDetails.forEach(obj -> {obj.setCandidateId(candidateId);candidateSkillDetailsRepository.save(obj);});
+
+    }
+
+    @Transactional
+    public void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetails, Long candidateId) throws Exception {
+        //delete existing records
+        candidateCompanyDetailsRepository.deleteByCandidateId(candidateId);
+
+        //insert new ones
+        candidateCompanyDetails.forEach(obj -> {
+            obj.setCandidateId(candidateId);
+            //Check for company name
+            if (!Util.isNull(obj.getCompanyName()) && obj.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
+                //truncate institute name to max length
+                obj.setCompanyName(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), obj.getCompanyName()));
+            }
+            //check for designation
+            if (!Util.isNull(obj.getDesignation()) && obj.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue()) {
+                obj.setDesignation(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), obj.getDesignation()));
+            }
+            candidateCompanyDetailsRepository.save(obj);});
+    }
+
+    //Method to truncate the value in the field and send out a sentry message for the same
+    private String truncateField(String candidateId, String fieldName, int fieldLength, String fieldValue) {
+        StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);
+        log.info(info.toString());
+        Map<String, String> breadCrumb = new HashMap<>();
+        breadCrumb.put("Candidate Id",candidateId);
+        breadCrumb.put(fieldName, fieldValue);
+        //SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+        return fieldValue.substring(0, fieldLength);
+    }
+
+
 }

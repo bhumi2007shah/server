@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -26,8 +27,11 @@ public class CandidateDetails implements Serializable {
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column(name = "ID")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "CANDIDATE_ID")
     private Candidate candidateId;
 
@@ -93,5 +97,4 @@ public class CandidateDetails implements Serializable {
 
     @Column(name = "CANDIDATE_TYPE")
     private String candidateType;
-
 }

@@ -4,8 +4,9 @@
 
 package io.litmusblox.server.service;
 
-import io.litmusblox.server.model.Candidate;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.model.*;
+
+import java.util.List;
 
 /**
  * Service class for operations on candidate
@@ -39,4 +40,28 @@ public interface ICandidateService {
      * @return
      */
     Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser) throws Exception;
+
+    /**
+     * Method to update candidate details
+     *
+     * @param candidateId candidate id
+     * @param candidateDetails candidate details
+     * @return CandidateDetails
+     * @throws Exception
+     */
+    CandidateDetails saveUpdateCandidateDetails(CandidateDetails candidateDetails, Candidate candidateId) throws Exception;
+
+    void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetailsList, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfileList, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateLanguageProficiency(List<CandidateLanguageProficiency> candidateLanguageProficiencyList, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateWorkAuthorization(List<CandidateWorkAuthorization> candidateWorkAuthorizations, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception;
+
+    void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetailsList, Long candidateId) throws Exception;
 }

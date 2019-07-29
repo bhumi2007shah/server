@@ -34,6 +34,7 @@ import java.util.List;
 @Entity
 @Table(name = "JOB")
 @JsonFilter("JobClassFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Job implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

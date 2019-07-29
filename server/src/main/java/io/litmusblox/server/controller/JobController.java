@@ -4,11 +4,11 @@
 package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
+import io.litmusblox.server.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -69,8 +69,8 @@ public class JobController {
                     put("UserClassFilter",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("UserClassFilter", Arrays.asList("company","countryId"));
+                    put("JobClassFilter",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }

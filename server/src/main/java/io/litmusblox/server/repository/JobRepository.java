@@ -28,10 +28,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     //find all jobs that are not archived
     @Transactional
-    List<Job> findByCreatedByAndDateArchivedIsNull(User createdBy);
+    List<Job> findByCreatedByAndDateArchivedIsNullOrderByCreatedOnDesc(User createdBy);
     //find all archived jobs
     @Transactional
-    List<Job> findByCreatedByAndDateArchivedIsNotNull(User createdBy);
+    List<Job> findByCreatedByAndDateArchivedIsNotNullOrderByCreatedOnDesc(User createdBy);
 
     //count of archived jobs
     @Transactional

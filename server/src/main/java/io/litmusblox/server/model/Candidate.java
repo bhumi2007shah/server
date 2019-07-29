@@ -6,6 +6,7 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
@@ -30,6 +31,7 @@ import java.util.List;
 @Entity
 @Table(name = "CANDIDATE")
 @JsonFilter("CandidateFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Candidate implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -45,7 +47,7 @@ public class Candidate implements Serializable {
 
     @NotNull
     @Column(name = "LAST_NAME")
-    private String lastName;
+    private String lastName = "-";
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -97,8 +99,6 @@ public class Candidate implements Serializable {
     @JsonProperty
     private String candidateName;
 
-    //@PrimaryKeyJoinColumn
-   // @OneToOne(fetch = FetchType.LAZY/*, mappedBy = "candidateId"*/)
     @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "candidateId")
     @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private CandidateDetails candidateDetails;

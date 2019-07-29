@@ -40,4 +40,5 @@ public interface IErrorMessages {
     String INVALID_REQUEST_FROM_PLUGIN = "Invalid request object from plugin, missing Candidate info";
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
+    String JOB_NOT_LIVE = "Selected job is not live";
 }

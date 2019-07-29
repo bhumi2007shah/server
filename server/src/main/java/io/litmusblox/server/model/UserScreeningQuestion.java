@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -23,6 +24,7 @@ import java.util.Date;
 @Entity
 @Table(name = "USER_SCREENING_QUESTION")
 @JsonFilter("UserScreeningQuestionFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserScreeningQuestion implements Serializable {
 
     public static final String IDENTIFIER = "UserScreeningQuestion";

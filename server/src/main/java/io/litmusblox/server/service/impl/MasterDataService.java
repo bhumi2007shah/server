@@ -6,16 +6,20 @@ package io.litmusblox.server.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.error.WebException;
+import io.litmusblox.server.model.ConfigurationSettings;
 import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
 import io.litmusblox.server.repository.*;
+import io.litmusblox.server.service.ConfigSettings;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +56,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     ScreeningQuestionsRepository screeningQuestionsRepository;
 
+    @Resource
+    ConfigurationSettingsRepository configurationSettingsRepository;
+
     /**
      * Method that will be called during application startup
      * Will read all master data from database and store them in internal cache
@@ -85,6 +92,13 @@ public class MasterDataService implements IMasterDataService {
             }
         });
 
+        //populate various configuration settings like max limits, send sms/email flag,etc
+        List<ConfigurationSettings> configurationSettings = configurationSettingsRepository.findAll();
+        ConfigurablePropertyAccessor configFieldAccesor = PropertyAccessorFactory.forDirectFieldAccess(MasterDataBean.getInstance().getConfigSettings());
+        configurationSettings.forEach(config-> {
+            configFieldAccesor.setPropertyValue(config.getConfigName(), config.getConfigValue());
+        });
+
         MasterDataBean.getInstance().setLoaded(true);
     }
 
@@ -113,6 +127,7 @@ public class MasterDataService implements IMasterDataService {
             else
                 continue;
         }
+        masterBean.setConfigSettings(new ConfigSettings());
         loadStaticMasterData();
     }
 
@@ -155,12 +170,13 @@ public class MasterDataService implements IMasterDataService {
                 userScreeningQuestionRepository.save(objToSave);
                 break;
             default:
-                throw new Exception("Unsupported action");
+                throw new WebException("Unsupported action", HttpStatus.BAD_REQUEST);
         }
     }
 
     private static final String COUNTRY_MASTER_DATA = "countries";
     private static final String SCREENING_QUESTIONS_MASTER_DATA = "screeningQuestions";
+    private static final String CONFIG_SETTINGS = "configSettings";
 
     /**
      * Method to fetch specific master data from cache
@@ -176,6 +192,9 @@ public class MasterDataService implements IMasterDataService {
                 break;
             case SCREENING_QUESTIONS_MASTER_DATA:
                 master.getScreeningQuestions().addAll(MasterDataBean.getInstance().getScreeningQuestions());
+                break;
+            case CONFIG_SETTINGS:
+                master.setConfigSettings(MasterDataBean.getInstance().getConfigSettings());
                 break;
             default: //for all other properties, use reflection
 

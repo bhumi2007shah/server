@@ -5,6 +5,7 @@
 package io.litmusblox.server.security;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class LbAuthRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        log.info("Got request " + request.getRequestURL() + " :: " + request.getHeader("Authorization") + " :: " + request.getMethod());
+        //log.info("Got request " + request.getRequestURL() + " :: " + request.getHeader(IConstant.TOKEN_HEADER) + " :: " + request.getMethod());
 
 
         if(((HttpServletRequest)request).getMethod().equalsIgnoreCase("OPTIONS")) {
@@ -62,15 +63,15 @@ public class LbAuthRequestFilter extends OncePerRequestFilter {
 
         //no authorization required for options request sent by browser automatically
         if(!request.getMethod().equalsIgnoreCase("OPTIONS")) {
-            final String requestTokenHeader = request.getHeader("Authorization");
+            final String requestTokenHeader = request.getHeader(IConstant.TOKEN_HEADER);
 
             log.info("Token in request is " + requestTokenHeader);
 
             String username = null;
             String jwtToken = null;
             // JWT Token begins with "Bearer ". Remove Bearer word and get only the Token value
-            if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
-                jwtToken = requestTokenHeader.substring(7);
+            if (requestTokenHeader != null && requestTokenHeader.startsWith(IConstant.TOKEN_PREFIX)) {
+                jwtToken = requestTokenHeader.substring(IConstant.TOKEN_PREFIX.length());
                 try {
                     username = jwtTokenUtil.getUsernameFromToken(jwtToken);
                 } catch (IllegalArgumentException e) {

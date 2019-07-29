@@ -50,25 +50,10 @@ import java.util.*;
 public class JobControllerMappingService implements IJobControllerMappingService {
 
     @Resource
-    CandidateRepository candidateRepository;
-
-    @Resource
-    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
-
-    @Resource
-    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+    JobRepository jobRepository;
 
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
-
-    @Resource
-    UserRepository userRepository;
-
-    @Resource
-    MasterDataRepository masterDataRepository;
-
-    @Resource
-    JobRepository jobRepository;
 
     @Autowired
     IUploadDataProcessService iUploadDataProcessService;
@@ -78,6 +63,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
     @Resource
     CandidateScreeningQuestionResponseRepository candidateScreeningQuestionResponseRepository;
+
+    @Resource
+    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
 
     @Resource
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
@@ -96,6 +84,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId) throws Exception {
+
+        //verify that the job is live before processing candidates
+        Job job = jobRepository.getOne(jobId);
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -205,6 +199,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
+        //verify that the job is live before processing candidates
+        Job job = jobRepository.getOne(jobId);
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
         //validate that the file has an extension that is supported by the application
         Util.validateUploadFileType(multipartFile.getOriginalFilename());
 
@@ -270,7 +270,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 file.mkdirs();
             }
 
-            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + userId + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
             return filePath;
         }
         catch (Exception e) {
@@ -333,7 +333,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     }
 
     /**
-     * Rest api to capture candidate consent from chatbot
+     * Service method to capture candidate consent from chatbot
      *
      * @param uuid     the uuid corresponding to a unique jcm record
      * @param interest boolean to capture candidate consent
@@ -343,37 +343,43 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
     }
 
     /**
-     * Rest api to capture candidate response to screening questions from chatbot
+     * Service method to capture candidate response to screening questions from chatbot
      *
      * @param uuid              the uuid corresponding to a unique jcm record
      * @param candidateResponse the response provided by a candidate against each screening question
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public void saveScreeningQuestionResponses(UUID uuid, Map<Long, String> candidateResponse) throws Exception {
+    public void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        //delete existing response for chatbot for the jcm
+        candidateScreeningQuestionResponseRepository.deleteByJobCandidateMappingId(objFromDb.getId());
 
         candidateResponse.forEach((key,value) -> {
-            if (value.length() > 100) {
-                log.error("Length of user response is greater than 100 " + value);
-                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value.substring(0,100)));
+            String[] valuesToSave = new String[value.size()];
+            for(int i=0;i<value.size();i++) {
+                valuesToSave[i] = value.get(i);
+                if(valuesToSave[i].length() > 100) {
+                    log.error("Length of user response is greater than 100 " + value);
+                    valuesToSave[i] = valuesToSave[i].substring(0,100);
+                }
             }
-            else
-                candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, value));
+            candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
         });
     }
 
     /**
-     * Rest api to get all screening questions for the job
+     * Service method to get all screening questions for the job
      *
      * @param uuid the uuid corresponding to a unique jcm record
      * @return the list of job screening questions
@@ -383,7 +389,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
         if (null == objFromDb)
-            throw new Exception("No mapping found for uuid " + uuid);
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
     }

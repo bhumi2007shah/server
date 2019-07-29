@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ import java.io.Serializable;
 @Data
 @Entity
 @Table(name = "MASTER_DATA")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MasterData implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285041L;

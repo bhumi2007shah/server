@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ import java.io.Serializable;
 @Data
 @Entity
 @Table(name = "COUNTRY")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Country implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

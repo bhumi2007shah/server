@@ -4,7 +4,9 @@
 
 package io.litmusblox.server.service.impl;
 
+import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.User;
+import io.litmusblox.server.repository.JobCandidateMappingRepository;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.security.JwtTokenUtil;
 import io.litmusblox.server.service.LoginResponseBean;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 
 /**
@@ -40,6 +44,9 @@ public class LbUserDetailsService implements UserDetailsService {
 
     @Resource
     UserRepository userRepository;
+
+    @Resource
+    JobCandidateMappingRepository jobCandidateMappingRepository;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -69,7 +76,8 @@ public class LbUserDetailsService implements UserDetailsService {
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
-        return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),0);
+
+        return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), userDetails));
     }
 
 
@@ -86,9 +94,9 @@ public class LbUserDetailsService implements UserDetailsService {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         } catch (DisabledException e) {
-            throw new Exception("USER_DISABLED", e);
+            throw new WebException("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            throw new Exception("INVALID_CREDENTIALS", e);
+            throw new WebException("INVALID_CREDENTIALS", e);
         }
     }
 

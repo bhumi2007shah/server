@@ -6,8 +6,6 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.CompanyScreeningQuestionsRepository;
-import io.litmusblox.server.repository.ScreeningQuestionsRepository;
-import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.repository.UserScreeningQuestionRepository;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.service.ScreeningQuestionResponseBean;
@@ -29,16 +27,10 @@ import javax.annotation.Resource;
 public class ScreeningQuestionService implements IScreeningQuestionService {
 
     @Resource
-    ScreeningQuestionsRepository screeningQuestionsRepository;
-
-    @Resource
     UserScreeningQuestionRepository userScreeningQuestionRepository;
 
     @Resource
     CompanyScreeningQuestionsRepository companyScreeningQuestionsRepository;
-
-    @Resource
-    UserRepository userRepository;
 
     /**
      * Method to fetch custom screening questions for the company and user

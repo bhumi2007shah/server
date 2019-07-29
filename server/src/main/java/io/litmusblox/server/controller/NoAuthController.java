@@ -86,7 +86,7 @@ public class NoAuthController {
      */
     @PostMapping("/screeningQuestionResponse")
     @ResponseStatus(HttpStatus.OK)
-    void screeningQuestionResponses(@RequestParam("uuid") UUID uuid, @RequestBody Map<Long,String> candidateResponse) throws Exception{
+    void screeningQuestionResponses(@RequestParam("uuid") UUID uuid, @RequestBody Map<Long,List<String>> candidateResponse) throws Exception{
         log.info("Received screening question responses from candidate: " + uuid);
         long startTime = System.currentTimeMillis();
         jobControllerMappingService.saveScreeningQuestionResponses(uuid, candidateResponse);

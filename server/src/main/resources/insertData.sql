@@ -147,6 +147,16 @@ VALUES
  ( 'experienceRange', '20+ yrs');
 
 
+-- max limits for various parameters
+insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
+('maxScreeningQuestionsLimit',10),
+('dailyCandidateUploadPerUserLimit',500),
+('dailyCandidateInviteLimit',500),
+('candidatesPerFileLimit',100),
+('sendEmail',1),
+('sendSms',1);
+
+
  -- key skill master data
 insert into skills_master (skill_name) values
 ('Core Java'),

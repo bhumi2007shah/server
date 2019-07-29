@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,13 +22,14 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "COMPANY_STAGE_STEP")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CompanyStageStep implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
@@ -36,12 +38,12 @@ public class CompanyStageStep implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "COMPANY_ID")
     private Company companyId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "STAGE")
     private MasterData stage;
 
     @NotNull
@@ -51,7 +53,7 @@ public class CompanyStageStep implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "CREATED_BY")
     private User createdBy;
 
     @Column(name = "UPDATED_ON")
@@ -59,7 +61,18 @@ public class CompanyStageStep implements Serializable {
     private Date updatedOn = new Date();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
+    public CompanyStageStep(@NotNull String step, @NotNull Company companyId, @NotNull MasterData stage, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.step = step;
+        this.companyId = companyId;
+        this.stage = stage;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
+
+    public CompanyStageStep() {
+        super();
+    }
 }

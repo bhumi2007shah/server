@@ -4,52 +4,63 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.service.IUserService;
-import io.litmusblox.server.service.impl.UserServiceImpl;
+import io.litmusblox.server.service.LoginResponseBean;
+import io.litmusblox.server.service.impl.LbUserDetailsService;
+import io.litmusblox.server.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 /**
- * Controller for all auth related functions like login, reset password, forgot password, acivate user
+ * Controller class for all authentication related apis like:
+ * 1. Login
+ * 2. Reset password
+ * 3. Forgot password
+ * 4. Activate user
  *
- * @author : sameer
- * Date : 5/7/19
- * Time : 10:50 AM
+ * @author : Shital Raval
+ * Date : 18/7/19
+ * Time : 9:59 AM
  * Class Name : AuthController
  * Project Name : server
  */
-
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/auth")
-
 public class AuthController {
 
     @Autowired
-    IUserService userService;
+    LbUserDetailsService userDetailsService;
 
-    @PostMapping("/login")
-    public String login(@RequestBody User user)throws Exception{
-        String jwtToken = userService.login(user);
-        return jwtToken;
+    /**
+     * Api to handle login request
+     * @param user object with email and password
+     * @return jwt token for authenticated user
+     * @throws Exception
+     */
+    @PostMapping(value = "/login")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    LoginResponseBean login(@RequestBody User user) throws Exception {
+        return userDetailsService.login(user);
     }
 
-    @PostMapping("/resetPassword")
-    public String resetPassword(@RequestBody User user){
-        return "Test";
+    @PostMapping(value = "/createUser")
+    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
+    String addUser(@RequestBody User user) throws Exception {
+        return Util.stripExtraInfoFromResponseBean(
+                userDetailsService.createUser(user),
+                (new HashMap<String, List<String>>(){{
+                    put("UserClassFilter", Arrays.asList("id", "firstName", "lastName", "email","mobile"));
+                }}),
+                null
+        );
     }
-
-    @PostMapping("/forgotPassword")
-    public void forgotPassword(@RequestBody User user){
-
-    }
-
-    @PostMapping("/setNewPassword")
-    public void setNewPassword(@RequestBody User user){
-
-    }
-
 }

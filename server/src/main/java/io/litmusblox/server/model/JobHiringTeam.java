@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,19 +22,19 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "JOB_HIRING_TEAM")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class JobHiringTeam implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
-    //@OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
-    private Job jobId;
+    private Long jobId;
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
@@ -66,4 +67,16 @@ public class JobHiringTeam implements Serializable {
     @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
+    public JobHiringTeam(@NotNull Long jobId, @NotNull CompanyStageStep stageStepId, @NotNull User userId, Long sequence, @NotNull Date createdOn, @NotNull User createdBy) {
+        this.jobId = jobId;
+        this.stageStepId = stageStepId;
+        this.userId = userId;
+        this.sequence = sequence;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
+
+    public JobHiringTeam() {
+        super();
+    }
 }

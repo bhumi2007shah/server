@@ -3,11 +3,11 @@
  */
 package io.litmusblox.server;
 
-import io.litmusblox.server.security.JwtConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main application class
@@ -18,7 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * Class Name : ServerApplication
  * Project Name : server
  */
-
+@PropertySource("classpath:appConfig.properties")
+@EnableConfigurationProperties
+@EnableScheduling
 @SpringBootApplication
 public class ServerApplication {
 
@@ -26,13 +28,4 @@ public class ServerApplication {
 		SpringApplication.run(ServerApplication.class, args);
 	}
 
-	@Bean
-	public JwtConfig jwtConfig() {
-		return new JwtConfig();
-	}
-
-	@Bean
-	public BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 }

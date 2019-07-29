@@ -25,7 +25,7 @@ import java.util.List;
  * Class Name : MasterDataController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/masterdata")
 @Log4j2
@@ -55,7 +55,8 @@ public class MasterDataController {
      */
     @PostMapping(value="/fetch/items")
     MasterDataResponse fetchForItems(@RequestBody List<String> requestItems) throws Exception {
-        return masterDataService.fetchForItems(requestItems);
+        MasterDataResponse response = masterDataService.fetchForItems(requestItems);
+        return response;
     }
 
     /**

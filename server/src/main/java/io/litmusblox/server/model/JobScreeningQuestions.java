@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,53 +23,47 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "JOB_SCREENING_QUESTIONS")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class JobScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*@NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Job jobId;*/
-
-    @NotNull
-    //@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "JOB_ID")
-    private Job jobId;
+    private Long jobId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "MASTER_SCREENING_QUESTION_ID")
     private ScreeningQuestions masterScreeningQuestionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "COMPANY_SCREENING_QUESTION_ID")
     private CompanyScreeningQuestion companyScreeningQuestionId;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_SCREENING_QUESTION_ID")
     private UserScreeningQuestion userScreeningQuestionId;
 
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date createdOn;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CREATED_BY")
-    private User createdBy;
+    @Column(name = "CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonIgnore
     private Date updatedOn;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UPDATED_BY")
-    private User updatedBy;
+    @Column(name = "UPDATED_BY")
+    private Long updatedBy;
 
 }

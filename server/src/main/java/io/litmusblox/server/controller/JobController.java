@@ -3,13 +3,19 @@
  */
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
-import io.litmusblox.server.service.JobResponseBean;
-import io.litmusblox.server.service.JobWorspaceResponseBean;
+import io.litmusblox.server.service.SingleJobViewResponseBean;
+import io.litmusblox.server.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,7 +27,7 @@ import java.util.Optional;
  * Class Name : JobController
  * Project Name : server
  */
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/job")
 public class JobController {
@@ -30,8 +36,22 @@ public class JobController {
     IJobService jobService;
 
     @PostMapping(value = "/createJob/{pageName}")
-    JobResponseBean addJob(@RequestBody Job job, @PathVariable ("pageName") String pageName) throws Exception {
-        return jobService.addJob(job, pageName);
+    String addJob(@RequestBody String jobStr, @PathVariable ("pageName") String pageName) throws Exception {
+        Job job = new ObjectMapper().readValue(jobStr, Job.class);
+
+        return Util.stripExtraInfoFromResponseBean(
+            jobService.addJob(job, pageName),
+            (new HashMap<String, List<String>>(){{
+                put("UserClassFilter",Arrays.asList("displayName","id"));
+            }}),
+            (new HashMap<String, List<String>>(){{
+                put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
+                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+            }})
+        );
+
+       // return jobService.addJob(job, pageName);
     }
 
     /**
@@ -41,7 +61,57 @@ public class JobController {
      * @throws Exception
      */
     @GetMapping(value = "/listOfJobs")
-    JobWorspaceResponseBean listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
-        return jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false);
+    String listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
+
+        return Util.stripExtraInfoFromResponseBean(
+                jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false),
+                (new HashMap<String, List<String>>(){{
+                    put("UserClassFilter",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("JobClassFilter",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
+                }})
+        );
     }
+
+    /**
+     * Api to retrieve
+     * 1. list candidates for job for specified stage
+     * 2. count of candidates by each stage
+     *
+     * @param jobCandidateMapping The payload consisting of job id and stage
+     *
+     * @return response bean with all details as a json string
+     * @throws Exception
+     */
+    @PostMapping(value = "/jobViewByStage")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
+        SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
+
+        return Util.stripExtraInfoFromResponseBean(responseBean,
+                (new HashMap<String, List<String>>(){{
+                    put("UserClassFilter",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    //put("UserClassFilter", Arrays.asList("company","countryId"));
+                }})
+        );
+    }
+
+    /**
+     * Api to set the status of a job as published.
+     *
+     * @param jobId id of the job which is to be published
+     * @throws Exception
+     */
+    @PutMapping(value = "/publishJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void publishJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.publishJob(jobId);
+    }
+
 }

@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,6 +22,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "COMPANY_BU")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CompanyBu implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -30,8 +32,7 @@ public class CompanyBu implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    //@NotNull
-    //@OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
+    @Column(name = "COMPANY_ID")
     private Long companyId;
 
     @NotNull
@@ -44,16 +45,14 @@ public class CompanyBu implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="CREATED_BY")
-    private User createdBy;
+    @Column(name="CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="UPDATED_BY")
-    private User updatedBy;
+    @Column(name="UPDATED_BY")
+    private Long updatedBy;
 
 }

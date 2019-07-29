@@ -5,21 +5,25 @@
 package io.litmusblox.server.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.error.WebException;
+import io.litmusblox.server.model.ConfigurationSettings;
 import io.litmusblox.server.model.MasterData;
+import io.litmusblox.server.model.SkillsMaster;
 import io.litmusblox.server.model.UserScreeningQuestion;
-import io.litmusblox.server.repository.CountryRepository;
-import io.litmusblox.server.repository.MasterDataRepository;
-import io.litmusblox.server.repository.UserScreeningQuestionRepository;
+import io.litmusblox.server.repository.*;
+import io.litmusblox.server.service.ConfigSettings;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
@@ -37,14 +41,23 @@ import java.util.Map;
 @Log4j2
 @Service
 public class MasterDataService implements IMasterDataService {
-    @Autowired
+    @Resource
     MasterDataRepository masterDataRepository;
 
-    @Autowired
+    @Resource
     CountryRepository countryRepository;
 
-    @Autowired
-    UserScreeningQuestionRepository screeningQuestionRepository;
+    @Resource
+    UserScreeningQuestionRepository userScreeningQuestionRepository;
+
+    @Resource
+    SkillMasterRepository skillMasterRepository;
+
+    @Resource
+    ScreeningQuestionsRepository screeningQuestionsRepository;
+
+    @Resource
+    ConfigurationSettingsRepository configurationSettingsRepository;
 
     /**
      * Method that will be called during application startup
@@ -59,12 +72,31 @@ public class MasterDataService implements IMasterDataService {
 
         List<MasterData> masterDataFromDb = masterDataRepository.findAll();
 
+        List<SkillsMaster> keySkillsList = skillMasterRepository.findAll();
+        keySkillsList.stream().forEach(keySkill ->
+                MasterDataBean.getInstance().getKeySkills().put(keySkill.getId(), keySkill.getSkillName())
+                );
+
+        MasterDataBean.getInstance().getScreeningQuestions().addAll(screeningQuestionsRepository.findAll());
+
         //handle to the getter method of the map in the master data singleton instance class
         ConfigurablePropertyAccessor mapAccessor = PropertyAccessorFactory.forDirectFieldAccess(MasterDataBean.getInstance());
 
         //For every master data record from database, populate the corresponding map with key-value pairs
         masterDataFromDb.forEach(data -> {
             ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
+
+            //special handling for Source stage
+            if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
+                MasterDataBean.getInstance().setSourceStage(data);
+            }
+        });
+
+        //populate various configuration settings like max limits, send sms/email flag,etc
+        List<ConfigurationSettings> configurationSettings = configurationSettingsRepository.findAll();
+        ConfigurablePropertyAccessor configFieldAccesor = PropertyAccessorFactory.forDirectFieldAccess(MasterDataBean.getInstance().getConfigSettings());
+        configurationSettings.forEach(config-> {
+            configFieldAccesor.setPropertyValue(config.getConfigName(), config.getConfigValue());
         });
 
         MasterDataBean.getInstance().setLoaded(true);
@@ -95,6 +127,7 @@ public class MasterDataService implements IMasterDataService {
             else
                 continue;
         }
+        masterBean.setConfigSettings(new ConfigSettings());
         loadStaticMasterData();
     }
 
@@ -134,14 +167,16 @@ public class MasterDataService implements IMasterDataService {
                 UserScreeningQuestion objToSave = new ObjectMapper().readValue(jsonData, UserScreeningQuestion.class);
                 objToSave.setCreatedOn(new Date());
                 //persist to database
-                screeningQuestionRepository.save(objToSave);
+                userScreeningQuestionRepository.save(objToSave);
                 break;
             default:
-                throw new Exception("Unsupported action");
+                throw new WebException("Unsupported action", HttpStatus.BAD_REQUEST);
         }
     }
 
     private static final String COUNTRY_MASTER_DATA = "countries";
+    private static final String SCREENING_QUESTIONS_MASTER_DATA = "screeningQuestions";
+    private static final String CONFIG_SETTINGS = "configSettings";
 
     /**
      * Method to fetch specific master data from cache
@@ -154,6 +189,12 @@ public class MasterDataService implements IMasterDataService {
         switch (input) {
             case COUNTRY_MASTER_DATA:
                 master.getCountries().addAll(MasterDataBean.getInstance().getCountryList());
+                break;
+            case SCREENING_QUESTIONS_MASTER_DATA:
+                master.getScreeningQuestions().addAll(MasterDataBean.getInstance().getScreeningQuestions());
+                break;
+            case CONFIG_SETTINGS:
+                master.setConfigSettings(MasterDataBean.getInstance().getConfigSettings());
                 break;
             default: //for all other properties, use reflection
 

@@ -4,11 +4,14 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -19,7 +22,8 @@ import java.io.Serializable;
  */
 @Data
 @Entity
-@Table(name = "SCREENING_QUESTIONS")
+@Table(name = "SCREENING_QUESTION")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -34,11 +38,14 @@ public class ScreeningQuestions implements Serializable {
     private String question;
 
     @Column(name = "OPTIONS")
-    private String options;
+    @Convert(converter = ListToArrayConverter.class)
+    private List<String> options;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
+    @Column(name = "MULTILEVELOPTIONS")
+    private String multiLevelOptions;
 }

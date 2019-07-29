@@ -4,8 +4,12 @@
 
 package io.litmusblox.server.model;
 
-import io.litmusblox.server.Constant.IConstant;
-import io.litmusblox.server.Constant.IErrorMessages;
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
@@ -13,6 +17,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +33,8 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "JOB")
+@JsonFilter("JobClassFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Job implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -37,18 +44,17 @@ public class Job implements Serializable {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Length(max = 10)
-    @Pattern(message = "Job_id "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_ID)
+    @Length(max = IConstant.JOB_ID_MAX_LENGTH)
+    @Pattern(message = "COMPANY_JOB_ID "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_COMPANY_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;
 
     @NotNull(message = "Job title " + IErrorMessages.NULL_MESSAGE)
-    //@Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE,regexp = IConstant.REGEX_FOR_JOB_TITLE)
+    @Pattern(message = "Job title "+IErrorMessages.SPECIAL_CHARACTER_MESSAGE, regexp = IConstant.REGEX_FOR_JOB_TITLE)
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
     @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
-    //@Pattern(message = "No of positions "+IErrorMessages.NUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_NO_OF_POSITIONS)
     @Column(name = "NO_OF_POSITIONS")
     private Integer noOfPositions;
 
@@ -63,6 +69,7 @@ public class Job implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_ID")
+    @JsonIgnore
     private Company companyId;
 
     @Column(name = "DATE_PUBLISHED")
@@ -83,7 +90,7 @@ public class Job implements Serializable {
     private Date createdOn;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="CREATED_BY")
     private User createdBy;
 
@@ -95,16 +102,29 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "jobId")
+    @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
     private JobDetail jobDetail;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobScreeningQuestions> jobScreeningQuestionsList;
+    @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY,mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<JobHiringTeam> jobHiringTeamList=new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobKeySkills> jobKeySkillsList;
+    @OneToMany(cascade = {CascadeType.MERGE},fetch= FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
-    private List<JobCapabilities> jobCapabilityList;
+    @OneToMany(/*cascade = {CascadeType.MERGE},*/fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
+    @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private List<JobCapabilities> jobCapabilityList=new ArrayList<>();
+
+    @Transient
+    @JsonInclude
+    private List<String> userEnteredKeySkill=new ArrayList<>();
+
+    @Transient
+    private List<User> usersForCompany=new ArrayList<>();
 }

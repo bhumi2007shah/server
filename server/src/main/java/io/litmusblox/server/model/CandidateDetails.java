@@ -4,10 +4,10 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -21,13 +21,17 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "CANDIDATE_DETAILS")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CandidateDetails implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
     @Id
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @Column(name = "ID")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "CANDIDATE_ID")
     private Candidate candidateId;
 
@@ -88,16 +92,9 @@ public class CandidateDetails implements Serializable {
     @Column(name = "CV_FILE_TYPE")
     private String cvFileType;
 
-    @NotNull
-    @Column(name = "CANDIDATE_SOURCE")
-    private String candidateSource;
-
     @Column(name = "LAST_ACTIVE")
     private Date lastActive;
 
     @Column(name = "CANDIDATE_TYPE")
     private String candidateType;
-
-
-
 }

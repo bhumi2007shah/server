@@ -1,0 +1,30 @@
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
+
+package io.litmusblox.server.repository;
+
+import io.litmusblox.server.model.JobKeySkills;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * @author : Sumit
+ * Date : 8/7/19
+ * Time : 12:12 PM
+ * Class Name : JobKeySkillsRepository
+ * Project Name : server
+ */
+public interface JobKeySkillsRepository extends JpaRepository<JobKeySkills, Long> {
+
+    @Transactional
+    List<JobKeySkills> findByJobIdAndMlProvided(Long jobId, Boolean mlProvided);
+
+    @Transactional
+    void deleteByJobId(Long jobId);
+
+    @Transactional
+    List<JobKeySkills> findByJobId(Long jobId);
+}

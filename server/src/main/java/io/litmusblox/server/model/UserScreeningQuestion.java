@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -21,6 +23,8 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "USER_SCREENING_QUESTION")
+@JsonFilter("UserScreeningQuestionFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserScreeningQuestion implements Serializable {
 
     public static final String IDENTIFIER = "UserScreeningQuestion";
@@ -40,12 +44,12 @@ public class UserScreeningQuestion implements Serializable {
     private String options;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "USER_ID")
     private User userId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 

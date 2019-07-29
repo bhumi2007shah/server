@@ -4,12 +4,16 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -21,6 +25,8 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "COMPANY_SCREENING_QUESTION")
+@JsonFilter("CompanyScreeningQuestionFilter")
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CompanyScreeningQuestion implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -35,16 +41,15 @@ public class CompanyScreeningQuestion implements Serializable {
     private String question;
 
     @Column(name = "OPTIONS")
-    private String options;
+    @Convert(converter = ListToArrayConverter.class)
+    private List<String> options;
+
+    @JoinColumn(name = "COMPANY_ID")
+    private Long companyId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private Company companyId;
-
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "QUESTION_TYPE")
     private MasterData questionType;
 
     @NotNull
@@ -53,15 +58,13 @@ public class CompanyScreeningQuestion implements Serializable {
     private Date createdOn = new Date();
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private User createdBy;
+    @Column(name = "CREATED_BY")
+    private Long createdBy;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private User updatedBy;
+    @Column(name="UPDATED_BY")
+    private Long updatedBy;
 }

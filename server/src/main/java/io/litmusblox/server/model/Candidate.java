@@ -3,6 +3,8 @@
  */
 
 package io.litmusblox.server.model;
+
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.litmusblox.server.constant.IConstant;
@@ -27,6 +29,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE")
+@JsonFilter("CandidateFilter")
 public class Candidate implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

@@ -110,6 +110,9 @@ VALUES
  ( 'questionType','Checkbox'),
  ( 'questionType','Radio button'),
  ( 'questionType','InputBox'),
+ ( 'questionType','Location'),
+ ( 'questionType','Slider'),
+ ( 'questionType','Calendar'),
 
  ( 'addressType','Job Location'),
  ( 'addressType','Interview Location'),

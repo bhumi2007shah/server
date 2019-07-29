@@ -4,19 +4,19 @@
 
 package io.litmusblox.server.service.impl;
 
-import io.litmusblox.server.service.ICandidateService;
-import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
+import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -117,33 +117,33 @@ public class JobControllerMappingService implements IJobControllerMappingService
         return uploadResponseBean;
     }
 
-    private void processCandidateData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, User u, Long jobId, int candidateProcessed) throws Exception{
+    private void processCandidateData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, User loggedInUser, Long jobId, int candidateProcessed) throws Exception{
 
         if (null != candidateList && candidateList.size() > 0) {
-            iUploadDataProcessService.processData(candidateList, uploadResponseBean, candidateProcessed,jobId, !u.getCountryId().getCountryName().equalsIgnoreCase(IConstant.STR_INDIA));
+            iUploadDataProcessService.processData(candidateList, uploadResponseBean, candidateProcessed,jobId, !loggedInUser.getCountryId().getCountryName().equalsIgnoreCase(IConstant.STR_INDIA));
         }
 
         for (Candidate candidate:candidateList) {
 
-            //find candidateid
-            CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
-            Candidate c=candidateEmailHistory.getCandidate();
+            //find candidateId
+            Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+
             Long candidateId = null;
-            if (null != candidateEmailHistory.getCandidate())
-                candidateId = candidateEmailHistory.getCandidate().getId();
+            if (null != candidateFromDb)
+                candidateId = candidateFromDb.getId();
             if (null != candidateId) {
                 //if telephone field has value, save to mobile history table
                 if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
                     //check if an entry exists in the mobile history record for this number
                     String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                    if (!c.getMobile().trim().equals(telephone.trim())) {
+                    if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
 
                         if (telephone.length() > 15)
                             telephone = telephone.substring(0, 15);
 
                         if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
-                            candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == c.getCountryCode()) ? u.getCountryId().getCountryCode() : c.getCountryCode()));
+                            candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
                     }
                 }
 
@@ -153,7 +153,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                     //if marital status is more than 10 characters, trim to 10. e.g. got a status as single/unmarried for one of the candidates!
                     if (!Util.isNull(candidate.getCandidateDetails().getMaritalStatus()) && candidate.getCandidateDetails().getMaritalStatus().length() > 10)
                         candidate.getCandidateDetails().setMaritalStatus(candidate.getCandidateDetails().getMaritalStatus().substring(0, 10));
-                    candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidate);
+                    candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidateFromDb);
                 }
 
                 //candidate education details

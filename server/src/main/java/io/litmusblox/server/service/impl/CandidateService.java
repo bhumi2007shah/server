@@ -5,11 +5,11 @@
 package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.utils.Util;
-import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.service.ICandidateService;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -140,6 +140,7 @@ public class CandidateService implements ICandidateService {
     @Transactional(propagation = Propagation.REQUIRED)
     public CandidateDetails saveUpdateCandidateDetails(CandidateDetails candidateDetails, Candidate candidate){
         //delete from CandidateDetails
+
         candidateDetailsRepository.deleteByCandidateId(candidate);
 
         if(!Util.isNull(candidateDetails.getCurrentAddress()) && candidateDetails.getCurrentAddress().length() > IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue()) {

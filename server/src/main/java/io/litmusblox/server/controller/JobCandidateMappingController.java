@@ -7,12 +7,15 @@ package io.litmusblox.server.controller;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -80,11 +83,15 @@ public class JobCandidateMappingController {
      * @throws Exception
      */
     @PostMapping(value = "/addCandidate/plugin")
-    UploadResponseBean uploadCandidateFromPlugin(@RequestBody Candidate candidate, @RequestParam("jobId") Long jobId) throws Exception {
+    String uploadCandidateFromPlugin(@RequestBody Candidate candidate, @RequestParam("jobId") Long jobId) throws Exception {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadCandidateFromPlugin(candidate, jobId);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
-        return responseBean;
+        return Util.stripExtraInfoFromResponseBean(responseBean, null,
+                new HashMap<String, List<String>>() {{
+                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
+                }});
     }
 }

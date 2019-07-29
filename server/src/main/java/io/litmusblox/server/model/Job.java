@@ -78,7 +78,7 @@ public class Job implements Serializable {
 
     @NotNull
     @Column(name = "STATUS")
-    private String status = "Draft";
+    private String status;
 
     @Column(name = "DATE_ARCHIVED")
     @Temporal(TemporalType.TIMESTAMP)

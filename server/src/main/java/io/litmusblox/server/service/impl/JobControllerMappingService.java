@@ -87,7 +87,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         //verify that the job is live before processing candidates
         Job job = jobRepository.getOne(jobId);
-        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -201,7 +201,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         //verify that the job is live before processing candidates
         Job job = jobRepository.getOne(jobId);
-        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {
+        if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 

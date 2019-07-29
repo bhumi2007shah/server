@@ -214,6 +214,7 @@ public class JobService implements IJobService {
         } else { //Create new entry for job
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);
+            job.setStatus(IConstant.JobStatus.DRAFT.getValue());
             job.setCreatedBy(loggedInUser);
             Company c = companyRepository.getOne(loggedInUser.getCompany().getId());
             job.setCompanyId(c);
@@ -340,8 +341,9 @@ public class JobService implements IJobService {
         });
 
 
-        oldJob.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
-        oldJob.setDatePublished(new Date());
+        //29th July: Do not auto-publish the job. The job should be explicitly published by means of an API call
+        //oldJob.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
+        //oldJob.setDatePublished(new Date());
         jobRepository.save(oldJob);
 
         job.getJobCapabilityList().clear();

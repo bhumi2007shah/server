@@ -227,7 +227,7 @@ public class JobService implements IJobService {
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
 
-        if (job.getJobScreeningQuestionsList().size() > IConstant.SCREENING_QUESTIONS_LIST_MAX_SIZE) {
+        if (job.getJobScreeningQuestionsList().size() > MasterDataBean.getInstance().getConfigSettings().getMaxScreeningQuestionsLimit()) {
             throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 

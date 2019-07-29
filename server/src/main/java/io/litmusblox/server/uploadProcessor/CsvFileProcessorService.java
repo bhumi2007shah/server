@@ -45,9 +45,6 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
     @Autowired
     IUploadDataProcessService uploadDataProcessor;
 
-    @Autowired
-    Environment environment;
-
     @Transactional
     public List<Candidate> process(String fileName, UploadResponseBean responseBean, boolean ignoreMobile, String repoLocation) {
         List<Candidate> candidateList = new ArrayList<>();

@@ -11,6 +11,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
@@ -97,7 +98,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,loggedInUser);
 
-        if (candidateProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
+        Integer i=MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit();
+
+        if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not processing records");
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -215,7 +218,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);
 
-        if (candidatesProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
+        if (candidatesProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not saving file " + multipartFile);
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }

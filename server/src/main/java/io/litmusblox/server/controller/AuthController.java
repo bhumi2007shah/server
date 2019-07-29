@@ -4,11 +4,11 @@
 
 package io.litmusblox.server.controller;
 
-import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
+import io.litmusblox.server.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;

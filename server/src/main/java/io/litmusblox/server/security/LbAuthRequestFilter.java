@@ -49,14 +49,14 @@ public class LbAuthRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        //log.info("Got request " + request.getRequestURL() + " :: " + request.getHeader(IConstant.TOKEN_HEADER) + " :: " + request.getMethod());
+        log.info("Got request " + request.getRequestURL() + " :: " + request.getHeader(IConstant.TOKEN_HEADER) + " :: " + request.getMethod() + " :: " + request.getHeader("Access-Control-Allow-Origin"));
 
 
         if(((HttpServletRequest)request).getMethod().equalsIgnoreCase("OPTIONS")) {
 
             ((HttpServletResponse)response).addHeader("Access-Control-Allow-Origin", "*");
             ((HttpServletResponse)response).addHeader("Access-Control-Allow-Methods", "GET, OPTIONS, HEAD, PUT, POST");
-            ((HttpServletResponse)response).addHeader("Access-Control-Allow-Headers", "X-Custom-Header, X-Auth-Token, Content-Type,Authorization");
+            ((HttpServletResponse)response).addHeader("Access-Control-Allow-Headers", "X-Custom-Header, X-Auth-Token, Content-Type,Authorization,Access-Control-Allow-Origin");
             ((HttpServletResponse)response).addHeader("Access-Control-Allow-Credentials", "true");
             return;
         }

@@ -29,7 +29,7 @@ import java.util.List;
  * Class Name : JobCandidateMappingController
  * Project Name : server
  */
-@CrossOrigin(allowedHeaders = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 @RequestMapping("/api/jcm")
 @Log4j2

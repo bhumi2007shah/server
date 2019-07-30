@@ -2,13 +2,15 @@ package io.litmusblox.server.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.Country;
 import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author : Shital Raval
@@ -55,5 +57,4 @@ public class MasterDataBean {
     private MasterData sourceStage = null;
 
     private ConfigSettings configSettings = new ConfigSettings();
-    private List<String> supportedFileFormats = Arrays.asList(IConstant.UPLOAD_FORMATS_SUPPORTED.values().toString());
 }

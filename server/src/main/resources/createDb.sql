@@ -474,7 +474,7 @@ CREATE TABLE EMAIL_LOG (
   STATUS VARCHAR(50) DEFAULT NULL
 );
 ---------------------------------------------------------------------------------------------------------------------------
-CREATE TABLE SMS_LOGS (
+CREATE TABLE SMS_LOG (
   ID serial PRIMARY KEY NOT NULL,
   TEMPLATE_NAME VARCHAR(40) DEFAULT NULL,
   SENT_TO_ID INTEGER DEFAULT NULL,

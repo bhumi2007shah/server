@@ -79,6 +79,7 @@ public class JobCandidateMappingController {
                 new HashMap<String, List<String>>() {{
                     put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
+                    put("UserClassFilter", Arrays.asList("createdBy","company"));
                 }});
     }
 

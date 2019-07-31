@@ -179,6 +179,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                     throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
                 }else{
                     //Create new entry for JobCandidateMapping
+                    candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
                     JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
                     //create an empty record in jcm Communication details table
                     jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));

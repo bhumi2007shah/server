@@ -57,6 +57,18 @@ public class JobCandidateMapping implements Serializable {
     private String candidateSource;
 
     @NotNull
+    @Column(name="EMAIL")
+    private String email;
+
+    @NotNull
+    @Column(name="MOBILE")
+    private String mobile;
+
+    @NotNull
+    @Column(name="COUNTRY_CODE")
+    private String countryCode;
+
+    @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdOn;
@@ -74,9 +86,9 @@ public class JobCandidateMapping implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @Column(name="JCM_UUID")
+    @Column(name="CHATBOT_UUID")
     @org.hibernate.annotations.Type(type = "pg-uuid")
-    private UUID jcmUuid;
+    private UUID chatbotUuid;
 
     @Column(name="CANDIDATE_INTEREST")
     private boolean candidateInterest;
@@ -85,13 +97,16 @@ public class JobCandidateMapping implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date candidateInterestDate;
 
-    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID jcmUuid) {
+    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID chatbotUuid) {
         this.job = job;
         this.candidate = candidate;
         this.stage = stage;
         this.candidateSource = candidateSource;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
-        this.jcmUuid = jcmUuid;
+        this.chatbotUuid = chatbotUuid;
+        this.email = candidate.getEmail();
+        this.mobile = candidate.getMobile();
+        this.countryCode = candidate.getCountryCode();
     }
 }

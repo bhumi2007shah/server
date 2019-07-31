@@ -42,5 +42,5 @@ public interface JobCandidateMappingRepository extends JpaRepository<JobCandidat
     Integer getUploadedCandidateCount(@Param("createdOn") Date createdOn, @Param("user") User user);
 
     @Transactional
-    JobCandidateMapping findByJcmUuid(UUID uuid) throws Exception;
+    JobCandidateMapping findByChatbotUuid(UUID uuid) throws Exception;
 }

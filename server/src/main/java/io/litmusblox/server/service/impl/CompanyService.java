@@ -7,8 +7,7 @@ package io.litmusblox.server.service.impl;
 import io.litmusblox.server.model.Company;
 import io.litmusblox.server.service.ICompanyService;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Service class to perform various operations on a company
@@ -21,15 +20,17 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class CompanyService implements ICompanyService {
-
     /**
      * Service method to add / update a company
      *
      * @param company the company to be added
+     * @param logo    file containing the company logo
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public void saveCompany(Company company) throws Exception {
-       // TODO: add logic to create / update a company
+    @Override
+    public void saveCompany(Company company, MultipartFile logo) throws Exception {
+        // TODO: add logic to update a company
+        //retrieve company based on the id in the company object
+        //save the logo to repolocation and the location of the file in the company logo column of db
     }
 }

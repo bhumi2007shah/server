@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,20 +55,6 @@ public class CompanyDataController {
     }
 
     /**
-     * REST Api to create a new company
-     * Only a super admin has access to this api
-     *
-     * @param company the company to be created
-     * @throws Exception
-     */
-    @PostMapping("/create")
-    @ResponseStatus(HttpStatus.OK)
-    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "')")
-    void createCompany(@RequestBody Company company) throws Exception {
-        companyService.saveCompany(company);
-    }
-
-    /**
      * REST Api to update an existing company details
      * Only a client admin has access to this api
      *
@@ -77,8 +64,9 @@ public class CompanyDataController {
     @PostMapping("/update")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
-    void updateCompany(@RequestBody Company company) throws Exception {
-        companyService.saveCompany(company);
+    void updateCompany(@RequestParam("logo") MultipartFile logo,
+                       @RequestParam("company") Company company) throws Exception {
+        companyService.saveCompany(company, logo);
     }
 
 }

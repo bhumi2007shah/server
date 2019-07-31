@@ -56,6 +56,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
+    @Resource
+    JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
+
     @Autowired
     IUploadDataProcessService iUploadDataProcessService;
 
@@ -393,5 +396,19 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
+    }
+
+    /**
+     * Service method to invite candidates to fill chatbot for a job
+     *
+     * @param jcmList list of jcm ids for chatbot invitation
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void inviteCandidates(List<Long> jcmList) throws Exception {
+        if(jcmList == null || jcmList.size() == 0)
+            throw new WebException("Select candidates to invite");
+
+        jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
     }
 }

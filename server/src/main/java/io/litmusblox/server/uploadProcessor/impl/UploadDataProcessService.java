@@ -7,11 +7,9 @@ package io.litmusblox.server.uploadProcessor.impl;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
-import io.litmusblox.server.model.Candidate;
-import io.litmusblox.server.model.Job;
-import io.litmusblox.server.model.JobCandidateMapping;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.CandidateRepository;
+import io.litmusblox.server.repository.JcmCommunicationDetailsRepository;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
 import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.service.ICandidateService;
@@ -57,6 +55,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
+
+    @Resource
+    JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
 
     @Autowired
     ICandidateService candidateService;
@@ -178,7 +179,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                     throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
                 }else{
                     //Create new entry for JobCandidateMapping
-                    jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
+                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
+                    //create an empty record in jcm Communication details table
+                    jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
                 }
 
                 successCount++;

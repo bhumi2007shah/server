@@ -102,4 +102,19 @@ public class JobCandidateMappingController {
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
     }
+
+    /**
+     * Api to invite candidates to fill chatbot for a job
+     *
+     * @param jcmList list of jcm ids for chatbot invitation
+     * @throws Exception
+     */
+    @PostMapping(value = "/inviteCandidates")
+    @ResponseStatus(value = HttpStatus.OK)
+    void inviteCandidates(@RequestBody List<Long> jcmList) throws Exception {
+        log.info("Received request to invite candidates");
+        long startTime = System.currentTimeMillis();
+        jobControllerMappingService.inviteCandidates(jcmList);
+        log.info("Completed inviting candidates in " + (System.currentTimeMillis()-startTime)+"ms.");
+    }
 }

@@ -9,6 +9,7 @@ import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import io.litmusblox.server.utils.Util;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Controller class for all authentication related apis like:
@@ -34,6 +36,7 @@ import java.util.List;
 @CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/auth")
+@Log4j2
 public class AuthController {
 
     @Autowired
@@ -52,12 +55,27 @@ public class AuthController {
         return userDetailsService.login(user);
     }
 
-    @PostMapping(value = "/")
-    void resetPassword(@RequestParam String email) throws Exception {
-
+    @PostMapping(value = "/activateUser")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    void activateUser(@RequestParam("userToken") UUID userToken, @RequestBody User user) throws Exception {
+        log.info("Request activate user request for " + userToken);
+        long startTime = System.currentTimeMillis();
+        user.setUserUuid(userToken);
+        userDetailsService.setPassword(user);
+        log.info("Completed processing forgot password request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
-    @PostMapping(value = "/createUser")
+    @PutMapping(value="/forgotPassword")
+    @ResponseStatus(value=HttpStatus.ACCEPTED)
+    void forgotPassword(@RequestParam String email) throws Exception {
+        log.info("Received forgot password request for " + email);
+        long startTime = System.currentTimeMillis();
+        userDetailsService.forgotPassword(email);
+        log.info("Completed processing set password request in " + (System.currentTimeMillis() - startTime) + "ms.");
+    }
+
+    @PostMapping(value="/createUser")
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
     String addUser(@RequestBody User user) throws Exception {
         return Util.stripExtraInfoFromResponseBean(
@@ -67,5 +85,15 @@ public class AuthController {
                 }}),
                 null
         );
+    }
+
+    @PutMapping(value = "/blockUser")
+    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
+    @ResponseStatus(value = HttpStatus.OK)
+    void blockUser(@RequestBody User user) throws Exception {
+        log.info("Received request to block user with id: "+ user.getId());
+        long startTime = System.currentTimeMillis();
+        userDetailsService.blockUser(user);
+        log.info("Complete block user request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 }

@@ -4,7 +4,9 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -23,6 +25,7 @@ import java.util.List;
 @Entity
 @Table(name = "COMPANY")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class Company implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -39,6 +42,31 @@ public class Company implements Serializable {
     @NotNull
     @Column(name = "ACTIVE")
     private Boolean active;
+
+    @Column(name="WEBSITE")
+    private String website;
+
+    @Column(name="LANDLINE")
+    private String landline;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="INDUSTRY")
+    private MasterData industry;
+
+    @Column(name="LINKEDIN")
+    private String linkedin;
+
+    @Column(name="FACEBOOK")
+    private String facebook;
+
+    @Column(name="TWITTER")
+    private String twitter;
+
+    @Column(name="LOGO")
+    private String logo;
+
+    @Column(name="SUBSCRIPTION")
+    private String subscription = IConstant.CompanySubscription.Lite.name();
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -62,4 +90,10 @@ public class Company implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
     private List<CompanyBu> companyBuList;
 
+    public Company(@NotNull String companyName, @NotNull Boolean active, @NotNull Date createdOn, @NotNull Long createdBy) {
+        this.companyName = companyName;
+        this.active = active;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+    }
 }

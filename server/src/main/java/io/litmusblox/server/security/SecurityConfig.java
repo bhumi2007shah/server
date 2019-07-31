@@ -68,8 +68,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 //all no auth controller request do not require authentication
                 .antMatchers("/api/noAuth/*").permitAll()
-                // dont authenticate this particular request
+                // dont authenticate this particular request in Auth controller
                 .antMatchers("/api/auth/login").permitAll()
+                .antMatchers("/api/auth/forgotPassword").permitAll()
+                .antMatchers("/api/auth/activateUser").permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()
                 .exceptionHandling().authenticationEntryPoint(lbAuthenticationEntryPoint)

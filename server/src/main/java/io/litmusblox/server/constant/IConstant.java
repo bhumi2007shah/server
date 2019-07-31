@@ -44,7 +44,7 @@ public interface IConstant {
 
 
     enum UserStatus {
-        New, Active, Blocked;
+        New, Active, Blocked, Inactive;
     }
 
     enum UserRole {
@@ -155,4 +155,7 @@ public interface IConstant {
         }
     }
 
+    enum CompanySubscription {
+        Lite,Max;
+    }
 }

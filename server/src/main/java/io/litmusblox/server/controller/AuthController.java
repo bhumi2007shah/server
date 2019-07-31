@@ -52,6 +52,11 @@ public class AuthController {
         return userDetailsService.login(user);
     }
 
+    @PostMapping(value = "/")
+    void resetPassword(@RequestParam String email) throws Exception {
+
+    }
+
     @PostMapping(value = "/createUser")
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
     String addUser(@RequestBody User user) throws Exception {

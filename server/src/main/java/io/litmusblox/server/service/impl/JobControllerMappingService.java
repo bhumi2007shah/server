@@ -342,7 +342,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
         objFromDb.setCandidateInterest(interest);
@@ -359,7 +359,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -388,7 +388,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 

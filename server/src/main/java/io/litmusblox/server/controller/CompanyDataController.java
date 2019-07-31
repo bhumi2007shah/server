@@ -4,10 +4,14 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.model.Company;
+import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.utils.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -31,6 +35,9 @@ public class CompanyDataController {
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
+    @Autowired
+    ICompanyService companyService;
+
     @GetMapping("/screeningQuestions")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
@@ -45,4 +52,33 @@ public class CompanyDataController {
             }}
         );
     }
+
+    /**
+     * REST Api to create a new company
+     * Only a super admin has access to this api
+     *
+     * @param company the company to be created
+     * @throws Exception
+     */
+    @PostMapping("/create")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "')")
+    void createCompany(@RequestBody Company company) throws Exception {
+        companyService.saveCompany(company);
+    }
+
+    /**
+     * REST Api to update an existing company details
+     * Only a client admin has access to this api
+     *
+     * @param company the company to be updated
+     * @throws Exception
+     */
+    @PostMapping("/update")
+    @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
+    void updateCompany(@RequestBody Company company) throws Exception {
+        companyService.saveCompany(company);
+    }
+
 }

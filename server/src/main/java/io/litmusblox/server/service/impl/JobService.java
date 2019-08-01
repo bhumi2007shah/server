@@ -227,7 +227,7 @@ public class JobService implements IJobService {
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
 
-        if (job.getJobScreeningQuestionsList().size() > IConstant.SCREENING_QUESTIONS_LIST_MAX_SIZE) {
+        if (job.getJobScreeningQuestionsList().size() > MasterDataBean.getInstance().getConfigSettings().getMaxScreeningQuestionsLimit()) {
             throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
@@ -351,7 +351,7 @@ public class JobService implements IJobService {
     }
 
     private void addJobDetail(Job job, Job oldJob, User loggedInUser) {//add job details
-
+/*
         if (null == job.getJobDetail()) {
             throw new ValidationException("Job detail " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
@@ -410,11 +410,11 @@ public class JobService implements IJobService {
 
         //populate all users for the company of current user
         List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
-        job.getUsersForCompany().addAll(userList);
+        job.getUsersForCompany().addAll(userList);*/
     }
 
     private void addJobHiringTeam(Job job, Job oldJob, User loggedInUser) throws Exception {
-
+/*
         List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
 
         for (JobHiringTeam jobHiringTeam : job.getJobHiringTeamList()) {
@@ -439,7 +439,7 @@ public class JobService implements IJobService {
             companyStageStep = companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(), companyStageStep.getCompanyId(), companyStageStep.getStage(), new Date(), loggedInUser));
             jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), companyStageStep, jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
         }
-
+*/
     }
 
     /**

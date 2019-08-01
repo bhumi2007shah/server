@@ -5,6 +5,7 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.litmusblox.server.constant.IConstant;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,10 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Entity class for User table
@@ -79,10 +77,17 @@ public class User implements Serializable, UserDetails {
     @JoinColumn(name="COMPANY_ID")
     private Company company;
 
-    @NotNull
+   // @NotNull
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "COUNTRY_ID")
     private Country countryId;
+
+    @Column(name="USER_UUID")
+    @org.hibernate.annotations.Type(type = "pg-uuid")
+    private UUID userUuid;
+
+    @Column(name="RESET_PASSWORD_FLAG")
+    private boolean resetPasswordFlag;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -98,6 +103,18 @@ public class User implements Serializable, UserDetails {
 
     @Column(name = "UPDATED_BY")
     private Long updatedBy;
+
+    @Transient
+    @JsonProperty
+    private String countryCode;
+
+    @Transient
+    @JsonProperty
+    private String currentPassword;
+
+    @Transient
+    @JsonProperty
+    private String confirmPassword;
 
     public String getDisplayName() {
         return firstName + " " + lastName;

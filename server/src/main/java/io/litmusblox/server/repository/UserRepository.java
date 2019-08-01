@@ -8,6 +8,7 @@ import io.litmusblox.server.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Repository class for User object
@@ -22,4 +23,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByCompanyId(Long companyId);
     User findByEmail(String email);
+    User findByUserUuid(UUID userUuid);
+    int countByCompanyId(Long companyId);
 }

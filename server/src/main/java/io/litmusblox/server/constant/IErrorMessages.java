@@ -38,7 +38,14 @@ public interface IErrorMessages {
     String MISSING_COLUMN_NAMES_FIRST_ROW = "First row in the file does not have correct column names";
     String DUPLICATE_CANDIDATE = "Candidate already exists ";
     String INVALID_REQUEST_FROM_PLUGIN = "Invalid request object from plugin, missing Candidate info";
+    String DUPLICATE_USER_EMAIL = "User with email already exists";
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
     String JOB_NOT_LIVE = "Selected job is not live";
+    String CLIENT_ADMIN_EXISTS_FOR_COMPANY = "Client admin for company already exists: ";
+    String USER_COUNTRY_NULL = "Country code for new  user not selected";
+    String USER_NOT_FOUND = "User does not exist for email ";
+    String FORGOT_PASSWORD_USER_NOT_ACTIVE = "Selected user is not Active: ";
+    String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
+    String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
 }

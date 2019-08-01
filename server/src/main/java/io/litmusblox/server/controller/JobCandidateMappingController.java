@@ -29,7 +29,7 @@ import java.util.List;
  * Class Name : JobCandidateMappingController
  * Project Name : server
  */
-@CrossOrigin(allowedHeaders = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 @RequestMapping("/api/jcm")
 @Log4j2
@@ -47,12 +47,16 @@ public class JobCandidateMappingController {
      */
     @PostMapping(value = "/addCandidate/individual")
     @ResponseStatus(value = HttpStatus.OK)
-    UploadResponseBean addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
+    String addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
-        return responseBean;
+        return Util.stripExtraInfoFromResponseBean(responseBean, null,
+                new HashMap<String, List<String>>() {{
+                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
+                }});
     }
 
     /**
@@ -66,12 +70,17 @@ public class JobCandidateMappingController {
      */
     @PostMapping(value = "/addCandidate/file")
     @ResponseStatus(value = HttpStatus.OK)
-    UploadResponseBean addCandidatesFromFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("jobId")Long jobId, @RequestParam("fileFormat")String fileFormat) throws Exception {
+    String addCandidatesFromFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("jobId")Long jobId, @RequestParam("fileFormat")String fileFormat) throws Exception {
         log.info("Received request to add candidates from a file.");
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadCandidatesFromFile(multipartFile, jobId, fileFormat);
         log.info("Completed processing candidates from file in " + (System.currentTimeMillis()-startTime) + "ms.");
-        return responseBean;
+        return Util.stripExtraInfoFromResponseBean(responseBean, null,
+                new HashMap<String, List<String>>() {{
+                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
+                    put("UserClassFilter", Arrays.asList("createdBy","company"));
+                }});
     }
 
     /**
@@ -93,5 +102,20 @@ public class JobCandidateMappingController {
                     put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
+    }
+
+    /**
+     * Api to invite candidates to fill chatbot for a job
+     *
+     * @param jcmList list of jcm ids for chatbot invitation
+     * @throws Exception
+     */
+    @PostMapping(value = "/inviteCandidates")
+    @ResponseStatus(value = HttpStatus.OK)
+    void inviteCandidates(@RequestBody List<Long> jcmList) throws Exception {
+        log.info("Received request to invite candidates");
+        long startTime = System.currentTimeMillis();
+        jobControllerMappingService.inviteCandidates(jcmList);
+        log.info("Completed inviting candidates in " + (System.currentTimeMillis()-startTime)+"ms.");
     }
 }

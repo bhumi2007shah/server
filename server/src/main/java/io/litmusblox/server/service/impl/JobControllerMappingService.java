@@ -11,6 +11,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
@@ -55,6 +56,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Resource
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
+    @Resource
+    JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
+
     @Autowired
     IUploadDataProcessService iUploadDataProcessService;
 
@@ -97,7 +101,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,loggedInUser);
 
-        if (candidateProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
+        if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not processing records");
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -215,7 +219,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);
 
-        if (candidatesProcessed >= Integer.parseInt(environment.getProperty(IConstant.MAX_CANDIDATES_PER_USER_PER_DAY))) {
+        if (candidatesProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not saving file " + multipartFile);
             throw new WebException(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED, HttpStatus.UNPROCESSABLE_ENTITY);
         }
@@ -341,7 +345,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
         objFromDb.setCandidateInterest(interest);
@@ -358,7 +362,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -387,10 +391,24 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByJcmUuid(uuid);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
+    }
+
+    /**
+     * Service method to invite candidates to fill chatbot for a job
+     *
+     * @param jcmList list of jcm ids for chatbot invitation
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void inviteCandidates(List<Long> jcmList) throws Exception {
+        if(jcmList == null || jcmList.size() == 0)
+            throw new WebException("Select candidates to invite");
+
+        jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
     }
 }

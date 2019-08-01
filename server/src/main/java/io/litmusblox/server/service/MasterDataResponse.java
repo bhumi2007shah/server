@@ -32,7 +32,9 @@ public class MasterDataResponse {
     private Map<Long,String> function  = new HashMap<>();
     private Map<Long,String> expertise  = new HashMap<>();
     private Map<Long,String> education  = new HashMap<>();
+    private Map<Long,String> industry = new HashMap<>();
     private Map<Long, String> keySkills = new HashMap<>();
     private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
     private ConfigSettings configSettings;
+    private List<String> supportedFileFormats = new ArrayList<>();
 }

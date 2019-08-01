@@ -14,7 +14,7 @@ package io.litmusblox.server.constant;
 public interface IConstant {
 
      // Regex
-     String REGEX_FOR_JOB_TITLE ="^[\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+     String REGEX_FOR_JOB_TITLE ="^[\\&\\/\\(\\)\\[\\]\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
      String REGEX_FOR_COMPANY_JOB_ID = "^[a-zA-Z0-9]*$";
 
     String INDIA_CODE = "+91";
@@ -32,22 +32,19 @@ public interface IConstant {
     // lengths
     Integer TITLE_MAX_LENGTH = 100;
     int JOB_ID_MAX_LENGTH = 10;
-    Integer SCREENING_QUESTIONS_LIST_MAX_SIZE = 10;
     Integer CANDIDATE_NAME_MAX_LENGTH = 45;
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 
-     String MAX_CANDIDATES_PER_FILE = "maxCandidatesPerFile";
-     String MAX_CANDIDATES_PER_USER_PER_DAY = "maxCandidatesPerUserPerDay";
-     String REPO_LOCATION = "repoLocation";
-     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
-     String STR_INDIA = "India";
+    String REPO_LOCATION = "repoLocation";
+    String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
+    String STR_INDIA = "India";
 
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
 
 
     enum UserStatus {
-        New, Active, Blocked;
+        New, Active, Blocked, Inactive;
     }
 
     enum UserRole {
@@ -158,4 +155,7 @@ public interface IConstant {
         }
     }
 
+    enum CompanySubscription {
+        Lite,Max;
+    }
 }

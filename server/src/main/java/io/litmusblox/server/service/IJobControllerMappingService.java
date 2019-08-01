@@ -80,4 +80,12 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception;
+
+    /**
+     * Service method to invite candidates to fill chatbot for a job
+     *
+     * @param jcmList list of jcm ids for chatbot invitation
+     * @throws Exception
+     */
+    void inviteCandidates(List<Long> jcmList) throws Exception;
 }

@@ -237,14 +237,37 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void blockUser(User user) {
+    public void blockUser(User user, boolean blockUser) {
         User objFromDb = userRepository.getOne(user.getId());
         if (null == objFromDb)
             throw new ValidationException("Invalid user", HttpStatus.UNPROCESSABLE_ENTITY);
-        objFromDb.setStatus(IConstant.UserStatus.Blocked.name());
-        objFromDb.setUpdatedBy(getLoggedInUser().getId());
-        objFromDb.setUpdatedOn(new Date());
 
-        userRepository.save(objFromDb);
+        //if user is client admin, block the company
+        if(objFromDb.getRole().equals(IConstant.UserRole.Names.CLIENT_ADMIN)) {
+            if(blockUser) {
+                Company companyToBlock = objFromDb.getCompany();
+                companyToBlock.setActive(false);
+                companyRepository.save(companyToBlock);
+                log.info("Blocked company " + companyToBlock.getCompanyName());
+            }
+            else {
+                if(!objFromDb.getCompany().getActive())
+                    throw new ValidationException("Cannot unblock user of a blocked company");
+            }
+        }
+        else {
+            if (blockUser)
+                objFromDb.setStatus(IConstant.UserStatus.Blocked.name());
+            else {
+                if (null == objFromDb.getPassword())
+                    objFromDb.setStatus(IConstant.UserStatus.Inactive.name());
+                else
+                    objFromDb.setStatus(IConstant.UserStatus.Active.name());
+            }
+            objFromDb.setUpdatedBy(getLoggedInUser().getId());
+            objFromDb.setUpdatedOn(new Date());
+
+            userRepository.save(objFromDb);
+        }
     }
 }

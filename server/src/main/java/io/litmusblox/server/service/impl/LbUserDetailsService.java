@@ -87,9 +87,14 @@ public class LbUserDetailsService implements UserDetailsService {
     public LoginResponseBean login(User user) throws Exception {
         log.info("Received login request from " + user.getEmail());
         long startTime = System.currentTimeMillis();
+        final User userDetails = (User)loadUserByUsername(user.getEmail());
+
+        //check if company is active
+        if(!userDetails.getCompany().getActive())
+            throw new WebException("Company blocked", HttpStatus.FORBIDDEN);
+
         authenticate(user.getEmail(), user.getPassword());
 
-        final User userDetails = (User)loadUserByUsername(user.getEmail());
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");

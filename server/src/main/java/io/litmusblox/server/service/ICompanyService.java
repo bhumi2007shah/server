@@ -25,4 +25,14 @@ public interface ICompanyService {
      * @throws Exception
      */
     void saveCompany(Company company, MultipartFile logo) throws Exception;
+
+    /**
+     * Service method to block or unblock a company
+     * Only a super admin has access to this api
+     *
+     * @param company the company to block
+     * @param blockCompany flag indicating whether it is a block or an unblock operation
+     * @throws Exception
+     */
+    void blockCompany(Company company, boolean blockCompany) throws Exception;
 }

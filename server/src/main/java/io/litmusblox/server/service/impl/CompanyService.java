@@ -6,11 +6,13 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.CompanyRepository;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CompanyWorspaceBean;
 import io.litmusblox.server.service.ICompanyService;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -67,6 +70,8 @@ public class CompanyService implements ICompanyService {
         if(null == companyObjFromDb)
             throw new ValidationException("Company not found: " + company.getCompanyName());
         companyObjFromDb.setActive(!blockCompany);
+        companyObjFromDb.setUpdatedOn(new Date());
+        companyObjFromDb.setUpdatedBy(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
         companyRepository.save(companyObjFromDb);
     }
 

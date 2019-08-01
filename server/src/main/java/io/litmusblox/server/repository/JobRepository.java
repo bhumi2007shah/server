@@ -43,4 +43,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     //find all jobs for which ml data is not available
     List<Job> findByMlDataAvailable(Boolean mlDataFlag);
+
+    int countByCreatedBy(User createdBy);
 }

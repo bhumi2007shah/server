@@ -9,14 +9,12 @@ import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.service.ICandidateService;
-import io.litmusblox.server.service.IJobControllerMappingService;
-import io.litmusblox.server.service.MasterDataBean;
-import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.service.*;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
+import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
-import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -225,7 +221,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
         }
 
         //Save file
-        String fileName = storeFile(multipartFile, loggedInUser.getId(), environment.getProperty(IConstant.REPO_LOCATION));
+        String fileName = StoreFileUtil.storeFile(multipartFile, loggedInUser.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.Candidates.toString(),null);
         log.info("User " + loggedInUser.getDisplayName() + " uploaded " + fileName);
         List<Candidate> candidateList = processUploadedFile(fileName, uploadResponseBean, loggedInUser, fileFormat, environment.getProperty(IConstant.REPO_LOCATION));
 
@@ -238,49 +234,6 @@ public class JobControllerMappingService implements IJobControllerMappingService
         }
 
         return uploadResponseBean;
-    }
-
-    private String storeFile(MultipartFile multipartFile, long userId, String repoLocation) throws Exception {
-        try {
-            InputStream is = multipartFile.getInputStream();
-            String filePath = getFileName(multipartFile.getOriginalFilename(), userId, repoLocation);
-            Util.storeFile(is, filePath,repoLocation);
-            return filePath;
-        }
-        catch (WebException e) {
-            throw e;
-        }
-        catch (Exception e) {
-            throw new WebException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR,e);
-        }
-    }
-
-
-    private String getFileName(String fileName, long userId, String repoLocation) throws Exception {
-
-        try {
-            String filePath = null;
-            String staticRepoPath = null;
-            if (Util.isNull(repoLocation)) {
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
-            }
-            staticRepoPath = repoLocation;
-
-            String time = Calendar.getInstance().getTimeInMillis() + "";
-            filePath = "User" + File.separator + userId /*+ File.separator + userId*/;
-
-            File file = new File(staticRepoPath + File.separator + filePath);
-            if (!file.exists()) {
-                file.mkdirs();
-            }
-
-            filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
-            return filePath;
-        }
-        catch (Exception e) {
-            log.error(e.getMessage());
-            throw new WebException(IErrorMessages.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR, e);
-        }
     }
 
     private List<Candidate> processUploadedFile(String fileName, UploadResponseBean responseBean, User user, String fileSource, String repoLocation) {
@@ -320,7 +273,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception {
+    public UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId, MultipartFile candidateCv) throws Exception {
         UploadResponseBean responseBean = null;
         if (null != candidate) {
             //populate the first name and last name of the candidate
@@ -328,6 +281,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
             //set source as plugin
             candidate.setCandidateSource(IConstant.CandidateSource.Plugin.getValue());
             responseBean = uploadIndividualCandidate(Arrays.asList(candidate), jobId);
+
+            //Store candidate cv to repository location
+            if(responseBean.getStatus().equals(IConstant.UPLOAD_STATUS.Success.name())) {
+                Candidate uploadCandidate=responseBean.getSuccessfulCandidates().get(0);
+                StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),uploadCandidate.getId());
+            }
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);
@@ -410,5 +369,30 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException("Select candidates to invite");
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+    }
+
+    /**
+     * Service method to process sharing of candidate profiles with Hiring managers
+     *
+     * @param requestBean The request bean with information about the profile to be shared, the recepient name and recepient email address
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
+        //TODO: For every hiring manager in the array, insert a row in JCM_PROFILE_SHARING_DETAILS table
+    }
+
+    /**
+     * Service method to capture hiring manager interest
+     *
+     * @param sharingId     the uuid corresponding to which the interest needs to be captured
+     * @param interestValue interested true / false response
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateHiringManagerInterest(UUID sharingId, Boolean interestValue) {
+        //TODO: For the uuid,
+        //1. fetch record from JCM_PROFILE_SHARING_DETAILS table
+        //2. update the record by setting the HIRING_MANAGER_INTEREST = interest value and HIRING_MANAGER_INTEREST_DATE as current date
     }
 }

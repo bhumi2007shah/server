@@ -15,7 +15,8 @@ public interface IConstant {
 
      // Regex
      String REGEX_FOR_JOB_TITLE ="^[\\&\\/\\(\\)\\[\\]\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
-     String REGEX_FOR_COMPANY_JOB_ID = "^[a-zA-Z0-9]*$";
+     String REGEX_FOR_COMPANY_JOB_ID = "^[\\-\\/\\.\\,\\a-zA-Z0-9\\s]*$";
+     String REGEX_FOR_COMPANY_NAME ="^[\\&\\'\\-\\.a-zA-Z0-9\\s]+$";
 
     String INDIA_CODE = "+91";
     String INDIAN_MOBILE_PATTERN = "(0/91)?[6-9][0-9]{9}";
@@ -157,5 +158,9 @@ public interface IConstant {
 
     enum CompanySubscription {
         Lite,Max;
+    }
+
+    enum UPLOAD_TYPE {
+       Candidates,Logo,CandidateCv;
     }
 }

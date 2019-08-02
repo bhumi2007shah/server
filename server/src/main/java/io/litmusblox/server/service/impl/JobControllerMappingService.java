@@ -6,6 +6,7 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
@@ -17,6 +18,7 @@ import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -394,5 +396,46 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //TODO: For the uuid,
         //1. fetch record from JCM_PROFILE_SHARING_DETAILS table
         //2. update the record by setting the HIRING_MANAGER_INTEREST = interest value and HIRING_MANAGER_INTEREST_DATE as current date
+    }
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param jobCandidateMappingId
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    @Transactional
+    public Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.getOne(jobCandidateMappingId);
+        if(null == objFromDb)
+            throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        List<JobScreeningQuestions> screeningQuestions = jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
+        Map<Long, JobScreeningQuestions> screeningQuestionsMap = new HashMap<>(screeningQuestions.size());
+        screeningQuestions.forEach(screeningQuestion-> {
+            screeningQuestionsMap.put(screeningQuestion.getId(), screeningQuestion);
+        });
+
+        List<CandidateScreeningQuestionResponse> responses = candidateScreeningQuestionResponseRepository.findByJobCandidateMappingId(jobCandidateMappingId);
+
+        responses.forEach(candidateResponse -> {
+            screeningQuestionsMap.get(candidateResponse.getJobScreeningQuestionId()).getCandidateResponse().add(candidateResponse.getResponse());
+            if (null != candidateResponse.getComment())
+                screeningQuestionsMap.get(candidateResponse.getJobScreeningQuestionId()).getCandidateResponse().add(candidateResponse.getComment());
+        });
+
+        Candidate returnObj = objFromDb.getCandidate();
+        Hibernate.initialize(returnObj.getCandidateDetails());
+        Hibernate.initialize(returnObj.getCandidateEducationDetails());
+        Hibernate.initialize(returnObj.getCandidateCompanyDetails());
+        Hibernate.initialize(returnObj.getCandidateProjectDetails());
+        Hibernate.initialize(returnObj.getCandidateLanguageProficiencies());
+        Hibernate.initialize(returnObj.getCandidateOnlineProfiles());
+        Hibernate.initialize(returnObj.getCandidateSkillDetails());
+        Hibernate.initialize(returnObj.getCandidateWorkAuthorizations());
+        returnObj.setScreeningQuestionResponses(new ArrayList<>(screeningQuestionsMap.values()));
+
+        return returnObj;
     }
 }

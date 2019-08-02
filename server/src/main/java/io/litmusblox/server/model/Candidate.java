@@ -132,4 +132,8 @@ public class Candidate implements Serializable {
         this.createdOn = createdOn;
         this.createdBy = createdBy;
     }
+
+    @JsonProperty
+    @Transient
+    private List<JobScreeningQuestions> screeningQuestionResponses;
 }

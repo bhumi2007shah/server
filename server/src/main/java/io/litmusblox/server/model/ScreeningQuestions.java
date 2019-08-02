@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
@@ -24,6 +25,7 @@ import java.util.List;
 @Entity
 @Table(name = "SCREENING_QUESTION")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("ScreeningQuestionFilter")
 public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

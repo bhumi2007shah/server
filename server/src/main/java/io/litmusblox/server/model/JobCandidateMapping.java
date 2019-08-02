@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,7 @@ import java.util.UUID;
 @Entity
 @Table(name="JOB_CANDIDATE_MAPPING")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("JcmFilter")
 public class JobCandidateMapping implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285047L;

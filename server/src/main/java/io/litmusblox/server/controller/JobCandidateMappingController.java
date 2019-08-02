@@ -138,4 +138,32 @@ public class JobCandidateMappingController {
     }
 
 
+    /**
+     * REST Api to fetch details of a single candidate for a job
+     *
+     * @param jobCandidateMappingId
+     * @return candidate object as json
+     * @throws Exception
+     */
+    @GetMapping("/fetchCandidateProfile/{jobCandidateMappingId}")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    String getCandidateProfile(@PathVariable("jobCandidateMappingId") Long jobCandidateMappingId) throws Exception {
+        log.info("Received request to share candidate profile with hiring managers");
+        long startTime = System.currentTimeMillis();
+        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
+                new HashMap<String, List<String>>() {{
+                    put("UserClassFilter", Arrays.asList("displayName"));
+                    put("ScreeningQuestionFilter", Arrays.asList("question"));
+                }},
+                new HashMap<String, List<String>>() {{
+                    put("CandidateFilter",Arrays.asList("createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
+                    put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                    put("JcmFilter", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+        }});
+        log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
+        return response;
+    }
+
 }

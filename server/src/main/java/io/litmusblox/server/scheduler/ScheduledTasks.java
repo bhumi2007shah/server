@@ -10,7 +10,6 @@ import io.litmusblox.server.repository.JobKeySkillsRepository;
 import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.UserRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,7 +43,7 @@ public class ScheduledTasks {
     @Resource
     JobCapabilitiesRepository jobCapabilitiesRepository;
 
-    @Scheduled(fixedRate = 3000, initialDelay = 5000)
+    //@Scheduled(fixedRate = 3000, initialDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRED)
     public void performMlApiCall() {
         //log.info("ML Api call scheduled task trigerred");

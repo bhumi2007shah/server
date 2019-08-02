@@ -6,12 +6,15 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -65,5 +68,9 @@ public class JobScreeningQuestions implements Serializable {
 
     @Column(name = "UPDATED_BY")
     private Long updatedBy;
+
+    @JsonProperty
+    @Transient
+    private List<String> candidateResponse = new ArrayList<>();
 
 }

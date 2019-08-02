@@ -381,4 +381,18 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
         //TODO: For every hiring manager in the array, insert a row in JCM_PROFILE_SHARING_DETAILS table
     }
+
+    /**
+     * Service method to capture hiring manager interest
+     *
+     * @param sharingId     the uuid corresponding to which the interest needs to be captured
+     * @param interestValue interested true / false response
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateHiringManagerInterest(UUID sharingId, Boolean interestValue) {
+        //TODO: For the uuid,
+        //1. fetch record from JCM_PROFILE_SHARING_DETAILS table
+        //2. update the record by setting the HIRING_MANAGER_INTEREST = interest value and HIRING_MANAGER_INTEREST_DATE as current date
+    }
 }

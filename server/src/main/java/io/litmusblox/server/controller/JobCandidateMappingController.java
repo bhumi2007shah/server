@@ -136,4 +136,6 @@ public class JobCandidateMappingController {
         jobControllerMappingService.shareCandidateProfiles(requestBean);
         log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
     }
+
+
 }

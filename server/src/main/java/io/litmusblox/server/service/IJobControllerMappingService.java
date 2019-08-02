@@ -97,4 +97,13 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean);
+
+    /**
+     * Service method to capture hiring manager interest
+     *
+     * @param sharingId the uuid corresponding to which the interest needs to be captured
+     * @param interestValue interested true / false response
+     * @throws Exception
+     */
+    void updateHiringManagerInterest(UUID sharingId, Boolean interestValue);
 }

@@ -73,6 +73,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Autowired
     ICandidateService candidateService;
 
+    @Resource
+    JcmProfileSharingDetailsRepository jcmProfileSharingDetailsRepository;
+
 
     /**
      * Service method to add a individually added candidates to a job
@@ -379,7 +382,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
-        //TODO: For every hiring manager in the array, insert a row in JCM_PROFILE_SHARING_DETAILS table
+
+        List<JcmProfileSharingDetails> jobJcmProfileSharingDetailsList=new ArrayList<>();
+
+        requestBean.getJcmId().stream().forEach(jcmId->{
+            for (String[] array:requestBean.getReceiverInfo()) {
+                JcmProfileSharingDetails jcmProfileSharingDetails=new JcmProfileSharingDetails();
+                jcmProfileSharingDetails.setReceiverName(array[0]);
+                jcmProfileSharingDetails.setReceiverEmail(array[1]);
+                jcmProfileSharingDetails.setJobCandidateMappingId(jcmId);
+                jcmProfileSharingDetails.setSenderId((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+                jobJcmProfileSharingDetailsList.add(jcmProfileSharingDetails);
+            }
+        });
+        jcmProfileSharingDetailsRepository.saveAll(jobJcmProfileSharingDetailsList);
     }
 
     /**
@@ -394,5 +410,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //TODO: For the uuid,
         //1. fetch record from JCM_PROFILE_SHARING_DETAILS table
         //2. update the record by setting the HIRING_MANAGER_INTEREST = interest value and HIRING_MANAGER_INTEREST_DATE as current date
+        JcmProfileSharingDetails jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findById(sharingId);
+        jcmProfileSharingDetails.setHiringManagerInterestDate(new Date());
+        jcmProfileSharingDetails.setHiringManagerInterest(interestValue);
+        jcmProfileSharingDetailsRepository.save(jcmProfileSharingDetails);
     }
 }

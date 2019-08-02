@@ -62,7 +62,7 @@ public class StoreFileUtil {
     private static String getFileName(String fileName, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
 
         try {
-            String filePath = null;
+            StringBuffer filePath=new StringBuffer();
             String staticRepoPath = null;
             if (Util.isNull(repoLocation)) {
                 throw new WebException(IErrorMessages.INVALID_SETTINGS);
@@ -70,19 +70,19 @@ public class StoreFileUtil {
             staticRepoPath = repoLocation;
 
             //String time = Calendar.getInstance().getTimeInMillis() + "";
-            filePath = uploadType + File.separator + id;
+            filePath.append(uploadType).append(File.separator + id);
             File file = new File(staticRepoPath + File.separator + filePath);
             if (!file.exists()) {
                 file.mkdirs();
             }
 
             if(null!=candidateId)
-                filePath = filePath + File.separator + candidateId+"_"+fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+                filePath.append(filePath).append(File.separator).append(candidateId).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
             else
-                filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+                filePath.append(filePath).append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
 
             log.info("Saved file: "+filePath);
-            return filePath;
+            return filePath.toString();
         }
         catch (Exception e) {
             log.error(e.getMessage());

@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.litmusblox.server.model.Candidate;
 import lombok.Data;
 
@@ -28,4 +29,6 @@ public class UploadResponseBean {
     private int failureCount;
     private List<Candidate> failedCandidates = new ArrayList();
     private int candidatesProcessedCount = 0;
+    @JsonIgnore
+    private List<Candidate> successfulCandidates = new ArrayList();;
 }

@@ -10,12 +10,10 @@ import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.CompanyRepository;
-import io.litmusblox.server.repository.CountryRepository;
-import io.litmusblox.server.repository.JobCandidateMappingRepository;
-import io.litmusblox.server.repository.UserRepository;
+import io.litmusblox.server.repository.*;
 import io.litmusblox.server.security.JwtTokenUtil;
 import io.litmusblox.server.service.LoginResponseBean;
+import io.litmusblox.server.service.UserWorkspaceBean;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -65,6 +64,9 @@ public class LbUserDetailsService implements UserDetailsService {
     @Resource
     CountryRepository countryRepository;
 
+    @Resource
+    JobRepository jobRepository;
+
     @Autowired
     private AuthenticationManager authenticationManager;
 
@@ -87,9 +89,14 @@ public class LbUserDetailsService implements UserDetailsService {
     public LoginResponseBean login(User user) throws Exception {
         log.info("Received login request from " + user.getEmail());
         long startTime = System.currentTimeMillis();
+        final User userDetails = (User)loadUserByUsername(user.getEmail());
+
+        //check if company is active
+        if(!userDetails.getCompany().getActive())
+            throw new WebException("Company blocked", HttpStatus.FORBIDDEN);
+
         authenticate(user.getEmail(), user.getPassword());
 
-        final User userDetails = (User)loadUserByUsername(user.getEmail());
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
@@ -237,14 +244,65 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void blockUser(User user) {
+    public void blockUser(User user, boolean blockUser) {
         User objFromDb = userRepository.getOne(user.getId());
         if (null == objFromDb)
             throw new ValidationException("Invalid user", HttpStatus.UNPROCESSABLE_ENTITY);
-        objFromDb.setStatus(IConstant.UserStatus.Blocked.name());
-        objFromDb.setUpdatedBy(getLoggedInUser().getId());
-        objFromDb.setUpdatedOn(new Date());
 
-        userRepository.save(objFromDb);
+        //if user is client admin, block the company
+        if(objFromDb.getRole().equals(IConstant.UserRole.Names.CLIENT_ADMIN)) {
+            if(blockUser) {
+                Company companyToBlock = objFromDb.getCompany();
+                companyToBlock.setActive(false);
+                companyToBlock.setUpdatedBy(getLoggedInUser().getId());
+                companyToBlock.setUpdatedOn(new Date());
+                companyRepository.save(companyToBlock);
+                log.info("Blocked company " + companyToBlock.getCompanyName());
+            }
+            else {
+                if(!objFromDb.getCompany().getActive())
+                    throw new ValidationException("Cannot unblock user of a blocked company");
+            }
+        }
+        else {
+            if (blockUser)
+                objFromDb.setStatus(IConstant.UserStatus.Blocked.name());
+            else {
+                if (null == objFromDb.getPassword())
+                    objFromDb.setStatus(IConstant.UserStatus.Inactive.name());
+                else
+                    objFromDb.setStatus(IConstant.UserStatus.Active.name());
+            }
+            objFromDb.setUpdatedBy(getLoggedInUser().getId());
+            objFromDb.setUpdatedOn(new Date());
+
+            userRepository.save(objFromDb);
+        }
+    }
+
+    /**
+     * Service method to fetch a list of all users for a company
+     * @param companyName the company for which users need to be fetched
+     * @return list of all users for the company
+     * @throws Exception
+     */
+    public List<UserWorkspaceBean> fetchUsers(String companyName) throws Exception {
+        log.info("Received request to get list of users");
+        long startTime = System.currentTimeMillis();
+
+        Company company = companyRepository.findByCompanyName(companyName);
+        if(null == company)
+            throw new ValidationException("Company not found: " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        List<User> userList = userRepository.findByCompanyId(company.getId());
+        List<UserWorkspaceBean> responseBeans = new ArrayList<>(userList.size());
+        userList.forEach(user->{
+            UserWorkspaceBean workspaceBean = new UserWorkspaceBean(user.getId(), user.getDisplayName(), user.getStatus());
+            workspaceBean.setNumberOfJobsCreated(jobRepository.countByCreatedBy(user));
+            responseBeans.add(workspaceBean);
+        });
+
+        log.info("Completed processing list of users in " + (System.currentTimeMillis() - startTime) + "ms.");
+        return responseBeans;
     }
 }

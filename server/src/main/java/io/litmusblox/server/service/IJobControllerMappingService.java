@@ -51,10 +51,11 @@ public interface IJobControllerMappingService {
      *
      * @param candidate the candidate to be added
      * @param jobId the job for which the candidate is to be added
+     * @param candidateCv candidate Cv
      * @return the status of upload operation
      * @throws Exception
      */
-    UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception;
+    UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId, MultipartFile candidateCv) throws Exception;
 
 
     /**
@@ -88,4 +89,21 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     void inviteCandidates(List<Long> jcmList) throws Exception;
+
+    /**
+     * Service method to process sharing of candidate profiles with Hiring managers
+     *
+     * @param requestBean The request bean with information about the profile to be shared, the recepient name and recepient email address
+     * @throws Exception
+     */
+    void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean);
+
+    /**
+     * Service method to capture hiring manager interest
+     *
+     * @param sharingId the uuid corresponding to which the interest needs to be captured
+     * @param interestValue interested true / false response
+     * @throws Exception
+     */
+    void updateHiringManagerInterest(UUID sharingId, Boolean interestValue);
 }

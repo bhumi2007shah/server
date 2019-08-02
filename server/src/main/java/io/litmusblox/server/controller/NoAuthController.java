@@ -92,4 +92,23 @@ public class NoAuthController {
         jobControllerMappingService.saveScreeningQuestionResponses(uuid, candidateResponse);
         log.info("Completed saving candidate response to screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
+
+    /**
+     * REST Api to capture hiring manager interest
+     *
+     * @param sharingId the uuid corresponding to which the interest needs to be captured
+     * @param interestValue interested true / false response
+     * @throws Exception
+     */
+    @PutMapping(value = "/hiringManagerInterest/{sharingId}/{interestValue}")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void updateHiringManagerInterest(@PathVariable(value = "sharingId") UUID sharingId, @PathVariable(value = "interestValue") Boolean interestValue) {
+        log.info("Received Hiring Manager Interest information");
+        long startTime = System.currentTimeMillis();
+
+        jobControllerMappingService.updateHiringManagerInterest(sharingId, interestValue);
+
+        log.info("Completed processing request for Hiring Manager Interest in " + (System.currentTimeMillis() - startTime) + " ms");
+    }
+
 }

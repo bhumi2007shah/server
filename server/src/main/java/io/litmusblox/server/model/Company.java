@@ -5,11 +5,14 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.constant.IErrorMessages;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -35,13 +38,18 @@ public class Company implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @NotNull(message = "COMPANY_NAME " + IErrorMessages.NULL_MESSAGE)
+    @NotBlank(message = "COMPANY_NAME " + IErrorMessages.BLANK_MESSAGE)
+    @Pattern(message = "COMPANY_NAME "+ IErrorMessages.COMPANY_NAME_NOT_VALID,regexp = IConstant.REGEX_FOR_COMPANY_NAME)
     @Column(name = "COMPANY_NAME")
     private String companyName;
 
     @NotNull
     @Column(name = "ACTIVE")
     private Boolean active;
+
+    @Column(name = "COMPANY_DESCRIPTION")
+    private String companyDescription;
 
     @Column(name="WEBSITE")
     private String website;

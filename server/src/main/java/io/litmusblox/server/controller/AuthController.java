@@ -33,7 +33,7 @@ import java.util.UUID;
  * Class Name : AuthController
  * Project Name : server
  */
-@CrossOrigin(allowedHeaders = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.PUT,RequestMethod.POST,RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 @RequestMapping("/api/auth")
 @Log4j2
@@ -87,13 +87,13 @@ public class AuthController {
         );
     }
 
-    @PutMapping(value = "/blockUser")
+    @PutMapping(value = "/blockUnblockUser")
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
     @ResponseStatus(value = HttpStatus.OK)
-    void blockUser(@RequestBody User user) throws Exception {
+    void blockUser(@RequestBody User user, @RequestParam boolean blockUser) throws Exception {
         log.info("Received request to block user with id: "+ user.getId());
         long startTime = System.currentTimeMillis();
-        userDetailsService.blockUser(user);
+        userDetailsService.blockUser(user,blockUser);
         log.info("Complete block user request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 }

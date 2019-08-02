@@ -14,6 +14,7 @@ package io.litmusblox.server.constant;
 public interface IErrorMessages {
 
     String NULL_MESSAGE="should not be null";
+    String BLANK_MESSAGE="should not be blank";
     String ALPHANUMERIC_MESSAGE="should be alphanumeric";
     String SPECIAL_CHARACTER_MESSAGE="should not contain special character";
     String EMPTY_AND_NULL_MESSAGE="should not be null or empty ";
@@ -48,4 +49,5 @@ public interface IErrorMessages {
     String FORGOT_PASSWORD_USER_NOT_ACTIVE = "Selected user is not Active: ";
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
+    String COMPANY_NAME_NOT_VALID= "Company name not valid";
 }

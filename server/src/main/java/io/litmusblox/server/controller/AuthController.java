@@ -87,13 +87,13 @@ public class AuthController {
         );
     }
 
-    @PutMapping(value = "/blockUser")
+    @PutMapping(value = "/blockUnblockUser")
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
     @ResponseStatus(value = HttpStatus.OK)
-    void blockUser(@RequestBody User user) throws Exception {
+    void blockUser(@RequestBody User user, @RequestParam boolean blockUser) throws Exception {
         log.info("Received request to block user with id: "+ user.getId());
         long startTime = System.currentTimeMillis();
-        userDetailsService.blockUser(user);
+        userDetailsService.blockUser(user,blockUser);
         log.info("Complete block user request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 }

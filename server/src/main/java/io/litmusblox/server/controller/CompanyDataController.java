@@ -30,10 +30,10 @@ import java.util.List;
  * Class Name : CompanyDataController
  * Project Name : server
  */
-@Log4j2
-@CrossOrigin
+@CrossOrigin(allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/company")
+@Log4j2
 public class CompanyDataController {
 
     @Autowired
@@ -71,6 +71,25 @@ public class CompanyDataController {
                        @RequestParam("company") String companyString) throws Exception {
         Company company=new ObjectMapper().readValue(companyString, Company.class);
         companyService.saveCompany(company, logo);
+    }
+
+
+    /**
+     * REST Api to block or unblock a company
+     * Only a super admin has access to this api
+     *
+     * @param company the company to block
+     * @param blockCompany flag indicating whether it is a block or an unblock operation
+     * @throws Exception
+     */
+    @PutMapping(value = "/blockUnblockCompany")
+    @PreAuthorize("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "')")
+    @ResponseStatus(value = HttpStatus.OK)
+    void blockCompany(@RequestBody Company company, @RequestParam boolean blockCompany) throws Exception {
+        log.info("Received request to block company with name: "+ company.getCompanyName());
+        long startTime = System.currentTimeMillis();
+        companyService.blockCompany(company,blockCompany);
+        log.info("Complete block company request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
 }

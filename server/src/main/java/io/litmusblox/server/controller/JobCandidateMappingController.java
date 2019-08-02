@@ -6,6 +6,7 @@ package io.litmusblox.server.controller;
 
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
@@ -117,5 +118,20 @@ public class JobCandidateMappingController {
         long startTime = System.currentTimeMillis();
         jobControllerMappingService.inviteCandidates(jcmList);
         log.info("Completed inviting candidates in " + (System.currentTimeMillis()-startTime)+"ms.");
+    }
+
+    /**
+     * REST Api to process sharing of candidate profiles with Hiring managers
+     *
+     * @param requestBean The request bean with information about the profile to be shared, the recepient name and recepient email address
+     * @throws Exception
+     */
+    @PostMapping(value = "/shareProfile")
+    @ResponseStatus(value = HttpStatus.OK)
+    void shareCandidateProfile(@RequestBody ShareCandidateProfileRequestBean requestBean) {
+        log.info("Received request to share candidate profile with hiring managers");
+        long startTime = System.currentTimeMillis();
+        jobControllerMappingService.shareCandidateProfiles(requestBean);
+        log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
     }
 }

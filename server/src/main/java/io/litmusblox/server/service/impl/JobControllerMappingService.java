@@ -9,10 +9,7 @@ import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
-import io.litmusblox.server.service.ICandidateService;
-import io.litmusblox.server.service.IJobControllerMappingService;
-import io.litmusblox.server.service.MasterDataBean;
-import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.service.*;
 import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
@@ -410,5 +407,16 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException("Select candidates to invite");
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+    }
+
+    /**
+     * Service method to process sharing of candidate profiles with Hiring managers
+     *
+     * @param requestBean The request bean with information about the profile to be shared, the recepient name and recepient email address
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
+        //TODO: For every hiring manager in the array, insert a row in JCM_PROFILE_SHARING_DETAILS table
     }
 }

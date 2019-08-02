@@ -88,4 +88,12 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     void inviteCandidates(List<Long> jcmList) throws Exception;
+
+    /**
+     * Service method to process sharing of candidate profiles with Hiring managers
+     *
+     * @param requestBean The request bean with information about the profile to be shared, the recepient name and recepient email address
+     * @throws Exception
+     */
+    void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean);
 }

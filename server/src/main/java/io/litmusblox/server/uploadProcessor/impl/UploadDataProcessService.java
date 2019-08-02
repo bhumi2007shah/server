@@ -185,6 +185,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                     jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
                 }
 
+                uploadResponseBean.getSuccessfulCandidates().add(candidateObjToUse);
                 successCount++;
             }catch(ValidationException ve) {
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + ve.getErrorMessage(), HttpStatus.BAD_REQUEST);

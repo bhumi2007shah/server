@@ -4,7 +4,9 @@
 
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.Company;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.utils.Util;
@@ -86,16 +88,17 @@ public class JobCandidateMappingController {
     /**
      * Api method to source and add a candidate from a plugin, for example Naukri plugin
      *
-     * @param candidate the candidate to be added
+     * @param candidateString the json string of candidate to be added
      * @param jobId the job for which the candidate is to be added
      * @return the status of upload operation
      * @throws Exception
      */
     @PostMapping(value = "/addCandidate/plugin")
-    String uploadCandidateFromPlugin(@RequestBody Candidate candidate, @RequestParam("jobId") Long jobId) throws Exception {
+    String uploadCandidateFromPlugin(@RequestParam(name = "candidateCv", required = false) MultipartFile candidateCv, @RequestParam("candidate") String candidateString, @RequestParam("jobId") Long jobId) throws Exception {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
-        UploadResponseBean responseBean = jobControllerMappingService.uploadCandidateFromPlugin(candidate, jobId);
+        Candidate candidate=new ObjectMapper().readValue(candidateString, Candidate.class);
+        UploadResponseBean responseBean = jobControllerMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{

@@ -51,10 +51,11 @@ public interface IJobControllerMappingService {
      *
      * @param candidate the candidate to be added
      * @param jobId the job for which the candidate is to be added
+     * @param candidateCv candidate Cv
      * @return the status of upload operation
      * @throws Exception
      */
-    UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId) throws Exception;
+    UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId, MultipartFile candidateCv) throws Exception;
 
 
     /**

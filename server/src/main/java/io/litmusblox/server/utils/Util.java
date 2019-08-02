@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
-import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Configuration;
@@ -146,7 +145,7 @@ public class Util {
     }
 
     public static String getFileExtension(String fileName) {
-        return fileName.substring(fileName.indexOf('.') + 1);
+        return fileName.substring(fileName.lastIndexOf('.') + 1);
     }
 
     public static boolean validateUploadFileType(String fileName) {
@@ -157,7 +156,7 @@ public class Util {
         return true;
     }
 
-    public static File storeFile(InputStream is, String filePath, String repoLocation) throws IOException {
+    /*public static File storeFile(InputStream is, String filePath, String repoLocation) throws IOException {
         File targetFile =  null;
         try {
             //String staticRepoPath = null;
@@ -172,7 +171,7 @@ public class Util {
             new WebException(e.getMessage());
         }
         return targetFile;
-    }
+    }*/
 
     public static String formatDate(Date date, String dateFormat) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);

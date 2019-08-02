@@ -4,11 +4,13 @@
 
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.Company;
 import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.utils.Util;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,6 +30,7 @@ import java.util.List;
  * Class Name : CompanyDataController
  * Project Name : server
  */
+@Log4j2
 @CrossOrigin
 @RestController
 @RequestMapping("/api/company")
@@ -58,14 +61,15 @@ public class CompanyDataController {
      * REST Api to update an existing company details
      * Only a client admin has access to this api
      *
-     * @param company the company to be updated
+     * @param companyString the company to be updated
      * @throws Exception
      */
-    @PostMapping("/update")
+    @PutMapping(value = "/update",consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
     void updateCompany(@RequestParam("logo") MultipartFile logo,
-                       @RequestParam("company") Company company) throws Exception {
+                       @RequestParam("company") String companyString) throws Exception {
+        Company company=new ObjectMapper().readValue(companyString, Company.class);
         companyService.saveCompany(company, logo);
     }
 

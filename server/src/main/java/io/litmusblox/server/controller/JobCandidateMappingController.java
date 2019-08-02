@@ -6,7 +6,6 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
-import io.litmusblox.server.model.Company;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;

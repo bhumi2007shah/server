@@ -7,11 +7,7 @@ package io.litmusblox.server.service.impl;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
-import io.litmusblox.server.error.WebException;
-import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Company;
-import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.CompanyRepository;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.CompanyRepository;
 import io.litmusblox.server.repository.UserRepository;
@@ -25,19 +21,10 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.Resource;
-import java.io.File;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Optional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -63,17 +50,6 @@ public class CompanyService implements ICompanyService {
 
     @Resource
     UserRepository userRepository;
-
-    /**
-     * Service method to add / update a company
-     *
-     * @param company the company to be added
-     * @param logo    file containing the company logo
-     * @throws Exception
-     */
-
-    @Resource
-    CompanyRepository companyRepository;
 
     @Autowired
     Environment environment;

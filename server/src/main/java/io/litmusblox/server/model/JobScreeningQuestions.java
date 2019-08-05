@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,6 +28,7 @@ import java.util.List;
 @Entity
 @Table(name = "JOB_SCREENING_QUESTIONS")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("JobScreeningQuestions")
 public class JobScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

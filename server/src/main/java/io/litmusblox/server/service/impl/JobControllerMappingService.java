@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -427,6 +428,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         Candidate returnObj = objFromDb.getCandidate();
         Hibernate.initialize(returnObj.getCandidateDetails());
+        //set the cv location
+        if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
+            StringBuffer cvLocation = new StringBuffer(environment.getProperty(IConstant.REPO_LOCATION));
+            cvLocation.append(IConstant.CANDIDATE_CV).append(File.separator).append(objFromDb.getJob().getId()).append(File.separator).append(objFromDb.getCandidate().getId()).append(returnObj.getCandidateDetails().getCvFileType());
+            returnObj.getCandidateDetails().setCvLocation(cvLocation.toString());
+        }
         Hibernate.initialize(returnObj.getCandidateEducationDetails());
         Hibernate.initialize(returnObj.getCandidateCompanyDetails());
         Hibernate.initialize(returnObj.getCandidateProjectDetails());
@@ -436,6 +443,8 @@ public class JobControllerMappingService implements IJobControllerMappingService
         Hibernate.initialize(returnObj.getCandidateWorkAuthorizations());
         returnObj.setScreeningQuestionResponses(new ArrayList<>(screeningQuestionsMap.values()));
 
+        returnObj.setEmail(objFromDb.getEmail());
+        returnObj.setMobile(objFromDb.getMobile());
         return returnObj;
     }
 }

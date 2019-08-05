@@ -42,12 +42,12 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
-                put("UserClassFilter",Arrays.asList("displayName","id"));
+                put("User",Arrays.asList("displayName","id"));
             }}),
             (new HashMap<String, List<String>>(){{
-                put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
-                put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
+                put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
             }})
         );
 
@@ -66,11 +66,10 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(
                 jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false),
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter",Arrays.asList("displayName"));
+                    put("User",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
-                    //put("UserClassFilter", Arrays.asList("company","countryId"));
+                    put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
                 }})
         );
     }
@@ -93,13 +92,12 @@ public class JobController {
 
         return Util.stripExtraInfoFromResponseBean(responseBean,
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter",Arrays.asList("displayName"));
+                    put("User",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Job",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
-                    //put("UserClassFilter", Arrays.asList("company","countryId"));
                 }})
         );
     }

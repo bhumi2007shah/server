@@ -23,7 +23,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "USER_SCREENING_QUESTION")
-@JsonFilter("UserScreeningQuestionFilter")
+@JsonFilter("UserScreeningQuestion")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserScreeningQuestion implements Serializable {
 

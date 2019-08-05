@@ -56,7 +56,7 @@ public class JobCandidateMappingController {
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
     }
@@ -79,9 +79,9 @@ public class JobCandidateMappingController {
         log.info("Completed processing candidates from file in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
-                    put("UserClassFilter", Arrays.asList("createdBy","company"));
+                    put("User", Arrays.asList("createdBy","company"));
                 }});
     }
 
@@ -102,7 +102,7 @@ public class JobCandidateMappingController {
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
     }
@@ -153,15 +153,24 @@ public class JobCandidateMappingController {
         long startTime = System.currentTimeMillis();
         String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
                 new HashMap<String, List<String>>() {{
-                    put("UserClassFilter", Arrays.asList("displayName"));
-                    put("ScreeningQuestionFilter", Arrays.asList("question"));
+                    put("User", Arrays.asList("displayName"));
+                    put("ScreeningQuestion", Arrays.asList("question"));
                 }},
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter",Arrays.asList("createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
-                    put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
-                    put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
-                    put("JcmFilter", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
-        }});
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId"));
+                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));
+                    put("CandidateOnlineProfiles", Arrays.asList("id","candidateId"));
+                    put("CandidateProjectDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateSkillDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateWorkAuthorization", Arrays.asList("id","candidateId"));
+                    put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                }});
         log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
         return response;
     }

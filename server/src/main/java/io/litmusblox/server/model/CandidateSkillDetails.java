@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
@@ -21,6 +22,7 @@ import java.util.Date;
 @Entity
 @Table(name = "CANDIDATE_SKILL_DETAILS")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("CandidateSkillDetails")
 public class CandidateSkillDetails {
 
     private static final long serialVersionUID = 6868521896546285046L;

@@ -29,7 +29,7 @@ import java.util.UUID;
 @Entity
 @Table(name="JOB_CANDIDATE_MAPPING")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonFilter("JcmFilter")
+@JsonFilter("JobCandidateMapping")
 public class JobCandidateMapping implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285047L;

@@ -46,7 +46,8 @@ public interface IErrorMessages {
     String CLIENT_ADMIN_EXISTS_FOR_COMPANY = "Client admin for company already exists: ";
     String USER_COUNTRY_NULL = "Country code for new  user not selected";
     String USER_NOT_FOUND = "User does not exist for email ";
-    String FORGOT_PASSWORD_USER_NOT_ACTIVE = "Selected user is not Active: ";
+    String FORGOT_PASSWORD_USER_BLOCKED = "User is blocked";
+    String FORGOT_PASSWORD_DUPLICATE_REQUEST = "Forgot password request has already been received";
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
     String COMPANY_NAME_NOT_VALID= "Company name not valid";

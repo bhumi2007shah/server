@@ -6,6 +6,7 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
@@ -96,7 +97,7 @@ public class CandidateService implements ICandidateService {
         if(null != dupCandidateByEmail && null != dupCandidateByMobile) {
             //found different candidate ids for the email and mobile number combination
             if(!dupCandidateByEmail.getId().equals(dupCandidateByMobile.getId()))
-                throw new Exception(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
+                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
         }
         else {
 

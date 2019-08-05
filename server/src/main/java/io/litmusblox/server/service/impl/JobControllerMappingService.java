@@ -286,7 +286,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
             responseBean = uploadIndividualCandidate(Arrays.asList(candidate), jobId);
 
             //Store candidate cv to repository location
-            if(responseBean.getStatus().equals(IConstant.UPLOAD_STATUS.Success.name())) {
+            if(responseBean.getStatus().equals(IConstant.UPLOAD_STATUS.Success.name()) && null!=candidateCv) {
                 Candidate uploadCandidate=responseBean.getSuccessfulCandidates().get(0);
                 StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),uploadCandidate.getId());
             }

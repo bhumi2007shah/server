@@ -70,14 +70,14 @@ public class StoreFileUtil {
             staticRepoPath = repoLocation;
 
             //String time = Calendar.getInstance().getTimeInMillis() + "";
-            filePath.append(uploadType).append(File.separator + id);
+            filePath.append(uploadType).append(File.separator).append(id);
             File file = new File(staticRepoPath + File.separator + filePath);
             if (!file.exists()) {
                 file.mkdirs();
             }
 
             if(null!=candidateId)
-                filePath.append(filePath).append(File.separator).append(candidateId).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
+                filePath.append(File.separator).append(candidateId).append(".").append(Util.getFileExtension(fileName));
             else
                 filePath.append(filePath).append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
 

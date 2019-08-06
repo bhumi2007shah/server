@@ -154,7 +154,7 @@ public class JobCandidateMappingController {
         String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
-                    put("ScreeningQuestion", Arrays.asList("question"));
+                    put("ScreeningQuestions", Arrays.asList("question"));
                 }},
                 new HashMap<String, List<String>>() {{
                     put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));

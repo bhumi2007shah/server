@@ -25,7 +25,7 @@ import java.util.List;
 @Entity
 @Table(name = "SCREENING_QUESTION")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonFilter("ScreeningQuestion")
+@JsonFilter("ScreeningQuestions")
 public class ScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

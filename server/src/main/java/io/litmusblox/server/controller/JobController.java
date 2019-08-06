@@ -43,7 +43,7 @@ public class JobController {
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
                 put("User",Arrays.asList("displayName","id"));
-                put("ScreeningQuestion", Arrays.asList("question"));
+                put("ScreeningQuestions", Arrays.asList("question"));
             }}),
             (new HashMap<String, List<String>>(){{
                 put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));

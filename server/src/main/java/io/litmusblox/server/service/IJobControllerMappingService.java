@@ -115,4 +115,13 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception;
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param profileSharingUuid uuid corresponding to the profile shared with hiring manager
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception;
 }

@@ -468,4 +468,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
         returnObj.setMobile(objFromDb.getMobile());
         return returnObj;
     }
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param profileSharingUuid uuid corresponding to the profile shared with hiring manager
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception {
+        JcmProfileSharingDetails details = jcmProfileSharingDetailsRepository.findById(profileSharingUuid);
+        if(null == details)
+            throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        return getCandidateProfile(details.getJobCandidateMappingId());
+    }
 }

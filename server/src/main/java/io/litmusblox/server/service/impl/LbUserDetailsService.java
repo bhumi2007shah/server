@@ -86,7 +86,7 @@ public class LbUserDetailsService implements UserDetailsService {
      * @throws Exception
      */
     @Transactional
-    public LoginResponseBean login(User user) throws Exception {
+    public LoginResponseBean login(User user) throws WebException {
         log.info("Received login request from " + user.getEmail());
         long startTime = System.currentTimeMillis();
         final User userDetails = (User)loadUserByUsername(user.getEmail());
@@ -94,9 +94,11 @@ public class LbUserDetailsService implements UserDetailsService {
         //check if company is active
         if(!userDetails.getCompany().getActive())
             throw new WebException("Company blocked", HttpStatus.FORBIDDEN);
-
-        authenticate(user.getEmail(), user.getPassword());
-
+        try {
+            authenticate(user.getEmail(), user.getPassword());
+        } catch (Exception e) {
+            throw new WebException(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
@@ -120,7 +122,7 @@ public class LbUserDetailsService implements UserDetailsService {
         } catch (DisabledException e) {
             throw new WebException("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            throw new WebException("INVALID_CREDENTIALS", e);
+            throw new WebException("INVALID_CREDENTIALS", HttpStatus.FORBIDDEN);
         }
     }
 

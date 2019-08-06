@@ -180,6 +180,8 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 }else{
                     //Create new entry for JobCandidateMapping
                     candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+                    candidateObjToUse.setEmail(candidate.getEmail());
+                    candidateObjToUse.setMobile(candidate.getMobile());
                     JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
                     //create an empty record in jcm Communication details table
                     jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
@@ -193,7 +195,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
             } catch(Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
                 candidate.setUploadErrorMessage(IErrorMessages.INTERNAL_SERVER_ERROR);
                 uploadResponseBean.getFailedCandidates().add(candidate);

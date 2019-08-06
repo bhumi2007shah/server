@@ -5,7 +5,6 @@
 package io.litmusblox.server.controller;
 
 import io.litmusblox.server.constant.IConstant;
-import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
@@ -52,7 +51,7 @@ public class AuthController {
     @PostMapping(value = "/login")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    LoginResponseBean login(@RequestBody User user) throws WebException {
+    LoginResponseBean login(@RequestBody User user) throws Exception {
         return userDetailsService.login(user);
     }
 

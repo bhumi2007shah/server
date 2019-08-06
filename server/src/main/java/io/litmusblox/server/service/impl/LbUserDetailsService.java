@@ -19,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -86,7 +84,7 @@ public class LbUserDetailsService implements UserDetailsService {
      * @throws Exception
      */
     @Transactional
-    public LoginResponseBean login(User user) throws WebException {
+    public LoginResponseBean login(User user) throws Exception {
         log.info("Received login request from " + user.getEmail());
         long startTime = System.currentTimeMillis();
         final User userDetails = (User)loadUserByUsername(user.getEmail());
@@ -94,11 +92,9 @@ public class LbUserDetailsService implements UserDetailsService {
         //check if company is active
         if(!userDetails.getCompany().getActive())
             throw new WebException("Company blocked", HttpStatus.FORBIDDEN);
-        try {
-            authenticate(user.getEmail(), user.getPassword());
-        } catch (Exception e) {
-            throw new WebException(e.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
-        }
+
+        authenticate(user.getEmail(), user.getPassword());
+
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
@@ -117,13 +113,7 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (DisabledException e) {
-            throw new WebException("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new WebException("INVALID_CREDENTIALS", HttpStatus.FORBIDDEN);
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     /**

@@ -372,7 +372,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public void inviteCandidates(List<Long> jcmList) throws Exception {
         if(jcmList == null || jcmList.size() == 0)
-            throw new WebException("Select candidates to invite");
+            throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
     }

@@ -344,6 +344,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 }
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
+            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         });
     }
 

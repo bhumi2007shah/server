@@ -45,7 +45,7 @@ public class StoreFileUtil {
             String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId);
             //Util.storeFile(is, filePath,repoLocation);
             if(Util.isNull(filePath))
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
 
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -65,7 +65,7 @@ public class StoreFileUtil {
             StringBuffer filePath=new StringBuffer();
             String staticRepoPath = null;
             if (Util.isNull(repoLocation)) {
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
             }
             staticRepoPath = repoLocation;
 

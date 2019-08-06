@@ -111,4 +111,41 @@ public class NoAuthController {
         log.info("Completed processing request for Hiring Manager Interest in " + (System.currentTimeMillis() - startTime) + " ms");
     }
 
+    /**
+     * REST Api to fetch details of a single candidate for the hiring manager
+     *
+     * @param profileSharingUuid uuid corresponding to the hiring manager record
+     * @return candidate object as json
+     * @throws Exception
+     */
+    @GetMapping("/fetchCandidateProfile/{profileSharingUuid}")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    String getCandidateProfile(@PathVariable("profileSharingUuid") UUID profileSharingUuid) throws Exception {
+        log.info("Received request to fetch candidate profile");
+        long startTime = System.currentTimeMillis();
+        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(profileSharingUuid),
+                new HashMap<String, List<String>>() {{
+                    put("User", Arrays.asList("displayName"));
+                    put("ScreeningQuestions", Arrays.asList("question"));
+                }},
+                new HashMap<String, List<String>>() {{
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
+                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));
+                    put("CandidateOnlineProfiles", Arrays.asList("id","candidateId"));
+                    put("CandidateProjectDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateSkillDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateWorkAuthorization", Arrays.asList("id","candidateId"));
+                    put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                }});
+        log.info("Completed processing fetch candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
+        return response;
+    }
+
 }

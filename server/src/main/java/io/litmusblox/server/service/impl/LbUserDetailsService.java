@@ -19,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -115,13 +113,7 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (DisabledException e) {
-            throw new WebException("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new WebException("INVALID_CREDENTIALS", e);
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     /**

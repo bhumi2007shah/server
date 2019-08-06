@@ -354,6 +354,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 }
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
+            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         });
     }
 
@@ -382,7 +383,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public void inviteCandidates(List<Long> jcmList) throws Exception {
         if(jcmList == null || jcmList.size() == 0)
-            throw new WebException("Select candidates to invite");
+            throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
     }
@@ -476,5 +477,21 @@ public class JobControllerMappingService implements IJobControllerMappingService
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
         return returnObj;
+    }
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param profileSharingUuid uuid corresponding to the profile shared with hiring manager
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception {
+        JcmProfileSharingDetails details = jcmProfileSharingDetailsRepository.findById(profileSharingUuid);
+        if(null == details)
+            throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        return getCandidateProfile(details.getJobCandidateMappingId());
     }
 }

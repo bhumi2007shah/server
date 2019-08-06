@@ -149,7 +149,7 @@ public class JobCandidateMappingController {
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     String getCandidateProfile(@PathVariable("jobCandidateMappingId") Long jobCandidateMappingId) throws Exception {
-        log.info("Received request to share candidate profile with hiring managers");
+        log.info("Received request to fetch candidate profile");
         long startTime = System.currentTimeMillis();
         String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
                 new HashMap<String, List<String>>() {{
@@ -171,7 +171,7 @@ public class JobCandidateMappingController {
                     put("CandidateWorkAuthorization", Arrays.asList("id","candidateId"));
                     put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
                 }});
-        log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
+        log.info("Completed processing fetch candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
         return response;
     }
 

@@ -30,5 +30,8 @@ public class UploadResponseBean {
     private List<Candidate> failedCandidates = new ArrayList();
     private int candidatesProcessedCount = 0;
     @JsonIgnore
-    private List<Candidate> successfulCandidates = new ArrayList();;
+    private List<Candidate> successfulCandidates = new ArrayList();
+    private Boolean cvStatus=false;
+    private String cvErrorMsg;
+
 }

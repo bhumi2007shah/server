@@ -42,6 +42,7 @@ public interface IConstant {
 
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
+    String CANDIDATE_CV = "CandidateCv";
 
 
     enum UserStatus {

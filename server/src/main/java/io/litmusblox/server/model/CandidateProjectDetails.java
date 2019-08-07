@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.litmusblox.server.utils.DateDeserializer;
 import lombok.Data;
@@ -21,6 +22,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "CANDIDATE_PROJECT_DETAILS")
+@JsonFilter("CandidateProjectDetails")
 public class CandidateProjectDetails {
 
     private static final long serialVersionUID = 6868521896546285046L;

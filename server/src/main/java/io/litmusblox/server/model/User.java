@@ -31,7 +31,7 @@ import java.util.*;
 @Data
 @Entity
 @Table(name = "USERS")
-@JsonFilter("UserClassFilter")
+@JsonFilter("User")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class User implements Serializable, UserDetails {
 

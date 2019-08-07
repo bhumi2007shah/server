@@ -79,6 +79,9 @@ public class JobService implements IJobService {
     @Resource
     JobHiringTeamRepository jobHiringTeamRepository;
 
+    @Resource
+    JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
@@ -179,6 +182,10 @@ public class JobService implements IJobService {
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
         responseBean.setCandidateList(jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage()));
+
+        responseBean.getCandidateList().forEach(jcmFromDb-> {
+            jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
+        });
 
         List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
 

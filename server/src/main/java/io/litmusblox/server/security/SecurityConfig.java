@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.csrf().disable()
                 .authorizeRequests()
                 //all no auth controller request do not require authentication
-                .antMatchers("/api/noAuth/*").permitAll()
+                .antMatchers("/api/noAuth/**").permitAll()
                 // dont authenticate this particular request in Auth controller
                 .antMatchers("/api/auth/login").permitAll()
                 .antMatchers("/api/auth/forgotPassword").permitAll()

@@ -6,6 +6,7 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
@@ -17,6 +18,7 @@ import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -28,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -72,6 +75,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
     @Autowired
     ICandidateService candidateService;
+
+    @Resource
+    JcmProfileSharingDetailsRepository jcmProfileSharingDetailsRepository;
 
 
     /**
@@ -283,10 +289,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
             responseBean = uploadIndividualCandidate(Arrays.asList(candidate), jobId);
 
             //Store candidate cv to repository location
-            if(responseBean.getStatus().equals(IConstant.UPLOAD_STATUS.Success.name())) {
-                Candidate uploadCandidate=responseBean.getSuccessfulCandidates().get(0);
-                StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),uploadCandidate.getId());
+            try{
+                if(null!=candidateCv) {
+                    if (responseBean.getSuccessfulCandidates().size()>0)
+                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getSuccessfulCandidates().get(0).getId());
+                    else
+                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getFailedCandidates().get(0).getId());
+
+                    responseBean.setCvStatus(true);
+                }
+            }catch(Exception e){
+                log.error("Resume upload failed :"+e.getMessage());
+                responseBean.setCvErrorMsg(e.getMessage());
             }
+
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);
@@ -338,6 +354,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 }
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
+            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         });
     }
 
@@ -366,7 +383,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public void inviteCandidates(List<Long> jcmList) throws Exception {
         if(jcmList == null || jcmList.size() == 0)
-            throw new WebException("Select candidates to invite");
+            throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
     }
@@ -379,7 +396,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
-        //TODO: For every hiring manager in the array, insert a row in JCM_PROFILE_SHARING_DETAILS table
+
+        List<JcmProfileSharingDetails> jobJcmProfileSharingDetailsList=new ArrayList<>();
+
+        requestBean.getJcmId().stream().forEach(jcmId->{
+            for (String[] array:requestBean.getReceiverInfo()) {
+                JcmProfileSharingDetails jcmProfileSharingDetails=new JcmProfileSharingDetails();
+                jcmProfileSharingDetails.setReceiverName(array[0]);
+                jcmProfileSharingDetails.setReceiverEmail(array[1]);
+                jcmProfileSharingDetails.setJobCandidateMappingId(jcmId);
+                jcmProfileSharingDetails.setSenderId((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+                jobJcmProfileSharingDetailsList.add(jcmProfileSharingDetails);
+            }
+        });
+        jcmProfileSharingDetailsRepository.saveAll(jobJcmProfileSharingDetailsList);
     }
 
     /**
@@ -394,5 +424,74 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //TODO: For the uuid,
         //1. fetch record from JCM_PROFILE_SHARING_DETAILS table
         //2. update the record by setting the HIRING_MANAGER_INTEREST = interest value and HIRING_MANAGER_INTEREST_DATE as current date
+        JcmProfileSharingDetails jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findById(sharingId);
+        jcmProfileSharingDetails.setHiringManagerInterestDate(new Date());
+        jcmProfileSharingDetails.setHiringManagerInterest(interestValue);
+        jcmProfileSharingDetailsRepository.save(jcmProfileSharingDetails);
+    }
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param jobCandidateMappingId
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    @Transactional
+    public Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.getOne(jobCandidateMappingId);
+        if(null == objFromDb)
+            throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        List<JobScreeningQuestions> screeningQuestions = jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
+        Map<Long, JobScreeningQuestions> screeningQuestionsMap = new HashMap<>(screeningQuestions.size());
+        screeningQuestions.forEach(screeningQuestion-> {
+            screeningQuestionsMap.put(screeningQuestion.getId(), screeningQuestion);
+        });
+
+        List<CandidateScreeningQuestionResponse> responses = candidateScreeningQuestionResponseRepository.findByJobCandidateMappingId(jobCandidateMappingId);
+
+        responses.forEach(candidateResponse -> {
+            screeningQuestionsMap.get(candidateResponse.getJobScreeningQuestionId()).getCandidateResponse().add(candidateResponse.getResponse());
+            if (null != candidateResponse.getComment())
+                screeningQuestionsMap.get(candidateResponse.getJobScreeningQuestionId()).getCandidateResponse().add(candidateResponse.getComment());
+        });
+
+        Candidate returnObj = objFromDb.getCandidate();
+        Hibernate.initialize(returnObj.getCandidateDetails());
+        //set the cv location
+        if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
+            StringBuffer cvLocation = new StringBuffer(environment.getProperty(IConstant.REPO_LOCATION));
+            cvLocation.append(IConstant.CANDIDATE_CV).append(File.separator).append(objFromDb.getJob().getId()).append(File.separator).append(objFromDb.getCandidate().getId()).append(returnObj.getCandidateDetails().getCvFileType());
+            returnObj.getCandidateDetails().setCvLocation(cvLocation.toString());
+        }
+        Hibernate.initialize(returnObj.getCandidateEducationDetails());
+        Hibernate.initialize(returnObj.getCandidateCompanyDetails());
+        Hibernate.initialize(returnObj.getCandidateProjectDetails());
+        Hibernate.initialize(returnObj.getCandidateLanguageProficiencies());
+        Hibernate.initialize(returnObj.getCandidateOnlineProfiles());
+        Hibernate.initialize(returnObj.getCandidateSkillDetails());
+        Hibernate.initialize(returnObj.getCandidateWorkAuthorizations());
+        returnObj.setScreeningQuestionResponses(new ArrayList<>(screeningQuestionsMap.values()));
+
+        returnObj.setEmail(objFromDb.getEmail());
+        returnObj.setMobile(objFromDb.getMobile());
+        return returnObj;
+    }
+
+    /**
+     * Service method to fetch details of a single candidate for a job
+     *
+     * @param profileSharingUuid uuid corresponding to the profile shared with hiring manager
+     * @return candidate object with required details
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception {
+        JcmProfileSharingDetails details = jcmProfileSharingDetailsRepository.findById(profileSharingUuid);
+        if(null == details)
+            throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        return getCandidateProfile(details.getJobCandidateMappingId());
     }
 }

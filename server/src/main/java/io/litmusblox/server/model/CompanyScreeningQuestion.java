@@ -25,7 +25,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "COMPANY_SCREENING_QUESTION")
-@JsonFilter("CompanyScreeningQuestionFilter")
+@JsonFilter("CompanyScreeningQuestion")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class CompanyScreeningQuestion implements Serializable {
 

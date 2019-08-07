@@ -23,22 +23,11 @@ public class WebException extends RuntimeException implements Serializable {
     private String errorMessage;
     private HttpStatus errorCode;
 
-    public WebException(String errorMessage)
-    {
-        super(errorMessage);
-    }
-
     public WebException(String errorMessage, HttpStatus errorCode)
     {
         super();
         this.errorMessage = errorMessage;
         this.errorCode = errorCode;
-    }
-
-    public WebException(Throwable cause)
-    {
-        super(cause);
-
     }
 
     public WebException(String message, Throwable cause)

@@ -48,11 +48,11 @@ public class CompanyDataController {
     String fetchScreeningQuestions() throws Exception {
         return Util.stripExtraInfoFromResponseBean(screeningQuestionService.fetchScreeningQuestionsForCompanyAndUser(),
             (new HashMap<String, List<String>>(){{
-                put("UserClassFilter", Arrays.asList("displayName"));
+                put("User", Arrays.asList("displayName"));
             }}),
             new HashMap<String, List<String>>() {{
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
-                put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
             }}
         );
     }

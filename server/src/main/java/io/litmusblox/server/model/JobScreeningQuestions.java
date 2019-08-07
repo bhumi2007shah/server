@@ -4,14 +4,18 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -24,6 +28,7 @@ import java.util.Date;
 @Entity
 @Table(name = "JOB_SCREENING_QUESTIONS")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("JobScreeningQuestions")
 public class JobScreeningQuestions implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -65,5 +70,9 @@ public class JobScreeningQuestions implements Serializable {
 
     @Column(name = "UPDATED_BY")
     private Long updatedBy;
+
+    @JsonProperty
+    @Transient
+    private List<String> candidateResponse = new ArrayList<>();
 
 }

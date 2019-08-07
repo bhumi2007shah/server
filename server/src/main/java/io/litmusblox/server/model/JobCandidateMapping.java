@@ -4,7 +4,9 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -28,6 +30,7 @@ import java.util.UUID;
 @Entity
 @Table(name="JOB_CANDIDATE_MAPPING")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@JsonFilter("JobCandidateMapping")
 public class JobCandidateMapping implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285047L;
@@ -96,6 +99,10 @@ public class JobCandidateMapping implements Serializable {
     @Column(name = "CANDIDATE_INTEREST_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
     private Date candidateInterestDate;
+
+    @Transient
+    @JsonProperty
+    private JcmCommunicationDetails jcmCommunicationDetails;
 
     public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID chatbotUuid) {
         this.job = job;

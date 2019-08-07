@@ -19,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -115,13 +113,7 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (DisabledException e) {
-            throw new WebException("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new WebException("INVALID_CREDENTIALS", e);
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     /**
@@ -233,8 +225,11 @@ public class LbUserDetailsService implements UserDetailsService {
         if (null == userToReset) {
             throw new ValidationException(IErrorMessages.USER_NOT_FOUND + email, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        if (!IConstant.UserStatus.Active.name().equals(userToReset.getStatus())) {
-            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_USER_NOT_ACTIVE+email, HttpStatus.UNPROCESSABLE_ENTITY);
+        if (IConstant.UserStatus.Blocked.name().equals(userToReset.getStatus())) {
+            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_USER_BLOCKED+email, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        else if(!IConstant.UserStatus.Active.name().equals(userToReset.getStatus())){
+            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_DUPLICATE_REQUEST+email, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         userToReset.setPassword(null);
         userToReset.setUserUuid(UUID.randomUUID());

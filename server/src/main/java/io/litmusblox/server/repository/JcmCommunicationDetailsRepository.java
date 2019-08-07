@@ -28,4 +28,12 @@ public interface JcmCommunicationDetailsRepository extends JpaRepository<JcmComm
     @Modifying
     @Query(nativeQuery = true,value = "Update Jcm_Communication_Details set chat_Invite_Flag=true where jcm_Id in :jcmIdList")
     void inviteCandidates(List<Long> jcmIdList);
+
+    @Transactional
+    JcmCommunicationDetails findByJcmId(Long jcmId);
+
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "Update Jcm_Communication_Details set chat_complete_flag = true where jcm_id =:jcmId")
+    void updateByJcmId(Long jcmId);
 }

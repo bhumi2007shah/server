@@ -30,7 +30,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE")
-@JsonFilter("CandidateFilter")
+@JsonFilter("Candidate")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Candidate implements Serializable {
 
@@ -132,4 +132,8 @@ public class Candidate implements Serializable {
         this.createdOn = createdOn;
         this.createdBy = createdBy;
     }
+
+    @JsonProperty
+    @Transient
+    private List<JobScreeningQuestions> screeningQuestionResponses;
 }

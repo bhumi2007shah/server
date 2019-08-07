@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -18,6 +19,7 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "CANDIDATE_EDUCATION_DETAILS")
+@JsonFilter("CandidateEducationDetails")
 public class CandidateEducationDetails {
 
     private static final long serialVersionUID = 6868521896546285046L;

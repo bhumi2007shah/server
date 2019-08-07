@@ -33,7 +33,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "JOB")
-@JsonFilter("JobClassFilter")
+@JsonFilter("Job")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Job implements Serializable {
 

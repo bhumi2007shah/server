@@ -6,11 +6,14 @@ package io.litmusblox.server.controller;
 
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataResponse;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -54,9 +57,13 @@ public class MasterDataController {
      * @throws Exception
      */
     @PostMapping(value="/fetch/items")
-    MasterDataResponse fetchForItems(@RequestBody List<String> requestItems) throws Exception {
-        MasterDataResponse response = masterDataService.fetchForItems(requestItems);
-        return response;
+    String fetchForItems(@RequestBody List<String> requestItems) throws Exception {
+        //MasterDataResponse response = masterDataService.fetchForItems(requestItems);
+        return Util.stripExtraInfoFromResponseBean(
+                masterDataService.fetchForItems(requestItems),null,
+            (new HashMap<String, List<String>>(){{
+                put("ScreeningQuestions", Arrays.asList("question"));
+            }}));
     }
 
     /**

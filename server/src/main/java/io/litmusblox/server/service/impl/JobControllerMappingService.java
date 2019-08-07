@@ -289,10 +289,20 @@ public class JobControllerMappingService implements IJobControllerMappingService
             responseBean = uploadIndividualCandidate(Arrays.asList(candidate), jobId);
 
             //Store candidate cv to repository location
-            if(responseBean.getStatus().equals(IConstant.UPLOAD_STATUS.Success.name()) && null!=candidateCv) {
-                Candidate uploadCandidate=responseBean.getSuccessfulCandidates().get(0);
-                StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),uploadCandidate.getId());
+            try{
+                if(null!=candidateCv) {
+                    if (responseBean.getSuccessfulCandidates().size()>0)
+                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getSuccessfulCandidates().get(0).getId());
+                    else
+                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getFailedCandidates().get(0).getId());
+
+                    responseBean.setCvStatus(true);
+                }
+            }catch(Exception e){
+                log.error("Resume upload failed :"+e.getMessage());
+                responseBean.setCvErrorMsg(e.getMessage());
             }
+
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);

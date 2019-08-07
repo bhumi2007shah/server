@@ -176,6 +176,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 if(null!=jobCandidateMapping){
                     log.error(IErrorMessages.DUPLICATE_CANDIDATE + " : " + candidateObjToUse.getId() + candidate.getEmail() + " : " + candidate.getMobile());
                     candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
+                    candidate.setId(candidateObjToUse.getId());
                     throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
                 }else{
                     //Create new entry for JobCandidateMapping

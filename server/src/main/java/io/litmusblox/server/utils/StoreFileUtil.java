@@ -79,7 +79,7 @@ public class StoreFileUtil {
             if(null!=candidateId)
                 filePath.append(File.separator).append(candidateId).append(".").append(Util.getFileExtension(fileName));
             else
-                filePath.append(filePath).append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
+                filePath.append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
 
             log.info("Saved file: "+filePath);
             return filePath.toString();

@@ -157,8 +157,15 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 }
 
                 //candidate education details
-                if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0)
+                if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0) {
+                    candidate.getCandidateEducationDetails().forEach(educationDetails-> {
+                        if(educationDetails.getInstituteName().length() > IConstant.MAX_INSTITUTE_LENGTH) {
+                            log.info("Institute name too long: " + educationDetails.getInstituteName());
+                            educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
+                        }
+                    });
                     candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
+                }
 
                 //candidate company details
                 if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)

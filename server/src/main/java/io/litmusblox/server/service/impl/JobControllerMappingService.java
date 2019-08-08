@@ -468,7 +468,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
         Hibernate.initialize(returnObj.getCandidateDetails());
         //set the cv location
         if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
-            StringBuffer cvLocation = new StringBuffer(environment.getProperty(IConstant.REPO_LOCATION));
+            StringBuffer cvLocation = new StringBuffer("");
             cvLocation.append(IConstant.CANDIDATE_CV).append(File.separator).append(objFromDb.getJob().getId()).append(File.separator).append(objFromDb.getCandidate().getId()).append(returnObj.getCandidateDetails().getCvFileType());
             returnObj.getCandidateDetails().setCvLocation(cvLocation.toString());
         }

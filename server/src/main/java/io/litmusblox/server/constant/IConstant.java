@@ -33,6 +33,7 @@ public interface IConstant {
     // lengths
     Integer TITLE_MAX_LENGTH = 100;
     int JOB_ID_MAX_LENGTH = 10;
+    int MAX_INSTITUTE_LENGTH = 75;
     Integer CANDIDATE_NAME_MAX_LENGTH = 45;
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 

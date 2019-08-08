@@ -53,11 +53,13 @@ public class NoAuthController {
         log.info("Completed fetching screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
          return Util.stripExtraInfoFromResponseBean(response,
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter", Arrays.asList("displayName"));
+                    put("User", Arrays.asList("displayName"));
                 }}),
                 new HashMap<String, List<String>>() {{
-                    put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
-                    put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
+                    put("JobScreeningQuestions", Arrays.asList("jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                    put("ScreeningQuestions", new ArrayList<>(0));
                 }}
         );
     }

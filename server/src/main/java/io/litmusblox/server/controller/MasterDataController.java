@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public class MasterDataController {
         return Util.stripExtraInfoFromResponseBean(
                 masterDataService.fetchForItems(requestItems),null,
             (new HashMap<String, List<String>>(){{
-                put("ScreeningQuestions", Arrays.asList("question"));
+                put("ScreeningQuestions", new ArrayList<>(0));
             }}));
     }
 

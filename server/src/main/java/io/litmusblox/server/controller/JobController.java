@@ -43,7 +43,7 @@ public class JobController {
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
                 put("User",Arrays.asList("displayName","id"));
-                put("ScreeningQuestions", Arrays.asList("question"));
+                put("ScreeningQuestions", Arrays.asList("question","id"));
             }}),
             (new HashMap<String, List<String>>(){{
                 put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
@@ -52,8 +52,6 @@ public class JobController {
                 put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
             }})
         );
-
-       // return jobService.addJob(job, pageName);
     }
 
     /**
@@ -98,9 +96,11 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateEducationDetails","candidateProjectDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy"));
                     put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
                 }})
         );
     }

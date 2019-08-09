@@ -12,6 +12,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -185,6 +186,8 @@ public class JobService implements IJobService {
 
         responseBean.getCandidateList().forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
+            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
+            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
 
         List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
@@ -192,7 +195,7 @@ public class JobService implements IJobService {
         stageCountList.stream().forEach(objArray -> {
             responseBean.getCandidateCountByStage().put(((Integer) objArray[0]).longValue(), ((BigInteger) objArray[1]).intValue());
         });
-        log.info("Completed processing request to find candidates for job " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId() + (System.currentTimeMillis() - startTime) + "ms");
+        log.info("Completed processing request to find candidates for job " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId() + " in "+ (System.currentTimeMillis() - startTime) + "ms");
 
         return responseBean;
     }
@@ -203,6 +206,11 @@ public class JobService implements IJobService {
         if (job.getJobTitle().length() > IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
             job.setJobTitle(job.getJobTitle().substring(0, IConstant.TITLE_MAX_LENGTH));
 
+        Company userCompany = companyRepository.getOne(loggedInUser.getCompany().getId());
+        if (null == userCompany) {
+            throw new ValidationException("Cannot find company for logged in user", HttpStatus.EXPECTATION_FAILED);
+        }
+        job.setCompanyId(userCompany);
 
         if (null != oldJob) {//only update existing job
             //set job id from the db object
@@ -223,8 +231,7 @@ public class JobService implements IJobService {
             job.setMlDataAvailable(false);
             job.setStatus(IConstant.JobStatus.DRAFT.getValue());
             job.setCreatedBy(loggedInUser);
-            Company c = companyRepository.getOne(loggedInUser.getCompany().getId());
-            job.setCompanyId(c);
+
             //End of code to be removed
             jobRepository.save(job);
         }

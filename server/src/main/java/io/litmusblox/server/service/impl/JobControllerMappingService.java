@@ -79,6 +79,8 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Resource
     JcmProfileSharingDetailsRepository jcmProfileSharingDetailsRepository;
 
+    @Resource
+    JcmProfileSharingMasterRepository jcmProfileSharingMasterRepository;
 
     /**
      * Service method to add a individually added candidates to a job
@@ -404,19 +406,16 @@ public class JobControllerMappingService implements IJobControllerMappingService
     @Transactional(propagation = Propagation.REQUIRED)
     public void shareCandidateProfiles(ShareCandidateProfileRequestBean requestBean) {
 
-        List<JcmProfileSharingDetails> jobJcmProfileSharingDetailsList=new ArrayList<>();
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        requestBean.getJcmId().stream().forEach(jcmId->{
-            for (String[] array:requestBean.getReceiverInfo()) {
-                JcmProfileSharingDetails jcmProfileSharingDetails=new JcmProfileSharingDetails();
-                jcmProfileSharingDetails.setReceiverName(array[0]);
-                jcmProfileSharingDetails.setReceiverEmail(array[1]);
-                jcmProfileSharingDetails.setJobCandidateMappingId(jcmId);
-                jcmProfileSharingDetails.setSenderId((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-                jobJcmProfileSharingDetailsList.add(jcmProfileSharingDetails);
-            }
-        });
-        jcmProfileSharingDetailsRepository.saveAll(jobJcmProfileSharingDetailsList);
+        for (String[] array:requestBean.getReceiverInfo()) {
+            JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), array[0], array[1]));
+            Set<JcmProfileSharingDetails> detailsSet = new HashSet<>(requestBean.getJcmId().size());
+            requestBean.getJcmId().forEach(jcmId ->{
+                detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
+            });
+            jcmProfileSharingDetailsRepository.saveAll(detailsSet);
+        }
     }
 
     /**

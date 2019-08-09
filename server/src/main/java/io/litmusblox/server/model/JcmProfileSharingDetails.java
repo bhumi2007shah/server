@@ -34,26 +34,12 @@ public class JcmProfileSharingDetails {
     @GeneratedValue(generator="system-uuid")
     private UUID id;
 
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="SENDER_ID")
-    private User senderId;
-
-    @NotNull
-    @Column(name = "RECEIVER_NAME")
-    private String receiverName;
-
-    @NotNull
-    @Column(name = "RECEIVER_EMAIL")
-    private String receiverEmail;
+    @Column(name="PROFILE_SHARING_MASTER_ID")
+    private Long profileSharingMasterId;
 
     @NotNull
     @Column(name="JOB_CANDIDATE_MAPPING_ID")
     private Long jobCandidateMappingId;
-
-    @Column(name = "EMAIL_SENT_ON")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date emailSentOn;
 
     @Column(name = "HIRING_MANAGER_INTEREST")
     private Boolean hiringManagerInterest=false;
@@ -61,4 +47,10 @@ public class JcmProfileSharingDetails {
     @Column(name = "HIRING_MANAGER_INTEREST_DATE")
     @Temporal(TemporalType.TIMESTAMP)
     private Date hiringManagerInterestDate;
+
+
+    public JcmProfileSharingDetails(Long profileSharingMasterId, @NotNull Long jobCandidateMappingId) {
+        this.profileSharingMasterId = profileSharingMasterId;
+        this.jobCandidateMappingId = jobCandidateMappingId;
+    }
 }

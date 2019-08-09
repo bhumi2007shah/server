@@ -98,9 +98,11 @@ public class JobController {
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateEducationDetails","candidateProjectDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy"));
                     put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
                 }})
         );
     }

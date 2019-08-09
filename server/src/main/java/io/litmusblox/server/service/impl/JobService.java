@@ -12,6 +12,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -185,6 +186,8 @@ public class JobService implements IJobService {
 
         responseBean.getCandidateList().forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
+            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
+            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
 
         List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());

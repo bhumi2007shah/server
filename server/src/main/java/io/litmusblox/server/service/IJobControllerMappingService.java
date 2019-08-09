@@ -5,6 +5,7 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -124,4 +125,6 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception;
+
+    JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception;
 }

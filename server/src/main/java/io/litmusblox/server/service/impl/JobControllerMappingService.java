@@ -499,4 +499,16 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         return getCandidateProfile(details.getJobCandidateMappingId());
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
+        if (null == objFromDb)
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        Hibernate.initialize(objFromDb.getJob().getCompanyId());
+        Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
+        objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
+        return objFromDb;
+    }
 }

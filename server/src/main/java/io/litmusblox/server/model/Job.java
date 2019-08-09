@@ -127,4 +127,7 @@ public class Job implements Serializable {
 
     @Transient
     private List<User> usersForCompany=new ArrayList<>();
+
+    @Transient
+    private String companyName;
 }

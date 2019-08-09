@@ -139,7 +139,7 @@ public class NoAuthController {
                     put("CandidateDetails", Arrays.asList("id","candidateId"));
                     put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
                     put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));
-                    put("CandidateOnlineProfiles", Arrays.asList("id","candidateId"));
+                    put("CandidateOnlineProfile", Arrays.asList("id","candidateId"));
                     put("CandidateProjectDetails", Arrays.asList("id","candidateId"));
                     put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
                     put("CandidateSkillDetails", Arrays.asList("id","candidateId"));

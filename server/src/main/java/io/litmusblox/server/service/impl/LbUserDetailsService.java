@@ -221,6 +221,9 @@ public class LbUserDetailsService implements UserDetailsService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void forgotPassword(String email) throws Exception {
+        if(Util.isNull(email))
+            throw new ValidationException(IErrorMessages.NO_EMAIL_PROVIDED, HttpStatus.BAD_REQUEST);
+
         User userToReset = userRepository.findByEmail(email);
         if (null == userToReset) {
             throw new ValidationException(IErrorMessages.USER_NOT_FOUND + email, HttpStatus.UNPROCESSABLE_ENTITY);

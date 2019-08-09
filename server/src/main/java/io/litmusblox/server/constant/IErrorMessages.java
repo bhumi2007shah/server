@@ -45,7 +45,7 @@ public interface IErrorMessages {
     String JOB_NOT_LIVE = "Selected job is not live";
     String CLIENT_ADMIN_EXISTS_FOR_COMPANY = "Client admin for company already exists: ";
     String USER_COUNTRY_NULL = "Country code for new  user not selected";
-    String USER_NOT_FOUND = "User does not exist";
+    String USER_NOT_FOUND = "User does not exist ";
     String INVALID_CREDENTIALS="Invalid credentials";
     String FORGOT_PASSWORD_USER_BLOCKED = "User is blocked";
     String DISABLED_USER = "User is blocked / disabled";
@@ -53,4 +53,5 @@ public interface IErrorMessages {
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
     String COMPANY_NAME_NOT_VALID= "Company name not valid";
+    String NO_EMAIL_PROVIDED = "No email address provided";
 }

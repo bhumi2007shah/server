@@ -17,7 +17,6 @@ import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,7 +39,6 @@ import java.util.List;
  * Class Name : CompanyService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Log4j2
 @Service
 public class CompanyService implements ICompanyService {

@@ -20,7 +20,6 @@ import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,7 +43,6 @@ import java.util.*;
  * Class Name : JobControllerMappingService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Service
 @Log4j2
 public class JobControllerMappingService implements IJobControllerMappingService {

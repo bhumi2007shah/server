@@ -53,4 +53,5 @@ public interface IErrorMessages {
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
     String COMPANY_NAME_NOT_VALID= "Company name not valid";
+    String NO_EMAIL_PROVIDED = "No email address provided";
 }

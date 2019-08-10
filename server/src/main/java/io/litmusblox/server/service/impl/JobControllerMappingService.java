@@ -506,6 +506,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
         if (null == objFromDb)
             throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
+        objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());

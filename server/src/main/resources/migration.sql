@@ -112,3 +112,6 @@ ADD COLUMN CHAT_COMPLETE_FLAG BOOL DEFAULT 'f';
 
 alter table CANDIDATE_EDUCATION_DETAILS
 alter column INSTITUTE_NAME type varchar(75);
+
+alter table EMAIL_LOG
+alter column TEMPLATE_NAME type varchar(30);

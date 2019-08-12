@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.persistence.RollbackException;
+import javax.validation.ConstraintViolationException;
+
 /**
  * Exception handler to send the correct error code, http status and error message from the Rest API to the caller
  *
@@ -24,6 +27,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  */
 @RestControllerAdvice
 public class GlobalControllerExceptionHandler {
+
+    private final String templateStr = "messageTemplate='";
 
     @ExceptionHandler(value = { BadCredentialsException.class })
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -52,7 +57,23 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(value = { WebException.class })
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ApiErrorResponse handleWebException(WebException ex) {
-        System.out.println(ex);
+        //System.out.println(ex);
         return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getErrorMessage());
+    }
+
+    @ExceptionHandler(value = { ConstraintViolationException.class })
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ApiErrorResponse handleConstraintViolation(ConstraintViolationException exception) {
+        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getConstraintViolations().toString());
+    }
+
+    @ExceptionHandler(value = { RollbackException.class })
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ApiErrorResponse handleConstraintViolation(RollbackException exception) {
+        int index = exception.getCause().getMessage().indexOf(templateStr);
+        if (index != -1) {
+            return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),exception.getCause().getMessage().substring(index+templateStr.length(),exception.getCause().getMessage().lastIndexOf('}')-1));
+        }
+        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getCause().getMessage());
     }
 }

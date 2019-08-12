@@ -44,7 +44,7 @@ public class Job implements Serializable {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Length(max = IConstant.JOB_ID_MAX_LENGTH)
+    @Length(max = IConstant.JOB_ID_MAX_LENGTH, message = "Company's Job ID: length should be between 0 and " + IConstant.JOB_ID_MAX_LENGTH)
     @Pattern(message = "COMPANY_JOB_ID "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_COMPANY_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;

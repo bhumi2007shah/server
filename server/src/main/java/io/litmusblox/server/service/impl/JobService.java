@@ -213,7 +213,7 @@ public class JobService implements IJobService {
         job.setCompanyId(userCompany);
 
         if (null != oldJob) {//only update existing job
-
+            oldJob.setCompanyJobId(job.getCompanyJobId());
             oldJob.setJobTitle(job.getJobTitle());
             oldJob.setJobDescription(job.getJobDescription());
             oldJob.setUpdatedBy(loggedInUser);

@@ -2,8 +2,9 @@
  * Copyright © Litmusblox 2019. All rights reserved.
  */
 
-package io.litmusblox.server.model;
+package io.litmusblox.server.repository;
 
+import io.litmusblox.server.model.JcmProfileSharingMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

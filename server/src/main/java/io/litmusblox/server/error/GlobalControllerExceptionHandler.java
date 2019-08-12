@@ -64,12 +64,16 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(value = { ConstraintViolationException.class })
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ApiErrorResponse handleConstraintViolation(ConstraintViolationException exception) {
-        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getConstraintViolations().toString());
+        int index = exception.getMessage().indexOf(templateStr);
+        if (index != -1) {
+            return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),exception.getMessage().substring(index+templateStr.length(),exception.getMessage().lastIndexOf('}')-1));
+        }
+        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getMessage());
     }
 
     @ExceptionHandler(value = { RollbackException.class })
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
-    public ApiErrorResponse handleConstraintViolation(RollbackException exception) {
+    public ApiErrorResponse handleRollback(RollbackException exception) {
         int index = exception.getCause().getMessage().indexOf(templateStr);
         if (index != -1) {
             return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),exception.getCause().getMessage().substring(index+templateStr.length(),exception.getCause().getMessage().lastIndexOf('}')-1));

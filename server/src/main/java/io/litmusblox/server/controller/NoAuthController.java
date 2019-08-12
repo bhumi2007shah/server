@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.utils.Util;
@@ -64,6 +65,35 @@ public class NoAuthController {
         );
     }
 
+    /**
+     * Rest api to get all candidate and job details for the uuid provided
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @return the list of job screening questions
+     * @throws Exception
+     */
+    @GetMapping("/candidateAndJobDetails")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    String candidateAndJobDetailsForUuid(@RequestParam("uuid") UUID uuid) throws Exception {
+        log.info("Received request to retrieve candidate & job information based on uuid : " + uuid);
+        long startTime = System.currentTimeMillis();
+        JobCandidateMapping mappingObj = jobControllerMappingService.getJobCandidateMapping(uuid);
+        log.info("Completed fetching JobCandidateMapping in " + (System.currentTimeMillis() - startTime) + "ms.");
+        return Util.stripExtraInfoFromResponseBean(mappingObj,
+                (new HashMap<String, List<String>>(){{
+                    put("User", Arrays.asList("displayName"));
+                    put("CandidateCompanyDetails", new ArrayList<>(0));
+                }}),
+                new HashMap<String, List<String>>() {{
+                    put("Job",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy","companyJobId","jobTitle","noOfPositions","mlDataAvailable","status","createdOn","createdBy","userEnteredKeySkill"));
+                    put("Candidate", Arrays.asList("CandidateDetails","candidateDetails","candidateEducationDetails","candidateProjectDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy","candidateSource","firstName","lastName","candidateSource","CandidateCompanyDetails"));
+                    put("Company", Arrays.asList("companyAddressList", "companyBuList"));
+                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+
+            }}
+        );
+    }
 
     /**
      * Rest api to capture candidate consent from chatbot

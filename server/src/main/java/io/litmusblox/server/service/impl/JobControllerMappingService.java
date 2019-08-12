@@ -20,7 +20,6 @@ import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,7 +43,6 @@ import java.util.*;
  * Class Name : JobControllerMappingService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Service
 @Log4j2
 public class JobControllerMappingService implements IJobControllerMappingService {
@@ -499,5 +497,18 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
 
         return getCandidateProfile(details.getJobCandidateMappingId());
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
+        if (null == objFromDb)
+            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+
+        objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
+        Hibernate.initialize(objFromDb.getJob().getCompanyId());
+        Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
+        objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
+        return objFromDb;
     }
 }

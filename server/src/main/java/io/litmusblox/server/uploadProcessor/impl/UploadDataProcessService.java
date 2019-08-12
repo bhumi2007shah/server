@@ -19,8 +19,6 @@ import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,13 +37,9 @@ import java.util.UUID;
  * Class Name : UploadDataProcessService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Service
 @Log4j2
 public class UploadDataProcessService implements IUploadDataProcessService {
-
-    @Autowired
-    Environment environment;
 
     @Resource
     JobRepository jobRepository;

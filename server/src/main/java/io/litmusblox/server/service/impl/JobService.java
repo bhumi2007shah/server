@@ -213,19 +213,16 @@ public class JobService implements IJobService {
         job.setCompanyId(userCompany);
 
         if (null != oldJob) {//only update existing job
-            //set job id from the db object
-            job.setId(oldJob.getId());
-            job.setCreatedBy(oldJob.getCreatedBy());
-            job.setCreatedOn(oldJob.getCreatedOn());
-            job.setStatus(oldJob.getStatus());
-            job.setMlDataAvailable(false);
-            job.setUpdatedOn(new Date());
 
+            oldJob.setJobTitle(job.getJobTitle());
+            oldJob.setJobDescription(job.getJobDescription());
+            oldJob.setUpdatedBy(loggedInUser);
+            oldJob.setUpdatedOn(new Date());
             //remove all data from job_key_skills and job_capabilities
             jobKeySkillsRepository.deleteByJobId(job.getId());
             jobCapabilitiesRepository.deleteByJobId(job.getId());
 
-            jobRepository.save(job);
+            jobRepository.save(oldJob);
         } else { //Create new entry for job
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);

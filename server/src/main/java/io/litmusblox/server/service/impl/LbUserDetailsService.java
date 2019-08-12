@@ -231,6 +231,9 @@ public class LbUserDetailsService implements UserDetailsService {
         if (IConstant.UserStatus.Blocked.name().equals(userToReset.getStatus())) {
             throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_USER_BLOCKED+email, HttpStatus.UNPROCESSABLE_ENTITY);
         }
+        else if(IConstant.UserStatus.Active.name().equals(userToReset.getStatus())) {
+            throw new ValidationException(IErrorMessages.USER_NOT_ACTIVE + email, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         else if(!IConstant.UserStatus.Active.name().equals(userToReset.getStatus())){
             throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_DUPLICATE_REQUEST+email, HttpStatus.UNPROCESSABLE_ENTITY);
         }

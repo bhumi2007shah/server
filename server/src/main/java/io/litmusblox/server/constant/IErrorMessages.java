@@ -49,9 +49,10 @@ public interface IErrorMessages {
     String INVALID_CREDENTIALS="Invalid credentials";
     String FORGOT_PASSWORD_USER_BLOCKED = "User is blocked";
     String DISABLED_USER = "User is blocked / disabled";
-    String FORGOT_PASSWORD_DUPLICATE_REQUEST = "Forgot password request has already been received";
+    String FORGOT_PASSWORD_DUPLICATE_REQUEST = "Forgot password request has already been received ";
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
     String COMPANY_NAME_NOT_VALID= "Company name not valid";
     String NO_EMAIL_PROVIDED = "No email address provided";
+    String USER_NOT_ACTIVE = "User was not activated ";
 }

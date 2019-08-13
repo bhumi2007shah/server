@@ -149,7 +149,7 @@ VALUES
 
 -- max limits for various parameters
 insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
-('maxScreeningQuestionsLimit',10),
+('maxScreeningQuestionsLimit',50),
 ('dailyCandidateUploadPerUserLimit',500),
 ('dailyCandidateInviteLimit',500),
 ('candidatesPerFileLimit',100),

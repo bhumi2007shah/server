@@ -139,3 +139,7 @@ alter column TEMPLATE_NAME type varchar(30);
 -- Fix for ticket #76
 alter table USERS alter column INVITATION_MAIL_TIMESTAMP drop not null;
 alter table USERS alter column INVITATION_MAIL_TIMESTAMP set default null;
+
+-- Fix for ticket #81
+update configuration_settings
+set config_value = 50 where config_name='maxScreeningQuestionsLimit';

@@ -461,18 +461,31 @@ public class JobService implements IJobService {
     @Transactional
     public void publishJob(Long jobId) throws Exception {
         log.info("Received request to publish job with id: " + jobId);
+        changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
+        log.info("Completed publishing job with id: " + jobId);
+    }
 
+    /**
+     * Service method to archive a job
+     *
+     * @param jobId id of the job to be archived
+     */
+    @Transactional
+    public void archiveJob(Long jobId) {
+        log.info("Received request to archiving job with id: " + jobId);
+        changeJobStatus(jobId,IConstant.JobStatus.ARCHIVED.getValue());
+        log.info("Completed archiving job with id: " + jobId);
+    }
+
+    private void changeJobStatus(Long jobId, String status) {
         Job job = jobRepository.getOne(jobId);
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
         job.setDatePublished(new Date());
         job.setUpdatedOn(new Date());
-        job.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
+        job.setStatus(status);
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         jobRepository.save(job);
-
-        log.info("Completed publishing job with id: " + jobId);
     }
-
 }

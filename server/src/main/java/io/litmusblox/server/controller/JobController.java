@@ -117,4 +117,16 @@ public class JobController {
         jobService.publishJob(jobId);
     }
 
+    /**
+     * Api to archive a job
+     *
+     * @param jobId id of the job to be archived
+     * @throws Exception
+     */
+    @PutMapping(value = "/archiveJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void archiveJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.archiveJob(jobId);
+    }
+
 }

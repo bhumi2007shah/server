@@ -51,4 +51,11 @@ public interface IJobService {
      * @param jobId id of the job to be published
      */
     void publishJob(Long jobId) throws Exception;
+
+    /**
+     * Service method to archive a job
+     *
+     * @param jobId id of the job to be archived
+     */
+    void archiveJob(Long jobId);
 }

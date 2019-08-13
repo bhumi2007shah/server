@@ -89,6 +89,10 @@ public class User implements Serializable, UserDetails {
     @Column(name="RESET_PASSWORD_FLAG")
     private boolean resetPasswordFlag;
 
+    @Column(name="RESET_PASSWORD_EMAIL_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date resetPasswordEmailTimestamp;
+
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)

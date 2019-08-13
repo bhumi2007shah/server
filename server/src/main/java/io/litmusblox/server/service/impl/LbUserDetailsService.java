@@ -216,6 +216,7 @@ public class LbUserDetailsService implements UserDetailsService {
         userToUpdate.setStatus(IConstant.UserStatus.Active.name());
         userToUpdate.setUpdatedOn(new Date());
         userToUpdate.setResetPasswordFlag(false);
+        userToUpdate.setResetPasswordEmailTimestamp(null);
         userRepository.save(userToUpdate);
     }
 

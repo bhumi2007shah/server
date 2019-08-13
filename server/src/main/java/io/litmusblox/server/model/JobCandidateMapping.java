@@ -50,6 +50,10 @@ public class JobCandidateMapping implements Serializable {
     @JoinColumn(name = "CANDIDATE_ID")
     private Candidate candidate;
 
+    /*@NotNull
+    @Column(name = "CANDIDATE_ID")
+    private Long candidateId;
+*/
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "STAGE")
@@ -100,10 +104,17 @@ public class JobCandidateMapping implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date candidateInterestDate;
 
+    @Column(name="CANDIDATE_FIRST_NAME")
+    private String candidateFirstName;
+
+    @Column(name="CANDIDATE_LAST_NAME")
+    private String candidateLastName;
+
     @Transient
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;
 
+    /*
     public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID chatbotUuid) {
         this.job = job;
         this.candidate = candidate;
@@ -115,5 +126,20 @@ public class JobCandidateMapping implements Serializable {
         this.email = candidate.getEmail();
         this.mobile = candidate.getMobile();
         this.countryCode = candidate.getCountryCode();
+    }*/
+
+    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, UUID chatbotUuid, String candidateFirstName, String candidateLastName) {
+        this.job = job;
+        this.candidate = candidate;
+        this.stage = stage;
+        this.candidateSource = candidateSource;
+        this.email = candidate.getEmail();
+        this.mobile = candidate.getMobile();
+        this.countryCode = candidate.getCountryCode();
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+        this.chatbotUuid = chatbotUuid;
+        this.candidateFirstName = candidateFirstName;
+        this.candidateLastName = candidateLastName;
     }
 }

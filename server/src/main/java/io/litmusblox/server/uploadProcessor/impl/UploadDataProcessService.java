@@ -177,7 +177,10 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                     candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
                     candidateObjToUse.setEmail(candidate.getEmail());
                     candidateObjToUse.setMobile(candidate.getMobile());
-                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
+                    //@NotNull Job job, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull String email, @NotNull String mobile, @NotNull String countryCode, @NotNull Date createdOn, @NotNull User createdBy, UUID chatbotUuid, String candidateFirstName, String candidateLastName
+
+                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(), new Date(),loggedInUser, UUID.randomUUID(), candidate.getFirstName(), candidate.getLastName()));
+                    //JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
                     //create an empty record in jcm Communication details table
                     jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
                 }

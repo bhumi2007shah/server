@@ -81,7 +81,7 @@ public class AuthController {
         return Util.stripExtraInfoFromResponseBean(
                 userDetailsService.createUser(user),
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter", Arrays.asList("id", "firstName", "lastName", "email","mobile"));
+                    put("User", Arrays.asList("id", "firstName", "lastName", "email","mobile"));
                 }}),
                 null
         );

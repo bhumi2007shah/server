@@ -51,6 +51,7 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     String addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
+        log.info("Candidate name: " + candidate.get(0).getDisplayName());
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");

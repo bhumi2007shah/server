@@ -407,7 +407,32 @@ public class JobControllerMappingService implements IJobControllerMappingService
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         for (String[] array:requestBean.getReceiverInfo()) {
-            JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), array[0], array[1]));
+
+            String receiverNameToUse = array[0], receiverEmailToUse =  array[1];
+
+            if (!Util.validateName(receiverNameToUse.trim())) {
+                String cleanName = receiverNameToUse.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
+                log.error("Special characters found, cleaning First name \"" + receiverNameToUse + "\" to " + cleanName);
+                if (!Util.validateName(cleanName))
+                    throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + receiverNameToUse, HttpStatus.BAD_REQUEST);
+                receiverNameToUse =cleanName;
+            }
+            if (receiverNameToUse.trim().length()==0 || receiverNameToUse.length()>45)
+                throw new WebException(IErrorMessages.INVALID_RECEIVER_NAME, HttpStatus.BAD_REQUEST);
+
+            //validate recevier email
+            if (!Util.validateEmail(receiverEmailToUse)) {
+                String cleanEmail = receiverEmailToUse.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_EMAIL,"");
+                log.error("Special characters found, cleaning Email \"" + receiverEmailToUse + "\" to " + cleanEmail);
+                if (!Util.validateEmail(cleanEmail)) {
+                    throw new ValidationException(IErrorMessages.INVALID_EMAIL + " - " + receiverEmailToUse, HttpStatus.BAD_REQUEST);
+                }
+                receiverEmailToUse=cleanEmail;
+            }
+            if(receiverEmailToUse.length()>50)
+                throw new ValidationException(IErrorMessages.EMAIL_TOO_LONG, HttpStatus.BAD_REQUEST);
+
+            JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), receiverNameToUse, receiverEmailToUse));
             Set<JcmProfileSharingDetails> detailsSet = new HashSet<>(requestBean.getJcmId().size());
             requestBean.getJcmId().forEach(jcmId ->{
                 detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));

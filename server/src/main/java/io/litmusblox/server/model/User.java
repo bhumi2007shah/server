@@ -63,7 +63,7 @@ public class User implements Serializable, UserDetails {
 
     @NotNull
     @Column(name = "ROLE")
-    private String role = IConstant.UserRole.Names.RECRUITER;
+    private String role;
 
     @Column(name = "DESIGNATION")
     private String designation;

@@ -97,7 +97,7 @@ public class LbUserDetailsService implements UserDetailsService {
 
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
-        log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
+        log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +" ms.");
 
         return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), userDetails));
     }

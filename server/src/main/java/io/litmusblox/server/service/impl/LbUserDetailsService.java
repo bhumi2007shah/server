@@ -235,6 +235,8 @@ public class LbUserDetailsService implements UserDetailsService {
         if (null == userToUpdate)
             throw new ValidationException(IErrorMessages.USER_NOT_FOUND, HttpStatus.UNPROCESSABLE_ENTITY);
         User userByEmail = userRepository.findByEmail(user.getEmail());
+        if (null == userByEmail)
+            throw new ValidationException(IErrorMessages.USER_NOT_FOUND + "- " + user.getEmail(), HttpStatus.UNPROCESSABLE_ENTITY);
         if (userToUpdate.getId() != userByEmail.getId())
             throw new ValidationException(IErrorMessages.USER_EMAIL_TOKEN_MISMATCH, HttpStatus.UNPROCESSABLE_ENTITY);
 

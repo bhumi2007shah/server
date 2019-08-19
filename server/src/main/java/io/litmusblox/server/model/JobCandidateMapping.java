@@ -31,7 +31,7 @@ import java.util.UUID;
 @Table(name="JOB_CANDIDATE_MAPPING")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("JobCandidateMapping")
-public class JobCandidateMapping implements Serializable {
+public class JobCandidateMapping implements Serializable, Comparable {
 
     private static final long serialVersionUID = 6868521896546285047L;
 
@@ -123,5 +123,27 @@ public class JobCandidateMapping implements Serializable {
         this.chatbotUuid = chatbotUuid;
         this.candidateFirstName = candidateFirstName;
         this.candidateLastName = candidateLastName;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        int returnVal = 0;
+
+        JobCandidateMapping objToCompare = null;
+        if (null != o)
+            objToCompare = (JobCandidateMapping)o ;
+
+        if(null == objToCompare.getJcmCommunicationDetails() || (null == objToCompare.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() && null == objToCompare.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())) {
+            if (null != this.getJcmCommunicationDetails() && (this.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() != null || this.getJcmCommunicationDetails().getChatCompleteSmsTimestamp() != null))
+                return -1;
+        }
+
+        if(null == this.getJcmCommunicationDetails() || (null == this.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() && null == this.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())) {
+            if(null != objToCompare.getJcmCommunicationDetails())
+                if(null != objToCompare.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() || null != objToCompare.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())
+                return 1;
+        }
+
+        return (-1 * this.getId().compareTo(((JobCandidateMapping)o).getId()));
     }
 }

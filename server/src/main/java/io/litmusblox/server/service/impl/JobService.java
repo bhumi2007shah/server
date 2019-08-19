@@ -217,13 +217,17 @@ public class JobService implements IJobService {
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
-        responseBean.setCandidateList(jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage()));
+        List<JobCandidateMapping> jcmList = jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage());
 
-        responseBean.getCandidateList().forEach(jcmFromDb-> {
+        jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
+
+        Collections.sort(jcmList);
+
+        responseBean.setCandidateList(jcmList);
 
         List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
 

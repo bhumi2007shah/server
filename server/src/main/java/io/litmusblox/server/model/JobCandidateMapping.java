@@ -144,6 +144,13 @@ public class JobCandidateMapping implements Serializable, Comparable {
                 return 1;
         }
 
-        return (-1 * this.getId().compareTo(((JobCandidateMapping)o).getId()));
+        returnVal = -1 * this.getCreatedOn().compareTo(objToCompare.getCreatedOn());
+        if(returnVal == 0)
+            returnVal = this.getCandidateFirstName().compareTo(objToCompare.getCandidateFirstName());
+
+        if(returnVal == 0)
+            returnVal = this.getCandidateLastName().compareTo(objToCompare.getCandidateLastName());
+
+        return returnVal;
     }
 }

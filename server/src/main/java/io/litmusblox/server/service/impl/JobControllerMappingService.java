@@ -555,21 +555,21 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId) {
         CvUploadResponseBean responseBean = new CvUploadResponseBean();
 
+        int filesProcessed = 0;
         Arrays.stream(multipartFiles).forEach(fileToProcess -> {
             String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
+            if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
+                responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.MAX_FILES_PER_UPLOAD);
+            }
             //check if the extension is supported by RChilli
-            if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension)) {
+            else if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension)) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.UNSUPPORTED_FILE_TYPE + extension);
             }
             else {
 
-                //TODO: save file to a temporary location
+                //TODO: save file to <repoLocation>/temp
                 // If the file is a zip / rar file, unzip the contents and save each file individually
-
-                // 2. call the RChilli api to parse the candidate
-                // 3. add jcm, and jcm communication details records
-                // 4. increment the number of candidates processed by the user
-                // 5. add a record in the new table cv_parsing_details with required details
+                // save file as <userId>_<jobId>_actualFileName
             }
         });
 

@@ -33,6 +33,7 @@ public interface IErrorMessages {
     String INTERNAL_SERVER_ERROR = "Something went wrong into server";
     String MAX_CANDIDATE_PER_FILE_EXCEEDED = "Maximum candidates per file limit exceeded";
     String MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED = "Daily limit for maximum candidates per user exceeded";
+    String MAX_FILES_PER_UPLOAD = "Exceeded limit of maximum files that can be uploaded in a single request";
     String UNSUPPORTED_FILE_SOURCE = "Unsupported file source : ";
     String UNSUPPORTED_FILE_TYPE = "Unsupported file type with extension";
     String INVALID_SETTINGS = "Invalid System Settings";

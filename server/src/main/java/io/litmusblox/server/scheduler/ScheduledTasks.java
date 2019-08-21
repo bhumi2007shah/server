@@ -28,7 +28,7 @@ public class ScheduledTasks {
     @Autowired
     IProcessUploadedCV processUploadedCV;
 
-    @Scheduled(fixedRate = 3000, initialDelay = 5000)
+    @Scheduled(fixedRate = 30000, initialDelay = 5000)
     @Transactional(propagation = Propagation.REQUIRED)
     public void parseAndProcessCv() {
         processUploadedCV.processCv();

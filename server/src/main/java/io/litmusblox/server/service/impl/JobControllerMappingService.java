@@ -555,7 +555,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId) {
         CvUploadResponseBean responseBean = new CvUploadResponseBean();
 
-        int filesProcessed = 0;
+        int filesProcessed = 0, successCount = 0, failureCount =0;
         Arrays.stream(multipartFiles).forEach(fileToProcess -> {
             String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
             if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
@@ -573,6 +573,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
             }
         });
 
+        //depending on whether all files succeeded or failed, set status as Success / Failure / Partial Success
         return responseBean;
     }
 }

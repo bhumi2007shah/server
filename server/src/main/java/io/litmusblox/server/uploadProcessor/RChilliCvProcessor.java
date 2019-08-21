@@ -30,5 +30,7 @@ public class RChilliCvProcessor {
         // 4. increment the number of candidates processed by the user
         // 5. add a record in the new table cv_parsing_details with required details
         // 6. move the file to the job folder using the candidate id generated
+        // In case of error from RChilli
+        // 1. add record in cv_parsing_details <repolocation>/job_id/error_files/
     }
 }

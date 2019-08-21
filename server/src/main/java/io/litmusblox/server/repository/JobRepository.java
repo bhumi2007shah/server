@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.repository;
 
+import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +16,7 @@ import java.util.List;
 /**
  * Repository class for Job table related CRUD operations
  *
- * @author : shital
+ * @author : Shital Raval
  * Date : 2/7/19
  * Time : 9:41 AM
  * Class Name : JobRepository
@@ -42,7 +43,24 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     Long countByCreatedByAndDateArchivedIsNull(User createdBy);
 
     //find all jobs for which ml data is not available
+    @Transactional
     List<Job> findByMlDataAvailable(Boolean mlDataFlag);
 
     int countByCreatedBy(User createdBy);
+
+    //find all archived jobs by company
+    @Transactional
+    List<Job> findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(Company company);
+
+    //count of all active jobs by company
+    @Transactional
+    Long countByCompanyIdAndDateArchivedIsNull(Company company);
+
+    //find all active jobs by company
+    @Transactional
+    List<Job> findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(Company company);
+
+    //count of all archived jobs by company
+    @Transactional
+    Long countByCompanyIdAndDateArchivedIsNotNull(Company company);
 }

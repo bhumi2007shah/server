@@ -143,3 +143,18 @@ alter table USERS alter column INVITATION_MAIL_TIMESTAMP set default null;
 -- Fix for ticket #81
 update configuration_settings
 set config_value = 50 where config_name='maxScreeningQuestionsLimit';
+
+-- fix for ticket #80
+alter table job_candidate_mapping
+add column candidate_first_name varchar(45),
+add column candidate_last_name varchar(45);
+
+update job_candidate_mapping
+set candidate_first_name = first_name from candidate where candidate.id = job_candidate_mapping.candidate_id;
+
+update job_candidate_mapping
+set candidate_last_name = last_name from candidate where candidate.id = job_candidate_mapping.candidate_id;
+
+alter table job_candidate_mapping
+alter column candidate_first_name set not null,
+alter column candidate_last_name set not null;

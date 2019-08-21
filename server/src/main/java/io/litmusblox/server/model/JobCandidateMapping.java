@@ -31,7 +31,7 @@ import java.util.UUID;
 @Table(name="JOB_CANDIDATE_MAPPING")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonFilter("JobCandidateMapping")
-public class JobCandidateMapping implements Serializable {
+public class JobCandidateMapping implements Serializable, Comparable {
 
     private static final long serialVersionUID = 6868521896546285047L;
 
@@ -100,20 +100,57 @@ public class JobCandidateMapping implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date candidateInterestDate;
 
+    @Column(name="CANDIDATE_FIRST_NAME")
+    private String candidateFirstName;
+
+    @Column(name="CANDIDATE_LAST_NAME")
+    private String candidateLastName;
+
     @Transient
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;
 
-    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, @NotNull UUID chatbotUuid) {
+    public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, UUID chatbotUuid, String candidateFirstName, String candidateLastName) {
         this.job = job;
         this.candidate = candidate;
         this.stage = stage;
         this.candidateSource = candidateSource;
-        this.createdOn = createdOn;
-        this.createdBy = createdBy;
-        this.chatbotUuid = chatbotUuid;
         this.email = candidate.getEmail();
         this.mobile = candidate.getMobile();
         this.countryCode = candidate.getCountryCode();
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+        this.chatbotUuid = chatbotUuid;
+        this.candidateFirstName = candidateFirstName;
+        this.candidateLastName = candidateLastName;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        int returnVal = 0;
+
+        JobCandidateMapping objToCompare = null;
+        if (null != o)
+            objToCompare = (JobCandidateMapping)o ;
+
+        if(null == objToCompare.getJcmCommunicationDetails() || (null == objToCompare.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() && null == objToCompare.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())) {
+            if (null != this.getJcmCommunicationDetails() && (this.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() != null || this.getJcmCommunicationDetails().getChatCompleteSmsTimestamp() != null))
+                return -1;
+        }
+
+        if(null == this.getJcmCommunicationDetails() || (null == this.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() && null == this.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())) {
+            if(null != objToCompare.getJcmCommunicationDetails())
+                if(null != objToCompare.getJcmCommunicationDetails().getChatCompleteEmailTimestamp() || null != objToCompare.getJcmCommunicationDetails().getChatCompleteSmsTimestamp())
+                return 1;
+        }
+
+        returnVal = -1 * this.getCreatedOn().compareTo(objToCompare.getCreatedOn());
+        if(returnVal == 0)
+            returnVal = this.getCandidateFirstName().compareTo(objToCompare.getCandidateFirstName());
+
+        if(returnVal == 0)
+            returnVal = this.getCandidateLastName().compareTo(objToCompare.getCandidateLastName());
+
+        return returnVal;
     }
 }

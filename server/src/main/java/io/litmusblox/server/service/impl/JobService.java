@@ -11,6 +11,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
+import io.litmusblox.server.utils.Util;
 import io.litmusblox.server.utils.SentryUtil;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
@@ -136,16 +137,41 @@ public class JobService implements IJobService {
      * query the repository to find the list of all jobs
      *
      * @param archived flag indicating if only archived jobs need to be fetched
+     * @param companyName name of the company for which jobs have to be found
      * @return List of jobs created by the logged in user
      */
     @Transactional
-    public JobWorspaceResponseBean findAllJobsForUser(boolean archived) throws Exception {
+    public JobWorspaceResponseBean findAllJobsForUser(boolean archived, String companyName) throws Exception {
 
         log.info("Received request to request to find all jobs for user for archived = " + archived);
         long startTime = System.currentTimeMillis();
 
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
+
+        switch(loggedInUser.getRole()) {
+            case IConstant.UserRole.Names.CLIENT_ADMIN:
+                log.info("Request from Client Admin, all jobs for the company will be returned");
+                jobsForCompany(responseBean, archived, loggedInUser.getCompany());
+                break;
+            case IConstant.UserRole.Names.SUPER_ADMIN:
+                if (Util.isNull(companyName))
+                    throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
+                log.info("Request from Super Admin for jobs of Company : " + companyName);
+                Company companyObjToUse = companyRepository.findByCompanyName(companyName);
+                if (null == companyObjToUse)
+                    throw new ValidationException("Company not found : " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
+                jobsForCompany(responseBean, archived, companyObjToUse);
+                break;
+            default:
+                jobsForLoggedInUser(responseBean, archived, loggedInUser);
+        }
+        log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
+
+        return responseBean;
+    }
+
+    private void jobsForLoggedInUser(JobWorspaceResponseBean responseBean, boolean archived, User loggedInUser) {
         if (archived) {
             responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNullOrderByCreatedOnDesc(loggedInUser));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
@@ -155,9 +181,18 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
-        log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
+    }
 
-        return responseBean;
+    private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, Company company) {
+        if (archived) {
+            responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(company));
+            responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
+            responseBean.setOpenJobs((jobRepository.countByCompanyIdAndDateArchivedIsNull(company)).intValue());
+        } else {
+            responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(company));
+            responseBean.setOpenJobs(responseBean.getListOfJobs().size());
+            responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
+        }
     }
 
     /**
@@ -194,13 +229,17 @@ public class JobService implements IJobService {
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
-        responseBean.setCandidateList(jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage()));
+        List<JobCandidateMapping> jcmList = jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage());
 
-        responseBean.getCandidateList().forEach(jcmFromDb-> {
+        jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
+
+        Collections.sort(jcmList);
+
+        responseBean.setCandidateList(jcmList);
 
         List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
 
@@ -494,7 +533,10 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        job.setDatePublished(new Date());
+        if (status.equals(IConstant.JobStatus.ARCHIVED.getValue()))
+            job.setDateArchived(new Date());
+        else
+            job.setDatePublished(new Date());
         job.setUpdatedOn(new Date());
         job.setStatus(status);
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());

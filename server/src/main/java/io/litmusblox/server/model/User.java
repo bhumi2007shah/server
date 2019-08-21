@@ -63,7 +63,7 @@ public class User implements Serializable, UserDetails {
 
     @NotNull
     @Column(name = "ROLE")
-    private String role = IConstant.UserRole.Names.RECRUITER;
+    private String role;
 
     @Column(name = "DESIGNATION")
     private String designation;
@@ -88,6 +88,10 @@ public class User implements Serializable, UserDetails {
 
     @Column(name="RESET_PASSWORD_FLAG")
     private boolean resetPasswordFlag;
+
+    @Column(name="RESET_PASSWORD_EMAIL_TIMESTAMP")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date resetPasswordEmailTimestamp;
 
     @NotNull
     @Column(name = "CREATED_ON")

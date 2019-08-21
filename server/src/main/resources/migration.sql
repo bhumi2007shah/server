@@ -158,3 +158,24 @@ set candidate_last_name = last_name from candidate where candidate.id = job_cand
 alter table job_candidate_mapping
 alter column candidate_first_name set not null,
 alter column candidate_last_name set not null;
+
+-- changes for ticket #88
+CREATE TABLE CV_PARSING_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CV_FILE_NAME varchar(255),
+    PROCESSED_ON TIMESTAMP,
+    PROCESSING_TIME smallint,
+    PROCESSING_STATUS varchar(10),
+    PARSING_RESPONSE text
+);
+
+CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+    SKILL VARCHAR(50),
+    LAST_USED DATE,
+    EXP_IN_MONTHS smallint
+);
+
+ALTER TABLE CANDIDATE_SKILL_DETAILS
+ADD COLUMN EXP_IN_MONTHS smallint;

@@ -524,6 +524,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
         return getCandidateProfile(details.getJobCandidateMappingId());
     }
 
+    /**
+     * Method to retrieve the job candidate mapping record based on the uuid
+     * @param uuid the uuid against which the record is to be retrieved
+     * @return the job candidate mapping
+     * @throws Exception
+     */
     @Transactional(propagation = Propagation.REQUIRED)
     public JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
@@ -535,5 +541,35 @@ public class JobControllerMappingService implements IJobControllerMappingService
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
+    }
+
+    /**
+     * Service method to upload candidates by means of drag and drop cv
+     *
+     * @param multipartFiles files to be processed to upload candidates
+     * @param jobId          the job for which the candidate is to be added
+     * @return response bean with details about success / failure of each candidate file
+     * @throws Exception
+     */
+    @Transactional
+    public CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId) {
+        CvUploadResponseBean responseBean = new CvUploadResponseBean();
+
+        Arrays.stream(multipartFiles).forEach(fileToProcess -> {
+            String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
+            if(!true) {
+                responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.UNSUPPORTED_FILE_TYPE + extension);
+            }
+            else {
+
+                //TODO: Add logic to 1. copy the file to the temporary location,
+                // 2. call the RChilli api to parse the candidate
+                // 3. add jcm, and jcm communication details records
+                // 4. increment the number of candidates processed by the user
+                // 5. add a record in the new table cv_parsing_details with required details
+            }
+        });
+
+        return responseBean;
     }
 }

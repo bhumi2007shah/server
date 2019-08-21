@@ -142,6 +142,7 @@ public interface IConstant {
     }
 
     String[] supportedExtensions = new String[] {"xls", "xlsx", "xml", "csv"};
+    String[] cvUploadSupportedExtensions = new String[] {"doc","docx","pdf"};
 
 
     enum MAX_FIELD_LENGTHS {

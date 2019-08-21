@@ -455,7 +455,8 @@ CREATE TABLE CANDIDATE_SKILL_DETAILS (
  ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
   SKILL VARCHAR(50),
-  LAST_USED DATE
+  LAST_USED DATE,
+  EXP_IN_MONTHS smallint
   );
 ---------------------------------------------------------------------------------------------------------------------------
 CREATE TABLE JCM_COMMUNICATION_DETAILS (
@@ -520,4 +521,25 @@ CREATE TABLE JCM_PROFILE_SHARING_DETAILS (
     HIRING_MANAGER_INTEREST BOOL DEFAULT FALSE,
     HIRING_MANAGER_INTEREST_DATE TIMESTAMP DEFAULT NULL,
     CONSTRAINT UNIQUE_JCM_HIRING_MANAGER UNIQUE (ID, PROFILE_SHARING_MASTER_ID)
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CV_PARSING_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CV_FILE_NAME varchar(255),
+    PROCESSED_ON TIMESTAMP,
+    PROCESSING_TIME smallint,
+    PROCESSING_STATUS varchar(10),
+    PARSING_RESPONSE text
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+    SKILL VARCHAR(50),
+    LAST_USED DATE,
+    EXP_IN_MONTHS smallint
 );

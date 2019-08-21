@@ -6,6 +6,7 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.service.CvUploadResponseBean;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
@@ -176,4 +177,19 @@ public class JobCandidateMappingController {
         return response;
     }
 
+
+    /**
+     * Api to upload candidates by means of drag and drop cv
+     *
+     * @param multipartFiles files to be processed to upload candidates
+     * @param jobId the job for which the candidate is to be added
+     * @return response bean with details about success / failure of each candidate file
+     * @throws Exception
+     */
+    @PostMapping("/addCandidate/dragAndDropCv")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
+        return jobControllerMappingService.processDragAndDropCv(multipartFiles, jobId);
+    }
 }

@@ -126,5 +126,21 @@ public interface IJobControllerMappingService {
      */
     Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception;
 
+    /**
+     * Method to retrieve the job candidate mapping record based on the uuid
+     * @param uuid the uuid against which the record is to be retrieved
+     * @return the job candidate mapping
+     * @throws Exception
+     */
     JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception;
+
+    /**
+     * Service method to upload candidates by means of drag and drop cv
+     *
+     * @param multipartFiles files to be processed to upload candidates
+     * @param jobId the job for which the candidate is to be added
+     * @return response bean with details about success / failure of each candidate file
+     * @throws Exception
+     */
+    CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId);
 }

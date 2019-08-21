@@ -44,6 +44,8 @@ public interface IConstant {
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
     String CANDIDATE_CV = "CandidateCv";
+    String SENTRY_DSN="sentryDSN";
+    String UPLOAD_FILE_TYPE="Upload file type";
 
 
     enum UserStatus {
@@ -164,5 +166,9 @@ public interface IConstant {
 
     enum UPLOAD_TYPE {
        Candidates,Logo,CandidateCv;
+    }
+
+    enum PROCESS_FILE_TYPE{
+        CsvFile,ExcelFile,HTMLFile,NaukriExcelFile
     }
 }

@@ -97,6 +97,13 @@
             <version>1.5</version>
         </dependency>
 
+		<!-- Sentry is used for logging error information -->
+		<dependency>
+			<groupId>io.sentry</groupId>
+			<artifactId>sentry</artifactId>
+			<version>1.7.16</version>
+		</dependency>
+
 		<!-- For postgresql json datatype handling -->
 		<!--
 		<dependency>

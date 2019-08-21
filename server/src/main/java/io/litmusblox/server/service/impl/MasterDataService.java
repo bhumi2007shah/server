@@ -19,6 +19,8 @@ import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +63,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     ConfigurationSettingsRepository configurationSettingsRepository;
 
+    @Autowired
+    Environment environment;
+
     /**
      * Method that will be called during application startup
      * Will read all master data from database and store them in internal cache
@@ -102,6 +107,9 @@ public class MasterDataService implements IMasterDataService {
         });
 
         MasterDataBean.getInstance().setLoaded(true);
+
+        // sentryDSN is only read from application.properties file as per profile it is not save in database
+        MasterDataBean.getInstance().setSentryDSN(environment.getProperty(IConstant.SENTRY_DSN));
     }
 
     /**

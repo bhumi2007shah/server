@@ -18,9 +18,7 @@ import org.springframework.http.HttpStatus;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author : Sumit
@@ -77,8 +75,13 @@ public class NaukriExcelFileProcessorService extends AbstractNaukriProcessor imp
                 if(headingRow) {
                     try {
                         //check that the row contains column names in correct order
-                        if ((row.getPhysicalNumberOfCells() == 0) || !checkForCells(row))
+                        if ((row.getPhysicalNumberOfCells() == 0) || !checkForCells(row)){
+                            Map<String, String> breadCrumb = new HashMap<>();
+                            breadCrumb.put(IConstant.UPLOAD_FILE_TYPE,IConstant.PROCESS_FILE_TYPE.ExcelFile.toString());
+                            breadCrumb.put("Row name", row.toString());
+                            Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.NaukriExcelFile.toString());
                             throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
+                        }
                     } catch (Exception e) {
                         throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
                     }

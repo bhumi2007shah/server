@@ -22,6 +22,7 @@ import java.util.Map;
 @Data
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class MasterDataBean {
+
     @JsonIgnore
     private static MasterDataBean instance;
 
@@ -58,4 +59,7 @@ public class MasterDataBean {
     private MasterData sourceStage = null;
 
     private ConfigSettings configSettings = new ConfigSettings();
+
+    // sentryDSN is only read from application.properties file as per profile it is not save in database
+    private String sentryDSN=null;
 }

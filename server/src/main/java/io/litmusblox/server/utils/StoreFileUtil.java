@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author : Sumit
@@ -44,9 +46,15 @@ public class StoreFileUtil {
             InputStream is = multipartFile.getInputStream();
             String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId);
             //Util.storeFile(is, filePath,repoLocation);
-            if(Util.isNull(filePath))
+            if(Util.isNull(filePath)){
+                StringBuffer info = new StringBuffer(multipartFile.getName()).append(" FilePath is null ");
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Candidate Id",candidateId.toString());
+                breadCrumb.put("filePath", filePath);
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
                 throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
-
+            }
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             return filePath;
@@ -65,6 +73,12 @@ public class StoreFileUtil {
             StringBuffer filePath=new StringBuffer();
             String staticRepoPath = null;
             if (Util.isNull(repoLocation)) {
+                StringBuffer info = new StringBuffer(fileName).append(" repoLocation is null ");
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Candidate Id",candidateId.toString());
+                breadCrumb.put("repoLocation", repoLocation);
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
                 throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
             }
             staticRepoPath = repoLocation;

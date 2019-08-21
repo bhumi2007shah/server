@@ -241,4 +241,12 @@ public class Util {
 
         return mobileNo;
     }
+
+    public static void sendSentryErrorMail(String fileName, Map<String, String> headers, String processFileType){
+        StringBuffer info = new StringBuffer(fileName).append(" - ").append(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW);
+        log.info(info.toString());
+        Map<String, String> breadCrumb = new HashMap<>();
+        breadCrumb.put(IConstant.UPLOAD_FILE_TYPE,processFileType);
+        SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+    }
 }

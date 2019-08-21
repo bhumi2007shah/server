@@ -111,6 +111,9 @@ public class MasterDataService implements IMasterDataService {
         MasterDataBean.getInstance().getConfigSettings().setMaxUploadDataLimit(Integer.parseInt(maxSize.substring(0,maxSize.indexOf("MB")))*1024*1024);
 
         MasterDataBean.getInstance().setLoaded(true);
+
+        // sentryDSN is only read from application.properties file as per profile it is not save in database
+        MasterDataBean.getInstance().setSentryDSN(environment.getProperty(IConstant.SENTRY_DSN));
     }
 
     /**

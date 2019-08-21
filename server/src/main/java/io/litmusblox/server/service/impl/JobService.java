@@ -11,6 +11,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
@@ -210,9 +211,20 @@ public class JobService implements IJobService {
         Job job = jobRepository.getOne(jobCandidateMapping.getJob().getId());
 
         if (null == job) {
+            StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
+            log.info(info.toString());
+            Map<String, String> breadCrumb = new HashMap<>();
+            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
+            SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
         else if(!job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
+            StringBuffer info = new StringBuffer("Job not published - ").append(job.getStatus());
+            log.info(info.toString());
+            Map<String, String> breadCrumb = new HashMap<>();
+            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
+            breadCrumb.put("Job Id",job.getId().toString());
+            SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -521,7 +533,10 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        job.setDatePublished(new Date());
+        if (status.equals(IConstant.JobStatus.ARCHIVED.getValue()))
+            job.setDateArchived(new Date());
+        else
+            job.setDatePublished(new Date());
         job.setUpdatedOn(new Date());
         job.setStatus(status);
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());

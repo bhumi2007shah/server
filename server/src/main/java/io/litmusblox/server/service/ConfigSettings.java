@@ -23,4 +23,6 @@ public class ConfigSettings {
     int candidatesPerFileLimit;
     int sendEmail;
     int sendSms;
+    int maxCvFiles;
+    long maxUploadDataLimit;
 }

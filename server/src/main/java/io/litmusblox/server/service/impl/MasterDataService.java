@@ -19,6 +19,8 @@ import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -61,6 +63,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     ConfigurationSettingsRepository configurationSettingsRepository;
 
+    @Autowired
+    Environment environment;
+
     /**
      * Method that will be called during application startup
      * Will read all master data from database and store them in internal cache
@@ -100,6 +105,10 @@ public class MasterDataService implements IMasterDataService {
         configurationSettings.forEach(config-> {
             configFieldAccesor.setPropertyValue(config.getConfigName(), config.getConfigValue());
         });
+        //read the limit from application.properties
+        //convert the maxUploadDataLimit from Mb into bytes
+        String maxSize = environment.getProperty("spring.http.multipart.max-request-size");
+        MasterDataBean.getInstance().getConfigSettings().setMaxUploadDataLimit(Integer.parseInt(maxSize.substring(0,maxSize.indexOf("MB")))*1024*1024);
 
         MasterDataBean.getInstance().setLoaded(true);
     }

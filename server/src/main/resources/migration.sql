@@ -179,3 +179,6 @@ CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
 
 ALTER TABLE CANDIDATE_SKILL_DETAILS
 ADD COLUMN EXP_IN_MONTHS smallint;
+
+insert into configuration_settings(config_name, config_value)
+values('maxCvFiles',20);

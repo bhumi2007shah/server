@@ -557,12 +557,15 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
         Arrays.stream(multipartFiles).forEach(fileToProcess -> {
             String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
-            if(!true) {
+            //check if the extension is supported by RChilli
+            if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension)) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.UNSUPPORTED_FILE_TYPE + extension);
             }
             else {
 
-                //TODO: Add logic to 1. copy the file to the temporary location,
+                //TODO: save file to a temporary location
+                // If the file is a zip / rar file, unzip the contents and save each file individually
+
                 // 2. call the RChilli api to parse the candidate
                 // 3. add jcm, and jcm communication details records
                 // 4. increment the number of candidates processed by the user

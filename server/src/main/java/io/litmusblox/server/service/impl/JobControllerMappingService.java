@@ -15,6 +15,7 @@ import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
@@ -94,6 +95,8 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //verify that the job is live before processing candidates
         Job job = jobRepository.getOne(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
+            StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId :").append(jobId);
+            sendSentryMail(info.toString(), null, jobId);
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -209,12 +212,16 @@ public class JobControllerMappingService implements IJobControllerMappingService
         //validate the file source is supported by application
         if(!Arrays.asList(IConstant.UPLOAD_FORMATS_SUPPORTED.values()).contains(IConstant.UPLOAD_FORMATS_SUPPORTED.valueOf(fileFormat))) {
             log.error(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat);
+            StringBuffer info = new StringBuffer("Unsupported file source : ").append(multipartFile.getName());
+            sendSentryMail(info.toString(), multipartFile.getName(),jobId);
             throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         //verify that the job is live before processing candidates
         Job job = jobRepository.getOne(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
+            StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId-").append(jobId);
+            sendSentryMail(info.toString(), null, jobId);
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -272,6 +279,8 @@ public class JobControllerMappingService implements IJobControllerMappingService
                 break;
             default:
                 log.error(IErrorMessages.UNSUPPORTED_FILE_TYPE  + " - "+ fileExtension);
+                StringBuffer info = new StringBuffer("Unsupported file source : ").append(fileName);
+                sendSentryMail(info.toString(),fileName,null);
                 throw new WebException(IErrorMessages.UNSUPPORTED_FILE_TYPE + " - " + fileExtension, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         return candidateList;
@@ -313,6 +322,8 @@ public class JobControllerMappingService implements IJobControllerMappingService
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);
+            StringBuffer info = new StringBuffer("Invalid request object from plugin, missing Candidate info");
+            sendSentryMail(info.toString(), null,jobId);
             throw new WebException(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         return responseBean;
@@ -510,5 +521,17 @@ public class JobControllerMappingService implements IJobControllerMappingService
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
+    }
+
+    private void sendSentryMail(String info,String fileName, Long jobId){
+        log.info(info);
+        Map<String, String> breadCrumb = new HashMap<>();
+        if(null!=jobId)
+            breadCrumb.put("JobId",jobId.toString());
+
+        if(null!=fileName)
+            breadCrumb.put("FileName",fileName);
+
+        SentryUtil.logWithStaticAPI(null, info, breadCrumb);
     }
 }

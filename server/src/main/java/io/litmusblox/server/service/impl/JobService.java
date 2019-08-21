@@ -521,7 +521,10 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        job.setDatePublished(new Date());
+        if (status.equals(IConstant.JobStatus.ARCHIVED.getValue()))
+            job.setDateArchived(new Date());
+        else
+            job.setDatePublished(new Date());
         job.setUpdatedOn(new Date());
         job.setStatus(status);
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());

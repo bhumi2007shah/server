@@ -6,14 +6,13 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author : Sumit
@@ -40,9 +39,9 @@ public class CompanyScreeningQuestion implements Serializable {
     @Column(name = "QUESTION")
     private String question;
 
-    @Column(name = "OPTIONS")
-    @Convert(converter = ListToArrayConverter.class)
-    private List<String> options;
+    @Column(name = "OPTIONS", columnDefinition = "varchar[]")
+    @Type(type = "com.vladmihalcea.hibernate.type.array.StringArrayType")
+    private String[]  options;
 
     @JoinColumn(name = "COMPANY_ID")
     private Long companyId;
@@ -55,7 +54,7 @@ public class CompanyScreeningQuestion implements Serializable {
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn = new Date();
+    private Date createdOn;
 
     @NotNull
     @Column(name = "CREATED_BY")
@@ -63,7 +62,7 @@ public class CompanyScreeningQuestion implements Serializable {
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
     @Column(name="UPDATED_BY")
     private Long updatedBy;

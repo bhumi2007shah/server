@@ -6,13 +6,12 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.litmusblox.server.psql.ListToArrayConverter;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * @author : Sumit
@@ -39,9 +38,9 @@ public class ScreeningQuestions implements Serializable {
     @Column(name = "QUESTION")
     private String question;
 
-    @Column(name = "OPTIONS")
-    @Convert(converter = ListToArrayConverter.class)
-    private List<String> options;
+    @Column(name = "OPTIONS", columnDefinition = "varchar[]")
+    @Type(type = "com.vladmihalcea.hibernate.type.array.StringArrayType")
+    private String[]  options;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)

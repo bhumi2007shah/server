@@ -214,15 +214,14 @@ public class JobService implements IJobService {
             StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
+            breadCrumb.put("Job Id",jobCandidateMapping.getJob().getId().toString());
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if(!job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
-            StringBuffer info = new StringBuffer("Job not published - ").append(job.getStatus());
+        else if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
+            StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
             breadCrumb.put("Job Id",job.getId().toString());
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);

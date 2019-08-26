@@ -58,4 +58,5 @@ public interface IErrorMessages {
     String USER_NOT_ACTIVE = "User was not activated ";
     String INVALID_RECEIVER_NAME = "Receiver's name should be between 1 and 45 characters";
     String JOB_NOT_ARCHIVED = "Selected job is not archived";
+    String JOB_COMPANY_MISMATCH = "Requested job does not belong to the company of the logged in user";
 }

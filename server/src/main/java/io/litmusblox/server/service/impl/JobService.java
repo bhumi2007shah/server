@@ -210,6 +210,7 @@ public class JobService implements IJobService {
         //If the job is not published, do not process the request
         Job job = jobRepository.getOne(jobCandidateMapping.getJob().getId());
 
+
         if (null == job) {
             StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
             log.info(info.toString());
@@ -218,13 +219,18 @@ public class JobService implements IJobService {
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
-            StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
-            log.info(info.toString());
-            Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Job Id",job.getId().toString());
-            SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
-            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+        else {
+            User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if(!loggedInUser.getRole().equals(IConstant.UserRole.Names.SUPER_ADMIN) && !job.getCompanyId().getId().equals(loggedInUser.getCompany().getId()))
+                throw new WebException(IErrorMessages.JOB_COMPANY_MISMATCH, HttpStatus.UNAUTHORIZED);
+            if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
+                StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Job Id", job.getId().toString());
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+            }
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();

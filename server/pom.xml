@@ -32,12 +32,6 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-devtools</artifactId>
-			<scope>runtime</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>
@@ -104,14 +98,13 @@
 			<version>1.7.16</version>
 		</dependency>
 
-		<!-- For postgresql json datatype handling -->
-		<!--
+		<!-- For postgresql array and json datatype handling -->
 		<dependency>
 			<groupId>com.vladmihalcea</groupId>
 			<artifactId>hibernate-types-52</artifactId>
-			<version>2.5.0</version>
+			<version>2.5.1</version>
 		</dependency>
-		-->
+
 		<!-- for process rar file -->
 		<dependency>
 			<groupId>com.github.junrar</groupId>

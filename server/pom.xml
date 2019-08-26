@@ -112,6 +112,13 @@
 			<version>2.5.0</version>
 		</dependency>
 		-->
+		<!-- for process rar file -->
+		<dependency>
+			<groupId>com.github.junrar</groupId>
+			<artifactId>junrar</artifactId>
+			<version>0.7</version>
+		</dependency>
+
 
 		<!-- for unit testing -->
 		<dependency>

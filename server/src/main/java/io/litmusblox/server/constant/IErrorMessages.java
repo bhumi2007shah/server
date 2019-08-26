@@ -57,4 +57,6 @@ public interface IErrorMessages {
     String NO_EMAIL_PROVIDED = "No email address provided";
     String USER_NOT_ACTIVE = "User was not activated ";
     String INVALID_RECEIVER_NAME = "Receiver's name should be between 1 and 45 characters";
+
+    String FAILED_TO_SAVE_FILE = "Fail to save the file";
 }

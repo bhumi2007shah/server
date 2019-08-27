@@ -59,4 +59,5 @@ public interface IErrorMessages {
     String INVALID_RECEIVER_NAME = "Receiver's name should be between 1 and 45 characters";
     String JOB_NOT_ARCHIVED = "Selected job is not archived";
     String JOB_COMPANY_MISMATCH = "Requested job does not belong to the company of the logged in user";
+    String ML_DATA_UNAVAILABLE = "No matching skills and capabilities found for the job title and job description";
 }

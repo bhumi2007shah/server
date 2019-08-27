@@ -5,6 +5,7 @@
 package io.litmusblox.server.utils;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -27,8 +28,11 @@ public class RestClient {
     //singleton instance
     private static RestClient restObj = null;
 
-    private static final int CONNECTION_TIMEOUT = 1000;
-    private static final int READ_TIMEOUT = 3000;
+    @Value("${restConnectionTimeout}")
+    private int connectionTimeout;
+
+    @Value("${restReadTimeout}")
+    private int readTimeout;
 
     //private constructor
     private RestClient() {
@@ -54,10 +58,10 @@ public class RestClient {
     public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
         SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory)restTemplate.getRequestFactory();
-        requestFactory.setConnectTimeout(CONNECTION_TIMEOUT);
-        requestFactory.setReadTimeout(READ_TIMEOUT);
+        requestFactory.setConnectTimeout(connectionTimeout);
+        requestFactory.setReadTimeout(readTimeout);
 
-        log.info("Request object sent to JM: " + requestObj);
+        //log.info("Request object sent: " + requestObj);
 
         HttpEntity<String> entity;
         if (null != requestObj)
@@ -65,8 +69,9 @@ public class RestClient {
         else
             entity = new HttpEntity<String>(getHttpHeader(authToken, false));
         try {
+            long startTime = System.currentTimeMillis();
             ResponseEntity<String> response = restTemplate.exchange(apiUrl, requestType, entity, String.class);
-            log.info("Response from Jobmosis: " + response);
+            log.info("Time taken to retrieve response from REST api: " + (System.currentTimeMillis() - startTime) + "ms.");
             return response.getBody();
         } catch(HttpStatusCodeException e ) {
             List<String> customHeader = e.getResponseHeaders().get("x-app-err-id");

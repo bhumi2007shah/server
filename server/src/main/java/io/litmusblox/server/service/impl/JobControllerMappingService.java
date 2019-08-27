@@ -623,9 +623,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
             }
         }
         //depending on whether all files succeeded or failed, set status as Success / Failure / Partial Success
-        if(countArray[0] == 0)      //Failure count
+        if(failureCount == 0)      //Failure count
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Success.name());
-        else if(countArray[1] == 0)    //Success count
+        else if(successCount == 0)    //Success count
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Failure.name());
         else
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Partial_Success.name());

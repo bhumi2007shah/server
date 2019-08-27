@@ -49,9 +49,6 @@ public class LbAuthRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        log.info("Got request " + request.getRequestURL() + " :: " + request.getHeader(IConstant.TOKEN_HEADER) + " :: " + request.getMethod() + " :: " + request.getHeader("Access-Control-Allow-Origin"));
-
-
         if(((HttpServletRequest)request).getMethod().equalsIgnoreCase("OPTIONS")) {
 
             ((HttpServletResponse)response).addHeader("Access-Control-Allow-Origin", "*");
@@ -64,8 +61,6 @@ public class LbAuthRequestFilter extends OncePerRequestFilter {
         //no authorization required for options request sent by browser automatically
         if(!request.getMethod().equalsIgnoreCase("OPTIONS")) {
             final String requestTokenHeader = request.getHeader(IConstant.TOKEN_HEADER);
-
-            log.info("Token in request is " + requestTokenHeader);
 
             String username = null;
             String jwtToken = null;

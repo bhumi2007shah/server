@@ -38,6 +38,7 @@ public interface IConstant {
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 
     String REPO_LOCATION = "repoLocation";
+    String TEMP_REPO_LOCATION="temprepolocation";
     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
     String STR_INDIA = "India";
 
@@ -171,5 +172,9 @@ public interface IConstant {
 
     enum PROCESS_FILE_TYPE{
         CsvFile,ExcelFile,HTMLFile,NaukriExcelFile
+    }
+
+    enum FILE_TYPE{
+        rar,zip,other
     }
 }

@@ -194,6 +194,7 @@ public class MasterDataService implements IMasterDataService {
     private static final String CONFIG_SETTINGS = "configSettings";
     private static final String SUPPORTED_FILE_FORMATS = "supportedFileFormats";
     private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
+    private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
 
     /**
      * Method to fetch specific master data from cache
@@ -220,6 +221,9 @@ public class MasterDataService implements IMasterDataService {
                 break;
             case SUPPORTED_CV_FILE_FORMATS:
                 master.setSupportedCvFileFormats(Arrays.asList(IConstant.cvUploadSupportedExtensions));
+                break;
+            case ID_FOR_SOURCE_STAGE:
+                master.setSourceStageId(MasterDataBean.getInstance().getSourceStage().getId());
                 break;
             default: //for all other properties, use reflection
 

@@ -38,4 +38,5 @@ public class MasterDataResponse {
     private ConfigSettings configSettings;
     private List<String> supportedFileFormats = new ArrayList<>();
     private List<String> supportedCvFileFormats = new ArrayList<>();
+    private long sourceStageId;
 }

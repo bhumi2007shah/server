@@ -37,4 +37,5 @@ public class MasterDataResponse {
     private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
     private ConfigSettings configSettings;
     private List<String> supportedFileFormats = new ArrayList<>();
+    private List<String> supportedCvFileFormats = new ArrayList<>();
 }

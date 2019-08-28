@@ -6,6 +6,7 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,6 +23,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "SKILLS_MASTER")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class SkillsMaster implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -34,4 +36,8 @@ public class SkillsMaster implements Serializable {
     @NotNull
     @Column(name = "SKILL_NAME")
     private String skillName;
+
+    public SkillsMaster(@NotNull String skillName) {
+        this.skillName = skillName;
+    }
 }

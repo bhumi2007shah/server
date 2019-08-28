@@ -15,5 +15,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface SkillMasterRepository extends JpaRepository<SkillsMaster, Long> {
-
+    public SkillsMaster findBySkillName(String skillName);
 }

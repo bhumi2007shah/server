@@ -73,6 +73,9 @@ public class JobService implements IJobService {
     SkillMasterRepository skillMasterRepository;
 
     @Resource
+    MasterDataRepository masterDataRepository;
+
+    @Resource
     CompanyAddressRepository companyAddressRepository;
 
     @Resource
@@ -95,6 +98,8 @@ public class JobService implements IJobService {
 
     @Value("${mlApiUrl}")
     private String mlUrl;
+
+    private static MasterData mediumImportanceLevel = null;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
@@ -612,11 +617,56 @@ public class JobService implements IJobService {
         String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
         log.info("Response received: " + mlResponse);
         MLResponseBean responseBean = objectMapper.readValue(mlResponseString, MLResponseBean.class);
-        log.info("Size of skill list: " + responseBean.getSkills().size());
+        handleSkillsFromML(responseBean.getSkills(), jobId);
+        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true);
+        handleCapabilitiesFromMl(responseBean.getRecommendedCapabilities(), jobId, false);
+    }
+
+    /**
+     * Method to handle all skills provided by ML
+     *
+     * @param skillsList List of skills obtained from ML
+     * @param jobId the job id for which the skills have to persisted
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
+        log.info("Size of skill list: " + skillsList.size());
         jobKeySkillsRepository.deleteByJobId(jobId);
-        responseBean.getSkills().forEach(skills-> {
-            jobKeySkillsRepository.save(new JobKeySkills());
+        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
+        skillsList.forEach(skill-> {
+            //find a skill from the master table for the skill name provided
+            SkillsMaster skillFromDb = skillMasterRepository.findBySkillName(skill.getName());
+            //if none if found, add a skill
+            if (null == skillFromDb) {
+                skillFromDb = new SkillsMaster(skill.getName());
+                skillMasterRepository.save(skillFromDb);
+            }
+            //add a record in job_key_skills with this skill id
+            jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
         });
+        jobKeySkillsRepository.saveAll(jobKeySkillsToSave);
+    }
+
+    /**
+     * Method to handle all capabilities provided by ML
+     *
+     * @param capabilitiesList
+     * @param jobId
+     * @param selectedByDefault
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault) throws Exception {
+        log.info("Size of capabilities list to process: " + capabilitiesList.size());
+        if(null == mediumImportanceLevel)
+            mediumImportanceLevel = findMasterDataForMediumImportance();
+        jobCapabilitiesRepository.deleteByJobId(jobId);
+        List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
+        capabilitiesList.forEach(capability->{
+            jobCapabilitiesToSave.add(new JobCapabilities(capability.getCapability(), selectedByDefault, mediumImportanceLevel, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+        });
+        jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
     }
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
@@ -636,7 +686,7 @@ public class JobService implements IJobService {
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
 
-        //populate capabilities and key skills for the job
+        //populate key skills for the job
         job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
@@ -712,6 +762,7 @@ public class JobService implements IJobService {
                 jobKeySkillsRepository.save(new JobKeySkills(tempSkills, false, true, new Date(), loggedInUser, job.getId()));
             }
         }
+        //populate the capabilities for the job
         job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
     }
 
@@ -903,5 +954,16 @@ public class JobService implements IJobService {
         job.setUpdatedOn(new Date());
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         jobRepository.save(job);
+    }
+
+
+    public MasterData findMasterDataForMediumImportance() {
+        final MasterData[] returnVal = {null};
+        MasterDataBean.getInstance().getImportanceLevel().keySet().forEach( key -> {
+            if(MasterDataBean.getInstance().getImportanceLevel().get(key).equals("Mid")) {
+                returnVal[0] = masterDataRepository.getOne(key);
+            }
+        });
+        return returnVal[0];
     }
 }

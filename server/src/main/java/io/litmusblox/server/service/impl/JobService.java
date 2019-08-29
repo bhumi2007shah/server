@@ -214,15 +214,14 @@ public class JobService implements IJobService {
             StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
+            breadCrumb.put("Job Id ",jobCandidateMapping.getJob().getId().toString());
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if(!job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
-            StringBuffer info = new StringBuffer("Job not published - ").append(job.getStatus());
+        else if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
+            StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Candidate Id",jobCandidateMapping.getCandidate().getId().toString());
             breadCrumb.put("Job Id",job.getId().toString());
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -523,22 +522,52 @@ public class JobService implements IJobService {
      */
     @Transactional
     public void archiveJob(Long jobId) {
-        log.info("Received request to archiving job with id: " + jobId);
+        log.info("Received request to archive job with id: " + jobId);
         changeJobStatus(jobId,IConstant.JobStatus.ARCHIVED.getValue());
         log.info("Completed archiving job with id: " + jobId);
     }
 
+    /**
+     * Service method to unarchive a job
+     *
+     * @param jobId id of the job to be unarchived
+     */
+    @Transactional
+    public void unarchiveJob(Long jobId) throws Exception {
+        log.info("Received request to unarchive job with id: " + jobId);
+        changeJobStatus(jobId,null);
+        log.info("Completed unarchiving job with id: " + jobId);
+    }
+
+    /**
+     * common method to Publish, Archive or Unarchive a job
+     * @param jobId the job on which the operation is to be performed
+     * @param status the status to be set. If the job is being unarchived, the status will be sent as null
+     */
     private void changeJobStatus(Long jobId, String status) {
         Job job = jobRepository.getOne(jobId);
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        if (status.equals(IConstant.JobStatus.ARCHIVED.getValue()))
-            job.setDateArchived(new Date());
-        else
-            job.setDatePublished(new Date());
+        if(null == status) {
+            //check that the old status of job is archived
+            if (!IConstant.JobStatus.ARCHIVED.getValue().equals(job.getStatus()))
+                throw new WebException(IErrorMessages.JOB_NOT_ARCHIVED, HttpStatus.UNPROCESSABLE_ENTITY);
+            if(null == job.getDatePublished())
+                job.setStatus(IConstant.JobStatus.DRAFT.getValue());
+            else
+                job.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
+
+            job.setDateArchived(null);
+        }
+        else  {
+            if (status.equals(IConstant.JobStatus.ARCHIVED.getValue()))
+                job.setDateArchived(new Date());
+            else
+                job.setDatePublished(new Date());
+            job.setStatus(status);
+        }
         job.setUpdatedOn(new Date());
-        job.setStatus(status);
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         jobRepository.save(job);
     }

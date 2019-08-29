@@ -130,4 +130,16 @@ public class JobController {
         jobService.archiveJob(jobId);
     }
 
+    /**
+     * Api to unarchive a job
+     *
+     * @param jobId id of the job to be unarchived
+     * @throws Exception
+     */
+    @PutMapping(value = "/unarchiveJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void unarchiveJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.unarchiveJob(jobId);
+    }
+
 }

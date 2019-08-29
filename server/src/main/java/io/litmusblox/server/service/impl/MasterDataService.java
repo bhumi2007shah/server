@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -192,6 +193,8 @@ public class MasterDataService implements IMasterDataService {
     private static final String SCREENING_QUESTIONS_MASTER_DATA = "screeningQuestions";
     private static final String CONFIG_SETTINGS = "configSettings";
     private static final String SUPPORTED_FILE_FORMATS = "supportedFileFormats";
+    private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
+    private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
 
     /**
      * Method to fetch specific master data from cache
@@ -215,6 +218,12 @@ public class MasterDataService implements IMasterDataService {
                 master.setSupportedFileFormats(Stream.of(IConstant.UPLOAD_FORMATS_SUPPORTED.values())
                                             .map(Enum::name)
                                             .collect(Collectors.toList()));
+                break;
+            case SUPPORTED_CV_FILE_FORMATS:
+                master.setSupportedCvFileFormats(Arrays.asList(IConstant.cvUploadSupportedExtensions));
+                break;
+            case ID_FOR_SOURCE_STAGE:
+                master.setSourceStageId(MasterDataBean.getInstance().getSourceStage().getId());
                 break;
             default: //for all other properties, use reflection
 

@@ -130,4 +130,7 @@ public class Job implements Serializable {
 
     @Transient
     private String companyName;
+
+    @Transient
+    private String mlErrorMessage;
 }

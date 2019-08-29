@@ -101,7 +101,7 @@ public class JobService implements IJobService {
 
     private static MasterData mediumImportanceLevel = null;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional//(propagation = Propagation.REQUIRED)
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
         log.info("Received request to add job for page " + pageName);
@@ -300,326 +300,33 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
+
         try {
             callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
+            if(null == oldJob) {
+                job.setMlDataAvailable(true);
+                jobRepository.save(job);
+            }
+            else {
+                oldJob.setMlDataAvailable(true);
+                jobRepository.save(oldJob);
+            }
         } catch (Exception e) {
             log.error("Error while fetching data from ML: " + e.getMessage());
-            throw new WebException(IErrorMessages.ML_DATA_UNAVAILABLE, HttpStatus.NO_CONTENT);
+            job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
         }
     }
-
-    /*
-    temporary - to be deleted
-     */
-    private static String mlResponseString = "{\n" +
-            "    \"skills\": [\n" +
-            "        {\n" +
-            "            \"id\": 1,\n" +
-            "            \"name\": \"QA\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"id\": 2,\n" +
-            "            \"name\": \"SaaS\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"id\": 3,\n" +
-            "            \"name\": \"Testing\"\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"suggestedCapabilities\": [\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 6,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Capacity Sizing, Scalability & Performance\",\n" +
-            "            \"capscore\": 12,\n" +
-            "            \"percentage\": \"0.88365245 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 12\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 6,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Future Technology Roadmap\",\n" +
-            "            \"capscore\": 12,\n" +
-            "            \"percentage\": \"0.88365245 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 13\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 6,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Regression Test Pack Management\",\n" +
-            "            \"capscore\": 12,\n" +
-            "            \"percentage\": \"0.88365245 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 14\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 6,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Performance & Stress Testing\",\n" +
-            "            \"capscore\": 12,\n" +
-            "            \"percentage\": \"0.88365245 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 15\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 2,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Agile Team Member\",\n" +
-            "            \"capscore\": 4,\n" +
-            "            \"percentage\": \"0.2945508 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 150\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"recommendedCapabilities\": [\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 10,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Architecture Basic Building Blocks\",\n" +
-            "            \"capscore\": 20,\n" +
-            "            \"percentage\": \"1.472754 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 1\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 10,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Test Case Design\",\n" +
-            "            \"capscore\": 20,\n" +
-            "            \"percentage\": \"1.472754 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 2\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 10,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Test Execution\",\n" +
-            "            \"capscore\": 20,\n" +
-            "            \"percentage\": \"1.472754 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 3\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 10,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Cloud Infra Design\",\n" +
-            "            \"capscore\": 20,\n" +
-            "            \"percentage\": \"1.472754 %\",\n" +
-            "            \"roleType\": \"Cloud Developer\",\n" +
-            "            \"id\": 4\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 10,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Cloud infra deploymet & Support\",\n" +
-            "            \"capscore\": 20,\n" +
-            "            \"percentage\": \"1.472754 %\",\n" +
-            "            \"roleType\": \"Cloud Developer\",\n" +
-            "            \"id\": 5\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 8,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Models & Frameworks\",\n" +
-            "            \"capscore\": 16,\n" +
-            "            \"percentage\": \"1.1782032 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 6\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 8,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Third Party Products & Technologies Evaluation & Selection\",\n" +
-            "            \"capscore\": 16,\n" +
-            "            \"percentage\": \"1.1782032 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 7\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 8,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"SaaS\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Application / Solution Design\",\n" +
-            "            \"capscore\": 16,\n" +
-            "            \"percentage\": \"1.1782032 %\",\n" +
-            "            \"roleType\": \"Architect\",\n" +
-            "            \"id\": 8\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 8,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Basics of Testing work\",\n" +
-            "            \"capscore\": 16,\n" +
-            "            \"percentage\": \"1.1782032 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 9\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 8,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Test Environment Management\",\n" +
-            "            \"capscore\": 16,\n" +
-            "            \"percentage\": \"1.1782032 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 10\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"capabilityWeight\": 7,\n" +
-            "            \"keywords\": [\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"QA\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                },\n" +
-            "                {\n" +
-            "                    \"keySkill\": \"Testing\",\n" +
-            "                    \"occurrence\": 1\n" +
-            "                }\n" +
-            "            ],\n" +
-            "            \"capability\": \"Handling Client Interactions\",\n" +
-            "            \"capscore\": 14,\n" +
-            "            \"percentage\": \"1.0309278 %\",\n" +
-            "            \"roleType\": \"Test Professional\",\n" +
-            "            \"id\": 11\n" +
-            "        }\n" +
-            "    ],\n" +
-            "    \"occuranceOfDistinctIndustry\": \" IT  3  Manufacturing  0 \",\n" +
-            "    \"roles\": [\n" +
-            "        {\n" +
-            "            \"role\": \"Cloud Developer\",\n" +
-            "            \"score\": 2,\n" +
-            "            \"keywords\": \" SaaS 1 time(s) \",\n" +
-            "            \"percentage\": \"33.333336 %\",\n" +
-            "            \"id\": 1\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"role\": \"Architect\",\n" +
-            "            \"score\": 2,\n" +
-            "            \"keywords\": \" SaaS 1 time(s) \",\n" +
-            "            \"percentage\": \"33.333336 %\",\n" +
-            "            \"id\": 2\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"role\": \"Test Professional\",\n" +
-            "            \"score\": 2,\n" +
-            "            \"keywords\": \" QA 1 time(s)  Testing 1 time(s) \",\n" +
-            "            \"percentage\": \"33.333336 %\",\n" +
-            "            \"id\": 3\n" +
-            "        }\n" +
-            "    ]\n" +
-            "}";
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
         log.info("Response received: " + mlResponse);
-        MLResponseBean responseBean = objectMapper.readValue(mlResponseString, MLResponseBean.class);
+        long startTime = System.currentTimeMillis();
+        MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
         handleSkillsFromML(responseBean.getSkills(), jobId);
         handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true);
         handleCapabilitiesFromMl(responseBean.getRecommendedCapabilities(), jobId, false);
+        log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
     /**
@@ -632,7 +339,6 @@ public class JobService implements IJobService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
         log.info("Size of skill list: " + skillsList.size());
-        jobKeySkillsRepository.deleteByJobId(jobId);
         List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
         skillsList.forEach(skill-> {
             //find a skill from the master table for the skill name provided
@@ -661,7 +367,6 @@ public class JobService implements IJobService {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
         if(null == mediumImportanceLevel)
             mediumImportanceLevel = findMasterDataForMediumImportance();
-        jobCapabilitiesRepository.deleteByJobId(jobId);
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
             jobCapabilitiesToSave.add(new JobCapabilities(capability.getCapability(), selectedByDefault, mediumImportanceLevel, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));

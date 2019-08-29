@@ -584,8 +584,10 @@ public class JobControllerMappingService implements IJobControllerMappingService
         int filesProcessed = 0;
         Integer successCount = 0, failureCount =0;
         Integer[] countArray = new Integer[0];
+        String fileName=null;
 
         for (MultipartFile fileToProcess :multipartFiles) {
+            fileName=fileToProcess.getOriginalFilename();
             String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
             if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.MAX_FILES_PER_UPLOAD);
@@ -623,7 +625,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
             }
         }
         //depending on whether all files succeeded or failed, set status as Success / Failure / Partial Success
-        if(failureCount == 0)      //Failure count
+        if(failureCount == 0 && successCount == 0)
+            responseBean.getCvUploadMessage().put(fileName, IErrorMessages.FAILED_TO_SAVE_FILE);
+        else if(failureCount == 0)      //Failure count
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Success.name());
         else if(successCount == 0)    //Success count
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Failure.name());

@@ -18,6 +18,7 @@ import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
+import io.litmusblox.server.utils.ZipFileProcessUtil;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -578,25 +579,60 @@ public class JobControllerMappingService implements IJobControllerMappingService
     public CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId) {
         CvUploadResponseBean responseBean = new CvUploadResponseBean();
 
-        int filesProcessed = 0, successCount = 0, failureCount =0;
-        Arrays.stream(multipartFiles).forEach(fileToProcess -> {
+        String filePath = null;
+        String fileType=null;
+        int filesProcessed = 0;
+        Integer successCount = 0, failureCount =0;
+        Integer[] countArray = new Integer[0];
+        String fileName=null;
+
+        for (MultipartFile fileToProcess :multipartFiles) {
+            fileName=fileToProcess.getOriginalFilename();
             String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
             if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.MAX_FILES_PER_UPLOAD);
             }
             //check if the extension is supported by RChilli
             else if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension)) {
+                failureCount++;
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.UNSUPPORTED_FILE_TYPE + extension);
             }
             else {
 
-                //TODO: save file to <repoLocation>/temp
-                // If the file is a zip / rar file, unzip the contents and save each file individually
-                // save file as <userId>_<jobId>_actualFileName
-            }
-        });
+                if(extension.equals(IConstant.FILE_TYPE.zip.toString()))
+                    fileType=IConstant.FILE_TYPE.zip.toString();
+                else if(extension.equals(IConstant.FILE_TYPE.rar.toString()))
+                    fileType=IConstant.FILE_TYPE.rar.toString();
+                else
+                    fileType=IConstant.FILE_TYPE.other.toString();
 
+                User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                try {
+                    filePath = StoreFileUtil.storeFile(fileToProcess, jobId, environment.getProperty(IConstant.TEMP_REPO_LOCATION), fileType,loggedInUser.getId());
+                    successCount++;
+                } catch (Exception e) {
+                    log.error(fileToProcess.getOriginalFilename()+" not save to temp location : "+e.getMessage());
+                    failureCount++;
+                    responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.FAILED_TO_SAVE_FILE + extension);
+                }
+
+                if(fileType.equals(IConstant.FILE_TYPE.zip.toString()) || fileType.equals(IConstant.FILE_TYPE.rar.toString())){
+                    successCount--;
+                    countArray=ZipFileProcessUtil.extractZipFile(filePath, environment.getProperty(IConstant.TEMP_REPO_LOCATION), loggedInUser.getId(),jobId, responseBean, failureCount,successCount);
+                    failureCount=countArray[0];
+                    successCount=countArray[1];
+                }
+            }
+        }
         //depending on whether all files succeeded or failed, set status as Success / Failure / Partial Success
+        if(successCount == 0) { //Failure count
+            responseBean.getCvUploadMessage().put(fileName, IErrorMessages.FAILED_TO_SAVE_FILE);
+            responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Failure.name());
+        }else if(failureCount == 0)    //Failure count
+            responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Success.name());
+        else
+            responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Partial_Success.name());
+
         return responseBean;
     }
 }

@@ -57,6 +57,10 @@ public class StoreFileUtil {
             }
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString()))
+                return targetFile.toString();
+
             return filePath;
         }
         catch (WebException e) {
@@ -83,17 +87,22 @@ public class StoreFileUtil {
             }
             staticRepoPath = repoLocation;
 
-            //String time = Calendar.getInstance().getTimeInMillis() + "";
-            filePath.append(uploadType).append(File.separator).append(id);
             File file = new File(staticRepoPath + File.separator + filePath);
             if (!file.exists()) {
                 file.mkdirs();
             }
 
-            if(null!=candidateId)
+           if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString())){
+                filePath.append(File.separator).append(fileName);
+            }else if(uploadType.equals(IConstant.FILE_TYPE.other.toString())){
+                filePath.append(candidateId).append("_").append(id).append("_").append(fileName);
+            }else if(null!=candidateId){
+                filePath.append(uploadType).append(File.separator).append(id);
                 filePath.append(File.separator).append(candidateId).append(".").append(Util.getFileExtension(fileName));
-            else
+            }else{
+                filePath.append(uploadType).append(File.separator).append(id);
                 filePath.append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
+            }
 
             log.info("Saved file: "+filePath);
             return filePath.toString();

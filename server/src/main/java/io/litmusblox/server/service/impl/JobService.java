@@ -300,7 +300,8 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
-/* TODO: After current deployment to prod, uncomment the following
+ //TODO: After current deployment to prod, uncomment the following
+        try {
             callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
             if(null == oldJob) {
                 job.setMlDataAvailable(true);
@@ -313,7 +314,7 @@ public class JobService implements IJobService {
         } catch (Exception e) {
             log.error("Error while fetching data from ML: " + e.getMessage());
             job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
-        }*/
+        }
     }
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {

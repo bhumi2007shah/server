@@ -177,4 +177,6 @@ public interface IConstant {
     enum FILE_TYPE{
         rar,zip,other
     }
+
+    String ERROR_FILES="error_files";
 }

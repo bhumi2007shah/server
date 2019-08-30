@@ -42,9 +42,13 @@ public class StoreFileUtil {
 
     public static String storeFile(MultipartFile multipartFile, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
         File targetFile =  null;
+        Boolean isZipFile=false;
         try {
+            if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString())){
+                isZipFile=true;
+            }
             InputStream is = multipartFile.getInputStream();
-            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId);
+            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId, isZipFile);
             //Util.storeFile(is, filePath,repoLocation);
             if(Util.isNull(filePath)){
                 StringBuffer info = new StringBuffer(multipartFile.getName()).append(" FilePath is null ");
@@ -58,7 +62,7 @@ public class StoreFileUtil {
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-            if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString()))
+            if(isZipFile)
                 return targetFile.toString();
 
             return filePath;
@@ -71,7 +75,7 @@ public class StoreFileUtil {
         }
     }
 
-    private static String getFileName(String fileName, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
+    private static String getFileName(String fileName, long id, String repoLocation, String uploadType, Long candidateId, Boolean isZipFile) throws Exception {
 
         try {
             StringBuffer filePath=new StringBuffer();
@@ -87,20 +91,26 @@ public class StoreFileUtil {
             }
             staticRepoPath = repoLocation;
 
+            if(uploadType.equals(IConstant.ERROR_FILES)){
+                filePath.append(uploadType).append(File.separator);
+            }else if(!isZipFile && !uploadType.equals(IConstant.FILE_TYPE.other.toString())){
+                filePath.append(uploadType).append(File.separator).append(id);
+            }
+
             File file = new File(staticRepoPath + File.separator + filePath);
             if (!file.exists()) {
                 file.mkdirs();
             }
 
-           if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString())){
+           if(isZipFile){
                 filePath.append(File.separator).append(fileName);
             }else if(uploadType.equals(IConstant.FILE_TYPE.other.toString())){
                 filePath.append(candidateId).append("_").append(id).append("_").append(fileName);
+            }else if(uploadType.equals(IConstant.ERROR_FILES)){
+               filePath.append(fileName);
             }else if(null!=candidateId){
-                filePath.append(uploadType).append(File.separator).append(id);
                 filePath.append(File.separator).append(candidateId).append(".").append(Util.getFileExtension(fileName));
             }else{
-                filePath.append(uploadType).append(File.separator).append(id);
                 filePath.append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
             }
 

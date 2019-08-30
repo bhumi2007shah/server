@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.utils.Util;
@@ -53,15 +54,46 @@ public class NoAuthController {
         log.info("Completed fetching screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
          return Util.stripExtraInfoFromResponseBean(response,
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter", Arrays.asList("displayName"));
+                    put("User", Arrays.asList("displayName"));
                 }}),
                 new HashMap<String, List<String>>() {{
-                    put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
-                    put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
+                    put("JobScreeningQuestions", Arrays.asList("jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                    put("ScreeningQuestions", new ArrayList<>(0));
                 }}
         );
     }
 
+    /**
+     * Rest api to get all candidate and job details for the uuid provided
+     * @param uuid the uuid corresponding to a unique jcm record
+     * @return the list of job screening questions
+     * @throws Exception
+     */
+    @GetMapping("/candidateAndJobDetails")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    String candidateAndJobDetailsForUuid(@RequestParam("uuid") UUID uuid) throws Exception {
+        log.info("Received request to retrieve candidate & job information based on uuid : " + uuid);
+        long startTime = System.currentTimeMillis();
+        JobCandidateMapping mappingObj = jobControllerMappingService.getJobCandidateMapping(uuid);
+        log.info("Completed fetching JobCandidateMapping in " + (System.currentTimeMillis() - startTime) + "ms.");
+        return Util.stripExtraInfoFromResponseBean(mappingObj,
+                (new HashMap<String, List<String>>(){{
+                    put("User", Arrays.asList("displayName"));
+                    put("CandidateCompanyDetails", new ArrayList<>(0));
+                }}),
+                new HashMap<String, List<String>>() {{
+                    put("Job",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy","companyJobId","jobTitle","noOfPositions","mlDataAvailable","status","createdOn","createdBy","userEnteredKeySkill"));
+                    put("Candidate", Arrays.asList("CandidateDetails","candidateDetails","candidateEducationDetails","candidateProjectDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy","candidateSource","firstName","lastName","candidateSource","CandidateCompanyDetails"));
+                    put("Company", Arrays.asList("companyAddressList", "companyBuList"));
+                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+
+            }}
+        );
+    }
 
     /**
      * Rest api to capture candidate consent from chatbot
@@ -109,6 +141,43 @@ public class NoAuthController {
         jobControllerMappingService.updateHiringManagerInterest(sharingId, interestValue);
 
         log.info("Completed processing request for Hiring Manager Interest in " + (System.currentTimeMillis() - startTime) + " ms");
+    }
+
+    /**
+     * REST Api to fetch details of a single candidate for the hiring manager
+     *
+     * @param profileSharingUuid uuid corresponding to the hiring manager record
+     * @return candidate object as json
+     * @throws Exception
+     */
+    @GetMapping("/fetchCandidateProfile/{profileSharingUuid}")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    String getCandidateProfile(@PathVariable("profileSharingUuid") UUID profileSharingUuid) throws Exception {
+        log.info("Received request to fetch candidate profile");
+        long startTime = System.currentTimeMillis();
+        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(profileSharingUuid),
+                new HashMap<String, List<String>>() {{
+                    put("User", Arrays.asList("displayName"));
+                    put("ScreeningQuestions", Arrays.asList("question"));
+                }},
+                new HashMap<String, List<String>>() {{
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
+                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));
+                    put("CandidateOnlineProfile", Arrays.asList("id","candidateId"));
+                    put("CandidateProjectDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateSkillDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateWorkAuthorization", Arrays.asList("id","candidateId"));
+                    put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                }});
+        log.info("Completed processing fetch candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
+        return response;
     }
 
 }

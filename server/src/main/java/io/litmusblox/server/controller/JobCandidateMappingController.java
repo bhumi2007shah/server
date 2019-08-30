@@ -6,6 +6,7 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.service.CvUploadResponseBean;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
@@ -31,7 +32,7 @@ import java.util.List;
  * Class Name : JobCandidateMappingController
  * Project Name : server
  */
-@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 @RequestMapping("/api/jcm")
 @Log4j2
@@ -51,12 +52,13 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     String addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
+        log.info("Candidate name: " + candidate.get(0).getDisplayName());
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobControllerMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
     }
@@ -79,9 +81,9 @@ public class JobCandidateMappingController {
         log.info("Completed processing candidates from file in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
-                    put("UserClassFilter", Arrays.asList("createdBy","company"));
+                    put("User", Arrays.asList("createdBy","company"));
                 }});
     }
 
@@ -102,7 +104,7 @@ public class JobCandidateMappingController {
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
+                    put("Candidate", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
                 }});
     }
@@ -138,4 +140,56 @@ public class JobCandidateMappingController {
     }
 
 
+    /**
+     * REST Api to fetch details of a single candidate for a job
+     *
+     * @param jobCandidateMappingId
+     * @return candidate object as json
+     * @throws Exception
+     */
+    @GetMapping("/fetchCandidateProfile/{jobCandidateMappingId}")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    String getCandidateProfile(@PathVariable("jobCandidateMappingId") Long jobCandidateMappingId) throws Exception {
+        log.info("Received request to fetch candidate profile");
+        long startTime = System.currentTimeMillis();
+        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
+                new HashMap<String, List<String>>() {{
+                    put("User", Arrays.asList("displayName"));
+                    put("ScreeningQuestions", Arrays.asList("question"));
+                }},
+                new HashMap<String, List<String>>() {{
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
+                    put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
+                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));
+                    put("CandidateOnlineProfile", Arrays.asList("id","candidateId"));
+                    put("CandidateProjectDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateSkillDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateWorkAuthorization", Arrays.asList("id","candidateId"));
+                    put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                }});
+        log.info("Completed processing fetch candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
+        return response;
+    }
+
+
+    /**
+     * Api to upload candidates by means of drag and drop cv
+     *
+     * @param multipartFiles files to be processed to upload candidates
+     * @param jobId the job for which the candidate is to be added
+     * @return response bean with details about success / failure of each candidate file
+     * @throws Exception
+     */
+    @PostMapping("/addCandidate/dragAndDropCv")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
+        return jobControllerMappingService.processDragAndDropCv(multipartFiles, jobId);
+    }
 }

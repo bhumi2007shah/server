@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author : Sumit
@@ -40,15 +42,29 @@ public class StoreFileUtil {
 
     public static String storeFile(MultipartFile multipartFile, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
         File targetFile =  null;
+        Boolean isZipFile=false;
         try {
+            if(uploadType.equals(IConstant.FILE_TYPE.zip.toString()) || uploadType.equals(IConstant.FILE_TYPE.rar.toString())){
+                isZipFile=true;
+            }
             InputStream is = multipartFile.getInputStream();
-            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId);
+            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId, isZipFile);
             //Util.storeFile(is, filePath,repoLocation);
-            if(Util.isNull(filePath))
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
-
+            if(Util.isNull(filePath)){
+                StringBuffer info = new StringBuffer(multipartFile.getName()).append(" FilePath is null ");
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Candidate Id",candidateId.toString());
+                breadCrumb.put("filePath", filePath);
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
+            }
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+            if(isZipFile)
+                return targetFile.toString();
+
             return filePath;
         }
         catch (WebException e) {
@@ -59,30 +75,47 @@ public class StoreFileUtil {
         }
     }
 
-    private static String getFileName(String fileName, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
+    private static String getFileName(String fileName, long id, String repoLocation, String uploadType, Long candidateId, Boolean isZipFile) throws Exception {
 
         try {
-            String filePath = null;
+            StringBuffer filePath=new StringBuffer();
             String staticRepoPath = null;
             if (Util.isNull(repoLocation)) {
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
+                StringBuffer info = new StringBuffer(fileName).append(" repoLocation is null ");
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Candidate Id",candidateId.toString());
+                breadCrumb.put("repoLocation", repoLocation);
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
             }
             staticRepoPath = repoLocation;
 
-            //String time = Calendar.getInstance().getTimeInMillis() + "";
-            filePath = uploadType + File.separator + id;
+            if(uploadType.equals(IConstant.ERROR_FILES)){
+                filePath.append(uploadType).append(File.separator);
+            }else if(!isZipFile && !uploadType.equals(IConstant.FILE_TYPE.other.toString())){
+                filePath.append(uploadType).append(File.separator).append(id);
+            }
+
             File file = new File(staticRepoPath + File.separator + filePath);
             if (!file.exists()) {
                 file.mkdirs();
             }
 
-            if(null!=candidateId)
-                filePath = filePath + File.separator + candidateId+"_"+fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
-            else
-                filePath = filePath + File.separator + fileName.substring(0,fileName.indexOf('.')) + "_" + Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm) + "." + Util.getFileExtension(fileName);
+           if(isZipFile){
+                filePath.append(File.separator).append(fileName);
+            }else if(uploadType.equals(IConstant.FILE_TYPE.other.toString())){
+                filePath.append(candidateId).append("_").append(id).append("_").append(fileName);
+            }else if(uploadType.equals(IConstant.ERROR_FILES)){
+               filePath.append(fileName);
+            }else if(null!=candidateId){
+                filePath.append(File.separator).append(candidateId).append(".").append(Util.getFileExtension(fileName));
+            }else{
+                filePath.append(File.separator).append(fileName.substring(0,fileName.indexOf('.'))).append("_").append(Util.formatDate(new Date(), IConstant.DATE_FORMAT_yyyymmdd_hhmm)).append(".").append(Util.getFileExtension(fileName));
+            }
 
             log.info("Saved file: "+filePath);
-            return filePath;
+            return filePath.toString();
         }
         catch (Exception e) {
             log.error(e.getMessage());

@@ -3,6 +3,8 @@
  */
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
@@ -37,40 +39,43 @@ public class JobController {
 
     @PostMapping(value = "/createJob/{pageName}")
     String addJob(@RequestBody String jobStr, @PathVariable ("pageName") String pageName) throws Exception {
-        Job job = new ObjectMapper().readValue(jobStr, Job.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        Job job = mapper.readValue(jobStr, Job.class);
 
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
-                put("UserClassFilter",Arrays.asList("displayName","id"));
+                put("User",Arrays.asList("displayName","id"));
+                put("ScreeningQuestions", Arrays.asList("question","id"));
             }}),
             (new HashMap<String, List<String>>(){{
-                put("JobClassFilter",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
-                put("CompanyScreeningQuestionFilter", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
-                put("UserScreeningQuestionFilter", Arrays.asList("createdOn", "updatedOn","userId"));
+                put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
+                put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
+                put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
+                put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
             }})
         );
-
-       // return jobService.addJob(job, pageName);
     }
 
     /**
      * Api for retrieving a list of jobs created by user
      * @param archived optional flag indicating if a list of archived jobs is requested. By default only open jobs will be returned
+     * @param companyName optional name of the company for which jobs have to be found. Will be populated only when superadmin accesses an account
      * @return response bean with a list of jobs, count of open jobs and count of archived jobs
      * @throws Exception
      */
     @GetMapping(value = "/listOfJobs")
-    String listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived) throws Exception {
+    String listAllJobsForUser(@RequestParam("archived") Optional<Boolean> archived, @RequestParam("companyName") Optional<String> companyName) throws Exception {
 
         return Util.stripExtraInfoFromResponseBean(
-                jobService.findAllJobsForUser(archived.isPresent() ? archived.get() : false),
+                jobService.findAllJobsForUser((archived.isPresent() ? archived.get() : false),(companyName.isPresent()?companyName.get():null)),
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter",Arrays.asList("displayName"));
+                    put("User",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
-                    //put("UserClassFilter", Arrays.asList("company","countryId"));
+                    put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "updatedOn", "updatedBy"));
                 }})
         );
     }
@@ -93,13 +98,15 @@ public class JobController {
 
         return Util.stripExtraInfoFromResponseBean(responseBean,
                 (new HashMap<String, List<String>>(){{
-                    put("UserClassFilter",Arrays.asList("displayName"));
+                    put("User",Arrays.asList("displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
-                    put("JobClassFilter",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
-                    put("CandidateFilter", Arrays.asList("candidateDetails","candidateEducationDetails","candidateProjectDetails","candidateCompanyDetails",
-                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails"));
-                    //put("UserClassFilter", Arrays.asList("company","countryId"));
+                    put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
+                    put("Candidate", Arrays.asList("candidateEducationDetails","candidateProjectDetails",
+                            "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy"));
+                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+                    put("CandidateDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
                 }})
         );
     }
@@ -114,6 +121,30 @@ public class JobController {
     @ResponseStatus(HttpStatus.OK)
     void publishJob(@PathVariable("jobId") Long jobId) throws Exception {
         jobService.publishJob(jobId);
+    }
+
+    /**
+     * Api to archive a job
+     *
+     * @param jobId id of the job to be archived
+     * @throws Exception
+     */
+    @PutMapping(value = "/archiveJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void archiveJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.archiveJob(jobId);
+    }
+
+    /**
+     * Api to unarchive a job
+     *
+     * @param jobId id of the job to be unarchived
+     * @throws Exception
+     */
+    @PutMapping(value = "/unarchiveJob/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
+    void unarchiveJob(@PathVariable("jobId") Long jobId) throws Exception {
+        jobService.unarchiveJob(jobId);
     }
 
 }

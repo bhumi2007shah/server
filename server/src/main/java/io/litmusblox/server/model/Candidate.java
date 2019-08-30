@@ -30,7 +30,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "CANDIDATE")
-@JsonFilter("CandidateFilter")
+@JsonFilter("Candidate")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Candidate implements Serializable {
 
@@ -104,9 +104,11 @@ public class Candidate implements Serializable {
     private CandidateDetails candidateDetails;
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    @OrderBy("yearOfPassing DESC")
     private List<CandidateEducationDetails> candidateEducationDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
+    @OrderBy("startDate DESC")
     private List<CandidateCompanyDetails> candidateCompanyDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
@@ -132,4 +134,8 @@ public class Candidate implements Serializable {
         this.createdOn = createdOn;
         this.createdBy = createdBy;
     }
+
+    @JsonProperty
+    @Transient
+    private List<JobScreeningQuestions> screeningQuestionResponses;
 }

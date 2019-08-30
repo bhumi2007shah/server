@@ -19,12 +19,15 @@ import io.litmusblox.server.service.MasterDataResponse;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.ConfigurablePropertyAccessor;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +63,9 @@ public class MasterDataService implements IMasterDataService {
 
     @Resource
     ConfigurationSettingsRepository configurationSettingsRepository;
+
+    @Autowired
+    Environment environment;
 
     /**
      * Method that will be called during application startup
@@ -100,8 +106,15 @@ public class MasterDataService implements IMasterDataService {
         configurationSettings.forEach(config-> {
             configFieldAccesor.setPropertyValue(config.getConfigName(), config.getConfigValue());
         });
+        //read the limit from application.properties
+        //convert the maxUploadDataLimit from Mb into bytes
+        String maxSize = environment.getProperty("spring.http.multipart.max-request-size");
+        MasterDataBean.getInstance().getConfigSettings().setMaxUploadDataLimit(Integer.parseInt(maxSize.substring(0,maxSize.indexOf("MB")))*1024*1024);
 
         MasterDataBean.getInstance().setLoaded(true);
+
+        // sentryDSN is only read from application.properties file as per profile it is not save in database
+        MasterDataBean.getInstance().setSentryDSN(environment.getProperty(IConstant.SENTRY_DSN));
     }
 
     /**
@@ -180,6 +193,8 @@ public class MasterDataService implements IMasterDataService {
     private static final String SCREENING_QUESTIONS_MASTER_DATA = "screeningQuestions";
     private static final String CONFIG_SETTINGS = "configSettings";
     private static final String SUPPORTED_FILE_FORMATS = "supportedFileFormats";
+    private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
+    private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
 
     /**
      * Method to fetch specific master data from cache
@@ -203,6 +218,12 @@ public class MasterDataService implements IMasterDataService {
                 master.setSupportedFileFormats(Stream.of(IConstant.UPLOAD_FORMATS_SUPPORTED.values())
                                             .map(Enum::name)
                                             .collect(Collectors.toList()));
+                break;
+            case SUPPORTED_CV_FILE_FORMATS:
+                master.setSupportedCvFileFormats(Arrays.asList(IConstant.cvUploadSupportedExtensions));
+                break;
+            case ID_FOR_SOURCE_STAGE:
+                master.setSourceStageId(MasterDataBean.getInstance().getSourceStage().getId());
                 break;
             default: //for all other properties, use reflection
 

@@ -33,7 +33,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name = "JOB")
-@JsonFilter("JobClassFilter")
+@JsonFilter("Job")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Job implements Serializable {
 
@@ -44,7 +44,7 @@ public class Job implements Serializable {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
-    @Length(max = IConstant.JOB_ID_MAX_LENGTH)
+    @Length(max = IConstant.JOB_ID_MAX_LENGTH, message = "Company's Job ID: length should be between 0 and " + IConstant.JOB_ID_MAX_LENGTH)
     @Pattern(message = "COMPANY_JOB_ID "+IErrorMessages.ALPHANUMERIC_MESSAGE,regexp = IConstant.REGEX_FOR_COMPANY_JOB_ID)
     @Column(name = "COMPANY_JOB_ID")
     private String companyJobId;
@@ -127,4 +127,10 @@ public class Job implements Serializable {
 
     @Transient
     private List<User> usersForCompany=new ArrayList<>();
+
+    @Transient
+    private String companyName;
+
+    @Transient
+    private String mlErrorMessage;
 }

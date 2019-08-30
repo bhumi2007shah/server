@@ -28,10 +28,11 @@ public interface IJobService {
      * Find all jobs for logged in user
      *
      * @param archived flag indicating if only archived jobs need to be fetched
+     * @param companyName name of the company for which jobs have to be found
      * @return response bean with list of jobs created by the user, count of active jobs and count of archived jobs
      * @throws Exception
      */
-    JobWorspaceResponseBean findAllJobsForUser(boolean archived) throws Exception;
+    JobWorspaceResponseBean findAllJobsForUser(boolean archived, String companyName) throws Exception;
 
     /**
      * For the specified job, retrieve
@@ -51,4 +52,18 @@ public interface IJobService {
      * @param jobId id of the job to be published
      */
     void publishJob(Long jobId) throws Exception;
+
+    /**
+     * Service method to archive a job
+     *
+     * @param jobId id of the job to be archived
+     */
+    void archiveJob(Long jobId);
+
+    /**
+     * Service method to unarchive a job
+     *
+     * @param jobId id of the job to be unarchived
+     */
+    void unarchiveJob(Long jobId) throws Exception;
 }

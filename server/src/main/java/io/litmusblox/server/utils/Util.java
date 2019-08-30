@@ -15,7 +15,6 @@ import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Candidate;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 
 import java.io.*;
@@ -36,7 +35,6 @@ import java.util.regex.Pattern;
  * Project Name : server
  */
 @Configuration
-@PropertySource("classpath:appConfig.properties")
 @Log4j2
 public class Util {
 
@@ -156,23 +154,6 @@ public class Util {
         return true;
     }
 
-    /*public static File storeFile(InputStream is, String filePath, String repoLocation) throws IOException {
-        File targetFile =  null;
-        try {
-            //String staticRepoPath = null;
-
-            if(isNull(filePath))
-                throw new WebException(IErrorMessages.INVALID_SETTINGS);
-
-
-            targetFile = new File(repoLocation + File.separator + filePath);
-            Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            new WebException(e.getMessage());
-        }
-        return targetFile;
-    }*/
-
     public static String formatDate(Date date, String dateFormat) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
         return simpleDateFormat.format(date);
@@ -259,5 +240,13 @@ public class Util {
             mobileNo = mobileNo.substring(2);
 
         return mobileNo;
+    }
+
+    public static void sendSentryErrorMail(String fileName, Map<String, String> headers, String processFileType){
+        StringBuffer info = new StringBuffer(fileName).append(" - ").append(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW);
+        log.info(info.toString());
+        Map<String, String> breadCrumb = new HashMap<>();
+        breadCrumb.put(IConstant.UPLOAD_FILE_TYPE,processFileType);
+        SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
     }
 }

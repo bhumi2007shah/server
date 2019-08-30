@@ -17,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author : Sumit
@@ -49,8 +51,16 @@ public class ExcelFileProcessorService implements IUploadFileProcessorService {
                                 (null == row.getCell(0).getStringCellValue().trim()) || (!row.getCell(0).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue())) ||
                                 (null == row.getCell(1).getStringCellValue().trim()) || (!row.getCell(1).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue())) ||
                                 (null == row.getCell(2).getStringCellValue().trim()) || (!row.getCell(2).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue())) ||
-                                (null == row.getCell(3).getStringCellValue().trim()) || (!row.getCell(3).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue())))
+                                (null == row.getCell(3).getStringCellValue().trim()) || (!row.getCell(3).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()))){
+
+                            Map<String, String> breadCrumb = new HashMap<>();
+                            breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue(), row.getCell(0).getStringCellValue());
+                            breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue(), row.getCell(1).getStringCellValue());
+                            breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue(), row.getCell(2).getStringCellValue());
+                            breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue(), row.getCell(3).getStringCellValue());
+                            Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.ExcelFile.toString());
                             throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
+                        }
                     } catch (Exception e) {
                         throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
                     }

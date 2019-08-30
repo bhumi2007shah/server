@@ -7,6 +7,7 @@ package io.litmusblox.server.model;
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -23,7 +24,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "USER_SCREENING_QUESTION")
-@JsonFilter("UserScreeningQuestionFilter")
+@JsonFilter("UserScreeningQuestion")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserScreeningQuestion implements Serializable {
 
@@ -33,15 +34,16 @@ public class UserScreeningQuestion implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
     @Column(name = "QUESTION")
     private String question;
 
-    @Column(name = "OPTIONS")
-    private String options;
+    @Column(name = "OPTIONS", columnDefinition = "varchar[]")
+    @Type(type = "com.vladmihalcea.hibernate.type.array.StringArrayType")
+    private String[]  options;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)
@@ -56,10 +58,10 @@ public class UserScreeningQuestion implements Serializable {
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date createdOn = new Date();
+    private Date createdOn;
 
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date updatedOn = new Date();
+    private Date updatedOn;
 
 }

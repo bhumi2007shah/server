@@ -10,12 +10,12 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +24,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -37,7 +34,6 @@ import java.util.Map;
  * Class Name : CsvFileProcessorService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Log4j2
 public class CsvFileProcessorService implements IUploadFileProcessorService {
 
@@ -56,6 +52,13 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
                     null == headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()) || headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()) != 1 ||
                     null == headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()) || headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()) != 2 ||
                     null == headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()) || headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()) != 3) {
+
+                Map<String, String> breadCrumb= new HashMap<>();
+                breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).toString());
+                breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).toString());
+                breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).toString());
+                breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).toString());
+                Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.CsvFile.toString());
                 throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
             }
 

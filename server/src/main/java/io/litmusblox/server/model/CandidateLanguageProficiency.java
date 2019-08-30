@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -19,6 +20,7 @@ import java.io.Serializable;
 @Data
 @Entity
 @Table(name = "CANDIDATE_LANGUAGE_PROFICIENCY")
+@JsonFilter("CandidateLanguageProficiency")
 public class CandidateLanguageProficiency implements Serializable, Cloneable{
 
     private static final long serialVersionUID = 6868521896546285046L;

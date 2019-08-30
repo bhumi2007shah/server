@@ -33,15 +33,20 @@ public interface IConstant {
     // lengths
     Integer TITLE_MAX_LENGTH = 100;
     int JOB_ID_MAX_LENGTH = 10;
+    int MAX_INSTITUTE_LENGTH = 75;
     Integer CANDIDATE_NAME_MAX_LENGTH = 45;
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 
     String REPO_LOCATION = "repoLocation";
+    String TEMP_REPO_LOCATION="temprepolocation";
     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
     String STR_INDIA = "India";
 
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
+    String CANDIDATE_CV = "CandidateCv";
+    String SENTRY_DSN="sentryDSN";
+    String UPLOAD_FILE_TYPE="Upload file type";
 
 
     enum UserStatus {
@@ -140,6 +145,7 @@ public interface IConstant {
     }
 
     String[] supportedExtensions = new String[] {"xls", "xlsx", "xml", "csv"};
+    String[] cvUploadSupportedExtensions = new String[] {"doc","docx","html","pdf","rar","rtf","zip"};
 
 
     enum MAX_FIELD_LENGTHS {
@@ -163,4 +169,14 @@ public interface IConstant {
     enum UPLOAD_TYPE {
        Candidates,Logo,CandidateCv;
     }
+
+    enum PROCESS_FILE_TYPE{
+        CsvFile,ExcelFile,HTMLFile,NaukriExcelFile
+    }
+
+    enum FILE_TYPE{
+        rar,zip,other
+    }
+
+    String ERROR_FILES="error_files";
 }

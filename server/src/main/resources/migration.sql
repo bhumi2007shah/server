@@ -106,3 +106,79 @@ CREATE TABLE JCM_PROFILE_SHARING_DETAILS (
     HIRING_MANAGER_INTEREST_DATE TIMESTAMP DEFAULT NULL,
     CONSTRAINT UNIQUE_JCM_HIRING_MANAGER UNIQUE (ID, SENDER_ID, RECEIVER_EMAIL)
 );
+
+alter table JCM_COMMUNICATION_DETAILS
+ADD COLUMN CHAT_COMPLETE_FLAG BOOL DEFAULT 'f';
+
+alter table CANDIDATE_EDUCATION_DETAILS
+alter column INSTITUTE_NAME type varchar(75);
+
+
+drop table JCM_PROFILE_SHARING_DETAILS;
+
+CREATE TABLE JCM_PROFILE_SHARING_MASTER (
+    ID serial PRIMARY KEY NOT NULL,
+    RECEIVER_NAME varchar(45) NOT NULL,
+    RECEIVER_EMAIL varchar(50) NOT NULL,
+    SENDER_ID INTEGER REFERENCES USERS(ID) NOT NULL,
+    EMAIL_SENT_ON TIMESTAMP DEFAULT NULL
+);
+
+CREATE TABLE JCM_PROFILE_SHARING_DETAILS (
+    ID UUID PRIMARY KEY DEFAULT uuid_generate_v1(),
+    PROFILE_SHARING_MASTER_ID INTEGER REFERENCES JCM_PROFILE_SHARING_MASTER(ID) NOT NULL,
+    JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
+    HIRING_MANAGER_INTEREST BOOL DEFAULT FALSE,
+    HIRING_MANAGER_INTEREST_DATE TIMESTAMP DEFAULT NULL,
+    CONSTRAINT UNIQUE_JCM_HIRING_MANAGER UNIQUE (ID, PROFILE_SHARING_MASTER_ID)
+);
+
+alter table EMAIL_LOG
+alter column TEMPLATE_NAME type varchar(30);
+
+-- Fix for ticket #76
+alter table USERS alter column INVITATION_MAIL_TIMESTAMP drop not null;
+alter table USERS alter column INVITATION_MAIL_TIMESTAMP set default null;
+
+-- Fix for ticket #81
+update configuration_settings
+set config_value = 50 where config_name='maxScreeningQuestionsLimit';
+
+-- fix for ticket #80
+alter table job_candidate_mapping
+add column candidate_first_name varchar(45),
+add column candidate_last_name varchar(45);
+
+update job_candidate_mapping
+set candidate_first_name = first_name from candidate where candidate.id = job_candidate_mapping.candidate_id;
+
+update job_candidate_mapping
+set candidate_last_name = last_name from candidate where candidate.id = job_candidate_mapping.candidate_id;
+
+alter table job_candidate_mapping
+alter column candidate_first_name set not null,
+alter column candidate_last_name set not null;
+
+-- changes for ticket #88
+CREATE TABLE CV_PARSING_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CV_FILE_NAME varchar(255),
+    PROCESSED_ON TIMESTAMP,
+    PROCESSING_TIME smallint,
+    PROCESSING_STATUS varchar(10),
+    PARSING_RESPONSE text
+);
+
+CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
+    ID serial PRIMARY KEY NOT NULL,
+    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
+    SKILL VARCHAR(50),
+    LAST_USED DATE,
+    EXP_IN_MONTHS smallint
+);
+
+ALTER TABLE CANDIDATE_SKILL_DETAILS
+ADD COLUMN EXP_IN_MONTHS smallint;
+
+insert into configuration_settings(config_name, config_value)
+values('maxCvFiles',20);

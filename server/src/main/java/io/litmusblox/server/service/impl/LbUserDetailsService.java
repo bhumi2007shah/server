@@ -19,8 +19,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Userdetails implementation class
@@ -99,7 +94,7 @@ public class LbUserDetailsService implements UserDetailsService {
 
         final String token = jwtTokenUtil.generateToken(userDetails, userDetails.getId(), userDetails.getCompany().getId());
 
-        log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +"ms.");
+        log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +" ms.");
 
         return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), userDetails));
     }
@@ -115,13 +110,7 @@ public class LbUserDetailsService implements UserDetailsService {
     }
 
     private void authenticate(String username, String password) throws Exception {
-        try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        } catch (DisabledException e) {
-            throw new WebException("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
-            throw new WebException("INVALID_CREDENTIALS", e);
-        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
     }
 
     /**
@@ -142,8 +131,14 @@ public class LbUserDetailsService implements UserDetailsService {
 
         Company companyObjToUse = null;
         if(IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())) {
-            //create a company
-            companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()));
+            //check if company exists
+            Company userCompany = companyRepository.findByCompanyName(user.getCompany().getCompanyName());
+
+            if (null == userCompany)
+                //create a company
+                companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()));
+            else
+                companyObjToUse = userCompany;
         }
 
         User u = new User();
@@ -151,8 +146,29 @@ public class LbUserDetailsService implements UserDetailsService {
         u.setLastName(user.getLastName());
         u.setEmail(user.getEmail());
         u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
-        //If a superadmin is creating a user, the role should be set to client admin, else it should be Recruiter
-        u.setRole(IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())?IConstant.UserRole.Names.CLIENT_ADMIN:IConstant.UserRole.Names.RECRUITER);
+        u.setRole(IConstant.UserRole.Names.RECRUITER);
+        if (null == user.getRole()) {
+            //If a superadmin is creating a user, the role should be set to client admin for the first user, else it should be as set in the request object
+            if (loggedInUser.getRole().equals(IConstant.UserRole.Names.SUPER_ADMIN)) {
+                //find number of users for the company
+                if (0 == userRepository.countByCompanyId(companyObjToUse.getId()))
+                    u.setRole(IConstant.UserRole.Names.CLIENT_ADMIN);
+            }
+        }
+        else {
+            //set role as present in the request
+            //check that the role is valid and exists in the system
+            if(Arrays.stream(IConstant.UserRole.values()).anyMatch((definedRole) -> definedRole.toString().equalsIgnoreCase(user.getRole()))) {
+                //if logged in user is client admin, a new user with super admin role cannot be created
+                if(loggedInUser.getRole().equals(IConstant.UserRole.Names.CLIENT_ADMIN)) {
+                    if(user.getRole().equals(IConstant.UserRole.Names.SUPER_ADMIN))
+                        throw new ValidationException("User with Client Admin privilege: " + loggedInUser.getEmail() + " attempted to create a user with Super Admin privilege", HttpStatus.FORBIDDEN);
+                }
+                u.setRole(user.getRole());
+            }
+            else
+                throw new ValidationException("Invalid role in create user request: " + user.getRole(), HttpStatus.UNPROCESSABLE_ENTITY);
+        }
         u.setCountryId(countryRepository.findByCountryCode(user.getCountryCode()));
         u.setMobile(user.getMobile());
         u.setUserUuid(UUID.randomUUID());
@@ -174,6 +190,8 @@ public class LbUserDetailsService implements UserDetailsService {
             throw new ValidationException(IErrorMessages.DUPLICATE_USER_EMAIL + " - " + user.getEmail(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
+        //following code is commented out as a result of ticket #85:  Allow super admin to create other users for a client
+        /*
         if(IConstant.UserRole.Names.SUPER_ADMIN.equals(role)) {
             //superadmin can only create the first user for any company
             //check that a user for the same company does not exist
@@ -186,6 +204,7 @@ public class LbUserDetailsService implements UserDetailsService {
                 }
             }
         }
+        */
     }
 
     private void validateUser(User user) throws ValidationException {
@@ -216,6 +235,8 @@ public class LbUserDetailsService implements UserDetailsService {
         if (null == userToUpdate)
             throw new ValidationException(IErrorMessages.USER_NOT_FOUND, HttpStatus.UNPROCESSABLE_ENTITY);
         User userByEmail = userRepository.findByEmail(user.getEmail());
+        if (null == userByEmail)
+            throw new ValidationException(IErrorMessages.USER_NOT_FOUND + "- " + user.getEmail(), HttpStatus.UNPROCESSABLE_ENTITY);
         if (userToUpdate.getId() != userByEmail.getId())
             throw new ValidationException(IErrorMessages.USER_EMAIL_TOKEN_MISMATCH, HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -224,17 +245,27 @@ public class LbUserDetailsService implements UserDetailsService {
         userToUpdate.setStatus(IConstant.UserStatus.Active.name());
         userToUpdate.setUpdatedOn(new Date());
         userToUpdate.setResetPasswordFlag(false);
+        userToUpdate.setResetPasswordEmailTimestamp(null);
         userRepository.save(userToUpdate);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
     public void forgotPassword(String email) throws Exception {
+        if(Util.isNull(email))
+            throw new ValidationException(IErrorMessages.NO_EMAIL_PROVIDED, HttpStatus.BAD_REQUEST);
+
         User userToReset = userRepository.findByEmail(email);
         if (null == userToReset) {
             throw new ValidationException(IErrorMessages.USER_NOT_FOUND + email, HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        if (!IConstant.UserStatus.Active.name().equals(userToReset.getStatus())) {
-            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_USER_NOT_ACTIVE+email, HttpStatus.UNPROCESSABLE_ENTITY);
+        if (IConstant.UserStatus.Blocked.name().equals(userToReset.getStatus())) {
+            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_USER_BLOCKED+email, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        else if(IConstant.UserStatus.New.name().equals(userToReset.getStatus())) {
+            throw new ValidationException(IErrorMessages.USER_NOT_ACTIVE + email, HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        else if(!IConstant.UserStatus.Active.name().equals(userToReset.getStatus())){
+            throw new ValidationException(IErrorMessages.FORGOT_PASSWORD_DUPLICATE_REQUEST+email, HttpStatus.UNPROCESSABLE_ENTITY);
         }
         userToReset.setPassword(null);
         userToReset.setUserUuid(UUID.randomUUID());

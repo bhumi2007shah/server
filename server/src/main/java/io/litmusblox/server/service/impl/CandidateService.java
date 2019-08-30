@@ -6,9 +6,11 @@ package io.litmusblox.server.service.impl;
 
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -96,7 +98,7 @@ public class CandidateService implements ICandidateService {
         if(null != dupCandidateByEmail && null != dupCandidateByMobile) {
             //found different candidate ids for the email and mobile number combination
             if(!dupCandidateByEmail.getId().equals(dupCandidateByMobile.getId()))
-                throw new Exception(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
+                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
         }
         else {
 
@@ -247,9 +249,8 @@ public class CandidateService implements ICandidateService {
         Map<String, String> breadCrumb = new HashMap<>();
         breadCrumb.put("Candidate Id",candidateId);
         breadCrumb.put(fieldName, fieldValue);
-        //SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+        SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
         return fieldValue.substring(0, fieldLength);
     }
-
 
 }

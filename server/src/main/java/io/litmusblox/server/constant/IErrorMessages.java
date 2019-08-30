@@ -33,6 +33,7 @@ public interface IErrorMessages {
     String INTERNAL_SERVER_ERROR = "Something went wrong into server";
     String MAX_CANDIDATE_PER_FILE_EXCEEDED = "Maximum candidates per file limit exceeded";
     String MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED = "Daily limit for maximum candidates per user exceeded";
+    String MAX_FILES_PER_UPLOAD = "Exceeded limit of maximum files that can be uploaded in a single request";
     String UNSUPPORTED_FILE_SOURCE = "Unsupported file source : ";
     String UNSUPPORTED_FILE_TYPE = "Unsupported file type with extension";
     String INVALID_SETTINGS = "Invalid System Settings";
@@ -42,12 +43,22 @@ public interface IErrorMessages {
     String DUPLICATE_USER_EMAIL = "User with email already exists";
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY = "Found different Candidate ids for mobile and email : ";
-    String JOB_NOT_LIVE = "Selected job is not live";
+    String JOB_NOT_LIVE = "Selected job is in \'Draft\' stage";
     String CLIENT_ADMIN_EXISTS_FOR_COMPANY = "Client admin for company already exists: ";
     String USER_COUNTRY_NULL = "Country code for new  user not selected";
-    String USER_NOT_FOUND = "User does not exist for email ";
-    String FORGOT_PASSWORD_USER_NOT_ACTIVE = "Selected user is not Active: ";
+    String USER_NOT_FOUND = "User does not exist ";
+    String INVALID_CREDENTIALS="Invalid credentials";
+    String FORGOT_PASSWORD_USER_BLOCKED = "User is blocked";
+    String DISABLED_USER = "User is blocked / disabled";
+    String FORGOT_PASSWORD_DUPLICATE_REQUEST = "Forgot password request has already been received ";
     String USER_EMAIL_TOKEN_MISMATCH = "Invalid email address to set password";
     String PASSWORD_MISMATCH = "Given password and confirm password are either null or do not match";
     String COMPANY_NAME_NOT_VALID= "Company name not valid";
+    String NO_EMAIL_PROVIDED = "No email address provided";
+    String USER_NOT_ACTIVE = "User was not activated ";
+    String INVALID_RECEIVER_NAME = "Receiver's name should be between 1 and 45 characters";
+    String JOB_NOT_ARCHIVED = "Selected job is not archived";
+    String FAILED_TO_SAVE_FILE = "Fail to save the file";
+    String JOB_COMPANY_MISMATCH = "Requested job does not belong to the company of the logged in user";
+    String ML_DATA_UNAVAILABLE = "No matching skills and capabilities found for the job title and job description";
 }

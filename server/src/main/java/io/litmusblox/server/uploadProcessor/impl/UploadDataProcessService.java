@@ -19,8 +19,6 @@ import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -39,13 +37,9 @@ import java.util.UUID;
  * Class Name : UploadDataProcessService
  * Project Name : server
  */
-@PropertySource("classpath:appConfig.properties")
 @Service
 @Log4j2
 public class UploadDataProcessService implements IUploadDataProcessService {
-
-    @Autowired
-    Environment environment;
 
     @Resource
     JobRepository jobRepository;
@@ -176,11 +170,15 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 if(null!=jobCandidateMapping){
                     log.error(IErrorMessages.DUPLICATE_CANDIDATE + " : " + candidateObjToUse.getId() + candidate.getEmail() + " : " + candidate.getMobile());
                     candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
+                    candidate.setId(candidateObjToUse.getId());
                     throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
                 }else{
                     //Create new entry for JobCandidateMapping
                     candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
-                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(),new Date(),loggedInUser, UUID.randomUUID()));
+                    candidateObjToUse.setEmail(candidate.getEmail());
+                    candidateObjToUse.setMobile(candidate.getMobile());
+
+                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(), new Date(),loggedInUser, UUID.randomUUID(), candidate.getFirstName(), candidate.getLastName()));
                     //create an empty record in jcm Communication details table
                     jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
                 }
@@ -193,7 +191,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
             } catch(Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
                 candidate.setUploadErrorMessage(IErrorMessages.INTERNAL_SERVER_ERROR);
                 uploadResponseBean.getFailedCandidates().add(candidate);

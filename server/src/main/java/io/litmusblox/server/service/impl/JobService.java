@@ -101,7 +101,7 @@ public class JobService implements IJobService {
 
     private static MasterData mediumImportanceLevel = null;
 
-    @Transactional//(propagation = Propagation.REQUIRED)
+    @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
         log.info("Received request to add job for page " + pageName);
@@ -300,8 +300,7 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
-
-        try {
+/* TODO: After current deployment to prod, uncomment the following
             callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
             if(null == oldJob) {
                 job.setMlDataAvailable(true);
@@ -314,7 +313,7 @@ public class JobService implements IJobService {
         } catch (Exception e) {
             log.error("Error while fetching data from ML: " + e.getMessage());
             job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
-        }
+        }*/
     }
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {

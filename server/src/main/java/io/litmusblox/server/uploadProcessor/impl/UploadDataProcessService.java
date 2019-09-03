@@ -89,101 +89,8 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
 
             try {
-
                 recordsProcessed++;
-
-                if (null != candidate.getFirstName()) {
-                    if (!Util.validateName(candidate.getFirstName().trim())) {
-                        String cleanFirstName = candidate.getFirstName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
-                        log.error("Special characters found, cleaning First name \"" + candidate.getFirstName() + "\" to " + cleanFirstName);
-                        if (!Util.validateName(cleanFirstName))
-                            throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getFirstName(), HttpStatus.BAD_REQUEST);
-                        candidate.setFirstName(cleanFirstName);
-                    }
-                }
-
-                if (null != candidate.getLastName()) {
-                    if (!Util.validateName(candidate.getLastName().trim())) {
-                        String cleanLastName = candidate.getLastName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
-                        log.error("Special characters found, cleaning Last name \"" + candidate.getLastName() + "\" to " + cleanLastName);
-                        if (!Util.validateName(cleanLastName))
-                            throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getLastName(), HttpStatus.BAD_REQUEST);
-                        candidate.setLastName(cleanLastName);
-                    }
-                }
-
-                if (!Util.validateEmail(candidate.getEmail())) {
-                    String cleanEmail = candidate.getEmail().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_EMAIL,"");
-                    log.error("Special characters found, cleaning Email \"" + candidate.getEmail() + "\" to " + cleanEmail);
-                    if (!Util.validateEmail(cleanEmail)) {
-                        throw new ValidationException(IErrorMessages.INVALID_EMAIL + " - " + candidate.getEmail(), HttpStatus.BAD_REQUEST);
-                    }
-                    candidate.setEmail(cleanEmail);
-                }
-
-                StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());
-
-                if(Util.isNotNull(candidate.getMobile())) {
-                    if (!Util.validateMobile(candidate.getMobile(), loggedInUser.getCountryId().getCountryCode())) {
-                        String cleanMobile = candidate.getMobile().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
-                        log.error("Special characters found, cleaning mobile number \"" + candidate.getMobile() + "\" to " + cleanMobile);
-                        if (!Util.validateMobile(cleanMobile, candidate.getCountryCode()))
-                            throw new ValidationException(IErrorMessages.MOBILE_INVALID_DATA + " - " + candidate.getMobile(), HttpStatus.BAD_REQUEST);
-                        candidate.setMobile(cleanMobile);
-                    }
-                    msg.append("-").append(candidate.getMobile());
-                }else {
-                    //mobile number of candidate is null
-                    //check if ignore mobile flag is set
-                    if(ignoreMobile) {
-                        log.info("Ignoring check for mobile number required for " + candidate.getEmail());
-                    }
-                    else {
-                        //ignore mobile flag is false, throw an exception
-                        throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + candidate.getMobile(), HttpStatus.BAD_REQUEST);
-                    }
-
-                }
-                log.info(msg);
-
-                //create a candidate if no history found for email and mobile
-                long candidateId;
-                Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
-                Candidate candidateObjToUse = existingCandidate;
-                if(null == existingCandidate) {
-                    candidate.setCreatedOn(new Date());
-                    candidate.setCreatedBy(loggedInUser);
-                    if(Util.isNull(candidate.getCountryCode()))
-                        candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
-                    candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser);
-                    msg.append(" New");
-                }
-                else {
-                    log.info("Found existing candidate: " + existingCandidate.getId());
-                }
-
-                log.info(msg);
-
-                //find duplicate candidate for job
-                JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobAndCandidate(job, candidateObjToUse);
-
-                if(null!=jobCandidateMapping){
-                    log.error(IErrorMessages.DUPLICATE_CANDIDATE + " : " + candidateObjToUse.getId() + candidate.getEmail() + " : " + candidate.getMobile());
-                    candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
-                    candidate.setId(candidateObjToUse.getId());
-                    throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+jobId, HttpStatus.BAD_REQUEST);
-                }else{
-                    //Create new entry for JobCandidateMapping
-                    candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
-                    candidateObjToUse.setEmail(candidate.getEmail());
-                    candidateObjToUse.setMobile(candidate.getMobile());
-
-                    JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(), new Date(),loggedInUser, UUID.randomUUID(), candidate.getFirstName(), candidate.getLastName()));
-                    //create an empty record in jcm Communication details table
-                    jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
-                }
-
-                uploadResponseBean.getSuccessfulCandidates().add(candidateObjToUse);
+                validateDataAndSaveJcmAndJcmCommModel(uploadResponseBean,candidate, loggedInUser, ignoreMobile, job);
                 successCount++;
             }catch(ValidationException ve) {
                 log.error("Error while processing candidate : " + candidate.getEmail() + " : " + ve.getErrorMessage(), HttpStatus.BAD_REQUEST);
@@ -212,4 +119,107 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         uploadResponseBean.setCandidatesProcessedCount(candidateProcessed + successCount);
 
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    @Override
+    public Candidate validateDataAndSaveJcmAndJcmCommModel(UploadResponseBean uploadResponseBean, Candidate candidate, User loggedInUser, Boolean ignoreMobile, Job job) throws Exception {
+
+        if (null != candidate.getFirstName()) {
+            if (!Util.validateName(candidate.getFirstName().trim())) {
+                String cleanFirstName = candidate.getFirstName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
+                log.error("Special characters found, cleaning First name \"" + candidate.getFirstName() + "\" to " + cleanFirstName);
+                if (!Util.validateName(cleanFirstName))
+                    throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getFirstName(), HttpStatus.BAD_REQUEST);
+                candidate.setFirstName(cleanFirstName);
+            }
+        }
+
+        if (null != candidate.getLastName()) {
+            if (!Util.validateName(candidate.getLastName().trim())) {
+                String cleanLastName = candidate.getLastName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
+                log.error("Special characters found, cleaning Last name \"" + candidate.getLastName() + "\" to " + cleanLastName);
+                if (!Util.validateName(cleanLastName))
+                    throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getLastName(), HttpStatus.BAD_REQUEST);
+                candidate.setLastName(cleanLastName);
+            }
+        }
+
+        if (!Util.validateEmail(candidate.getEmail())) {
+            String cleanEmail = candidate.getEmail().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_EMAIL,"");
+            log.error("Special characters found, cleaning Email \"" + candidate.getEmail() + "\" to " + cleanEmail);
+            if (!Util.validateEmail(cleanEmail)) {
+                throw new ValidationException(IErrorMessages.INVALID_EMAIL + " - " + candidate.getEmail(), HttpStatus.BAD_REQUEST);
+            }
+            candidate.setEmail(cleanEmail);
+        }
+
+        StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());
+
+        if(Util.isNotNull(candidate.getMobile())) {
+            if (!Util.validateMobile(candidate.getMobile(), loggedInUser.getCountryId().getCountryCode())) {
+                String cleanMobile = candidate.getMobile().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
+                log.error("Special characters found, cleaning mobile number \"" + candidate.getMobile() + "\" to " + cleanMobile);
+                if (!Util.validateMobile(cleanMobile, candidate.getCountryCode()))
+                    throw new ValidationException(IErrorMessages.MOBILE_INVALID_DATA + " - " + candidate.getMobile(), HttpStatus.BAD_REQUEST);
+                candidate.setMobile(cleanMobile);
+            }
+            msg.append("-").append(candidate.getMobile());
+        }else {
+            //mobile number of candidate is null
+            //check if ignore mobile flag is set
+            if(ignoreMobile) {
+                log.info("Ignoring check for mobile number required for " + candidate.getEmail());
+            }
+            else {
+                //ignore mobile flag is false, throw an exception
+                throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + candidate.getMobile(), HttpStatus.BAD_REQUEST);
+            }
+
+        }
+        log.info(msg);
+
+        //create a candidate if no history found for email and mobile
+        long candidateId;
+        Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
+        Candidate candidateObjToUse = existingCandidate;
+        if(null == existingCandidate) {
+            candidate.setCreatedOn(new Date());
+            candidate.setCreatedBy(loggedInUser);
+            if(Util.isNull(candidate.getCountryCode()))
+                candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
+            candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser);
+            msg.append(" New");
+        }
+        else {
+            log.info("Found existing candidate: " + existingCandidate.getId());
+        }
+
+        log.info(msg);
+
+        //find duplicate candidate for job
+        JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobAndCandidate(job, candidateObjToUse);
+
+        if(null!=jobCandidateMapping){
+            log.error(IErrorMessages.DUPLICATE_CANDIDATE + " : " + candidateObjToUse.getId() + candidate.getEmail() + " : " + candidate.getMobile());
+            candidate.setUploadErrorMessage(IErrorMessages.DUPLICATE_CANDIDATE);
+            candidate.setId(candidateObjToUse.getId());
+            throw new ValidationException(IErrorMessages.DUPLICATE_CANDIDATE + " - " +"JobId:"+job.getId(), HttpStatus.BAD_REQUEST);
+        }else{
+            //Create new entry for JobCandidateMapping
+            candidateObjToUse.setCountryCode(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+            candidateObjToUse.setEmail(candidate.getEmail());
+            candidateObjToUse.setMobile(candidate.getMobile());
+
+            JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(), new Date(),loggedInUser, UUID.randomUUID(), candidate.getFirstName(), candidate.getLastName()));
+            //create an empty record in jcm Communication details table
+            jcmCommunicationDetailsRepository.save(new JcmCommunicationDetails(savedObj.getId()));
+        }
+
+        if(null!=uploadResponseBean){
+            uploadResponseBean.getSuccessfulCandidates().add(candidateObjToUse);
+        }
+        return candidateObjToUse;
+    }
+
+
 }

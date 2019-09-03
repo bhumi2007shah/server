@@ -128,73 +128,84 @@ public class JobControllerMappingService implements IJobControllerMappingService
         }
 
         for (Candidate candidate:candidateList) {
+            saveCandidateSupportiveInfo(candidate, loggedInUser);
+        }
+    }
 
-            //find candidateId
-            Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+    /**
+     * Method for save candidates supportive information like Company, project, language, skills etc
+     *
+     * @param candidate for which candidate add this info
+     * @param loggedInUser user which is login currently
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
 
-            Long candidateId = null;
-            if (null != candidateFromDb)
-                candidateId = candidateFromDb.getId();
-            if (null != candidateId) {
-                //if telephone field has value, save to mobile history table
-                if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
-                    //check if an entry exists in the mobile history record for this number
-                    String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
+        //find candidateId
+        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
 
-                    if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
+        Long candidateId = null;
+        if (null != candidateFromDb)
+            candidateId = candidateFromDb.getId();
+        if (null != candidateId) {
+            //if telephone field has value, save to mobile history table
+            if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
+                //check if an entry exists in the mobile history record for this number
+                String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                        if (telephone.length() > 15)
-                            telephone = telephone.substring(0, 15);
+                if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
 
-                        if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
-                            candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
-                    }
+                    if (telephone.length() > 15)
+                        telephone = telephone.substring(0, 15);
+
+                    if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
+                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
                 }
-
-                //process other information
-                if(null != candidate.getCandidateDetails()) {
-                    //candidate details
-                    //if marital status is more than 10 characters, trim to 10. e.g. got a status as single/unmarried for one of the candidates!
-                    if (!Util.isNull(candidate.getCandidateDetails().getMaritalStatus()) && candidate.getCandidateDetails().getMaritalStatus().length() > 10)
-                        candidate.getCandidateDetails().setMaritalStatus(candidate.getCandidateDetails().getMaritalStatus().substring(0, 10));
-                    candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidateFromDb);
-                }
-
-                //candidate education details
-                if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0) {
-                    candidate.getCandidateEducationDetails().forEach(educationDetails-> {
-                        if(educationDetails.getInstituteName().length() > IConstant.MAX_INSTITUTE_LENGTH) {
-                            log.info("Institute name too long: " + educationDetails.getInstituteName());
-                            educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
-                        }
-                    });
-                    candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
-                }
-
-                //candidate company details
-                if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)
-                    candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateId);
-
-                //candidate project details
-                if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
-                    candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
-
-                //candidate online profile
-                if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
-                    candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateId);
-
-                //candidate language proficiency
-                if(null != candidate.getCandidateLanguageProficiencies() && candidate.getCandidateLanguageProficiencies().size() > 0)
-                    candidateService.saveUpdateCandidateLanguageProficiency(candidate.getCandidateLanguageProficiencies(), candidateId);
-
-                //candidate work authorization
-                if(null != candidate.getCandidateWorkAuthorizations() && candidate.getCandidateWorkAuthorizations().size() > 0)
-                    candidateService.saveUpdateCandidateWorkAuthorization(candidate.getCandidateWorkAuthorizations(), candidateId);
-
-                //candidate skill details
-                if(null != candidate.getCandidateSkillDetails() && candidate.getCandidateSkillDetails().size() > 0)
-                    candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateId);
             }
+
+            //process other information
+            if(null != candidate.getCandidateDetails()) {
+                //candidate details
+                //if marital status is more than 10 characters, trim to 10. e.g. got a status as single/unmarried for one of the candidates!
+                if (!Util.isNull(candidate.getCandidateDetails().getMaritalStatus()) && candidate.getCandidateDetails().getMaritalStatus().length() > 10)
+                    candidate.getCandidateDetails().setMaritalStatus(candidate.getCandidateDetails().getMaritalStatus().substring(0, 10));
+                candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidateFromDb);
+            }
+
+            //candidate education details
+            if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0) {
+                candidate.getCandidateEducationDetails().forEach(educationDetails-> {
+                    if(educationDetails.getInstituteName().length() > IConstant.MAX_INSTITUTE_LENGTH) {
+                        log.info("Institute name too long: " + educationDetails.getInstituteName());
+                        educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
+                    }
+                });
+                candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
+            }
+
+            //candidate company details
+            if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)
+                candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateId);
+
+            //candidate project details
+            if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
+                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
+
+            //candidate online profile
+            if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
+                candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateId);
+
+            //candidate language proficiency
+            if(null != candidate.getCandidateLanguageProficiencies() && candidate.getCandidateLanguageProficiencies().size() > 0)
+                candidateService.saveUpdateCandidateLanguageProficiency(candidate.getCandidateLanguageProficiencies(), candidateId);
+
+            //candidate work authorization
+            if(null != candidate.getCandidateWorkAuthorizations() && candidate.getCandidateWorkAuthorizations().size() > 0)
+                candidateService.saveUpdateCandidateWorkAuthorization(candidate.getCandidateWorkAuthorizations(), candidateId);
+
+            //candidate skill details
+            if(null != candidate.getCandidateSkillDetails() && candidate.getCandidateSkillDetails().size() > 0)
+                candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateId);
         }
     }
 

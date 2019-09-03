@@ -66,7 +66,7 @@ public class RestClient {
             entity = new HttpEntity<String>(getHttpHeader(authToken, false));
         try {
             ResponseEntity<String> response = restTemplate.exchange(apiUrl, requestType, entity, String.class);
-            log.info("Response from Jobmosis: " + response);
+            log.info("Response from Rchilli: " + response);
             return response.getBody();
         } catch(HttpStatusCodeException e ) {
             List<String> customHeader = e.getResponseHeaders().get("x-app-err-id");

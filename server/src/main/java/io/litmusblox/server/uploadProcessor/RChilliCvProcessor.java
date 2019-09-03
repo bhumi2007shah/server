@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.CvParsingDetailsRepository;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
@@ -15,7 +16,6 @@ import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.IJobControllerMappingService;
 import io.litmusblox.server.service.MasterDataBean;
-
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
@@ -30,10 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -78,7 +75,7 @@ public class RChilliCvProcessor {
      * Service method to process the CV uploaded against RChilli application
      * @param filePath
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void processFile(String filePath) {
         // TODO:
         // 1. call the RChilli api to parse the candidate via RestClient
@@ -90,307 +87,295 @@ public class RChilliCvProcessor {
         // In case of error from RChilli
         // 1. add record in cv_parsing_details <repolocation>/error_files/job_id
 
-        String fileName=filePath.split("/")[6];
-        String[] s=fileName.split("_");
-        long userId=Long.parseLong(s[0]);
-        long jobId=Long.parseLong(s[1]);
-        User user= userRepository.getOne(userId);
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+        String[] s = fileName.split("_");
+        long userId = Long.parseLong(s[0]);
+        long jobId = Long.parseLong(s[1]);
+        User user = userRepository.getOne(userId);
         Job job = jobRepository.getOne(jobId);
-        Candidate candidate=null;
-        String rchilliFormattedJson=null;
-        ResumeParserDataRchilliBean bean=null;
-        long rchilliResponseTime= 0L;
-        Boolean isCandidateFailedToProcess=false;
-        Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        int candidateProcessed=jobCandidateMappingRepository.getUploadedCandidateCount(createdOn,user);
+        Candidate candidate = null;
+        String rchilliFormattedJson = null;
+        ResumeParserDataRchilliBean bean = null;
+        long rchilliResponseTime = 0L;
+        Boolean isCandidateFailedToProcess = false;
+        Date createdOn = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+        int candidateProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, user);
 
-        RestClient rest=RestClient.getInstance();
-        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL)+filePath + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
+        RestClient rest = RestClient.getInstance();
+        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + filePath + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
                 + "\",\"subuserid\":\"" + environment.getProperty(IConstant.SUB_USER_ID) + "\"}";
-        try{
+        try {
             long startTime = System.currentTimeMillis();
             //String rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
-             rchilliResponseTime=System.currentTimeMillis()-startTime;
+            rchilliResponseTime = System.currentTimeMillis() - startTime;
             log.info("Completed adding candidate from plugin in " + rchilliResponseTime + "ms.");
-          String rchilliJsonResponse= "{\n" +
-                  "  \"ResumeParserData\" : {\n" +
-                  "    \"ResumeFileName\" : \"HX_Amol_Kale_4_2_Infosys_Pune.pdf\",\n" +
-                  "    \"ResumeLanguage\" : \"English\",\n" +
-                  "    \"ParsingDate\" : \"19/08/2019 11:37:13\",\n" +
-                  "    \"FullName\" : \"Madra K\",\n" +
-                  "    \"TitleName\" : \"\",\n" +
-                  "    \"FirstName\" : \"sdfghj\",\n" +
-                  "    \"Middlename\" : \"\",\n" +
-                  "    \"LastName\" : \"dsdfgh\",\n" +
-                  "    \"DateOfBirth\" : \"\",\n" +
-                  "    \"Gender\" : \"\",\n" +
-                  "    \"FatherName\" : \"\",\n" +
-                  "    \"MotherName\" : \"\",\n" +
-                  "    \"MaritalStatus\" : \"\",\n" +
-                  "    \"Nationality\" : \"\",\n" +
-                  "    \"LanguageKnown\" : \"\",\n" +
-                  "    \"UniqueID\" : \"\",\n" +
-                  "    \"LicenseNo\" : \"\",\n" +
-                  "    \"PassportNo\" : \"\",\n" +
-                  "    \"PanNo\" : \"\",\n" +
-                  "    \"VisaStatus\" : \"\",\n" +
-                  "    \"Email\" : \"sdfgh22@gmail.com\",\n" +
-                  "    \"AlternateEmail\" : \"\",\n" +
-                  "    \"Phone\" : \"+917700449900\",\n" +
-                  "    \"FormattedPhone\" : \"+1 770-044-9900\",\n" +
-                  "    \"Mobile\" : \"\",\n" +
-                  "    \"FormattedMobile\" : \"\",\n" +
-                  "    \"FaxNo\" : \"\",\n" +
-                  "    \"WebSites\" : {\n" +
-                  "      \"WebSite\" : [ {\n" +
-                  "        \"Type\" : \"\",\n" +
-                  "        \"Url\" : \"\"\n" +
-                  "      } ]\n" +
-                  "    },\n" +
-                  "    \"Address\" : \"\",\n" +
-                  "    \"City\" : \"\",\n" +
-                  "    \"State\" : \"\",\n" +
-                  "    \"Country\" : \"\",\n" +
-                  "    \"ZipCode\" : \"\",\n" +
-                  "    \"FormattedAddress\" : \"\",\n" +
-                  "    \"PermanentAddress\" : \"\",\n" +
-                  "    \"PermanentCity\" : \"\",\n" +
-                  "    \"PermanentState\" : \"\",\n" +
-                  "    \"PermanentCountry\" : \"\",\n" +
-                  "    \"PermanentZipCode\" : \"\",\n" +
-                  "    \"FormattedPermanentAddress\" : \"\",\n" +
-                  "    \"Category\" : \"Software/IT\",\n" +
-                  "    \"SubCategory\" : \"Software Engineer\",\n" +
-                  "    \"CurrentSalary\" : \"\",\n" +
-                  "    \"ExpectedSalary\" : \"\",\n" +
-                  "    \"Qualification\" : \"M. C. A. \\n  \\n B. C. A. \\n  \\n H. S. C. \\n  \\n S. S. C. \\n  \\n Sinhgad Institutes , Lonavala with 65.00% \\n  \\n College of Computer Science and Information Technology , Latur with 68.00% \\n  \\n Annandmuni Vidhayalay Kelgaon with 66.50% \\n Annandmuni Vidhayalay Kelgaon with 49.60%\",\n" +
-                  "    \"SegregatedQualification\" : {\n" +
-                  "      \"EducationSplit\" : [ {\n" +
-                  "        \"Institution\" : {\n" +
-                  "          \"Name\" : \"\",\n" +
-                  "          \"Type\" : \"\",\n" +
-                  "          \"City\" : \"\",\n" +
-                  "          \"State\" : \"\",\n" +
-                  "          \"Country\" : \"\"\n" +
-                  "        },\n" +
-                  "        \"Degree\" : \"M. C. A\",\n" +
-                  "        \"StartDate\" : \"\",\n" +
-                  "        \"EndDate\" : \"31/12/2014\",\n" +
-                  "        \"Aggregate\" : {\n" +
-                  "          \"Value\" : \"\",\n" +
-                  "          \"MeasureType\" : \"\"\n" +
-                  "        }\n" +
-                  "      }, {\n" +
-                  "        \"Institution\" : {\n" +
-                  "          \"Name\" : \"\",\n" +
-                  "          \"Type\" : \"\",\n" +
-                  "          \"City\" : \"\",\n" +
-                  "          \"State\" : \"\",\n" +
-                  "          \"Country\" : \"\"\n" +
-                  "        },\n" +
-                  "        \"Degree\" : \"B. C. A\",\n" +
-                  "        \"StartDate\" : \"\",\n" +
-                  "        \"EndDate\" : \"31/12/2014\",\n" +
-                  "        \"Aggregate\" : {\n" +
-                  "          \"Value\" : \"\",\n" +
-                  "          \"MeasureType\" : \"\"\n" +
-                  "        }\n" +
-                  "      }, {\n" +
-                  "        \"Institution\" : {\n" +
-                  "          \"Name\" : \"\",\n" +
-                  "          \"Type\" : \"\",\n" +
-                  "          \"City\" : \"\",\n" +
-                  "          \"State\" : \"\",\n" +
-                  "          \"Country\" : \"\"\n" +
-                  "        },\n" +
-                  "        \"Degree\" : \"H. S. C.\",\n" +
-                  "        \"StartDate\" : \"\",\n" +
-                  "        \"EndDate\" : \"31/12/2014\",\n" +
-                  "        \"Aggregate\" : {\n" +
-                  "          \"Value\" : \"\",\n" +
-                  "          \"MeasureType\" : \"\"\n" +
-                  "        }\n" +
-                  "      }, {\n" +
-                  "        \"Institution\" : {\n" +
-                  "          \"Name\" : \"Sinhgad Institute s\",\n" +
-                  "          \"Type\" : \"Institute\",\n" +
-                  "          \"City\" : \"Lonavala\",\n" +
-                  "          \"State\" : \"\",\n" +
-                  "          \"Country\" : \"\"\n" +
-                  "        },\n" +
-                  "        \"Degree\" : \"S. S. C.\",\n" +
-                  "        \"StartDate\" : \"\",\n" +
-                  "        \"EndDate\" : \"\",\n" +
-                  "        \"Aggregate\" : {\n" +
-                  "          \"Value\" : \"65.00\",\n" +
-                  "          \"MeasureType\" : \"Percentage\"\n" +
-                  "        }\n" +
-                  "      }, {\n" +
-                  "        \"Institution\" : {\n" +
-                  "          \"Name\" : \"College of Computer Science and Information Technology\",\n" +
-                  "          \"Type\" : \"College\",\n" +
-                  "          \"City\" : \"Latur\",\n" +
-                  "          \"State\" : \"\",\n" +
-                  "          \"Country\" : \"\"\n" +
-                  "        },\n" +
-                  "        \"Degree\" : \"\",\n" +
-                  "        \"StartDate\" : \"\",\n" +
-                  "        \"EndDate\" : \"\",\n" +
-                  "        \"Aggregate\" : {\n" +
-                  "          \"Value\" : \"68.00\",\n" +
-                  "          \"MeasureType\" : \"Percentage\"\n" +
-                  "        }\n" +
-                  "      } ]\n" +
-                  "    },\n" +
-                  "    \"Skills\" : \"PROFILE SUMMARY   \\n JAVA/J2EE Development \\n  \\n E-Commerce / Travel/Real Estate \\n  \\n Product Design & Development \\n  \\n Team Management \\n  \\n  Client Servicing \\n \\t Working as Senior Software Engineer with Infosys India Pvt. \\n \\t  Ltd. all aspects of software development including implementation \\n \\t  Of Enterprise, Scalable web applications. \\n  \\n \\t Experience in OOP, Software development and business \\n \\t  Modeling in Web applications. \\n  \\n \\t Strong Web development skills and Experience in Client-Server based \\n \\t  Internet technology, portal design / development. Web based data \\n \\t  reporting system, Framework development for Internet application. \\n  \\n \\t Thorough knowledge with J2EE application platform configuration, \\n \\t  application deployment automation and unit testing. \\n  \\n \\t Skilled in \\n \\t   \\n \\t  Excellent in JAVA/J2EE Development including , Spring \\n \\t  framework, Spring boot, Multithreading, Hibernate, Web Services \\n \\t and Maven \\n \\t   \\n \\t  Good Hands on databases like MySQL, Oracle and PostgreSQL \\n \\t   \\n \\t  Basic knowledge of JavaScript, jQuery, HTML, CSS \\n  \\n \\t   \\n Knows frameworks like Velocity, Tapestry.\\n\\n\\n\\n\\n\\n\\n\\nJAVA Frameworks \\n  \\n Front End Technologies \\n  \\n Databases \\n  \\n Web / Application server \\n  \\n Build Tool / Repository \\n  \\n JAVA, J2EE, Multithreading \\n Struts,Spring MVC, Spring Boot, Hibernate, Rest and SOAP Web Services \\n  \\n JavaScript, jQuery,HTML5 ,CSS3 ,Bootstrap \\n  \\n MySQL, Oracle \\n  \\n Apache Tomcat \\n  \\n Maven, GIT \\n    \\n I Infosys India Pvt Ltd. \\n  \\n Project Name : Bank of America. \\n Team Size : 25 \\n Duration : 12 Months \\n  \\n Technologies / Languages :  \\n  \\n Struts 2.x Spring 4.1 Framework , IBM WEB server Agile methodology Development model \\n Databases : Oracle \\n Operating System : Windows 7 ,10\",\n" +
-                  "    \"SkillKeywords\" : {\n" +
-                  "      \"SkillSet\" : [ {\n" +
-                  "        \"Skill\" : \"Implementation\",\n" +
-                  "        \"Type\" : \"SoftSkill\",\n" +
-                  "        \"Alias\" : \"Implementator\",\n" +
-                  "        \"FormattedName\" : \"Implementation\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"Application Deployment Automation\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"\",\n" +
-                  "        \"FormattedName\" : \"\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"WEB Server Agile Methodology\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"\",\n" +
-                  "        \"FormattedName\" : \"\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"Hibernate\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"Hibernate, Hibernate 3.1\",\n" +
-                  "        \"FormattedName\" : \"Hibernate\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"Reporting\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"\",\n" +
-                  "        \"FormattedName\" : \"\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"JAVA/J2EE\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"Java/J2ee, Java/J2ee Spring\",\n" +
-                  "        \"FormattedName\" : \"JAVA/J2EE\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"Tapestry\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"\",\n" +
-                  "        \"FormattedName\" : \"\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      }, {\n" +
-                  "        \"Skill\" : \"HTML\",\n" +
-                  "        \"Type\" : \"OperationalSkill\",\n" +
-                  "        \"Alias\" : \"Basic Html, Html 3.2/4.0, Html 4.0.1, Html 4.01, Html4.0, Hypertext Markup Language\",\n" +
-                  "        \"FormattedName\" : \"HTML\",\n" +
-                  "        \"Evidence\" : \"SkillSection\",\n" +
-                  "        \"LastUsed\" : \"\",\n" +
-                  "        \"ExperienceInMonths\" : \"0\"\n" +
-                  "      } ]\n" +
-                  "    },\n" +
-                  "    \"Experience\" : \"PROJECT\\nThis application is used to distribute the product orders based on catalog to different types of fulfilment  \\n \\t  vendors. It keeps tracks of master catalog data and solving issue product order up to its end to end users.\",\n" +
-                  "    \"SegregatedExperience\" : {\n" +
-                  "      \"WorkHistory\" : [ ]\n" +
-                  "    },\n" +
-                  "    \"CurrentEmployer\" : \"\",\n" +
-                  "    \"JobProfile\" : \"\",\n" +
-                  "    \"WorkedPeriod\" : {\n" +
-                  "      \"TotalExperienceInMonths\" : \"\",\n" +
-                  "      \"TotalExperienceInYear\" : \"\",\n" +
-                  "      \"TotalExperienceRange\" : \"\"\n" +
-                  "    },\n" +
-                  "    \"GapPeriod\" : \"\",\n" +
-                  "    \"AverageStay\" : \"\",\n" +
-                  "    \"LongestStay\" : \"\",\n" +
-                  "    \"Summary\" : \"\",\n" +
-                  "    \"ExecutiveSummary\" : \"\",\n" +
-                  "    \"ManagementSummary\" : \"\",\n" +
-                  "    \"Coverletter\" : \"\",\n" +
-                  "    \"Certification\" : \"\",\n" +
-                  "    \"Publication\" : \"\",\n" +
-                  "    \"CurrentLocation\" : \"Pune\",\n" +
-                  "    \"PreferredLocation\" : \"\",\n" +
-                  "    \"Availability\" : \"\",\n" +
-                  "    \"Hobbies\" : \"\",\n" +
-                  "    \"Objectives\" : \"Aim to work in a challenging work environment where I can utilize my expertise in technical skills, towards the development and implementation of the new ideas and contributing to growth of the organization.\",\n" +
-                  "    \"Achievements\" : \"\",\n" +
-                  "    \"References\" : \"\",\n" +
-                  "    \"CustomFields\" : \"Parsing Time : 1845ms;\",\n" +
-                  "    \"EmailInfo\" : {\n" +
-                  "      \"EmailTo\" : \" \",\n" +
-                  "      \"EmailBody\" : \" \",\n" +
-                  "      \"EmailReplyTo\" : \" \",\n" +
-                  "      \"EmailSignature\" : \" \",\n" +
-                  "      \"EmailFrom\" : \" \",\n" +
-                  "      \"EmailSubject\" : \" \",\n" +
-                  "      \"EmailCC\" : \" \"\n" +
-                  "    },\n" +
-                  "    \"Recommendations\" : {\n" +
-                  "      \"Recommendation\" : [ {\n" +
-                  "        \"PersonName\" : \"\",\n" +
-                  "        \"PositionTitle\" : \"\",\n" +
-                  "        \"CompanyName\" : \"\",\n" +
-                  "        \"Relation\" : \"\",\n" +
-                  "        \"Description\" : \"\"\n" +
-                  "      } ]\n" +
-                  "    },\n" +
-                  "    \"DetailResume\" : \"\",\n" +
-                  "    \"HtmlResume\" : \"\",\n" +
-                  "    \"CandidateImage\" : {\n" +
-                  "      \"CandidateImageData\" : \"\",\n" +
-                  "      \"CandidateImageFormat\" : \"\"\n" +
-                  "    },\n" +
-                  "    \"TemplateOutput\" : {},\n" +
-                  "    \"Platform\" : \"\"\n" +
-                  "  }\n" +
-                  "}";
+            String rchilliJsonResponse = "{\n" +
+                    "  \"ResumeParserData\" : {\n" +
+                    "    \"ResumeFileName\" : \"HX_Amol_Kale_4_2_Infosys_Pune.pdf\",\n" +
+                    "    \"ResumeLanguage\" : \"English\",\n" +
+                    "    \"ParsingDate\" : \"19/08/2019 11:37:13\",\n" +
+                    "    \"FullName\" : \"Madra K\",\n" +
+                    "    \"TitleName\" : \"\",\n" +
+                    "    \"FirstName\" : \"sdfghj\",\n" +
+                    "    \"Middlename\" : \"\",\n" +
+                    "    \"LastName\" : \"dsdfgh\",\n" +
+                    "    \"DateOfBirth\" : \"\",\n" +
+                    "    \"Gender\" : \"\",\n" +
+                    "    \"FatherName\" : \"\",\n" +
+                    "    \"MotherName\" : \"\",\n" +
+                    "    \"MaritalStatus\" : \"\",\n" +
+                    "    \"Nationality\" : \"\",\n" +
+                    "    \"LanguageKnown\" : \"\",\n" +
+                    "    \"UniqueID\" : \"\",\n" +
+                    "    \"LicenseNo\" : \"\",\n" +
+                    "    \"PassportNo\" : \"\",\n" +
+                    "    \"PanNo\" : \"\",\n" +
+                    "    \"VisaStatus\" : \"\",\n" +
+                    "    \"Email\" : \"sdfgh22@gmail.com\",\n" +
+                    "    \"AlternateEmail\" : \"\",\n" +
+                    "    \"Phone\" : \"+917700449900\",\n" +
+                    "    \"FormattedPhone\" : \"+1 770-044-9900\",\n" +
+                    "    \"Mobile\" : \"\",\n" +
+                    "    \"FormattedMobile\" : \"\",\n" +
+                    "    \"FaxNo\" : \"\",\n" +
+                    "    \"WebSites\" : {\n" +
+                    "      \"WebSite\" : [ {\n" +
+                    "        \"Type\" : \"\",\n" +
+                    "        \"Url\" : \"\"\n" +
+                    "      } ]\n" +
+                    "    },\n" +
+                    "    \"Address\" : \"\",\n" +
+                    "    \"City\" : \"\",\n" +
+                    "    \"State\" : \"\",\n" +
+                    "    \"Country\" : \"\",\n" +
+                    "    \"ZipCode\" : \"\",\n" +
+                    "    \"FormattedAddress\" : \"\",\n" +
+                    "    \"PermanentAddress\" : \"\",\n" +
+                    "    \"PermanentCity\" : \"\",\n" +
+                    "    \"PermanentState\" : \"\",\n" +
+                    "    \"PermanentCountry\" : \"\",\n" +
+                    "    \"PermanentZipCode\" : \"\",\n" +
+                    "    \"FormattedPermanentAddress\" : \"\",\n" +
+                    "    \"Category\" : \"Software/IT\",\n" +
+                    "    \"SubCategory\" : \"Software Engineer\",\n" +
+                    "    \"CurrentSalary\" : \"\",\n" +
+                    "    \"ExpectedSalary\" : \"\",\n" +
+                    "    \"Qualification\" : \"M. C. A. \\n  \\n B. C. A. \\n  \\n H. S. C. \\n  \\n S. S. C. \\n  \\n Sinhgad Institutes , Lonavala with 65.00% \\n  \\n College of Computer Science and Information Technology , Latur with 68.00% \\n  \\n Annandmuni Vidhayalay Kelgaon with 66.50% \\n Annandmuni Vidhayalay Kelgaon with 49.60%\",\n" +
+                    "    \"SegregatedQualification\" : {\n" +
+                    "      \"EducationSplit\" : [ {\n" +
+                    "        \"Institution\" : {\n" +
+                    "          \"Name\" : \"\",\n" +
+                    "          \"Type\" : \"\",\n" +
+                    "          \"City\" : \"\",\n" +
+                    "          \"State\" : \"\",\n" +
+                    "          \"Country\" : \"\"\n" +
+                    "        },\n" +
+                    "        \"Degree\" : \"M. C. A\",\n" +
+                    "        \"StartDate\" : \"\",\n" +
+                    "        \"EndDate\" : \"31/12/2014\",\n" +
+                    "        \"Aggregate\" : {\n" +
+                    "          \"Value\" : \"\",\n" +
+                    "          \"MeasureType\" : \"\"\n" +
+                    "        }\n" +
+                    "      }, {\n" +
+                    "        \"Institution\" : {\n" +
+                    "          \"Name\" : \"\",\n" +
+                    "          \"Type\" : \"\",\n" +
+                    "          \"City\" : \"\",\n" +
+                    "          \"State\" : \"\",\n" +
+                    "          \"Country\" : \"\"\n" +
+                    "        },\n" +
+                    "        \"Degree\" : \"B. C. A\",\n" +
+                    "        \"StartDate\" : \"\",\n" +
+                    "        \"EndDate\" : \"31/12/2014\",\n" +
+                    "        \"Aggregate\" : {\n" +
+                    "          \"Value\" : \"\",\n" +
+                    "          \"MeasureType\" : \"\"\n" +
+                    "        }\n" +
+                    "      }, {\n" +
+                    "        \"Institution\" : {\n" +
+                    "          \"Name\" : \"\",\n" +
+                    "          \"Type\" : \"\",\n" +
+                    "          \"City\" : \"\",\n" +
+                    "          \"State\" : \"\",\n" +
+                    "          \"Country\" : \"\"\n" +
+                    "        },\n" +
+                    "        \"Degree\" : \"H. S. C.\",\n" +
+                    "        \"StartDate\" : \"\",\n" +
+                    "        \"EndDate\" : \"31/12/2014\",\n" +
+                    "        \"Aggregate\" : {\n" +
+                    "          \"Value\" : \"\",\n" +
+                    "          \"MeasureType\" : \"\"\n" +
+                    "        }\n" +
+                    "      }, {\n" +
+                    "        \"Institution\" : {\n" +
+                    "          \"Name\" : \"Sinhgad Institute s\",\n" +
+                    "          \"Type\" : \"Institute\",\n" +
+                    "          \"City\" : \"Lonavala\",\n" +
+                    "          \"State\" : \"\",\n" +
+                    "          \"Country\" : \"\"\n" +
+                    "        },\n" +
+                    "        \"Degree\" : \"S. S. C.\",\n" +
+                    "        \"StartDate\" : \"\",\n" +
+                    "        \"EndDate\" : \"\",\n" +
+                    "        \"Aggregate\" : {\n" +
+                    "          \"Value\" : \"65.00\",\n" +
+                    "          \"MeasureType\" : \"Percentage\"\n" +
+                    "        }\n" +
+                    "      }, {\n" +
+                    "        \"Institution\" : {\n" +
+                    "          \"Name\" : \"College of Computer Science and Information Technology\",\n" +
+                    "          \"Type\" : \"College\",\n" +
+                    "          \"City\" : \"Latur\",\n" +
+                    "          \"State\" : \"\",\n" +
+                    "          \"Country\" : \"\"\n" +
+                    "        },\n" +
+                    "        \"Degree\" : \"\",\n" +
+                    "        \"StartDate\" : \"\",\n" +
+                    "        \"EndDate\" : \"\",\n" +
+                    "        \"Aggregate\" : {\n" +
+                    "          \"Value\" : \"68.00\",\n" +
+                    "          \"MeasureType\" : \"Percentage\"\n" +
+                    "        }\n" +
+                    "      } ]\n" +
+                    "    },\n" +
+                    "    \"Skills\" : \"PROFILE SUMMARY   \\n JAVA/J2EE Development \\n  \\n E-Commerce / Travel/Real Estate \\n  \\n Product Design & Development \\n  \\n Team Management \\n  \\n  Client Servicing \\n \\t Working as Senior Software Engineer with Infosys India Pvt. \\n \\t  Ltd. all aspects of software development including implementation \\n \\t  Of Enterprise, Scalable web applications. \\n  \\n \\t Experience in OOP, Software development and business \\n \\t  Modeling in Web applications. \\n  \\n \\t Strong Web development skills and Experience in Client-Server based \\n \\t  Internet technology, portal design / development. Web based data \\n \\t  reporting system, Framework development for Internet application. \\n  \\n \\t Thorough knowledge with J2EE application platform configuration, \\n \\t  application deployment automation and unit testing. \\n  \\n \\t Skilled in \\n \\t   \\n \\t  Excellent in JAVA/J2EE Development including , Spring \\n \\t  framework, Spring boot, Multithreading, Hibernate, Web Services \\n \\t and Maven \\n \\t   \\n \\t  Good Hands on databases like MySQL, Oracle and PostgreSQL \\n \\t   \\n \\t  Basic knowledge of JavaScript, jQuery, HTML, CSS \\n  \\n \\t   \\n Knows frameworks like Velocity, Tapestry.\\n\\n\\n\\n\\n\\n\\n\\nJAVA Frameworks \\n  \\n Front End Technologies \\n  \\n Databases \\n  \\n Web / Application server \\n  \\n Build Tool / Repository \\n  \\n JAVA, J2EE, Multithreading \\n Struts,Spring MVC, Spring Boot, Hibernate, Rest and SOAP Web Services \\n  \\n JavaScript, jQuery,HTML5 ,CSS3 ,Bootstrap \\n  \\n MySQL, Oracle \\n  \\n Apache Tomcat \\n  \\n Maven, GIT \\n    \\n I Infosys India Pvt Ltd. \\n  \\n Project Name : Bank of America. \\n Team Size : 25 \\n Duration : 12 Months \\n  \\n Technologies / Languages :  \\n  \\n Struts 2.x Spring 4.1 Framework , IBM WEB server Agile methodology Development model \\n Databases : Oracle \\n Operating System : Windows 7 ,10\",\n" +
+                    "    \"SkillKeywords\" : {\n" +
+                    "      \"SkillSet\" : [ {\n" +
+                    "        \"Skill\" : \"Implementation\",\n" +
+                    "        \"Type\" : \"SoftSkill\",\n" +
+                    "        \"Alias\" : \"Implementator\",\n" +
+                    "        \"FormattedName\" : \"Implementation\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"Application Deployment Automation\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"\",\n" +
+                    "        \"FormattedName\" : \"\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"WEB Server Agile Methodology\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"\",\n" +
+                    "        \"FormattedName\" : \"\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"Hibernate\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"Hibernate, Hibernate 3.1\",\n" +
+                    "        \"FormattedName\" : \"Hibernate\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"Reporting\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"\",\n" +
+                    "        \"FormattedName\" : \"\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"JAVA/J2EE\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"Java/J2ee, Java/J2ee Spring\",\n" +
+                    "        \"FormattedName\" : \"JAVA/J2EE\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"Tapestry\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"\",\n" +
+                    "        \"FormattedName\" : \"\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      }, {\n" +
+                    "        \"Skill\" : \"HTML\",\n" +
+                    "        \"Type\" : \"OperationalSkill\",\n" +
+                    "        \"Alias\" : \"Basic Html, Html 3.2/4.0, Html 4.0.1, Html 4.01, Html4.0, Hypertext Markup Language\",\n" +
+                    "        \"FormattedName\" : \"HTML\",\n" +
+                    "        \"Evidence\" : \"SkillSection\",\n" +
+                    "        \"LastUsed\" : \"\",\n" +
+                    "        \"ExperienceInMonths\" : \"0\"\n" +
+                    "      } ]\n" +
+                    "    },\n" +
+                    "    \"Experience\" : \"PROJECT\\nThis application is used to distribute the product orders based on catalog to different types of fulfilment  \\n \\t  vendors. It keeps tracks of master catalog data and solving issue product order up to its end to end users.\",\n" +
+                    "    \"SegregatedExperience\" : {\n" +
+                    "      \"WorkHistory\" : [ ]\n" +
+                    "    },\n" +
+                    "    \"CurrentEmployer\" : \"\",\n" +
+                    "    \"JobProfile\" : \"\",\n" +
+                    "    \"WorkedPeriod\" : {\n" +
+                    "      \"TotalExperienceInMonths\" : \"\",\n" +
+                    "      \"TotalExperienceInYear\" : \"\",\n" +
+                    "      \"TotalExperienceRange\" : \"\"\n" +
+                    "    },\n" +
+                    "    \"GapPeriod\" : \"\",\n" +
+                    "    \"AverageStay\" : \"\",\n" +
+                    "    \"LongestStay\" : \"\",\n" +
+                    "    \"Summary\" : \"\",\n" +
+                    "    \"ExecutiveSummary\" : \"\",\n" +
+                    "    \"ManagementSummary\" : \"\",\n" +
+                    "    \"Coverletter\" : \"\",\n" +
+                    "    \"Certification\" : \"\",\n" +
+                    "    \"Publication\" : \"\",\n" +
+                    "    \"CurrentLocation\" : \"Pune\",\n" +
+                    "    \"PreferredLocation\" : \"\",\n" +
+                    "    \"Availability\" : \"\",\n" +
+                    "    \"Hobbies\" : \"\",\n" +
+                    "    \"Objectives\" : \"Aim to work in a challenging work environment where I can utilize my expertise in technical skills, towards the development and implementation of the new ideas and contributing to growth of the organization.\",\n" +
+                    "    \"Achievements\" : \"\",\n" +
+                    "    \"References\" : \"\",\n" +
+                    "    \"CustomFields\" : \"Parsing Time : 1845ms;\",\n" +
+                    "    \"EmailInfo\" : {\n" +
+                    "      \"EmailTo\" : \" \",\n" +
+                    "      \"EmailBody\" : \" \",\n" +
+                    "      \"EmailReplyTo\" : \" \",\n" +
+                    "      \"EmailSignature\" : \" \",\n" +
+                    "      \"EmailFrom\" : \" \",\n" +
+                    "      \"EmailSubject\" : \" \",\n" +
+                    "      \"EmailCC\" : \" \"\n" +
+                    "    },\n" +
+                    "    \"Recommendations\" : {\n" +
+                    "      \"Recommendation\" : [ {\n" +
+                    "        \"PersonName\" : \"\",\n" +
+                    "        \"PositionTitle\" : \"\",\n" +
+                    "        \"CompanyName\" : \"\",\n" +
+                    "        \"Relation\" : \"\",\n" +
+                    "        \"Description\" : \"\"\n" +
+                    "      } ]\n" +
+                    "    },\n" +
+                    "    \"DetailResume\" : \"\",\n" +
+                    "    \"HtmlResume\" : \"\",\n" +
+                    "    \"CandidateImage\" : {\n" +
+                    "      \"CandidateImageData\" : \"\",\n" +
+                    "      \"CandidateImageFormat\" : \"\"\n" +
+                    "    },\n" +
+                    "    \"TemplateOutput\" : {},\n" +
+                    "    \"Platform\" : \"\"\n" +
+                    "  }\n" +
+                    "}";
 
-            rchilliJsonResponse= rchilliJsonResponse.replace("{\n" +
-                    "  \"ResumeParserData\" : ","");
+            rchilliJsonResponse = rchilliJsonResponse.replace("{\n" +
+                    "  \"ResumeParserData\" : ", "");
 
-            rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf(",\n" +
-                    "    \"DetailResume\""))+"\n"+"}";
+            rchilliFormattedJson = rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf(",\n" +
+                    "    \"DetailResume\"")) + "\n" + "}";
             //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-            bean = mapper.readValue(rchilliJsonResponse, ResumeParserDataRchilliBean.class);
-            //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
-            candidate=setCandidateModel(bean,user);
 
-
-            if(candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()) {
-                log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " +  user.getId());
-            }
-            //check for daily limit per user
-            if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
-                log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED  + " : user id : " +  user.getId());
-            }
-            candidate=uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null,candidate,user,!candidate.getMobile().isEmpty(),job);
-            jobControllerMappingService.saveCandidateSupportiveInfo(candidate,user);
+        } catch (ValidationException ve) {
+            log.error("Error while processing candidate in drag and drop : " + ((null!=candidate) ? candidate.getEmail() :user.getEmail()) + " : " + ve.getMessage());
+            isCandidateFailedToProcess=true;
         }catch(Exception e) {
-            log.error("Error while processing candidate in drag and drop : " + ((null!=candidate) ? candidate.getEmail() :user.getEmail()) + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            log.error("Error while processing candidate in drag and drop : " + ((null!=candidate) ? candidate.getEmail() :user.getEmail()) + " : " + e.getMessage());
             isCandidateFailedToProcess=true;
         }
 
@@ -423,11 +408,6 @@ public class RChilliCvProcessor {
             cvParsingDetails.setCvFileName(fileName);
             cvParsingDetails.setProcessedOn(new Date());
             cvParsingDetails.setProcessingTime(rchilliResponseTime);
-            if(isCandidateFailedToProcess)
-                cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
-            else
-                cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
-
             cvParsingDetails.setParsingResponseHtml(bean.getHtmlResume());
             cvParsingDetails.setParsingResponseText(bean.getDetailResume());
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
@@ -531,5 +511,54 @@ public class RChilliCvProcessor {
         });
         candidate.setCandidateSkillDetails(candidateSkillDetailsList);
         return candidate;
+    }
+
+    /**
+     * Method that will fetch all records from cv_parsing_details where status is null
+     * and process them to create a job_candidate mapping
+     */
+    public void processRChilliData(){
+
+        List<CvParsingDetails> recordsToProcess = cvParsingDetailsRepository.findByProcessingStatusIsNull();
+
+        recordsToProcess.forEach(cvParsingDetails -> {
+            try {
+                String fileName = cvParsingDetails.getCvFileName().substring(cvParsingDetails.getCvFileName().lastIndexOf(File.separator) + 1);
+                String[] s = fileName.split("_");
+                long userId = Long.parseLong(s[0]);
+                long jobId = Long.parseLong(s[1]);
+                User user = userRepository.getOne(userId);
+                Job job = jobRepository.getOne(jobId);
+                Date createdOn = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                ResumeParserDataRchilliBean bean = mapper.readValue(cvParsingDetails.getParsingResponseJson(), ResumeParserDataRchilliBean.class);
+                //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
+                Candidate candidate = setCandidateModel(bean, user);
+                int candidateProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, user);
+
+
+                if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()) {
+                    log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " + user.getId());
+                }
+                //check for daily limit per user
+                if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
+                    log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
+                }
+                try {
+                    candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+                    jobControllerMappingService.saveCandidateSupportiveInfo(candidate, user);
+                    cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
+                }
+                cvParsingDetailsRepository.save(cvParsingDetails);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 }

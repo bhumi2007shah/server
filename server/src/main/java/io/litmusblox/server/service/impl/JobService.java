@@ -300,7 +300,7 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
- //TODO: After current deployment to prod, uncomment the following
+        //make a call to ML api to obtain skills and capabilities
         try {
             callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
             if(null == oldJob) {

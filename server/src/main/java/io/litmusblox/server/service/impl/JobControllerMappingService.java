@@ -97,8 +97,9 @@ public class JobControllerMappingService implements IJobControllerMappingService
         Job job = jobRepository.getOne(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId :").append(jobId);
-            sendSentryMail(info.toString(), null, jobId);
-            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+            Map<String, String> breadCrumb = new HashMap<>();
+            breadCrumb.put("detail", info.toString());
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
@@ -214,16 +215,21 @@ public class JobControllerMappingService implements IJobControllerMappingService
         if(!Arrays.asList(IConstant.UPLOAD_FORMATS_SUPPORTED.values()).contains(IConstant.UPLOAD_FORMATS_SUPPORTED.valueOf(fileFormat))) {
             log.error(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat);
             StringBuffer info = new StringBuffer("Unsupported file source : ").append(multipartFile.getName());
-            sendSentryMail(info.toString(), multipartFile.getName(),jobId);
-            throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY);
+            Map<String, String> breadCrumb = new HashMap<>();
+            breadCrumb.put("Job Id", jobId.toString());
+            breadCrumb.put("File Name", multipartFile.getName());
+            breadCrumb.put("detail", info.toString());
+            throw new WebException(IErrorMessages.UNSUPPORTED_FILE_SOURCE + fileFormat, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
 
         //verify that the job is live before processing candidates
         Job job = jobRepository.getOne(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId-").append(jobId);
-            sendSentryMail(info.toString(), null, jobId);
-            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+            Map<String, String> breadCrumb = new HashMap<>();
+            breadCrumb.put("Job Id", jobId.toString());
+            breadCrumb.put("detail", info.toString());
+            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
 
         //validate that the file has an extension that is supported by the application
@@ -281,8 +287,10 @@ public class JobControllerMappingService implements IJobControllerMappingService
             default:
                 log.error(IErrorMessages.UNSUPPORTED_FILE_TYPE  + " - "+ fileExtension);
                 StringBuffer info = new StringBuffer("Unsupported file source : ").append(fileName);
-                sendSentryMail(info.toString(),fileName,null);
-                throw new WebException(IErrorMessages.UNSUPPORTED_FILE_TYPE + " - " + fileExtension, HttpStatus.UNPROCESSABLE_ENTITY);
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("File Name", fileName);
+                breadCrumb.put("detail", info.toString());
+                throw new WebException(IErrorMessages.UNSUPPORTED_FILE_TYPE + " - " + fileExtension, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
         return candidateList;
     }

@@ -54,12 +54,13 @@ public class ExcelFileProcessorService implements IUploadFileProcessorService {
                                 (null == row.getCell(3).getStringCellValue().trim()) || (!row.getCell(3).getStringCellValue().equalsIgnoreCase(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()))){
 
                             Map<String, String> breadCrumb = new HashMap<>();
+                            breadCrumb.put("File Name", fileName);
                             breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue(), row.getCell(0).getStringCellValue());
                             breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue(), row.getCell(1).getStringCellValue());
                             breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue(), row.getCell(2).getStringCellValue());
                             breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue(), row.getCell(3).getStringCellValue());
-                            Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.ExcelFile.toString());
-                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
+                            breadCrumb.put("File Type", IConstant.PROCESS_FILE_TYPE.ExcelFile.toString());
+                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
                         }
                     } catch (Exception e) {
                         throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);

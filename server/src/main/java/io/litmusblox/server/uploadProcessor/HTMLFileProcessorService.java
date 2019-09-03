@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.uploadProcessor;
 
+import com.sun.org.apache.bcel.internal.generic.ICONST;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
@@ -52,9 +53,10 @@ public class HTMLFileProcessorService extends AbstractNaukriProcessor implements
                         //processing headers
                         if (!processHeaders(trElement)){
                             Map<String, String> breadCrumb = new HashMap<>();
+                            breadCrumb.put("File Name", fileName);
+                            breadCrumb.put("File Type", IConstant.PROCESS_FILE_TYPE.HTMLFile.toString());
                             breadCrumb.put("trElement", trElement.toString());
-                            Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.HTMLFile.toString());
-                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.INTERNAL_SERVER_ERROR.UNPROCESSABLE_ENTITY);
+                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.INTERNAL_SERVER_ERROR.UNPROCESSABLE_ENTITY, breadCrumb);
                         }
                         break;
                     default:

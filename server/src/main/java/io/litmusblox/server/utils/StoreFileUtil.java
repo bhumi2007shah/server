@@ -56,7 +56,7 @@ public class StoreFileUtil {
                 Map<String, String> breadCrumb = new HashMap<>();
                 breadCrumb.put("Candidate Id",candidateId.toString());
                 breadCrumb.put("filePath", filePath);
-                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                breadCrumb.put("detail", info.toString());
                 throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
             }
             targetFile = new File(repoLocation + File.separator + filePath);
@@ -86,8 +86,8 @@ public class StoreFileUtil {
                 Map<String, String> breadCrumb = new HashMap<>();
                 breadCrumb.put("Candidate Id",candidateId.toString());
                 breadCrumb.put("repoLocation", repoLocation);
-                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
-                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
+                breadCrumb.put("detail", info.toString());
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED, breadCrumb);
             }
             staticRepoPath = repoLocation;
 

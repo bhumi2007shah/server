@@ -7,6 +7,7 @@ package io.litmusblox.server.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -24,6 +25,7 @@ import java.util.Date;
 @Entity
 @Table(name = "JOB_CAPABILITIES")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
 public class JobCapabilities implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -71,4 +73,13 @@ public class JobCapabilities implements Serializable {
     @JoinColumn(name = "JOB_ID")
     private Long jobId;
 
+
+    public JobCapabilities(@NotNull String capabilityName, @NotNull Boolean selected, @NotNull MasterData importanceLevel, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
+        this.capabilityName = capabilityName;
+        this.selected = selected;
+        this.importanceLevel = importanceLevel;
+        this.createdOn = createdOn;
+        this.createdBy = createdBy;
+        this.jobId = jobId;
+    }
 }

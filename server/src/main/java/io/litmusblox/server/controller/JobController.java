@@ -3,6 +3,8 @@
  */
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
@@ -37,7 +39,10 @@ public class JobController {
 
     @PostMapping(value = "/createJob/{pageName}")
     String addJob(@RequestBody String jobStr, @PathVariable ("pageName") String pageName) throws Exception {
-        Job job = new ObjectMapper().readValue(jobStr, Job.class);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        Job job = mapper.readValue(jobStr, Job.class);
 
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),

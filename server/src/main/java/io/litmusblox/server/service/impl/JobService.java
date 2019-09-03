@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
@@ -11,11 +12,14 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
+import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -38,6 +42,7 @@ import java.util.*;
  */
 @Service
 @Log4j2
+
 public class JobService implements IJobService {
 
     @Resource
@@ -68,6 +73,9 @@ public class JobService implements IJobService {
     SkillMasterRepository skillMasterRepository;
 
     @Resource
+    MasterDataRepository masterDataRepository;
+
+    @Resource
     CompanyAddressRepository companyAddressRepository;
 
     @Resource
@@ -88,8 +96,12 @@ public class JobService implements IJobService {
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
+    @Value("${mlApiUrl}")
+    private String mlUrl;
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    private static MasterData mediumImportanceLevel = null;
+
+    @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
         log.info("Received request to add job for page " + pageName);
@@ -210,6 +222,7 @@ public class JobService implements IJobService {
         //If the job is not published, do not process the request
         Job job = jobRepository.getOne(jobCandidateMapping.getJob().getId());
 
+
         if (null == job) {
             StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
             log.info(info.toString());
@@ -218,13 +231,18 @@ public class JobService implements IJobService {
             SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
             throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        else if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
-            StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
-            log.info(info.toString());
-            Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Job Id",job.getId().toString());
-            SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
-            throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+        else {
+            User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if(!loggedInUser.getRole().equals(IConstant.UserRole.Names.SUPER_ADMIN) && !job.getCompanyId().getId().equals(loggedInUser.getCompany().getId()))
+                throw new WebException(IErrorMessages.JOB_COMPANY_MISMATCH, HttpStatus.UNAUTHORIZED);
+            if(job.getStatus().equals(IConstant.JobStatus.DRAFT.getValue())) {
+                StringBuffer info = new StringBuffer(IErrorMessages.JOB_NOT_LIVE).append(job.getStatus());
+                log.info(info.toString());
+                Map<String, String> breadCrumb = new HashMap<>();
+                breadCrumb.put("Job Id", job.getId().toString());
+                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
+            }
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
@@ -282,8 +300,78 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
+        //make a call to ML api to obtain skills and capabilities
+        try {
+            callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
+            if(null == oldJob) {
+                job.setMlDataAvailable(true);
+                jobRepository.save(job);
+            }
+            else {
+                oldJob.setMlDataAvailable(true);
+                jobRepository.save(oldJob);
+            }
+        } catch (Exception e) {
+            log.error("Error while fetching data from ML: " + e.getMessage());
+            job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
+        }
+    }
 
-        //TODO: Add call to ml api? scheduled task?
+    private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
+        log.info("Response received: " + mlResponse);
+        long startTime = System.currentTimeMillis();
+        MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
+        handleSkillsFromML(responseBean.getSkills(), jobId);
+        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true);
+        handleCapabilitiesFromMl(responseBean.getRecommendedCapabilities(), jobId, false);
+        log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
+    }
+
+    /**
+     * Method to handle all skills provided by ML
+     *
+     * @param skillsList List of skills obtained from ML
+     * @param jobId the job id for which the skills have to persisted
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
+        log.info("Size of skill list: " + skillsList.size());
+        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
+        skillsList.forEach(skill-> {
+            //find a skill from the master table for the skill name provided
+            SkillsMaster skillFromDb = skillMasterRepository.findBySkillName(skill.getName());
+            //if none if found, add a skill
+            if (null == skillFromDb) {
+                skillFromDb = new SkillsMaster(skill.getName());
+                skillMasterRepository.save(skillFromDb);
+            }
+            //add a record in job_key_skills with this skill id
+            jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+        });
+        jobKeySkillsRepository.saveAll(jobKeySkillsToSave);
+    }
+
+    /**
+     * Method to handle all capabilities provided by ML
+     *
+     * @param capabilitiesList
+     * @param jobId
+     * @param selectedByDefault
+     * @throws Exception
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault) throws Exception {
+        log.info("Size of capabilities list to process: " + capabilitiesList.size());
+        if(null == mediumImportanceLevel)
+            mediumImportanceLevel = findMasterDataForMediumImportance();
+        List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
+        capabilitiesList.forEach(capability->{
+            jobCapabilitiesToSave.add(new JobCapabilities(capability.getCapability(), selectedByDefault, mediumImportanceLevel, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+        });
+        jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
     }
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
@@ -303,7 +391,7 @@ public class JobService implements IJobService {
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
 
-        //populate capabilities and key skills for the job
+        //populate key skills for the job
         job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
@@ -379,6 +467,7 @@ public class JobService implements IJobService {
                 jobKeySkillsRepository.save(new JobKeySkills(tempSkills, false, true, new Date(), loggedInUser, job.getId()));
             }
         }
+        //populate the capabilities for the job
         job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
     }
 
@@ -570,5 +659,16 @@ public class JobService implements IJobService {
         job.setUpdatedOn(new Date());
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         jobRepository.save(job);
+    }
+
+
+    public MasterData findMasterDataForMediumImportance() {
+        final MasterData[] returnVal = {null};
+        MasterDataBean.getInstance().getImportanceLevel().keySet().forEach( key -> {
+            if(MasterDataBean.getInstance().getImportanceLevel().get(key).equals("Mid")) {
+                returnVal[0] = masterDataRepository.getOne(key);
+            }
+        });
+        return returnVal[0];
     }
 }

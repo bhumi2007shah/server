@@ -11,8 +11,12 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 /**
  * Class that has the methods to process the files and that will be triggered by scheduler
@@ -45,33 +49,26 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
         // rChilliCvProcessor.processFile();
 
         try{
-            /*Stream<Path> filePathStream= Files.walk(Paths.get(environment.getProperty(IConstant.TEMP_REPO_LOCATION)));
+
+            Stream<Path> filePathStream= Files.walk(Paths.get(environment.getProperty(IConstant.TEMP_REPO_LOCATION)));
             filePathStream.forEach(filePath -> {
                     if (Files.isRegularFile(filePath)) {
                         log.info("Temp folder Cv path : "+filePath.getFileName());
                         rChilliCvProcessor.processFile(filePath.toString());
                     }
-                });*/
-
-
-
-           // String [] files=Files.list(Paths.get(environment.getProperty(IConstant.TEMP_REPO_LOCATION)));
-                    /*.forEach(filePath->{
-                        //log.info("Temp folder Cv path : "+filePath.getFileName());
-                        rChilliCvProcessor.processFile(filePath.toString());
-                    });*/
-                    File file=new File(environment.getProperty(IConstant.TEMP_REPO_LOCATION));
-                    File [] files=file.listFiles();
-                    //int i=0;
-                    //if(files.length>0){
-                    //for(int i=0; i<files.length; i++) {
-                        log.info("Temp folder Cv path : "+files[0].getAbsoluteFile());
-                        rChilliCvProcessor.processFile(files[0].getPath());
-                        //i++;
-                    //}
+                });
         } catch (Exception e) {
             e.printStackTrace();
             log.info("Error while processing temp location files : "+e.getMessage());
         }
+    }
+
+    /**
+     * Method that will fetch all records from cv_parsing_details where status is null
+     * and process them to create a job_candidate mapping
+     */
+    @Transactional
+    public void processRChilliData() {
+        rChilliCvProcessor.processRChilliData();
     }
 }

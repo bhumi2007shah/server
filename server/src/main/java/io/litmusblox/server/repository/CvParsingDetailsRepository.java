@@ -7,6 +7,8 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.CvParsingDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * @author : Sumit
  * Date : 30/08/19
@@ -14,7 +16,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Class Name : CvParsingDetailsRepository
  * Project Name : server
  */
-//@Repository
 public interface CvParsingDetailsRepository extends JpaRepository<CvParsingDetails, Long> {
-
+    List<CvParsingDetails> findByProcessingStatusIsNull();
 }

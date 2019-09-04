@@ -121,7 +121,6 @@ public class UploadDataProcessService implements IUploadDataProcessService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    @Override
     public Candidate validateDataAndSaveJcmAndJcmCommModel(UploadResponseBean uploadResponseBean, Candidate candidate, User loggedInUser, Boolean ignoreMobile, Job job) throws Exception {
 
         if (null != candidate.getFirstName()) {

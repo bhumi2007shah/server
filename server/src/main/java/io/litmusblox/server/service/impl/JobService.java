@@ -292,6 +292,9 @@ public class JobService implements IJobService {
             jobKeySkillsRepository.deleteByJobId(job.getId());
             jobCapabilitiesRepository.deleteByJobId(job.getId());
 
+            jobKeySkillsRepository.flush();
+            jobCapabilitiesRepository.flush();
+
         } else { //Create new entry for job
             job.setCreatedOn(new Date());
             job.setMlDataAvailable(false);

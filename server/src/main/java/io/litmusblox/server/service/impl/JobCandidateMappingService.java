@@ -37,17 +37,17 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * Implementation class for methods exposed by IJobControllerMappingService
+ * Implementation class for methods exposed by IJobCandidateMappingService
  *
  * @author : Shital Raval
  * Date : 16/7/19
  * Time : 4:56 PM
- * Class Name : JobControllerMappingService
+ * Class Name : JobCandidateMappingService
  * Project Name : server
  */
 @Service
 @Log4j2
-public class JobControllerMappingService implements IJobControllerMappingService {
+public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     JobRepository jobRepository;

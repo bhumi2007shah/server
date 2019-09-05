@@ -14,7 +14,7 @@ import io.litmusblox.server.repository.CvParsingDetailsRepository;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
 import io.litmusblox.server.repository.JobRepository;
 import io.litmusblox.server.repository.UserRepository;
-import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.StoreFileUtil;
@@ -67,7 +67,7 @@ public class RChilliCvProcessor {
     JobCandidateMappingRepository jobCandidateMappingRepository;
 
     @Autowired
-    IJobControllerMappingService jobControllerMappingService;
+    IJobCandidateMappingService jobCandidateMappingService;
 
     @Autowired
     CvParsingDetailsRepository cvParsingDetailsRepository;
@@ -250,7 +250,7 @@ public class RChilliCvProcessor {
                 }
                 try {
                     candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
-                    jobControllerMappingService.saveCandidateSupportiveInfo(candidate, user);
+                    jobCandidateMappingService.saveCandidateSupportiveInfo(candidate, user);
                     cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
                 }catch (Exception e) {
                     e.printStackTrace();

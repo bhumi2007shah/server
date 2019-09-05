@@ -675,4 +675,17 @@ public class JobService implements IJobService {
         });
         return returnVal[0];
     }
+
+    @Transactional
+    public Job getJobDetails(Long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if (null == job) {
+            throw new WebException("Job with id " + jobId + " does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        Hibernate.initialize(job.getCompanyId());
+        Hibernate.initialize(job.getJobScreeningQuestionsList());
+        Hibernate.initialize(job.getJobKeySkillsList());
+        Hibernate.initialize(job.getJobCapabilityList());
+        return job;
+    }
 }

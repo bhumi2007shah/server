@@ -4,11 +4,11 @@
 
 package io.litmusblox.server.uploadProcessor;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.CvParsingDetailsRepository;
 import io.litmusblox.server.repository.JobCandidateMappingRepository;
@@ -31,16 +31,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Service class to process the CV uploaded against RChilli application
+ *
  * @author : shital
  * Date : 21/8/19
  * Time : 1:06 PM
@@ -72,65 +73,153 @@ public class RChilliCvProcessor {
     @Autowired
     CvParsingDetailsRepository cvParsingDetailsRepository;
 
+    @Transactional(readOnly = true)
+    User getUser(long userId) {
+        return userRepository.findById(userId).get();
+    }
+
+    @Transactional(readOnly = true)
+    Job getJob(long jobId) {
+        return jobRepository.findById(jobId).get();
+    }
 
     /**
      * Service method to process the CV uploaded against RChilli application
+     *
      * @param filePath
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     public void processFile(String filePath) {
-        Map<String, Object> map = findUserAndJob(filePath);
-        User user=(User)map.get("user");
-        Job job=(Job)map.get("job");
+        // TODO:
+        // 1. call the RChilli api to parse the candidate via RestClient
+        // 2. from the name of file (<userId>_<jobId>_actualFileName), retrieve user Id and job id, to be used
+        // 3. add jcm, and jcm communication details records
+        // 4. increment the number of candidates processed by the user
+        // 5. add a record in the new table cv_parsing_details with required details
+        // 6. move the file to the job folder using the candidate id generated
+        // In case of error from RChilli
+        // 1. add record in cv_parsing_details <repolocation>/error_files/job_id
 
+        String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+        String[] s = fileName.split("_");
+
+        User user = getUser(Long.parseLong(s[0]));
+        Job job = getJob(Long.parseLong(s[1]));
+
+        Candidate candidate = null;
         String rchilliFormattedJson = null;
         ResumeParserDataRchilliBean bean = null;
         long rchilliResponseTime = 0L;
-        boolean isCandidateFailedToProcess = false;
+        boolean isCandidateFailedToProcess = false, rChilliErrorResponse = false;
 
         RestClient rest = RestClient.getInstance();
-        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + map.get("fileName").toString() + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
+        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + filePath + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
                 + "\",\"subuserid\":\"" + environment.getProperty(IConstant.SUB_USER_ID) + "\"}";
         try {
             long startTime = System.currentTimeMillis();
             String rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
             rchilliResponseTime = System.currentTimeMillis() - startTime;
-            log.info("Response taken come from Rchilli in : " + rchilliResponseTime + "ms.");
-            rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
-            rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
-            log.info("RchilliFormattedJson  : "+rchilliFormattedJson);
+            log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
+            if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg"))
+                rChilliErrorResponse = true;
 
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            bean = mapper.readValue(rchilliJsonResponse, ResumeParserDataRchilliBean.class);
+             if(!rChilliErrorResponse) {
+                rchilliJsonResponse = rchilliJsonResponse.replace("{\n" +
+                        "  \"ResumeParserData\" : ", "");
 
-        }catch(Exception e) {
-            log.error("Error while getting rchiilli response : " + user.getEmail() + " : " + e.getMessage());
-            isCandidateFailedToProcess=true;
-        }
+                rchilliFormattedJson = rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf(",\n" +
+                        "    \"DetailResume\"")) + "\n" + "}";
+                //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                bean = mapper.readValue(rchilliJsonResponse, ResumeParserDataRchilliBean.class);
+                //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
+                candidate = setCandidateModel(bean, user);
 
-        try {
-
-            if(isCandidateFailedToProcess) {
-                storeFile(filePath, isCandidateFailedToProcess, job.getId(), null);
+                isCandidateFailedToProcess = processCandidate(candidate, user, job);
             }
-        } catch (Exception ex) {
-            log.error("Error while storing file : " + filePath + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+            else {
+                log.error("Failed to process CV against RChilli: " + rchilliJsonResponse);
+                //TODO: Add sentry here?
+            }
+
+        } catch (Exception e) {
+            log.error("Error while processing candidate in drag and drop : " + ((null != candidate) ? candidate.getEmail() : user.getEmail()) + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+            isCandidateFailedToProcess = true;
         }
 
-        //Add cv_parsing_details
-        CvParsingDetails cvParsingDetails = new CvParsingDetails();
-        cvParsingDetails.setCvFileName(filePath);
-        cvParsingDetails.setProcessedOn(new Date());
-        cvParsingDetails.setProcessingTime(rchilliResponseTime);
-        cvParsingDetails.setParsingResponseHtml(bean.getHtmlResume());
-        cvParsingDetails.setParsingResponseText(bean.getDetailResume());
-        cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
-        if(isCandidateFailedToProcess)
-            cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
+        if(!rChilliErrorResponse) {
+            try {
+                File file = new File(filePath);
+                DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(), file.getParentFile());
+                InputStream input = new FileInputStream(file);
+                OutputStream os = fileItem.getOutputStream();
+                int ret = input.read();
+                while (ret != -1) {
+                    os.write(ret);
+                    ret = input.read();
+                }
+                os.flush();
+                MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+                if (isCandidateFailedToProcess)
+                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate.getId());
+                else
+                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate.getId());
 
-        cvParsingDetailsRepository.save(cvParsingDetails);
+                file.delete();
+            } catch (Exception ex) {
+                log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+            addCvParsingDetails(fileName, rchilliResponseTime, rchilliFormattedJson, isCandidateFailedToProcess, bean);
+        }
+
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private boolean processCandidate(Candidate candidate, User user, Job job) {
+
+        int candidateProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), user);
+
+        if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()) {
+            log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " + user.getId());
+        }
+        //check for daily limit per user
+        if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
+            log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
+        }
+        try {
+            candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+            jobControllerMappingService.saveCandidateSupportiveInfo(candidate, user);
+        } catch (ValidationException ve) {
+            log.error("Error while processing candidate information received from RChilli : " + ve.getMessage());
+            return true;
+        } catch (Exception e) {
+            log.error("Error while processing candidate information received from RChilli : " + e.getMessage());
+            return true;
+        }
+        return false;
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean) {
+        try {
+            //Add cv_parsing_details
+            CvParsingDetails cvParsingDetails = new CvParsingDetails();
+            cvParsingDetails.setCvFileName(fileName);
+            cvParsingDetails.setProcessedOn(new Date());
+            cvParsingDetails.setProcessingTime(rchilliResponseTime);
+            if (isCandidateFailedToProcess)
+                cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
+            else
+                cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
+
+            cvParsingDetails.setParsingResponseHtml(bean.getHtmlResume());
+            cvParsingDetails.setParsingResponseText(bean.getDetailResume());
+            cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
+            cvParsingDetailsRepository.save(cvParsingDetails);
+        } catch (Exception e) {
+            log.info("Save CvParsingDetails");
+            e.printStackTrace();
+        }
     }
 
     private Candidate setCandidateModel(ResumeParserDataRchilliBean bean, User user) {
@@ -138,12 +227,12 @@ public class RChilliCvProcessor {
         //Format mobile no
         mobile=Util.indianMobileConvertor(mobile);
 
-        Candidate candidate=new Candidate(bean.getFirstName(),bean.getLastName(),bean.getEmail(), mobile,null,new Date(),null);
+        Candidate candidate = new Candidate(bean.getFirstName(), bean.getLastName(), bean.getEmail(), mobile, null, new Date(), null);
         candidate.setCandidateName(bean.getFullName());
         candidate.setCandidateSource(IConstant.CandidateSource.DragDropCv.toString());
         candidate.setCountryCode(user.getCountryId().getCountryCode());
 
-        CandidateDetails candidateDetails=new CandidateDetails();
+        CandidateDetails candidateDetails = new CandidateDetails();
         candidateDetails.setDateOfBirth(Util.convertStringToDate(bean.getDateOfBirth()));
         candidateDetails.setGender(bean.getGender());
 
@@ -161,15 +250,15 @@ public class RChilliCvProcessor {
         candidate.setCandidateDetails(candidateDetails);
 
         bean.getSegregatedQualification().getEducationSplit().forEach(educationSplit -> {
-            CandidateEducationDetails candidateEducationDetails= new CandidateEducationDetails();
+            CandidateEducationDetails candidateEducationDetails = new CandidateEducationDetails();
 
-            if(educationSplit.getInstitution().getName().length()>75)
-                candidateEducationDetails.setInstituteName(educationSplit.getInstitution().getName().substring(0,75));
+            if (educationSplit.getInstitution().getName().length() > 75)
+                candidateEducationDetails.setInstituteName(educationSplit.getInstitution().getName().substring(0, 75));
             else
                 candidateEducationDetails.setInstituteName(educationSplit.getInstitution().getName());
 
             candidateEducationDetails.setDegree(educationSplit.getDegree());
-            if(!educationSplit.getEndDate().isEmpty()){
+            if (!educationSplit.getEndDate().isEmpty()) {
                 candidateEducationDetails.setYearOfPassing(Util.getYearFromStringDate(educationSplit.getEndDate()));
             }
             candidate.getCandidateEducationDetails().add(candidateEducationDetails);
@@ -214,98 +303,5 @@ public class RChilliCvProcessor {
             candidate.getCandidateSkillDetails().add(candidateSkillDetails);
         });
         return candidate;
-    }
-
-    /**
-     * Method that will fetch all records from cv_parsing_details where status is null
-     * and process them to create a job_candidate mapping
-     */
-    public void processRChilliData(){
-
-        List<CvParsingDetails> recordsToProcess = cvParsingDetailsRepository.findByProcessingStatusIsNull();
-
-        recordsToProcess.forEach(cvParsingDetails -> {
-            try {
-                Boolean isCandidateFailedToProcess=false;
-                Map<String, Object> map = findUserAndJob(cvParsingDetails.getCvFileName());
-                User user=(User)map.get("user");
-                Job job=(Job)map.get("job");
-                Date createdOn=(Date)map.get("createdOn");
-                String fileName=map.get("fileName").toString();
-
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                ResumeParserDataRchilliBean bean = mapper.readValue(cvParsingDetails.getParsingResponseJson(), ResumeParserDataRchilliBean.class);
-                log.info("ResumeParserDataRchilliBean :"+bean);
-                Candidate candidate = setCandidateModel(bean, user);
-                int candidateProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, user);
-
-                if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()) {
-                    log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " + user.getId());
-                }
-                //check for daily limit per user
-                if (candidateProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
-                    log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
-                }
-                try {
-                    candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
-                    jobControllerMappingService.saveCandidateSupportiveInfo(candidate, user);
-                    cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
-                }catch (Exception e) {
-                    e.printStackTrace();
-                    log.error("Error While candidate process : "+bean.getEmail()+" "+"FileName : "+fileName+" : "+e.getStackTrace());
-                    cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
-                    isCandidateFailedToProcess=true;
-                }
-                storeFile(cvParsingDetails.getCvFileName(),isCandidateFailedToProcess,job.getId(),candidate.getId());
-
-                CvParsingDetails cv=cvParsingDetailsRepository.save(cvParsingDetails);
-                //log.info("CvParsingDetails : "+cv);
-            } catch (IOException e) {
-                log.error("Error While processing processRChilliData : "+cvParsingDetails.getCvFileName()+" : "+e.getMessage());
-            } catch (Exception e) {
-                log.error("Error While processing processRChilliData : " + cvParsingDetails.getCvFileName() + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
-            }
-        });
-
-    }
-
-    private Map<String, Object> findUserAndJob(String cvFileName){
-        Map<String, Object> map=new HashMap<>();
-        cvFileName = cvFileName.substring(cvFileName.lastIndexOf(File.separator) + 1);
-        String[] s = cvFileName.split("_");
-        long userId = Long.parseLong(s[0]);
-        long jobId = Long.parseLong(s[1]);
-        User user = userRepository.getOne(userId);
-        Job job = jobRepository.getOne(jobId);
-        Date createdOn = Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
-        map.put("fileName", cvFileName);
-        map.put("user", user);
-        map.put("job", job);
-        map.put("createdOn", createdOn);
-        return map;
-    }
-
-    private void storeFile(String filePath, Boolean isCandidateFailedToProcess, Long jobId, Long candidateId) throws Exception {
-
-        File file=new File(filePath);
-        DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length() , file.getParentFile());
-        InputStream input = new FileInputStream(file);
-        OutputStream os = fileItem.getOutputStream();
-        int ret = input.read();
-        while ( ret != -1 )
-        {
-            os.write(ret);
-            ret = input.read();
-        }
-        os.flush();
-        MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
-        if(isCandidateFailedToProcess){
-            StoreFileUtil.storeFile(multipartFile, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES,candidateId);
-        }else{
-            StoreFileUtil.storeFile(multipartFile, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),candidateId);
-        }
-        file.delete();
     }
 }

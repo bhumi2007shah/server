@@ -44,12 +44,7 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
      */
     @Override
     public void processCv() {
-        //TODO: Fetch all the CVs that need to be processed
-        // for each cv, call the following with the pathTofile
-        // rChilliCvProcessor.processFile();
-
         try{
-
             Stream<Path> filePathStream= Files.walk(Paths.get(environment.getProperty(IConstant.TEMP_REPO_LOCATION)));
             filePathStream.forEach(filePath -> {
                     if (Files.isRegularFile(filePath)) {
@@ -58,7 +53,6 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
                     }
                 });
         } catch (Exception e) {
-            e.printStackTrace();
             log.info("Error while processing temp location files : "+e.getMessage());
         }
     }
@@ -69,6 +63,6 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
      */
     @Transactional
     public void processRChilliData() {
-        rChilliCvProcessor.processRChilliData();
+            rChilliCvProcessor.processRChilliData();
     }
 }

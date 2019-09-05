@@ -6,10 +6,12 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CvUploadResponseBean;
 import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.uploadProcessor.IProcessUploadedCV;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +42,12 @@ public class JobCandidateMappingController {
 
     @Autowired
     IJobCandidateMappingService jobCandidateMappingService;
+
+    @Autowired
+    IProcessUploadedCV processUploadedCV;
+
+    @Autowired
+    UserRepository userRepository;
 
     /**
      * Api to add a single candidate to a job

@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import java.io.*;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -248,5 +249,21 @@ public class Util {
         Map<String, String> breadCrumb = new HashMap<>();
         breadCrumb.put(IConstant.UPLOAD_FILE_TYPE,processFileType);
         SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+    }
+
+    public static Date convertStringToDate(String stringDate) {
+        if(!stringDate.isEmpty()){
+            try {
+                return new SimpleDateFormat("dd/MM/yyyy").parse(stringDate);
+            } catch (ParseException e) {
+                log.error("Given string not convert in Date...");
+            }
+        }
+        log.info("Given date string is empty");
+        return null;
+    }
+
+    public static String getYearFromStringDate(String dateString){
+        return dateString.split("/")[2];
     }
 }

@@ -197,7 +197,7 @@ public class JobCandidateMappingController {
     @PostMapping("/addCandidate/dragAndDropCv")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) /*throws Exception*/ {
+    CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
         return jobControllerMappingService.processDragAndDropCv(multipartFiles, jobId);
     }
 }

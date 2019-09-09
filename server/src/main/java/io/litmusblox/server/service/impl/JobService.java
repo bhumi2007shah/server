@@ -254,6 +254,15 @@ public class JobService implements IJobService {
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
 
+        Hibernate.initialize(job.getJobDetail().getJobLocation());
+        Hibernate.initialize(job.getJobDetail().getInterviewLocation());
+        Hibernate.initialize(job.getJobDetail().getExpertise());
+        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+        });
+       // Hibernate.initialize(job.getJobHiringTeamList());
+
         Collections.sort(jcmList);
 
         responseBean.setCandidateList(jcmList);

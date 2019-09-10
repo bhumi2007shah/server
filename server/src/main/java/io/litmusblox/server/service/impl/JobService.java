@@ -309,7 +309,7 @@ public class JobService implements IJobService {
             //End of code to be removed
             jobRepository.save(job);
         }
-        jobHistoryRepository.save(new JobHistory(job.getId(), historyMsg + " job overview", loggedInUser));
+        saveJobHistory(job.getId(), historyMsg + " job overview", loggedInUser);
         //make a call to ML api to obtain skills and capabilities
         try {
             callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
@@ -403,7 +403,7 @@ public class JobService implements IJobService {
             n.setJobId(job.getId());
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
-        jobHistoryRepository.save(new JobHistory(job.getId(), historyMsg + " screening questions", loggedInUser));
+        saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);
 
         //populate key skills for the job
         job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
@@ -481,7 +481,7 @@ public class JobService implements IJobService {
                 jobKeySkillsRepository.save(new JobKeySkills(tempSkills, false, true, new Date(), loggedInUser, job.getId()));
             }
         }
-        jobHistoryRepository.save(new JobHistory(job.getId(), "Added key skills", loggedInUser));
+        saveJobHistory(job.getId(), "Added key skills", loggedInUser);
         //populate the capabilities for the job
         job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
     }
@@ -510,7 +510,7 @@ public class JobService implements IJobService {
         //oldJob.setStatus(IConstant.JobStatus.PUBLISHED.getValue());
         //oldJob.setDatePublished(new Date());
         jobRepository.save(oldJob);
-        jobHistoryRepository.save(new JobHistory(job.getId(), "Added capabilities", loggedInUser));
+        saveJobHistory(job.getId(), "Added capabilities", loggedInUser);
 
         job.getJobCapabilityList().clear();
         job.getJobCapabilityList().addAll(oldJob.getJobCapabilityList());
@@ -654,6 +654,7 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
+
         if(null == status) {
             //check that the old status of job is archived
             if (!IConstant.JobStatus.ARCHIVED.getValue().equals(job.getStatus()))
@@ -673,7 +674,9 @@ public class JobService implements IJobService {
             job.setStatus(status);
         }
         job.setUpdatedOn(new Date());
-        job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        job.setUpdatedBy(loggedInUser);
+        saveJobHistory(job.getId(), "Status changed to " +job.getStatus(), loggedInUser);
         jobRepository.save(job);
     }
 
@@ -699,5 +702,9 @@ public class JobService implements IJobService {
         Hibernate.initialize(job.getJobKeySkillsList());
         Hibernate.initialize(job.getJobCapabilityList());
         return job;
+    }
+
+    private void saveJobHistory(Long jobId, String historyMsg, User loggedInUser) {
+        jobHistoryRepository.save(new JobHistory(jobId, historyMsg, loggedInUser));
     }
 }

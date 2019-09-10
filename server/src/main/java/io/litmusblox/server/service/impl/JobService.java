@@ -717,7 +717,7 @@ public class JobService implements IJobService {
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         job.setUpdatedBy(loggedInUser);
         saveJobHistory(job.getId(), "Status changed to " +job.getStatus(), loggedInUser);
-        jobRepository.save(job);
+        return jobRepository.save(job);
     }
 
     @Transactional

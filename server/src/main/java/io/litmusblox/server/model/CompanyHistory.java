@@ -6,7 +6,6 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -14,18 +13,17 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : Sumit
- * Date : 4/7/19
+ * @author : Sonal
+ * Date : 9/9/19
  * Time : 2:09 PM
- * Class Name : JobHistory
+ * Class Name : CompanyHistory
  * Project Name : server
  */
-@NoArgsConstructor
 @Data
 @Entity
-@Table(name = "JOB_HISTORY")
+@Table(name = "COMPANY_HISTORY")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class JobHistory implements Serializable {
+public class CompanyHistory implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -35,27 +33,21 @@ public class JobHistory implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "JOB_ID")
-    private long jobId;
+    @Column(name = "COMPANY_ID")
+    private long companyId;
 
     @NotNull
     @Column(name = "DETAILS")
     private String details;
 
     @NotNull
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "UPDATED_BY")
+    @OneToOne(fetch = FetchType.LAZY)
+    @PrimaryKeyJoinColumn
     private User updatedBy;
 
     @NotNull
     @Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
-
-    public JobHistory(@NotNull long jobId, @NotNull String details, @NotNull User updatedBy) {
-        this.jobId = jobId;
-        this.details = details;
-        this.updatedBy = updatedBy;
-    }
 
 }

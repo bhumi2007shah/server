@@ -36,6 +36,11 @@ public class JobCapabilities implements Serializable {
     private Long id;
 
     @NotNull
+    @Column(name = "CAPABILITY_ID")
+    private Long capabilityId;
+
+
+    @NotNull
     @Column(name = "CAPABILITY_NAME")
     private String capabilityName;
 
@@ -74,7 +79,8 @@ public class JobCapabilities implements Serializable {
     private Long jobId;
 
 
-    public JobCapabilities(@NotNull String capabilityName, @NotNull Boolean selected, @NotNull MasterData importanceLevel, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
+    public JobCapabilities(@NotNull Long capabilityId, @NotNull String capabilityName, @NotNull Boolean selected, @NotNull MasterData importanceLevel, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
+        this.capabilityId = capabilityId;
         this.capabilityName = capabilityName;
         this.selected = selected;
         this.importanceLevel = importanceLevel;

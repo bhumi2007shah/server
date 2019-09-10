@@ -435,6 +435,7 @@ public class JobControllerMappingService implements IJobControllerMappingService
                     queryParams.put("lbJobId",jcm.getJob().getId());
                     queryParams.put("candidateId", jcm.getCandidate().getId());
                     queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                    log.info("Calling Scoring Engine api to add candidate to job");
                     String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl+scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT,null, Optional.of(queryParams));
                 } catch (Exception e) {
                     e.printStackTrace();

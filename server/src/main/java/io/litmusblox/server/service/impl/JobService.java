@@ -332,8 +332,9 @@ public class JobService implements IJobService {
         long startTime = System.currentTimeMillis();
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
         handleSkillsFromML(responseBean.getSkills(), jobId);
-        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true);
-        handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false);
+        Set<Integer> uniqueCapabilityIds = new HashSet<>();
+        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
+        handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
         log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
@@ -368,14 +369,18 @@ public class JobService implements IJobService {
      * @param capabilitiesList
      * @param jobId
      * @param selectedByDefault
+     * @param uniqueCapabilityIds
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault) throws Exception {
+    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault, Set<Integer> uniqueCapabilityIds) throws Exception {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
-            jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()),capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+            if (capability.getId() !=0 && !uniqueCapabilityIds.contains(capability.getId())) {
+                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+                uniqueCapabilityIds.add(capability.getId());
+            }
         });
         jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
     }
@@ -690,16 +695,5 @@ public class JobService implements IJobService {
         job.setUpdatedOn(new Date());
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return jobRepository.save(job);
-    }
-
-
-    public MasterData findMasterDataForMediumImportance() {
-        final MasterData[] returnVal = {null};
-        MasterDataBean.getInstance().getImportanceLevel().keySet().forEach( key -> {
-            if(MasterDataBean.getInstance().getImportanceLevel().get(key).equals("Mid")) {
-                returnVal[0] = masterDataRepository.getOne(key);
-            }
-        });
-        return returnVal[0];
     }
 }

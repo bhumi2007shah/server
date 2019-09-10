@@ -15,14 +15,13 @@ import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
-import io.litmusblox.server.utils.SentryUtil;
-import io.litmusblox.server.utils.StoreFileUtil;
-import io.litmusblox.server.utils.Util;
-import io.litmusblox.server.utils.ZipFileProcessUtil;
+import io.litmusblox.server.utils.*;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -81,6 +80,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     JcmProfileSharingMasterRepository jcmProfileSharingMasterRepository;
+
+    @Value("${scoringEngineBaseUrl}")
+    private String scoringEngineBaseUrl;
+
+    @Value("${scoringEngineAddCandidateUrlSuffix}")
+    private String scoringEngineAddCandidateUrlSuffix;
 
     /**
      * Service method to add a individually added candidates to a job
@@ -416,6 +421,27 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+
+        //make an api call to scoring engine for each of the jcm
+        jcmList.stream().forEach(jcmId->{
+            Optional<JobCandidateMapping> jcmOptional = jobCandidateMappingRepository.findById(jcmId);
+            if (!jcmOptional.isPresent()) {
+                log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);
+            }
+            else {
+                JobCandidateMapping jcm = jcmOptional.get();
+                try {
+                    Map queryParams = new HashMap(3);
+                    queryParams.put("lbJobId",jcm.getJob().getId());
+                    queryParams.put("candidateId", jcm.getCandidate().getId());
+                    queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                    log.info("Calling Scoring Engine api to add candidate to job");
+                    String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl+scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT,null, Optional.of(queryParams));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -562,6 +588,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
+        if(null!=objFromDb.getJob().getJobDetail() && null!=objFromDb.getJob().getJobDetail().getExpertise()){
+            Hibernate.initialize(objFromDb.getJob().getJobDetail().getExpertise());
+        }
+        objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
+        });
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
     }

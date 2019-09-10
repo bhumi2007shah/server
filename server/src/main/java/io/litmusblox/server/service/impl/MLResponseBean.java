@@ -23,7 +23,7 @@ import java.util.List;
 public class MLResponseBean {
     private List<Skills> skills;
     private List<Capabilities> suggestedCapabilities;
-    private List<Capabilities> recommendedCapabilities;
+    private List<Capabilities> additionalCapabilities;
     private String occuranceOfDistinctIndustry;
     private List<Role> roles;
 }

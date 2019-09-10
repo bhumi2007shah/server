@@ -40,4 +40,10 @@ public class CandidateSkillDetails {
 
     @Column(name = "LAST_USED")
     private Date lastUsed;
+
+    @Column(name="EXP_IN_MONTHS")
+    private Long expInMonths;
+
+    @Column(name = "VERSION")
+    private String version;
 }

@@ -36,17 +36,17 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * Implementation class for methods exposed by IJobControllerMappingService
+ * Implementation class for methods exposed by IJobCandidateMappingService
  *
  * @author : Shital Raval
  * Date : 16/7/19
  * Time : 4:56 PM
- * Class Name : JobControllerMappingService
+ * Class Name : JobCandidateMappingService
  * Project Name : server
  */
 @Service
 @Log4j2
-public class JobControllerMappingService implements IJobControllerMappingService {
+public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     JobRepository jobRepository;
@@ -588,6 +588,14 @@ public class JobControllerMappingService implements IJobControllerMappingService
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
+        if(null!=objFromDb.getJob().getJobDetail() && null!=objFromDb.getJob().getJobDetail().getExpertise()){
+            Hibernate.initialize(objFromDb.getJob().getJobDetail().getExpertise());
+        }
+        objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
+        });
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
     }

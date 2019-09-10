@@ -258,6 +258,14 @@ public class JobService implements IJobService {
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
 
+        if(null!=job.getJobDetail() && null!=job.getJobDetail().getExpertise()){
+            Hibernate.initialize(job.getJobDetail().getExpertise());
+        }
+        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+        });
+
         Collections.sort(jcmList);
 
         responseBean.setCandidateList(jcmList);
@@ -520,7 +528,6 @@ public class JobService implements IJobService {
     }
 
     private void addJobDetail(Job job, Job oldJob, User loggedInUser) {//add job details
-/*
         if (null == job.getJobDetail()) {
             throw new ValidationException("Job detail " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
@@ -569,6 +576,8 @@ public class JobService implements IJobService {
         String[] range = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId()).split(" ");
         detail.setMinExperience(Double.parseDouble(range[0]));
         detail.setMaxExperience(Double.parseDouble(range[2]));
+        detail.setMinSalary(0l);
+        detail.setMaxSalary(0l);
         detail.setJobId(oldJob);
         detail.setCreatedBy(loggedInUser);
         detail.setCreatedOn(new Date());
@@ -579,36 +588,35 @@ public class JobService implements IJobService {
 
         //populate all users for the company of current user
         List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
-        job.getUsersForCompany().addAll(userList);*/
+        job.getUsersForCompany().addAll(userList);
     }
 
     private void addJobHiringTeam(Job job, Job oldJob, User loggedInUser) throws Exception {
-/*
         List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
-
+        List<Long> userId=new ArrayList<>();
+        userList.forEach(user->{userId.add(user.getId());});
         for (JobHiringTeam jobHiringTeam : job.getJobHiringTeamList()) {
 
-            jobHiringTeam.setUserId(loggedInUser);//temp code for testing
-            if (null == jobHiringTeam.getUserId() || !userList.contains(jobHiringTeam.getUserId())) {
+           // jobHiringTeam.setUserId(loggedInUser);//temp code for testing
+            if (null == jobHiringTeam.getUserId() || !userId.contains(jobHiringTeam.getUserId().getId())) {
                 throw new ValidationException("Not valid User" + job.getId(), HttpStatus.BAD_REQUEST);
             }
 
             if (null == MasterDataBean.getInstance().getProcess().get(jobHiringTeam.getStageStepId().getStage().getId())) {
                 throw new ValidationException("In Job hiring team, process " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-
             }
 
             //TODO:Check Lead Recruiter and Hiring manager are selected or not
 
+
             job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
-            //job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
+            job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
 
             CompanyStageStep companyStageStep = jobHiringTeam.getStageStepId();
 
             companyStageStep = companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(), companyStageStep.getCompanyId(), companyStageStep.getStage(), new Date(), loggedInUser));
             jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), companyStageStep, jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
         }
-*/
     }
 
     /**
@@ -695,5 +703,25 @@ public class JobService implements IJobService {
         job.setUpdatedOn(new Date());
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         return jobRepository.save(job);
+    }
+
+    @Transactional
+    public Job getJobDetails(Long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if (null == job) {
+            throw new WebException("Job with id " + jobId + " does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        Hibernate.initialize(job.getCompanyId());
+        Hibernate.initialize(job.getJobScreeningQuestionsList());
+        Hibernate.initialize(job.getJobKeySkillsList());
+        Hibernate.initialize(job.getJobCapabilityList());
+        if(null!=job.getJobDetail() && null!=job.getJobDetail().getExpertise()){
+            Hibernate.initialize(job.getJobDetail().getExpertise());
+        }
+        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+        });
+        return job;
     }
 }

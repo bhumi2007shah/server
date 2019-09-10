@@ -6,7 +6,7 @@ package io.litmusblox.server.controller;
 
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
-import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import java.util.*;
 public class NoAuthController {
 
     @Autowired
-    IJobControllerMappingService jobControllerMappingService;
+    IJobCandidateMappingService jobCandidateMappingService;
 
     /**
      * Rest api to get all screening questions for the job
@@ -50,7 +50,7 @@ public class NoAuthController {
     String screeningQuestionsForUuid(@RequestParam("uuid") UUID uuid) throws Exception {
         log.info("Received request to retrieve screening questions for candidate: " + uuid);
         long startTime = System.currentTimeMillis();
-        List<JobScreeningQuestions> response = jobControllerMappingService.getJobScreeningQuestions(uuid);
+        List<JobScreeningQuestions> response = jobCandidateMappingService.getJobScreeningQuestions(uuid);
         log.info("Completed fetching screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
          return Util.stripExtraInfoFromResponseBean(response,
                 (new HashMap<String, List<String>>(){{
@@ -77,7 +77,7 @@ public class NoAuthController {
     String candidateAndJobDetailsForUuid(@RequestParam("uuid") UUID uuid) throws Exception {
         log.info("Received request to retrieve candidate & job information based on uuid : " + uuid);
         long startTime = System.currentTimeMillis();
-        JobCandidateMapping mappingObj = jobControllerMappingService.getJobCandidateMapping(uuid);
+        JobCandidateMapping mappingObj = jobCandidateMappingService.getJobCandidateMapping(uuid);
         log.info("Completed fetching JobCandidateMapping in " + (System.currentTimeMillis() - startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(mappingObj,
                 (new HashMap<String, List<String>>(){{
@@ -106,7 +106,7 @@ public class NoAuthController {
     void captureCandidateInterest(@RequestParam("uuid") UUID uuid, @RequestParam("interest") boolean interest) throws Exception {
         log.info("Received candidate interest capture request: " + uuid);
         long startTime = System.currentTimeMillis();
-        jobControllerMappingService.captureCandidateInterest(uuid, interest);
+        jobCandidateMappingService.captureCandidateInterest(uuid, interest);
         log.info("Completed capturing candidate request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
@@ -121,7 +121,7 @@ public class NoAuthController {
     void screeningQuestionResponses(@RequestParam("uuid") UUID uuid, @RequestBody Map<Long,List<String>> candidateResponse) throws Exception{
         log.info("Received screening question responses from candidate: " + uuid);
         long startTime = System.currentTimeMillis();
-        jobControllerMappingService.saveScreeningQuestionResponses(uuid, candidateResponse);
+        jobCandidateMappingService.saveScreeningQuestionResponses(uuid, candidateResponse);
         log.info("Completed saving candidate response to screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
@@ -138,7 +138,7 @@ public class NoAuthController {
         log.info("Received Hiring Manager Interest information");
         long startTime = System.currentTimeMillis();
 
-        jobControllerMappingService.updateHiringManagerInterest(sharingId, interestValue);
+        jobCandidateMappingService.updateHiringManagerInterest(sharingId, interestValue);
 
         log.info("Completed processing request for Hiring Manager Interest in " + (System.currentTimeMillis() - startTime) + " ms");
     }
@@ -156,7 +156,7 @@ public class NoAuthController {
     String getCandidateProfile(@PathVariable("profileSharingUuid") UUID profileSharingUuid) throws Exception {
         log.info("Received request to fetch candidate profile");
         long startTime = System.currentTimeMillis();
-        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(profileSharingUuid),
+        String response = Util.stripExtraInfoFromResponseBean(jobCandidateMappingService.getCandidateProfile(profileSharingUuid),
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
                     put("ScreeningQuestions", Arrays.asList("question"));

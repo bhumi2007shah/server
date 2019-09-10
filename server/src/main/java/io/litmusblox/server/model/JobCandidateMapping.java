@@ -110,6 +110,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;
 
+    public String getDisplayName() {
+        return candidateFirstName + " " + candidateLastName;
+    }
+
     public JobCandidateMapping(@NotNull Job job, @NotNull Candidate candidate, @NotNull MasterData stage, @NotNull String candidateSource, @NotNull Date createdOn, @NotNull User createdBy, UUID chatbotUuid, String candidateFirstName, String candidateLastName) {
         this.job = job;
         this.candidate = candidate;

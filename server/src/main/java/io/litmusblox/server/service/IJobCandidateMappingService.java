@@ -22,10 +22,10 @@ import java.util.UUID;
  * @author : Shital Raval
  * Date : 16/7/19
  * Time : 4:44 PM
- * Class Name : IJobControllerMappingService
+ * Class Name : IJobCandidateMappingService
  * Project Name : server
  */
-public interface IJobControllerMappingService {
+public interface IJobCandidateMappingService {
 
     /**
      * Service method to add a individually added candidates to a job

@@ -49,9 +49,8 @@ public class JobCapabilities implements Serializable {
     private Boolean selected;
 
     @NotNull
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "IMPORTANCE_LEVEL")
-    private MasterData importanceLevel;
+    @Column(name = "WEIGHTAGE")
+    private int weightage;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -79,11 +78,11 @@ public class JobCapabilities implements Serializable {
     private Long jobId;
 
 
-    public JobCapabilities(@NotNull Long capabilityId, @NotNull String capabilityName, @NotNull Boolean selected, @NotNull MasterData importanceLevel, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
+    public JobCapabilities(@NotNull Long capabilityId, @NotNull String capabilityName, @NotNull Boolean selected, @NotNull int weightage, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
         this.capabilityId = capabilityId;
         this.capabilityName = capabilityName;
         this.selected = selected;
-        this.importanceLevel = importanceLevel;
+        this.weightage = weightage;
         this.createdOn = createdOn;
         this.createdBy = createdBy;
         this.jobId = jobId;

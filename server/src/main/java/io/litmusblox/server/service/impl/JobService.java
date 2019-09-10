@@ -105,8 +105,6 @@ public class JobService implements IJobService {
     @Value("${scoringEngineAddJobUrlSuffix}")
     private String scoringEngineAddJobUrlSuffix;
 
-    private static MasterData mediumImportanceLevel = null;
-
     @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
 
@@ -375,13 +373,19 @@ public class JobService implements IJobService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault) throws Exception {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
-        if(null == mediumImportanceLevel)
-            mediumImportanceLevel = findMasterDataForMediumImportance();
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
-            jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()),capability.getCapability(), selectedByDefault, mediumImportanceLevel, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+            jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()),capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
         });
         jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
+    }
+
+    private int mapWeightage(int capabilityWeight) {
+        if(capabilityWeight <= 2)
+            return 2;
+        else if (capabilityWeight <=6)
+            return 6;
+        return 10;
     }
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
@@ -494,7 +498,7 @@ public class JobService implements IJobService {
 
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
-            oldCapability.setImportanceLevel(newValue.getImportanceLevel());
+            oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
             oldCapability.setUpdatedOn(new Date());
             oldCapability.setUpdatedBy(loggedInUser);
@@ -625,7 +629,7 @@ public class JobService implements IJobService {
         List<JobCapabilities> jobCapabilities = jobCapabilitiesRepository.findByJobIdAndSelected(jobId,true);
         List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
         jobCapabilities.stream().forEach(jobCapability -> {
-            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getImportanceLevel().getId().intValue()));
+            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage()));
         });
         ScoringEngineJobBean jobRequestBean = new ScoringEngineJobBean(jobId, capabilityList);
         return (new ObjectMapper()).writeValueAsString(jobRequestBean);

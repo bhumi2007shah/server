@@ -4,7 +4,8 @@
 
 package io.litmusblox.server.uploadProcessor;
 
-import lombok.*;
+import lombok.Data;
+
 import java.util.List;
 
 /**

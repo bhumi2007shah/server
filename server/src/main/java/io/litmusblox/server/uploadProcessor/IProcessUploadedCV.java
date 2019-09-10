@@ -18,10 +18,4 @@ public interface IProcessUploadedCV {
      * @throws Exception
      */
     void processCv();
-
-    /**
-     * Method that will fetch all records from cv_parsing_details where status is null
-     * and process them to create a job_candidate mapping
-     */
-    void processRChilliData();
 }

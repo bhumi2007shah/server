@@ -99,7 +99,11 @@ public class JobService implements IJobService {
     @Value("${mlApiUrl}")
     private String mlUrl;
 
-    private static MasterData mediumImportanceLevel = null;
+    @Value("${scoringEngineBaseUrl}")
+    private String scoringEngineBaseUrl;
+
+    @Value("${scoringEngineAddJobUrlSuffix}")
+    private String scoringEngineAddJobUrlSuffix;
 
     @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
@@ -336,8 +340,9 @@ public class JobService implements IJobService {
         long startTime = System.currentTimeMillis();
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
         handleSkillsFromML(responseBean.getSkills(), jobId);
-        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true);
-        handleCapabilitiesFromMl(responseBean.getRecommendedCapabilities(), jobId, false);
+        Set<Integer> uniqueCapabilityIds = new HashSet<>();
+        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
+        handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
         log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
@@ -372,18 +377,28 @@ public class JobService implements IJobService {
      * @param capabilitiesList
      * @param jobId
      * @param selectedByDefault
+     * @param uniqueCapabilityIds
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault) throws Exception {
+    private void handleCapabilitiesFromMl(List<Capabilities> capabilitiesList, long jobId, boolean selectedByDefault, Set<Integer> uniqueCapabilityIds) throws Exception {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
-        if(null == mediumImportanceLevel)
-            mediumImportanceLevel = findMasterDataForMediumImportance();
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
-            jobCapabilitiesToSave.add(new JobCapabilities(capability.getCapability(), selectedByDefault, mediumImportanceLevel, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+            if (capability.getId() !=0 && !uniqueCapabilityIds.contains(capability.getId())) {
+                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+                uniqueCapabilityIds.add(capability.getId());
+            }
         });
         jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
+    }
+
+    private int mapWeightage(int capabilityWeight) {
+        if(capabilityWeight <= 2)
+            return 2;
+        else if (capabilityWeight <=6)
+            return 6;
+        return 10;
     }
 
     private void addJobScreeningQuestions(Job job, Job oldJob, User loggedInUser) throws Exception { //method for add screening questions
@@ -496,7 +511,7 @@ public class JobService implements IJobService {
 
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
-            oldCapability.setImportanceLevel(newValue.getImportanceLevel());
+            oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
             oldCapability.setUpdatedOn(new Date());
             oldCapability.setUpdatedBy(loggedInUser);
@@ -614,6 +629,23 @@ public class JobService implements IJobService {
         log.info("Received request to publish job with id: " + jobId);
         changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
         log.info("Completed publishing job with id: " + jobId);
+        log.info("Calling Scoring Engine Api to create a job");
+        try {
+            String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId), scoringEngineBaseUrl+scoringEngineAddJobUrlSuffix, HttpMethod.POST,null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    private String convertJobToRequestPayload(Long jobId) throws Exception {
+        List<JobCapabilities> jobCapabilities = jobCapabilitiesRepository.findByJobIdAndSelected(jobId,true);
+        List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
+        jobCapabilities.stream().forEach(jobCapability -> {
+            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage()));
+        });
+        ScoringEngineJobBean jobRequestBean = new ScoringEngineJobBean(jobId, capabilityList);
+        return (new ObjectMapper()).writeValueAsString(jobRequestBean);
     }
 
     /**
@@ -645,7 +677,7 @@ public class JobService implements IJobService {
      * @param jobId the job on which the operation is to be performed
      * @param status the status to be set. If the job is being unarchived, the status will be sent as null
      */
-    private void changeJobStatus(Long jobId, String status) {
+    private Job changeJobStatus(Long jobId, String status) {
         Job job = jobRepository.getOne(jobId);
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -670,18 +702,7 @@ public class JobService implements IJobService {
         }
         job.setUpdatedOn(new Date());
         job.setUpdatedBy((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-        jobRepository.save(job);
-    }
-
-
-    public MasterData findMasterDataForMediumImportance() {
-        final MasterData[] returnVal = {null};
-        MasterDataBean.getInstance().getImportanceLevel().keySet().forEach( key -> {
-            if(MasterDataBean.getInstance().getImportanceLevel().get(key).equals("Mid")) {
-                returnVal[0] = masterDataRepository.getOne(key);
-            }
-        });
-        return returnVal[0];
+        return jobRepository.save(job);
     }
 
     @Transactional

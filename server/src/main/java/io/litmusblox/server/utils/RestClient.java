@@ -10,8 +10,11 @@ import org.springframework.http.*;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Util class to make REST api calls to 3rd party apis
@@ -50,12 +53,27 @@ public class RestClient {
      *
      * @param requestObj the payload to send in the request in json format
      * @param apiUrl the url to connect to
-     * @param requestType GET / POST
+     * @param requestType GET / POST / PUT
      * @param authToken authorization information
      * @return JSON representation of the response
      * @throws Exception
      */
     public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken) throws Exception {
+        return consumeRestApi(requestObj, apiUrl, requestType, authToken, null);
+    }
+
+    /**
+     Method that connects to the server as mentioned in the url and performs GET/POST operation
+     *
+     * @param requestObj the payload to send in the request in json format
+     * @param apiUrl the url to connect to
+     * @param requestType GET / POST / PUT
+     * @param authToken authorization information
+     * @param queryParameters Map of query parameters if any
+     * @return
+     * @throws Exception
+     */
+    public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken, Optional<Map> queryParameters) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
         SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory)restTemplate.getRequestFactory();
         requestFactory.setConnectTimeout(connectionTimeout);
@@ -70,7 +88,17 @@ public class RestClient {
             entity = new HttpEntity<String>(getHttpHeader(authToken, false));
         try {
             long startTime = System.currentTimeMillis();
-            ResponseEntity<String> response = restTemplate.exchange(apiUrl, requestType, entity, String.class);
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(apiUrl);
+
+            if(null != queryParameters && queryParameters.isPresent()) {
+                Map queryParametersToSet = queryParameters.get();
+                queryParametersToSet.forEach((k,v) ->{
+                    uriBuilder.queryParam(k.toString(),v.toString());
+                });
+
+            }
+
+            ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(), requestType, entity, String.class);
             log.info("Time taken to retrieve response from REST api: " + (System.currentTimeMillis() - startTime) + "ms.");
             return response.getBody();
         } catch(HttpStatusCodeException e ) {

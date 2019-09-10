@@ -11,7 +11,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,19 +49,11 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
                     if (Files.isRegularFile(filePath)) {
                         log.info("Temp folder Cv path : "+filePath.getFileName());
                         rChilliCvProcessor.processFile(filePath.toString());
+                        log.info("Completed processing " + filePath.toString());
                     }
                 });
         } catch (Exception e) {
             log.info("Error while processing temp location files : "+e.getMessage());
         }
-    }
-
-    /**
-     * Method that will fetch all records from cv_parsing_details where status is null
-     * and process them to create a job_candidate mapping
-     */
-    @Transactional
-    public void processRChilliData() {
-            rChilliCvProcessor.processRChilliData();
     }
 }

@@ -6,6 +6,7 @@ package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -19,6 +20,7 @@ import java.util.Date;
  * Class Name : CompanyHistory
  * Project Name : server
  */
+@NoArgsConstructor
 @Data
 @Entity
 @Table(name = "COMPANY_HISTORY")
@@ -42,7 +44,7 @@ public class CompanyHistory implements Serializable {
 
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
+    @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
     @NotNull
@@ -50,4 +52,9 @@ public class CompanyHistory implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
+    public CompanyHistory(@NotNull long companyId, @NotNull String details, @NotNull User updatedBy) {
+        this.companyId = companyId;
+        this.details = details;
+        this.updatedBy = updatedBy;
+    }
 }

@@ -5,6 +5,7 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -45,4 +46,12 @@ public interface ICompanyService {
      * @throws Exception
      */
     List<CompanyWorspaceBean> getCompanyList() throws Exception;
+
+    /**
+     * Service method to save company history. Need a service method because needs to be called from LbUserDetailsService on company create
+     * @param companyId
+     * @param historyMsg
+     * @param loggedInUser
+     */
+    void saveCompanyHistory(Long companyId, String historyMsg, User loggedInUser);
 }

@@ -57,5 +57,4 @@ public class JobHistory implements Serializable {
         this.details = details;
         this.updatedBy = updatedBy;
     }
-
 }

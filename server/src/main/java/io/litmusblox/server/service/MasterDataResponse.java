@@ -23,7 +23,6 @@ import java.util.Map;
 @Data
 public class MasterDataResponse {
     private List<Country> countries = new ArrayList<Country>();
-    private Map<Long,String> importanceLevel = new HashMap<>();
     private Map<Long,String> questionType  = new HashMap<>();
     private Map<Long,String> experienceRange  = new HashMap<>();
     private Map<Long,String> addressType  = new HashMap<>();

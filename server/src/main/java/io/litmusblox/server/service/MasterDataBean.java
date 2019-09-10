@@ -43,7 +43,6 @@ public class MasterDataBean {
 
     private Map<Long, String> keySkills = new HashMap<>();
 
-    private Map<Long, String> importanceLevel = new HashMap<>();
     private Map<Long, String> questionType = new HashMap<>();
     private Map<Long, String> experienceRange = new HashMap<>();
     private Map<Long, String> addressType = new HashMap<>();

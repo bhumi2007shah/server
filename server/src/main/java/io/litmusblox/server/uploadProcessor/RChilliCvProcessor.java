@@ -117,6 +117,7 @@ public class RChilliCvProcessor {
         try {
             long startTime = System.currentTimeMillis();
             rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
+
             rchilliResponseTime = System.currentTimeMillis() - startTime;
             log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
             if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg")) {
@@ -172,7 +173,7 @@ public class RChilliCvProcessor {
         } catch (Exception ex) {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean);
+        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -191,7 +192,8 @@ public class RChilliCvProcessor {
             candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
             jobCandidateMappingService.saveCandidateSupportiveInfo(candidate, user);
         } catch (ValidationException ve) {
-            log.error("Error while processing candidate information received from RChilli : " + ve.getMessage());
+            candidate.setUploadErrorMessage(ve.getErrorMessage());
+            log.error("Error while processing candidate information received from RChilli : " + ve.getErrorMessage());
             return true;
         } catch (Exception e) {
             log.error("Error while processing candidate information received from RChilli : " + e.getMessage());
@@ -201,7 +203,7 @@ public class RChilliCvProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean) {
+    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage) {
         try {
             //Add cv_parsing_details
             CvParsingDetails cvParsingDetails = new CvParsingDetails();
@@ -218,6 +220,7 @@ public class RChilliCvProcessor {
                 cvParsingDetails.setParsingResponseText(bean.getDetailResume());
             }
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
+            cvParsingDetails.setErrorMessage(errorMessage);
             cvParsingDetailsRepository.save(cvParsingDetails);
         } catch (Exception e) {
             log.info("Save CvParsingDetails");

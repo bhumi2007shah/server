@@ -302,6 +302,7 @@ public class RChilliCvProcessor {
         bean.getSkillKeywords().getSkillSet().forEach(skillSet -> {
             CandidateSkillDetails candidateSkillDetails=new CandidateSkillDetails();
             candidateSkillDetails.setSkill(skillSet.getSkill());
+            candidateSkillDetails.setExpInMonths(Long.parseLong(skillSet.getExperienceInMonths()));
             candidateSkillDetails.setLastUsed(Util.convertStringToDate(skillSet.getLastUsed()));
             candidate.getCandidateSkillDetails().add(candidateSkillDetails);
         });

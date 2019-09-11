@@ -13,7 +13,6 @@ import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,7 +79,7 @@ public class CandidateService implements ICandidateService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Candidate findByMobileOrEmail(String email, String mobile, String countryCode) throws Exception {
+    public Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser) throws Exception {
         //check if candidate exists for email
         Candidate dupCandidateByEmail = null;
         CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(email);
@@ -101,8 +100,6 @@ public class CandidateService implements ICandidateService {
                 throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
         }
         else {
-
-            User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
             if (null == dupCandidateByEmail && null != dupCandidateByMobile) {
                 //Candidate by mobile exists, add email history

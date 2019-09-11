@@ -106,21 +106,23 @@ public class RChilliCvProcessor {
         Job job = getJob(Long.parseLong(s[1]));
 
         Candidate candidate = null;
-        String rchilliFormattedJson = null;
+        String rchilliFormattedJson = null, rchilliJsonResponse = null;
         ResumeParserDataRchilliBean bean = null;
         long rchilliResponseTime = 0L;
         boolean isCandidateFailedToProcess = false, rChilliErrorResponse = false;
 
         RestClient rest = RestClient.getInstance();
-        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + filePath + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
+        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + fileName + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
                 + "\",\"subuserid\":\"" + environment.getProperty(IConstant.SUB_USER_ID) + "\"}";
         try {
             long startTime = System.currentTimeMillis();
-            String rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
+            rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
             rchilliResponseTime = System.currentTimeMillis() - startTime;
             log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
-            if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg"))
+            if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg")) {
                 rChilliErrorResponse = true;
+                isCandidateFailedToProcess = true;
+            }
 
              if(!rChilliErrorResponse) {
                 rchilliJsonResponse = rchilliJsonResponse.replace("{\n" +
@@ -139,7 +141,7 @@ public class RChilliCvProcessor {
             }
             else {
                 log.error("Failed to process CV against RChilli: " + rchilliJsonResponse);
-                //TODO: Add sentry here?
+                 //TODO: Add sentry here?
             }
 
         } catch (Exception e) {
@@ -147,31 +149,30 @@ public class RChilliCvProcessor {
             isCandidateFailedToProcess = true;
         }
 
-        if(!rChilliErrorResponse) {
-            try {
-                File file = new File(filePath);
-                DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(), file.getParentFile());
-                InputStream input = new FileInputStream(file);
-                OutputStream os = fileItem.getOutputStream();
-                int ret = input.read();
-                while (ret != -1) {
-                    os.write(ret);
-                    ret = input.read();
-                }
-                os.flush();
-                MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
-                if (isCandidateFailedToProcess)
-                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate.getId());
-                else
-                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate.getId());
-
-                file.delete();
-            } catch (Exception ex) {
-                log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        try {
+            File file = new File(filePath);
+            DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(), file.getParentFile());
+            InputStream input = new FileInputStream(file);
+            OutputStream os = fileItem.getOutputStream();
+            int ret = input.read();
+            while (ret != -1) {
+                os.write(ret);
+                ret = input.read();
             }
-            addCvParsingDetails(fileName, rchilliResponseTime, rchilliFormattedJson, isCandidateFailedToProcess, bean);
-        }
+            os.flush();
+            MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+            if(isCandidateFailedToProcess && rChilliErrorResponse)
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, user.getId());
+            else if (isCandidateFailedToProcess)
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate.getId());
+            else
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate.getId());
 
+            file.delete();
+        } catch (Exception ex) {
+            log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -212,8 +213,10 @@ public class RChilliCvProcessor {
             else
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
 
-            cvParsingDetails.setParsingResponseHtml(bean.getHtmlResume());
-            cvParsingDetails.setParsingResponseText(bean.getDetailResume());
+            if (null != bean) {
+                cvParsingDetails.setParsingResponseHtml(bean.getHtmlResume());
+                cvParsingDetails.setParsingResponseText(bean.getDetailResume());
+            }
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetailsRepository.save(cvParsingDetails);
         } catch (Exception e) {

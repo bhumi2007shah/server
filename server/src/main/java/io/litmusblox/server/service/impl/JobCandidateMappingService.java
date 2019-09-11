@@ -147,7 +147,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
 
         //find candidateId
-        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser);
 
         Long candidateId = null;
         if (null != candidateFromDb)

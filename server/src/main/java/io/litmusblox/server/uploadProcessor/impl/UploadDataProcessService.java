@@ -179,7 +179,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
         //create a candidate if no history found for email and mobile
         long candidateId;
-        Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()));
+        Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()), loggedInUser);
         Candidate candidateObjToUse = existingCandidate;
         if(null == existingCandidate) {
             candidate.setCreatedOn(new Date());

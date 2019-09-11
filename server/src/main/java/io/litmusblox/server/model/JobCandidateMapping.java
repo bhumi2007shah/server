@@ -106,6 +106,16 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @Column(name="CANDIDATE_LAST_NAME")
     private String candidateLastName;
 
+    @Column(name="CHATBOT_STATUS")
+    private String chatbotStatus;
+
+    @Column(name="SCORE")
+    private Integer score;
+
+    @Column(name="CHATBOT_LAST_UPDATED")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date chatbotLastUpdated;
+
     @Transient
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;

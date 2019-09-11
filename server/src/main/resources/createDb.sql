@@ -256,12 +256,12 @@ create unique index unique_job_temp_skill_id on job_key_skills (job_id, skill_id
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-CREATE TABLE JOB_HISTORY(
-  ID serial PRIMARY KEY NOT NULL,
-   JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
-   CHANGE_TEXT VARCHAR (255) NOT NULL,
-   MODIFIED_BY INTEGER REFERENCES USERS(ID) NOT NULL,
-   MODIFIED_ON TIMESTAMP NOT NULL
+CREATE TABLE JOB_HISTORY (
+    ID serial PRIMARY KEY NOT NULL,
+    JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
+    DETAILS VARCHAR(300),
+    UPDATED_ON TIMESTAMP,
+    UPDATED_BY INTEGER REFERENCES USERS(ID) NOT NULL
 );
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
@@ -270,8 +270,9 @@ CREATE TABLE JOB_CAPABILITIES(
   ID serial PRIMARY KEY NOT NULL,
   JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
    CAPABILITY_NAME VARCHAR (45) NOT NULL,
+   CAPABILITY_ID INTEGER NOT NULL,
    SELECTED BOOLEAN NOT NULL,
-   IMPORTANCE_LEVEL INTEGER REFERENCES MASTER_DATA(ID) NOT NULL,
+   WEIGHTAGE SMALLINT NOT NULL,
    CREATED_ON TIMESTAMP NOT NULL,
    CREATED_BY INTEGER REFERENCES USERS(ID) NOT NULL,
    UPDATED_ON TIMESTAMP,
@@ -531,7 +532,8 @@ CREATE TABLE CV_PARSING_DETAILS (
     PROCESSED_ON TIMESTAMP,
     PROCESSING_TIME smallint,
     PROCESSING_STATUS varchar(10),
-    PARSING_RESPONSE text
+    PARSING_RESPONSE text,
+    ERROR_MESSAGE varchar(100)
 );
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -542,4 +544,14 @@ CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
     SKILL VARCHAR(50),
     LAST_USED DATE,
     EXP_IN_MONTHS smallint
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE COMPANY_HISTORY (
+    ID serial PRIMARY KEY NOT NULL,
+    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
+    DETAILS VARCHAR(300),
+    UPDATED_ON TIMESTAMP,
+    UPDATED_BY INTEGER REFERENCES USERS(ID) NOT NULL
 );

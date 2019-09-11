@@ -66,4 +66,11 @@ public interface IJobService {
      * @param jobId id of the job to be unarchived
      */
     void unarchiveJob(Long jobId) throws Exception;
+
+    /**
+     * Service method to get job details by job id
+     *
+     * @param jobId id for which details will be retrieved
+     */
+    Job getJobDetails(Long jobId) throws Exception;
 }

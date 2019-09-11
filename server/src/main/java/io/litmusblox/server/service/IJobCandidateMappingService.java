@@ -7,6 +7,7 @@ package io.litmusblox.server.service;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
+import io.litmusblox.server.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -21,10 +22,10 @@ import java.util.UUID;
  * @author : Shital Raval
  * Date : 16/7/19
  * Time : 4:44 PM
- * Class Name : IJobControllerMappingService
+ * Class Name : IJobCandidateMappingService
  * Project Name : server
  */
-public interface IJobControllerMappingService {
+public interface IJobCandidateMappingService {
 
     /**
      * Service method to add a individually added candidates to a job
@@ -143,4 +144,12 @@ public interface IJobControllerMappingService {
      * @throws Exception
      */
     CvUploadResponseBean processDragAndDropCv(MultipartFile[] multipartFiles, Long jobId);
+
+    /**
+     * Method for save candidates supportive information like Company, project, language, skills etc
+     *
+     * @param candidate for which candidate add this info
+     * @param loggedInUser user which is login currently
+     */
+    void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception;
 }

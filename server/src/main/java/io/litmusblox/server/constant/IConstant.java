@@ -39,6 +39,7 @@ public interface IConstant {
 
     String REPO_LOCATION = "repoLocation";
     String TEMP_REPO_LOCATION="temprepolocation";
+    String ERROR_FILES_REPO_LOCATION="error_files";
     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
     String STR_INDIA = "India";
 
@@ -105,7 +106,7 @@ public interface IConstant {
     }
 
     enum CandidateSource {
-        SingleCandidateUpload("Individual"), File("File"), Plugin("Plugin");
+        SingleCandidateUpload("Individual"), File("File"), Plugin("Plugin"), DragDropCv("DragDropCv");
         private String value;
 
         CandidateSource(String val) {
@@ -178,5 +179,10 @@ public interface IConstant {
         rar,zip,other
     }
 
+    String USER_KEY="userKey";
+    String VERSION = "version";
+    String SUB_USER_ID="subUserId";
+    String RCHILLI_API_URL="rchilliApiUrl";
+    String FILE_STORAGE_URL="fileStorageUrl";
     String ERROR_FILES="error_files";
 }

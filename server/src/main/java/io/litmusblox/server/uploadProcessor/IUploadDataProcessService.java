@@ -5,6 +5,8 @@
 package io.litmusblox.server.uploadProcessor;
 
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.Job;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.UploadResponseBean;
 
 import java.util.List;
@@ -19,4 +21,6 @@ import java.util.List;
 public interface IUploadDataProcessService {
 
     void processData(List<Candidate> candidateList, UploadResponseBean uploadResponseBean, int candidateProcessed, Long jobId, boolean ignoreMobile);
+
+    Candidate validateDataAndSaveJcmAndJcmCommModel(UploadResponseBean uploadResponseBean, Candidate candidate, User loggedInUser, Boolean ignoreMobile, Job job) throws Exception;
 }

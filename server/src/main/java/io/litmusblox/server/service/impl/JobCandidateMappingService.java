@@ -15,14 +15,13 @@ import io.litmusblox.server.uploadProcessor.CsvFileProcessorService;
 import io.litmusblox.server.uploadProcessor.ExcelFileProcessorService;
 import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
-import io.litmusblox.server.utils.SentryUtil;
-import io.litmusblox.server.utils.StoreFileUtil;
-import io.litmusblox.server.utils.Util;
-import io.litmusblox.server.utils.ZipFileProcessUtil;
+import io.litmusblox.server.utils.*;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,17 +36,17 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * Implementation class for methods exposed by IJobControllerMappingService
+ * Implementation class for methods exposed by IJobCandidateMappingService
  *
  * @author : Shital Raval
  * Date : 16/7/19
  * Time : 4:56 PM
- * Class Name : JobControllerMappingService
+ * Class Name : JobCandidateMappingService
  * Project Name : server
  */
 @Service
 @Log4j2
-public class JobControllerMappingService implements IJobControllerMappingService {
+public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     JobRepository jobRepository;
@@ -81,6 +80,12 @@ public class JobControllerMappingService implements IJobControllerMappingService
 
     @Resource
     JcmProfileSharingMasterRepository jcmProfileSharingMasterRepository;
+
+    @Value("${scoringEngineBaseUrl}")
+    private String scoringEngineBaseUrl;
+
+    @Value("${scoringEngineAddCandidateUrlSuffix}")
+    private String scoringEngineAddCandidateUrlSuffix;
 
     /**
      * Service method to add a individually added candidates to a job
@@ -129,73 +134,84 @@ public class JobControllerMappingService implements IJobControllerMappingService
         }
 
         for (Candidate candidate:candidateList) {
+            saveCandidateSupportiveInfo(candidate, loggedInUser);
+        }
+    }
 
-            //find candidateId
-            Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode());
+    /**
+     * Method for save candidates supportive information like Company, project, language, skills etc
+     *
+     * @param candidate for which candidate add this info
+     * @param loggedInUser user which is login currently
+     */
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
 
-            Long candidateId = null;
-            if (null != candidateFromDb)
-                candidateId = candidateFromDb.getId();
-            if (null != candidateId) {
-                //if telephone field has value, save to mobile history table
-                if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
-                    //check if an entry exists in the mobile history record for this number
-                    String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
+        //find candidateId
+        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser);
 
-                    if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
+        Long candidateId = null;
+        if (null != candidateFromDb)
+            candidateId = candidateFromDb.getId();
+        if (null != candidateId) {
+            //if telephone field has value, save to mobile history table
+            if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
+                //check if an entry exists in the mobile history record for this number
+                String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                        if (telephone.length() > 15)
-                            telephone = telephone.substring(0, 15);
+                if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
 
-                        if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
-                            candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
-                    }
+                    if (telephone.length() > 15)
+                        telephone = telephone.substring(0, 15);
+
+                    if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
+                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
                 }
-
-                //process other information
-                if(null != candidate.getCandidateDetails()) {
-                    //candidate details
-                    //if marital status is more than 10 characters, trim to 10. e.g. got a status as single/unmarried for one of the candidates!
-                    if (!Util.isNull(candidate.getCandidateDetails().getMaritalStatus()) && candidate.getCandidateDetails().getMaritalStatus().length() > 10)
-                        candidate.getCandidateDetails().setMaritalStatus(candidate.getCandidateDetails().getMaritalStatus().substring(0, 10));
-                    candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidateFromDb);
-                }
-
-                //candidate education details
-                if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0) {
-                    candidate.getCandidateEducationDetails().forEach(educationDetails-> {
-                        if(educationDetails.getInstituteName().length() > IConstant.MAX_INSTITUTE_LENGTH) {
-                            log.info("Institute name too long: " + educationDetails.getInstituteName());
-                            educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
-                        }
-                    });
-                    candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
-                }
-
-                //candidate company details
-                if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)
-                    candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateId);
-
-                //candidate project details
-                if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
-                    candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
-
-                //candidate online profile
-                if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
-                    candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateId);
-
-                //candidate language proficiency
-                if(null != candidate.getCandidateLanguageProficiencies() && candidate.getCandidateLanguageProficiencies().size() > 0)
-                    candidateService.saveUpdateCandidateLanguageProficiency(candidate.getCandidateLanguageProficiencies(), candidateId);
-
-                //candidate work authorization
-                if(null != candidate.getCandidateWorkAuthorizations() && candidate.getCandidateWorkAuthorizations().size() > 0)
-                    candidateService.saveUpdateCandidateWorkAuthorization(candidate.getCandidateWorkAuthorizations(), candidateId);
-
-                //candidate skill details
-                if(null != candidate.getCandidateSkillDetails() && candidate.getCandidateSkillDetails().size() > 0)
-                    candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateId);
             }
+
+            //process other information
+            if(null != candidate.getCandidateDetails()) {
+                //candidate details
+                //if marital status is more than 10 characters, trim to 10. e.g. got a status as single/unmarried for one of the candidates!
+                if (!Util.isNull(candidate.getCandidateDetails().getMaritalStatus()) && candidate.getCandidateDetails().getMaritalStatus().length() > 10)
+                    candidate.getCandidateDetails().setMaritalStatus(candidate.getCandidateDetails().getMaritalStatus().substring(0, 10));
+                candidateService.saveUpdateCandidateDetails(candidate.getCandidateDetails(), candidateFromDb);
+            }
+
+            //candidate education details
+            if(null != candidate.getCandidateEducationDetails() && candidate.getCandidateEducationDetails().size() > 0) {
+                candidate.getCandidateEducationDetails().forEach(educationDetails-> {
+                    if(educationDetails.getInstituteName().length() > IConstant.MAX_INSTITUTE_LENGTH) {
+                        log.info("Institute name too long: " + educationDetails.getInstituteName());
+                        educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
+                    }
+                });
+                candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
+            }
+
+            //candidate company details
+            if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)
+                candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateId);
+
+            //candidate project details
+            if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
+                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
+
+            //candidate online profile
+            if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
+                candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateId);
+
+            //candidate language proficiency
+            if(null != candidate.getCandidateLanguageProficiencies() && candidate.getCandidateLanguageProficiencies().size() > 0)
+                candidateService.saveUpdateCandidateLanguageProficiency(candidate.getCandidateLanguageProficiencies(), candidateId);
+
+            //candidate work authorization
+            if(null != candidate.getCandidateWorkAuthorizations() && candidate.getCandidateWorkAuthorizations().size() > 0)
+                candidateService.saveUpdateCandidateWorkAuthorization(candidate.getCandidateWorkAuthorizations(), candidateId);
+
+            //candidate skill details
+            if(null != candidate.getCandidateSkillDetails() && candidate.getCandidateSkillDetails().size() > 0)
+                candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateId);
         }
     }
 
@@ -413,6 +429,27 @@ public class JobControllerMappingService implements IJobControllerMappingService
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+
+        //make an api call to scoring engine for each of the jcm
+        jcmList.stream().forEach(jcmId->{
+            Optional<JobCandidateMapping> jcmOptional = jobCandidateMappingRepository.findById(jcmId);
+            if (!jcmOptional.isPresent()) {
+                log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);
+            }
+            else {
+                JobCandidateMapping jcm = jcmOptional.get();
+                try {
+                    Map queryParams = new HashMap(3);
+                    queryParams.put("lbJobId",jcm.getJob().getId());
+                    queryParams.put("candidateId", jcm.getCandidate().getId());
+                    queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                    log.info("Calling Scoring Engine api to add candidate to job");
+                    String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl+scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT,null, Optional.of(queryParams));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     /**
@@ -559,6 +596,14 @@ public class JobControllerMappingService implements IJobControllerMappingService
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
+        if(null!=objFromDb.getJob().getJobDetail() && null!=objFromDb.getJob().getJobDetail().getExpertise()){
+            Hibernate.initialize(objFromDb.getJob().getJobDetail().getExpertise());
+        }
+        objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
+        });
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
     }

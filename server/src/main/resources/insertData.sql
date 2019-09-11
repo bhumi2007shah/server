@@ -118,10 +118,6 @@ VALUES
  ( 'addressType','Interview Location'),
  ( 'addressType','Both'),
 
- ( 'importanceLevel','Low'),
- ( 'importanceLevel','Mid'),
- ( 'importanceLevel','High'),
-
  ( 'stage','Source'),
  ( 'stage','Screen'),
  ( 'stage','Interview'),

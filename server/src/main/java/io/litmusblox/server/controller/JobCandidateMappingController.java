@@ -6,10 +6,12 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CvUploadResponseBean;
-import io.litmusblox.server.service.IJobControllerMappingService;
+import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.uploadProcessor.IProcessUploadedCV;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +41,13 @@ import java.util.List;
 public class JobCandidateMappingController {
 
     @Autowired
-    IJobControllerMappingService jobControllerMappingService;
+    IJobCandidateMappingService jobCandidateMappingService;
+
+    @Autowired
+    IProcessUploadedCV processUploadedCV;
+
+    @Autowired
+    UserRepository userRepository;
 
     /**
      * Api to add a single candidate to a job
@@ -54,7 +62,7 @@ public class JobCandidateMappingController {
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
         log.info("Candidate name: " + candidate.get(0).getDisplayName());
         long startTime = System.currentTimeMillis();
-        UploadResponseBean responseBean = jobControllerMappingService.uploadIndividualCandidate(candidate, jobId);
+        UploadResponseBean responseBean = jobCandidateMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
@@ -77,7 +85,7 @@ public class JobCandidateMappingController {
     String addCandidatesFromFile(@RequestParam("file") MultipartFile multipartFile, @RequestParam("jobId")Long jobId, @RequestParam("fileFormat")String fileFormat) throws Exception {
         log.info("Received request to add candidates from a file.");
         long startTime = System.currentTimeMillis();
-        UploadResponseBean responseBean = jobControllerMappingService.uploadCandidatesFromFile(multipartFile, jobId, fileFormat);
+        UploadResponseBean responseBean = jobCandidateMappingService.uploadCandidatesFromFile(multipartFile, jobId, fileFormat);
         log.info("Completed processing candidates from file in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
@@ -100,7 +108,7 @@ public class JobCandidateMappingController {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
         Candidate candidate=new ObjectMapper().readValue(candidateString, Candidate.class);
-        UploadResponseBean responseBean = jobControllerMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
+        UploadResponseBean responseBean = jobCandidateMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
                 new HashMap<String, List<String>>() {{
@@ -120,7 +128,7 @@ public class JobCandidateMappingController {
     void inviteCandidates(@RequestBody List<Long> jcmList) throws Exception {
         log.info("Received request to invite candidates");
         long startTime = System.currentTimeMillis();
-        jobControllerMappingService.inviteCandidates(jcmList);
+        jobCandidateMappingService.inviteCandidates(jcmList);
         log.info("Completed inviting candidates in " + (System.currentTimeMillis()-startTime)+"ms.");
     }
 
@@ -135,7 +143,7 @@ public class JobCandidateMappingController {
     void shareCandidateProfile(@RequestBody ShareCandidateProfileRequestBean requestBean) {
         log.info("Received request to share candidate profile with hiring managers");
         long startTime = System.currentTimeMillis();
-        jobControllerMappingService.shareCandidateProfiles(requestBean);
+        jobCandidateMappingService.shareCandidateProfiles(requestBean);
         log.info("Completed processing share candidate profile request in " + (System.currentTimeMillis()-startTime) + "ms.");
     }
 
@@ -153,7 +161,7 @@ public class JobCandidateMappingController {
     String getCandidateProfile(@PathVariable("jobCandidateMappingId") Long jobCandidateMappingId) throws Exception {
         log.info("Received request to fetch candidate profile");
         long startTime = System.currentTimeMillis();
-        String response = Util.stripExtraInfoFromResponseBean(jobControllerMappingService.getCandidateProfile(jobCandidateMappingId),
+        String response = Util.stripExtraInfoFromResponseBean(jobCandidateMappingService.getCandidateProfile(jobCandidateMappingId),
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
                     put("ScreeningQuestions", Arrays.asList("question"));
@@ -190,6 +198,6 @@ public class JobCandidateMappingController {
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
     CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
-        return jobControllerMappingService.processDragAndDropCv(multipartFiles, jobId);
+        return jobCandidateMappingService.processDragAndDropCv(multipartFiles, jobId);
     }
 }

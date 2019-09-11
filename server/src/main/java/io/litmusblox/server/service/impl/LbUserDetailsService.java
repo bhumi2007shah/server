@@ -71,6 +71,9 @@ public class LbUserDetailsService implements UserDetailsService {
     @Autowired
     JwtTokenUtil jwtTokenUtil;
 
+    @Autowired
+    CompanyService companyService;
+
     /**
      * Implementation for login functionality which will
      * 1. authenticate the user
@@ -134,11 +137,13 @@ public class LbUserDetailsService implements UserDetailsService {
             //check if company exists
             Company userCompany = companyRepository.findByCompanyName(user.getCompany().getCompanyName());
 
-            if (null == userCompany)
+            if (null == userCompany) {
                 //create a company
                 companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()));
-            else
+                companyService.saveCompanyHistory(companyObjToUse.getId(), "New company, "+companyObjToUse.getCompanyName()+", created", loggedInUser);
+            } else {
                 companyObjToUse = userCompany;
+            }
         }
 
         User u = new User();
@@ -175,6 +180,7 @@ public class LbUserDetailsService implements UserDetailsService {
         u.setCreatedBy(loggedInUser.getId());
         u.setCreatedOn(new Date());
 
+        companyService.saveCompanyHistory(companyObjToUse.getId(), "New user with email " + user.getEmail() + " created",loggedInUser);
         return userRepository.save(u);
     }
 
@@ -289,6 +295,7 @@ public class LbUserDetailsService implements UserDetailsService {
                 companyToBlock.setUpdatedOn(new Date());
                 companyRepository.save(companyToBlock);
                 log.info("Blocked company " + companyToBlock.getCompanyName());
+                companyService.saveCompanyHistory(companyToBlock.getId(), "Company status changed to blocked", getLoggedInUser());
             }
             else {
                 if(!objFromDb.getCompany().getActive())
@@ -308,6 +315,7 @@ public class LbUserDetailsService implements UserDetailsService {
             objFromDb.setUpdatedOn(new Date());
 
             userRepository.save(objFromDb);
+            companyService.saveCompanyHistory(objFromDb.getCompany().getId(), "Status of user with email, " +objFromDb.getEmail()+ ", changed to " + objFromDb.getStatus(), getLoggedInUser());
         }
     }
 

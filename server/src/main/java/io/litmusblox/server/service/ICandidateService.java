@@ -23,10 +23,11 @@ public interface ICandidateService {
      * @param email the email of the candidate
      * @param mobile the mobile number of the candidate
      * @param countryCode the country code for the mobile
+     * @param loggedInUser currently logged in user
      * @return
      * @throws Exception
      */
-    Candidate findByMobileOrEmail(String email, String mobile, String countryCode) throws Exception;
+    Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser) throws Exception;
 
     /**
      * Method to create a new candidate, candidateEmailHistory and candidateMobileHistory

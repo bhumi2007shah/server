@@ -8,7 +8,9 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.CompanyHistory;
 import io.litmusblox.server.model.User;
+import io.litmusblox.server.repository.CompanyHistoryRepository;
 import io.litmusblox.server.repository.CompanyRepository;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CompanyWorspaceBean;
@@ -51,6 +53,9 @@ public class CompanyService implements ICompanyService {
 
     @Autowired
     Environment environment;
+
+    @Autowired
+    CompanyHistoryRepository companyHistoryRepository;
 
     //Update Company
     @Override
@@ -104,9 +109,11 @@ public class CompanyService implements ICompanyService {
             company.setSubscription(companyFromDb.getSubscription());
         }
         company.setUpdatedOn(new Date());
-        company.setUpdatedBy(((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        company.setUpdatedBy(loggedInUser.getId());
         //Update Company
         companyRepository.save(company);
+        saveCompanyHistory(company.getId(), "Update company information", loggedInUser);
         log.info("Company Updated "+company.getId());
     }
 
@@ -125,8 +132,10 @@ public class CompanyService implements ICompanyService {
             throw new ValidationException("Company not found: " + company.getCompanyName());
         companyObjFromDb.setActive(!blockCompany);
         companyObjFromDb.setUpdatedOn(new Date());
-        companyObjFromDb.setUpdatedBy(((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
+        User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        companyObjFromDb.setUpdatedBy(loggedInUser.getId());
         companyRepository.save(companyObjFromDb);
+        saveCompanyHistory(companyObjFromDb.getId(), company.getActive() ? "Unblocked":"Blocked", loggedInUser);
     }
 
     /**
@@ -154,4 +163,11 @@ public class CompanyService implements ICompanyService {
         log.info("Completed processing list of companies in " + (System.currentTimeMillis() - startTime) + "ms.");
         return responseBeans;
     }
+
+    @Transactional
+    public void saveCompanyHistory(Long companyId, String historyMsg, User loggedInUser) {
+        companyHistoryRepository.save(new CompanyHistory(companyId, historyMsg, loggedInUser));
+    }
+
+
 }

@@ -25,4 +25,6 @@ public interface JobCapabilitiesRepository extends JpaRepository<JobCapabilities
     @Transactional
     List<JobCapabilities> findByJobId(Long jobId) throws Exception;
 
+    @Transactional
+    List<JobCapabilities> findByJobIdAndSelected(Long jobId, boolean b);
 }

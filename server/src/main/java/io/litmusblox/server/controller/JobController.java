@@ -15,10 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Controller class that exposes all REST endpoints for Job related operations
@@ -147,4 +144,26 @@ public class JobController {
         jobService.unarchiveJob(jobId);
     }
 
+
+    /**
+     * Api for get job details based on job id
+     *
+     */
+    @GetMapping(value = "/getDetails/{jobId}")
+    @ResponseBody
+    String getJobDetails(@PathVariable("jobId") Long jobId) throws Exception {
+        return Util.stripExtraInfoFromResponseBean(
+                jobService.getJobDetails(jobId),
+                (new HashMap<String, List<String>>(){{
+                    put("User",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("Job",new ArrayList<>(0));
+                    put("JobScreeningQuestions",new ArrayList<>(0));
+                    put("ScreeningQuestions",new ArrayList<>(0));
+                    put("CompanyScreeningQuestion",new ArrayList<>(0));
+                    put("UserScreeningQuestion",new ArrayList<>(0));
+                }}));
+        //return jobService.getJobDetails(jobId);
+    }
 }

@@ -235,8 +235,8 @@ public class JobService implements IJobService {
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
             breadCrumb.put("Job Id ",jobCandidateMapping.getJob().getId().toString());
-            SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
-            throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(), HttpStatus.UNPROCESSABLE_ENTITY);
+            breadCrumb.put("detail", info.toString());
+            throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(),  HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
         else {
             User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -247,7 +247,7 @@ public class JobService implements IJobService {
                 log.info(info.toString());
                 Map<String, String> breadCrumb = new HashMap<>();
                 breadCrumb.put("Job Id", job.getId().toString());
-                SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+                breadCrumb.put("detail", info.toString());
                 throw new WebException(IErrorMessages.JOB_NOT_LIVE, HttpStatus.UNPROCESSABLE_ENTITY);
             }
         }

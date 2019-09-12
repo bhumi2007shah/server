@@ -13,6 +13,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import io.litmusblox.server.utils.RestClient;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
@@ -347,8 +348,10 @@ public class JobService implements IJobService {
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
         int numUniqueSkills = handleSkillsFromML(responseBean.getSkills(), jobId);
         if(numUniqueSkills != responseBean.getSkills().size()) {
-            log.error("Received ML response with duplicate skills\n" + mlResponse);
-            //TODO: Add sentry here
+            log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
+            Map breadCrumb = new HashMap<String, String>();
+            breadCrumb.put("Job Id: ", String.valueOf(jobId));
+            SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
         }
         Set<Integer> uniqueCapabilityIds = new HashSet<>();
         handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);

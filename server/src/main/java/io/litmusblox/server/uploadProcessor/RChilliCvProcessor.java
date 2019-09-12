@@ -109,7 +109,7 @@ public class RChilliCvProcessor {
         Candidate candidate = null;
         String rchilliFormattedJson = null, rchilliJsonResponse = null;
         ResumeParserDataRchilliBean bean = null;
-        long rchilliResponseTime = 0L;
+        long rchilliResponseTime = 0L, candidateId=0L;
         boolean isCandidateFailedToProcess = false, rChilliErrorResponse = false;
 
         RestClient rest = RestClient.getInstance();
@@ -118,7 +118,6 @@ public class RChilliCvProcessor {
         try {
             long startTime = System.currentTimeMillis();
             rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
-
             rchilliResponseTime = System.currentTimeMillis() - startTime;
             log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
             if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg")) {
@@ -139,7 +138,13 @@ public class RChilliCvProcessor {
                 //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
                 candidate = setCandidateModel(bean, user);
 
-                isCandidateFailedToProcess = processCandidate(candidate, user, job);
+                candidateId = processCandidate(candidate, user, job);
+                if(candidateId==0)
+                    isCandidateFailedToProcess=true;
+                else{
+                    isCandidateFailedToProcess=false;
+                    candidate.setId(candidateId);
+                }
             }
             else {
                 log.error("Failed to process CV against RChilli: " + rchilliJsonResponse);
@@ -178,7 +183,7 @@ public class RChilliCvProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private boolean processCandidate(Candidate candidate, User user, Job job) {
+    private long processCandidate(Candidate candidate, User user, Job job) {
 
         int candidateProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), user);
 
@@ -195,12 +200,12 @@ public class RChilliCvProcessor {
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
             log.error("Error while processing candidate information received from RChilli : " + ve.getErrorMessage());
-            return true;
+            return 0;
         } catch (Exception e) {
             log.error("Error while processing candidate information received from RChilli : " + e.getMessage());
-            return true;
+            return 0;
         }
-        return false;
+        return candidate.getId();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -313,7 +318,7 @@ public class RChilliCvProcessor {
         return candidate;
     }
 
-    private void storeFile(String filePath, Boolean isCandidateFailedToProcess, Long jobId, Long candidateId) throws Exception {
+    /*private void storeFile(String filePath, Boolean isCandidateFailedToProcess, Long jobId, Long candidateId) throws Exception {
 
         File file=new File(filePath);
         DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length() , file.getParentFile());
@@ -333,5 +338,5 @@ public class RChilliCvProcessor {
             StoreFileUtil.storeFile(multipartFile, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),candidateId);
         }
         file.delete();
-    }
+    }*/
 }

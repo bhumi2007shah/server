@@ -253,6 +253,9 @@ WHERE ID NOT IN (SELECT MIN(id)
 FROM skills_master
 GROUP BY skill_name);
 
+-- Added unique constraint on skill_name in skills_master with case insensitivity
+Alter table skills_master add constraint unique_skill_name unique(skill_name);
+
 -- For ticket #123
 ALTER TABLE JOB_CANDIDATE_MAPPING
 ADD COLUMN CHATBOT_STATUS VARCHAR(15),

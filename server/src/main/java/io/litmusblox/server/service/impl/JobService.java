@@ -13,6 +13,7 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import io.litmusblox.server.utils.RestClient;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
@@ -29,6 +30,7 @@ import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation class for JobService
@@ -344,7 +346,13 @@ public class JobService implements IJobService {
         log.info("Response received: " + mlResponse);
         long startTime = System.currentTimeMillis();
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
-        handleSkillsFromML(responseBean.getSkills(), jobId);
+        int numUniqueSkills = handleSkillsFromML(responseBean.getSkills(), jobId);
+        if(numUniqueSkills != responseBean.getSkills().size()) {
+            log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
+            Map breadCrumb = new HashMap<String, String>();
+            breadCrumb.put("Job Id: ", String.valueOf(jobId));
+            SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
+        }
         Set<Integer> uniqueCapabilityIds = new HashSet<>();
         handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
         handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
@@ -359,12 +367,13 @@ public class JobService implements IJobService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
+    private int handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
         log.info("Size of skill list: " + skillsList.size());
-        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
-        skillsList.forEach(skill-> {
+        Set<Skills> uniqueSkills = skillsList.stream().collect(Collectors.toSet());
+        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(uniqueSkills.size());
+        uniqueSkills.forEach(skill-> {
             //find a skill from the master table for the skill name provided
-            SkillsMaster skillFromDb = skillMasterRepository.findBySkillName(skill.getName());
+            SkillsMaster skillFromDb = skillMasterRepository.findBySkillNameIgnoreCase(skill.getName());
             //if none if found, add a skill
             if (null == skillFromDb) {
                 skillFromDb = new SkillsMaster(skill.getName());
@@ -374,6 +383,7 @@ public class JobService implements IJobService {
             jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
         });
         jobKeySkillsRepository.saveAll(jobKeySkillsToSave);
+        return uniqueSkills.size();
     }
 
     /**

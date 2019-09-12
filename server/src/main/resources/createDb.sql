@@ -558,3 +558,11 @@ CREATE TABLE COMPANY_HISTORY (
     UPDATED_ON TIMESTAMP,
     UPDATED_BY INTEGER REFERENCES USERS(ID) NOT NULL
 );
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CANDIDATE_TECH_RESPONSE_DATA(
+    ID serial PRIMARY KEY NOT NULL,
+    JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
+    TECH_RESPONSE TEXT
+);

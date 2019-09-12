@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -115,6 +116,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @Column(name="CHATBOT_LAST_UPDATED")
     @Temporal(TemporalType.TIMESTAMP)
     private Date chatbotLastUpdated;
+
+    @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobCandidateMappingId")
+    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
+    private CandidateTechResponseData techResponseData;
 
     @Transient
     @JsonProperty

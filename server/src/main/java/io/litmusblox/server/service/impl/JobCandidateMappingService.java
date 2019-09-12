@@ -536,6 +536,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         });
 
         Candidate returnObj = objFromDb.getCandidate();
+        Hibernate.initialize(objFromDb.getTechResponseData());
+        returnObj.setTechResponseData(objFromDb.getTechResponseData().getTechResponse());
+
         Hibernate.initialize(returnObj.getCandidateDetails());
         //set the cv location
         if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
@@ -692,7 +695,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         objFromDb.setChatbotStatus(requestBean.getChatbotStatus());
         objFromDb.setScore(requestBean.getScore());
-        objFromDb.setChatbotLastUpdated(requestBean.getLastUpdated());
+        objFromDb.setChatbotLastUpdated(requestBean.getChatbotLastUpdated());
+        if(null != requestBean.getTechResponseJson()) {
+            Hibernate.initialize(objFromDb.getTechResponseData());
+            objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
+        }
         jobCandidateMappingRepository.save(objFromDb);
     }
 }

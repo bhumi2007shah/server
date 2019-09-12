@@ -20,7 +20,7 @@ import java.util.UUID;
 public class TechChatbotRequestBean {
     private UUID chatbotUuid;
     private String chatbotStatus;
-    private Date lastUpdated;
+    private Date chatbotLastUpdated;
     private int score;
     private String techResponseJson;
 }

@@ -113,9 +113,9 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @Column(name="SCORE")
     private Integer score;
 
-    @Column(name="CHATBOT_LAST_UPDATED")
+    @Column(name="CHATBOT_UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
-    private Date chatbotLastUpdated;
+    private Date chatbotUpdatedOn;
 
     @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobCandidateMappingId")
     @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})

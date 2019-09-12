@@ -695,7 +695,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         objFromDb.setChatbotStatus(requestBean.getChatbotStatus());
         objFromDb.setScore(requestBean.getScore());
-        objFromDb.setChatbotLastUpdated(requestBean.getChatbotLastUpdated());
+        objFromDb.setChatbotUpdatedOn(requestBean.getChatbotUpdatedOn());
         if(null != requestBean.getTechResponseJson()) {
             Hibernate.initialize(objFromDb.getTechResponseData());
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());

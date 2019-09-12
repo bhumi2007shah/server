@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.transaction.UnexpectedRollbackException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -101,5 +102,14 @@ public class GlobalControllerExceptionHandler {
         }
         SentryUtil.logWithStaticAPI(null, exception.getCause().getMessage(), breadCrumb);
         return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getCause().getMessage());
+    }
+
+    @ExceptionHandler(value = { UnexpectedRollbackException.class })
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ApiErrorResponse handleUnexpectedRollback(UnexpectedRollbackException exception) {
+        Map<String, String> breadCrumb = new HashMap<>();
+        breadCrumb.put("ExceptionType","RollbackException");
+        SentryUtil.logWithStaticAPI(null, exception.getLocalizedMessage(), breadCrumb);
+        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getLocalizedMessage());
     }
 }

@@ -101,7 +101,7 @@ public class JobController {
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));
                     put("Candidate", Arrays.asList("candidateEducationDetails","candidateProjectDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy"));
-                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy","techResponseData"));
                     put("CandidateDetails", Arrays.asList("id","candidateId"));
                     put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
                 }})

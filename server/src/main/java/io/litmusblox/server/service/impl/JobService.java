@@ -29,6 +29,7 @@ import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation class for JobService
@@ -344,7 +345,11 @@ public class JobService implements IJobService {
         log.info("Response received: " + mlResponse);
         long startTime = System.currentTimeMillis();
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
-        handleSkillsFromML(responseBean.getSkills(), jobId);
+        int numUniqueSkills = handleSkillsFromML(responseBean.getSkills(), jobId);
+        if(numUniqueSkills != responseBean.getSkills().size()) {
+            log.error("Received ML response with duplicate skills\n" + mlResponse);
+            //TODO: Add sentry here
+        }
         Set<Integer> uniqueCapabilityIds = new HashSet<>();
         handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
         handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
@@ -359,10 +364,11 @@ public class JobService implements IJobService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
+    private int handleSkillsFromML(List<Skills> skillsList, long jobId) throws Exception {
         log.info("Size of skill list: " + skillsList.size());
-        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
-        skillsList.forEach(skill-> {
+        Set<Skills> uniqueSkills = skillsList.stream().collect(Collectors.toSet());
+        List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(uniqueSkills.size());
+        uniqueSkills.forEach(skill-> {
             //find a skill from the master table for the skill name provided
             SkillsMaster skillFromDb = skillMasterRepository.findBySkillNameIgnoreCase(skill.getName());
             //if none if found, add a skill
@@ -374,6 +380,7 @@ public class JobService implements IJobService {
             jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
         });
         jobKeySkillsRepository.saveAll(jobKeySkillsToSave);
+        return uniqueSkills.size();
     }
 
     /**

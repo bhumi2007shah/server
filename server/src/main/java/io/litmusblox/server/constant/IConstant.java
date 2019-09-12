@@ -48,6 +48,7 @@ public interface IConstant {
     String CANDIDATE_CV = "CandidateCv";
     String SENTRY_DSN="sentryDSN";
     String UPLOAD_FILE_TYPE="Upload file type";
+    String LOCALHOST_LOOPBACK = "0:0:0:0:0:0:0:1";
 
 
     enum UserStatus {

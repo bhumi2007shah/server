@@ -152,4 +152,12 @@ public interface IJobCandidateMappingService {
      * @param loggedInUser user which is login currently
      */
     void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception;
+
+    /**
+     * Service to update tech response status received from scoring engine.
+     *
+     * @param requestBean bean with update information from scoring engine
+     * @throws Exception
+     */
+    void updateTechResponseStatus(TechChatbotRequestBean requestBean) throws Exception;
 }

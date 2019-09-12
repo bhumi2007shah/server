@@ -78,9 +78,10 @@ public class NaukriExcelFileProcessorService extends AbstractNaukriProcessor imp
                         if ((row.getPhysicalNumberOfCells() == 0) || !checkForCells(row)){
                             Map<String, String> breadCrumb = new HashMap<>();
                             breadCrumb.put(IConstant.UPLOAD_FILE_TYPE,IConstant.PROCESS_FILE_TYPE.ExcelFile.toString());
+                            breadCrumb.put("File Name", fileName);
+                            breadCrumb.put("File Type", IConstant.PROCESS_FILE_TYPE.NaukriExcelFile.toString());
                             breadCrumb.put("Row name", row.toString());
-                            Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.NaukriExcelFile.toString());
-                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
+                            throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
                         }
                     } catch (Exception e) {
                         throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);

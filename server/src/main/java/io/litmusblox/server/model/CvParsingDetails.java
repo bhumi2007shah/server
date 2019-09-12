@@ -49,4 +49,7 @@ public class CvParsingDetails {
 
     @Column(name = "PARSING_RESPONSE_HTML")
     private String parsingResponseHtml;
+
+    @Column(name = "ERROR_MESSAGE")
+    private String errorMessage;
 }

@@ -532,7 +532,8 @@ CREATE TABLE CV_PARSING_DETAILS (
     PROCESSED_ON TIMESTAMP,
     PROCESSING_TIME smallint,
     PROCESSING_STATUS varchar(10),
-    PARSING_RESPONSE text
+    PARSING_RESPONSE text,
+    ERROR_MESSAGE varchar(100)
 );
 
 ---------------------------------------------------------------------------------------------------------------------------

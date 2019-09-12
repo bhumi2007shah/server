@@ -99,6 +99,10 @@ public class Candidate implements Serializable {
     @JsonProperty
     private String candidateName;
 
+    @Transient
+    @JsonProperty
+    private String techResponseData;
+
     @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "candidateId")
     @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private CandidateDetails candidateDetails;

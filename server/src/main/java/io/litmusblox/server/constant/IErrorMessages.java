@@ -62,4 +62,5 @@ public interface IErrorMessages {
     String JOB_COMPANY_MISMATCH = "Requested job does not belong to the company of the logged in user";
     String ML_DATA_UNAVAILABLE = "No matching skills and capabilities found for the job title and job description";
     String JCM_NOT_FOUND = "No Job Candidate Mapping found for id: ";
+    String UUID_NOT_FOUND = "No mapping found for uuid ";
 }

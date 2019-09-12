@@ -4,15 +4,20 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.constant.IConstant;
+import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
 import io.litmusblox.server.service.IJobCandidateMappingService;
+import io.litmusblox.server.service.TechChatbotRequestBean;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -37,6 +42,12 @@ public class NoAuthController {
 
     @Autowired
     IJobCandidateMappingService jobCandidateMappingService;
+
+    @Autowired
+    private HttpServletRequest servletRequest;
+
+    @Value("${scoringEngineIpAddress}")
+    private String scoringEngineIpAddress;
 
     /**
      * Rest api to get all screening questions for the job
@@ -180,4 +191,23 @@ public class NoAuthController {
         return response;
     }
 
+    /**
+     * REST Api to listen to updates from scoring engine. The updates will be sent when
+     * 1. the candidate fills the first response of the tech chatbot
+     * 2. the candidate finishes responding to all questions of the tech chatbot
+     *
+     * @param requestBean bean with update information from scoring engine
+     * @throws Exception
+     */
+    @PostMapping("/updateTechChatbotStatus")
+    @ResponseStatus(value = HttpStatus.OK)
+    void updateTechChatbotStatus(@RequestBody TechChatbotRequestBean requestBean) throws Exception {
+        if(!servletRequest.getRemoteAddr().equals(scoringEngineIpAddress) && !servletRequest.getRemoteAddr().equals(IConstant.LOCALHOST_LOOPBACK))
+            throw new WebException("Unauthorized access!",HttpStatus.UNAUTHORIZED);
+
+        log.info("Received request to update tech chatbot status");
+        long startTime = System.currentTimeMillis();
+        jobCandidateMappingService.updateTechResponseStatus(requestBean);
+        log.info("Completed processing request to update tech chatbot status in " + (System.currentTimeMillis() - startTime) + "ms.");
+    }
 }

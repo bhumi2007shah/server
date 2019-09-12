@@ -366,7 +366,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public void captureCandidateInterest(UUID uuid, boolean interest) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
-            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
@@ -383,7 +383,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public void saveScreeningQuestionResponses(UUID uuid, Map<Long, List<String>> candidateResponse) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
-            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         //delete existing response for chatbot for the jcm
         candidateScreeningQuestionResponseRepository.deleteByJobCandidateMappingId(objFromDb.getId());
@@ -413,7 +413,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public List<JobScreeningQuestions> getJobScreeningQuestions(UUID uuid) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
-            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         return jobScreeningQuestionsRepository.findByJobId(objFromDb.getJob().getId());
     }
@@ -545,6 +545,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         });
 
         Candidate returnObj = objFromDb.getCandidate();
+        Hibernate.initialize(objFromDb.getTechResponseData());
+        returnObj.setTechResponseData(objFromDb.getTechResponseData().getTechResponse());
+
         Hibernate.initialize(returnObj.getCandidateDetails());
         //set the cv location
         if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
@@ -592,7 +595,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public JobCandidateMapping getJobCandidateMapping(UUID uuid) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(uuid);
         if (null == objFromDb)
-            throw new WebException("No mapping found for uuid " + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
@@ -685,5 +688,27 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             responseBean.setUploadRequestStatus(IConstant.UPLOAD_STATUS.Partial_Success.name());
 
         return responseBean;
+    }
+
+    /**
+     * Service to update tech response status received from scoring engine.
+     *
+     * @param requestBean bean with update information from scoring engine
+     * @throws Exception
+     */
+    @Transactional
+    public void updateTechResponseStatus(TechChatbotRequestBean requestBean) throws Exception {
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(requestBean.getChatbotUuid());
+        if(null == objFromDb)
+            throw new WebException(IErrorMessages.UUID_NOT_FOUND+requestBean.getChatbotUuid(),HttpStatus.UNPROCESSABLE_ENTITY);
+
+        objFromDb.setChatbotStatus(requestBean.getChatbotStatus());
+        objFromDb.setScore(requestBean.getScore());
+        objFromDb.setChatbotUpdatedOn(requestBean.getChatbotUpdatedOn());
+        if(null != requestBean.getTechResponseJson()) {
+            Hibernate.initialize(objFromDb.getTechResponseData());
+            objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
+        }
+        jobCandidateMappingRepository.save(objFromDb);
     }
 }

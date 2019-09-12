@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d822e62a-6652-4074-9fe2-68072e3465f8",
+		"_postman_id": "1331f67c-dbf7-4dd7-b885-2bf6668fb93f",
 		"name": "LB_V2",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
@@ -16,33 +16,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueUlkIjoxLCJzdWIiOiJzaGl0YWxAaGV4YWdvbnNlYXJjaC5jb20iLCJpYXQiOjE1NjM3NzA1OTIsImV4cCI6MTU2Mzg1Njk5Mn0.DZMGgsbD5U2aq3ANTTtf25Lm5bc4rB9AQWBQi3DHVMyOmdxoxTrvKAqnVNYtXTaybVOgOUyMS386deloxy9M3Q",
+						"value": "{{jwtToken}}",
 						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfUmVjcnVpdGVyIiwic3ViIjoic3JAaGV4YWdvbi5jb20iLCJpYXQiOjE1NjM1NDEyODMsImV4cCI6MTU2MzYyNzY4M30.B86IJNMRLb6Bjdbi8_JUXcKOHu2DYVfobccJNtBwaaf5q9Sv72oYrVtvZYaw1EmKKLBKYMy8IKlcCn7WONdQ5w",
-						"type": "text",
-						"disabled": true
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfQ2xpZW50QWRtaW4iLCJzdWIiOiJ0ZXN0bWFpbEBoZXguY29tIiwiaWF0IjoxNTYzNTQxMTk0LCJleHAiOjE1NjM2Mjc1OTR9.SNoX14v6VrZ74MhCDUhJVdjYwyZWWMoY_Hx-PLXxNXZ6KZa88njAifcPP5me3HmxO9UNoqG137HPN6PIZuuH9A",
-						"type": "text",
-						"disabled": true
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n\"countries\",\"importanceLevel\",\"questionType\",\"stage\",\"experienceRange\",\"function\",\"addressType\",\"process\",\"expertise\",\"education\",\"keySkills\", \"screeningQuestions\"\n]"
+					"raw": "[\"stage\"]"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/masterdata/fetch/items",
+					"raw": "http://localhost:9000/api/masterdata/fetch/items",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"masterdata",
@@ -108,10 +96,6 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/masterdata/reload",
 					"protocol": "http",
@@ -174,33 +158,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueUlkIjoxLCJzdWIiOiJzaGl0YWxAaGV4YWdvbnNlYXJjaC5jb20iLCJpYXQiOjE1NjM3NzA1OTIsImV4cCI6MTU2Mzg1Njk5Mn0.DZMGgsbD5U2aq3ANTTtf25Lm5bc4rB9AQWBQi3DHVMyOmdxoxTrvKAqnVNYtXTaybVOgOUyMS386deloxy9M3Q",
+						"value": "{{jwtToken}}",
 						"type": "text"
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfUmVjcnVpdGVyIiwic3ViIjoic3JAaGV4YWdvbi5jb20iLCJpYXQiOjE1NjM1NDEyODMsImV4cCI6MTU2MzYyNzY4M30.B86IJNMRLb6Bjdbi8_JUXcKOHu2DYVfobccJNtBwaaf5q9Sv72oYrVtvZYaw1EmKKLBKYMy8IKlcCn7WONdQ5w",
-						"type": "text",
-						"disabled": true
-					},
-					{
-						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfQ2xpZW50QWRtaW4iLCJzdWIiOiJ0ZXN0bWFpbEBoZXguY29tIiwiaWF0IjoxNTYzNTQxMTk0LCJleHAiOjE1NjM2Mjc1OTR9.SNoX14v6VrZ74MhCDUhJVdjYwyZWWMoY_Hx-PLXxNXZ6KZa88njAifcPP5me3HmxO9UNoqG137HPN6PIZuuH9A",
-						"type": "text",
-						"disabled": true
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"jobTitle\":\"SR-test-key-skills\",\n\"noOfPositions\":10,\n\"jobDescription\":\"testing for key skills\" \n}"
+					"raw": "{\n\t\"id\":326,\n\"jobTitle\":\"Software developer\",\n\"noOfPositions\":10,\n\"jobDescription\":\"testing for capabilities\" \n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/createJob/overview",
+					"raw": "http://localhost:9000/api/job/createJob/overview",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
@@ -222,10 +194,6 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/job/listOfJobs?",
 					"protocol": "http",
@@ -258,19 +226,24 @@
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{jwtToken}}",
+						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"job\":{\n\t\t\"id\":9\n\t},\n\t\"stage\":{\n\t\t\"id\":106\n\t}\n}"
+					"raw": "{\n\t\"job\":{\n\t\t\"id\":317\n\t},\n\t\"stage\":{\n\t\t\"id\":106\n\t}\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/jobViewByStage",
+					"raw": "http://localhost:9000/api/job/jobViewByStage",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
@@ -292,21 +265,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueUlkIjoxLCJzdWIiOiJzaGl0YWxAaGV4YWdvbnNlYXJjaC5jb20iLCJpYXQiOjE1NjM3NzA1OTIsImV4cCI6MTU2Mzg1Njk5Mn0.DZMGgsbD5U2aq3ANTTtf25Lm5bc4rB9AQWBQi3DHVMyOmdxoxTrvKAqnVNYtXTaybVOgOUyMS386deloxy9M3Q",
+						"value": "{{jwtToken}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"id\":43,\n\"jobTitle\":\"test99\",\n\"companyJobId\":\"1111\",\n\"noOfPositions\":10,\n\"jobDescription\":\"new job\", \n\"jobScreeningQuestionsList\": [\n        {\n            \"masterScreeningQuestionId\": {\"id\":1}\n        },\n        {\n        \t\"masterScreeningQuestionId\": {\"id\":2}\t\n        },\n        {\n         \"companyScreeningQuestionId\":{\"id\":2}\n        },\n        {\n           \"userScreeningQuestionId\":{\"id\":1}\n        }\n    ]\n}"
+					"raw": "{\n\"id\":326,\n\"jobTitle\":\"Software developer\",\n\"companyJobId\":\"1111\",\n\"noOfPositions\":10,\n\"jobDescription\":\"new job\", \n\"jobScreeningQuestionsList\": [\n        {\n            \"masterScreeningQuestionId\": {\"id\":1}\n        },\n        {\n        \t\"masterScreeningQuestionId\": {\"id\":2}\t\n        },\n        {\n         \"companyScreeningQuestionId\":{\"id\":2}\n        },\n        {\n           \"userScreeningQuestionId\":{\"id\":1}\n        }\n    ]\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/createJob/screeningQuestions",
+					"raw": "http://localhost:9000/api/job/createJob/screeningQuestions",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
@@ -329,21 +302,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueSI6MSwic3ViIjoic2hpdGFsQGhleGFnb25zZWFyY2guY29tIiwiaWF0IjoxNTYzNzc5NDI5LCJleHAiOjE1NjM4NjU4Mjl9.IkWEQJsAzw0lM7jtxWoIouAbrqclnGXtIrwtaY9qgq9hnE8zZHpjk2O7JkJ0Kig903cXpO1DsalP-IzA7MtpDg",
+						"value": "{{jwtToken}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\"id\":43,\n\"jobTitle\":\"test13\",\n\"companyJobId\":\"99999\",\n\"noOfPositions\":3,\n\"jobDescription\":\"yet another job for user 2\",\n\"jobCapabilityList\": [\n        {\n        \t\"id\":\"43\",\n        \t\"selected\":true,\n        \t\"importanceLevel\": {\n        \t\t\"id\":\"104\"\n        \t}\n        },\n        {\n        \t\"id\":\"44\",\n        \t\"selected\":true,\n        \t\"importanceLevel\":{\n        \t\t\"id\":\"105\"\n        \t}\n        },\n        {\n        \t\"id\":\"45\",\n        \t\"selected\":false,\n        \t\"importanceLevel\":{\n        \t\t\"id\":\"103\"\n        \t}\n        }\n    ]\n}"
+					"raw": "{\n  \"id\": 326,\n  \"jobTitle\": \"iwqireuouo\",\n  \"companyJobId\": \"23\",\n  \"noOfPositions\": \"23\",\n  \"jobDescription\": \"<p>23</p>\\n\\n<ul>\\n\\t<li>nderstanding the business requirements, application and its components<br />\\n\\tDesigning, developing and supporting frameworks for our test infrastructure and<br />\\n\\tproviding automation solutions for the QA teams.<br />\\n\\tResearch, recommend and implement tools as needed with the goal of increasing<br />\\n\\tautomation<br />\\n\\tCreating and enhancing Test Cases (Test Scripts) using Selenium, Eclipse, Element<br />\\n\\tlocators, WebDriver methods, Java programming concepts and TestNG Annotations<br />\\n\\tIntegrating the Selenium framework with Jenkins Pipeline<br />\\n\\tEffective Defect Management<br />\\n\\tCreating, Organizing, and managing Test Automation Resources<br />\\n\\tDelivering the automated scripts within the expected timelines and ensuring that it<br />\\n\\tis effectively utilized by the QA team.<br />\\n\\tWorking closely with the Engineering team, product team whenever required.<br />\\n\\t<br />\\n\\tConducting Periodical trainings to the QA testing team on the implementation of<br />\\n\\tnew changes.<br />\\n\\tContributing towards the QA transformation on the product.<br />\\n\\tCapable of using source code repositories<br />\\n\\tAbility to perform JMeter performance scripting and analysis.<br />\\n\\tAbility to perform Manual and Automation testing based on the business needs.</li>\\n</ul>\\n\\n<p><em>Salary:</em>&nbsp;Not Disclosed by Recruiter</p>\\n\\n<p><em>Industry:</em><a href=\\\"https://www.naukri.com/construction,-engineering,-cement,-metals-jobs\\\" target=\\\"_blank\\\">Construction, Engineering, Cement, Metals</a></p>\\n\\n<p><em>Functional Area:</em><a href=\\\"https://www.naukri.com/it-software-application-programming-jobs\\\" target=\\\"_blank\\\">IT Software - Application Programming&nbsp;</a>,&nbsp;<a href=\\\"https://www.naukri.com/maintenance-jobs\\\" target=\\\"_blank\\\">Maintenance</a></p>\\n\\n<p><em>Role Category:</em>QA/Testing/Documentation</p>\\n\\n<p><em>Role:</em>Quality Assurance/Quality Control Executive</p>\\n\\n<p><em>Employment Type:</em>Full Time, Temporary/Contractual</p>\\n\",\n  \"jobScreeningQuestionsList\": [\n    {\n      \"masterScreeningQuestionId\": {\n        \"id\": 6\n      }\n    }\n  ],\n  \"userEnteredKeySkill\": [\n    \n  ],\n  \"jobCapabilityList\": [\n    {\n      \"id\": 6691,\n      \"capabilityId\": 10036,\n      \"capabilityName\": \"Test Case Design\",\n      \"selected\": true,\n      \"weightage\": 10,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6700,\n      \"capabilityId\": 10145,\n      \"capabilityName\": \"Basics of IT Organisation & Users handled\",\n      \"selected\": true,\n      \"weightage\": 10,\n      \"jobId\": 2319\n    }\n  ],\n  \"jobKeySkillsList\": [\n    {\n      \"id\": 6555,\n      \"skillId\": {\n        \"id\": 1208,\n        \"skillName\": \"requirements\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6556,\n      \"skillId\": {\n        \"id\": 1209,\n        \"skillName\": \"quality control\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6557,\n      \"skillId\": {\n        \"id\": 1210,\n        \"skillName\": \"test automation\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6558,\n      \"skillId\": {\n        \"id\": 1051,\n        \"skillName\": \"automation testing\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6559,\n      \"skillId\": {\n        \"id\": 1052,\n        \"skillName\": \"documentation\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6560,\n      \"skillId\": {\n        \"id\": 1211,\n        \"skillName\": \"testing\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6561,\n      \"skillId\": {\n        \"id\": 1037,\n        \"skillName\": \"test cases\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6562,\n      \"skillId\": {\n        \"id\": 1038,\n        \"skillName\": \"test scripts\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6563,\n      \"skillId\": {\n        \"id\": 1040,\n        \"skillName\": \"manual\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6564,\n      \"skillId\": {\n        \"id\": 1212,\n        \"skillName\": \"jmeter\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6565,\n      \"skillId\": {\n        \"id\": 1213,\n        \"skillName\": \"eclipse\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6566,\n      \"skillId\": {\n        \"id\": 1214,\n        \"skillName\": \"qa\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6567,\n      \"skillId\": {\n        \"id\": 1043,\n        \"skillName\": \"automation\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6568,\n      \"skillId\": {\n        \"id\": 1215,\n        \"skillName\": \"java\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6569,\n      \"skillId\": {\n        \"id\": 1216,\n        \"skillName\": \"selenium\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6570,\n      \"skillId\": {\n        \"id\": 1055,\n        \"skillName\": \"infrastructure\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6571,\n      \"skillId\": {\n        \"id\": 1217,\n        \"skillName\": \"quality assurance\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6572,\n      \"skillId\": {\n        \"id\": 1044,\n        \"skillName\": \"jenkins\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6573,\n      \"skillId\": {\n        \"id\": 1218,\n        \"skillName\": \"https\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6574,\n      \"skillId\": {\n        \"id\": 1219,\n        \"skillName\": \"testng\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6575,\n      \"skillId\": {\n        \"id\": 1220,\n        \"skillName\": \"maintenance\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    },\n    {\n      \"id\": 6576,\n      \"skillId\": {\n        \"id\": 1221,\n        \"skillName\": \"test infrastructure\"\n      },\n      \"mlProvided\": true,\n      \"selected\": true,\n      \"jobId\": 2319\n    }\n  ]\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/createJob/capabilities",
+					"raw": "http://localhost:9000/api/job/createJob/capabilities",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
@@ -366,21 +339,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueSI6MSwic3ViIjoic2hpdGFsQGhleGFnb25zZWFyY2guY29tIiwiaWF0IjoxNTYzNzc5NDI5LCJleHAiOjE1NjM4NjU4Mjl9.IkWEQJsAzw0lM7jtxWoIouAbrqclnGXtIrwtaY9qgq9hnE8zZHpjk2O7JkJ0Kig903cXpO1DsalP-IzA7MtpDg",
+						"value": "{{jwtToken}}",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"id\":43,\n\"jobTitle\":\"test99\",\n\"companyJobId\":\"1111\",\n\"noOfPositions\":10,\n\"jobDescription\":\"new job\",\n\"jobKeySkillsList\": [\n        {\n            \"skillId\":{\"id\":1},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n         \"skillId\":{\"id\":2},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n          \"skillId\":{\"id\":3},\n            \"mlProvided\":true,\n            \"selected\":true\n        }\n    ],\n\"userEnteredKeySkill\": [\"Test\",\"Test1\"]\n}"
+					"raw": "{\n\t\"id\":326,\n\"jobTitle\":\"test99\",\n\"companyJobId\":\"1111\",\n\"noOfPositions\":10,\n\"jobDescription\":\"new job\",\n\"jobKeySkillsList\": [\n        {\n            \"skillId\":{\"id\":1},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n         \"skillId\":{\"id\":2},\n            \"mlProvided\":true,\n            \"selected\":false\n        },\n        {\n          \"skillId\":{\"id\":3},\n            \"mlProvided\":true,\n            \"selected\":true\n        }\n    ],\n\"userEnteredKeySkill\": [\"Test\",\"Test1\"]\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/createJob/keySkills",
+					"raw": "http://localhost:9000/api/job/createJob/keySkills",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
@@ -428,10 +401,6 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/company/screeningQuestions",
 					"protocol": "http",
@@ -450,8 +419,11 @@
 		},
 		{
 			"name": "Create User",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
 			"request": {
-				"method": "POST",
+				"method": "GET",
 				"header": [
 					{
 						"key": "Content-Type",
@@ -478,19 +450,144 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"firstName\":\"Test\",\n\t\"lastName\":\"Last\",\n\t\"email\":\"testmail1@hex.com\",\n\t\"password\":\"123456\",\n\t\"countryId\":{\"id\":5},\n\t\"companyId\":1,\n\t\"mobile\":\"1231231233\"\n}"
+					"raw": "{\n\t\"firstName\":\"Subodh\",\n\t\"lastName\":\"Last\",\n\t\"email\":\"testmail1@hex.com\",\n\t\"password\":\"123456\",\n\t\"countryId\":{\"id\":5},\n\t\"companyId\":1,\n\t\"mobile\":\"1231231233\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/createUser",
+					"raw": "http://13.90.151.97:8080/api/jcm/fetchCandidateProfile/33",
 					"protocol": "http",
 					"host": [
-						"localhost"
+						"13",
+						"90",
+						"151",
+						"97"
 					],
 					"port": "8080",
 					"path": [
 						"api",
+						"jcm",
+						"fetchCandidateProfile",
+						"33"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create User + Company",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{jwtToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"firstName\":\"Chirag\",\"lastName\":\"Pandya\",\"email\":\"chiragp@hex.com\",\"company\":{\"companyName\":\"Tales & Spirits\"},\"mobile\":\"7659908872\",\"countryCode\":\"+91\"}"
+				},
+				"url": {
+					"raw": "http://localhost:9000/api/auth/createUser",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
 						"auth",
 						"createUser"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Block User",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{jwtToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"id\":1\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9000/api/auth/blockUnblockUser?blockUser=false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"auth",
+						"blockUnblockUser"
+					],
+					"query": [
+						{
+							"key": "blockUser",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "FetchCandidateDetails",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{jwtToken-test}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"firstName\":\"Test\",\n\t\"lastName\":\"Last\",\n\t\"email\":\"testmail1@hex.com\",\n\t\"password\":\"123456\",\n\t\"countryId\":{\"id\":5},\n\t\"companyId\":1,\n\t\"mobile\":\"1231231233\"\n}"
+				},
+				"url": {
+					"raw": "http://13.90.151.97:8080/api/jcm/fetchCandidateProfile/65",
+					"protocol": "http",
+					"host": [
+						"13",
+						"90",
+						"151",
+						"97"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"jcm",
+						"fetchCandidateProfile",
+						"65"
 					]
 				}
 			},
@@ -503,7 +600,7 @@
 				"header": [
 					{
 						"key": "Authorization",
-						"value": "Bearer  eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueSI6MSwic3ViIjoic2hpdGFsQGhleGFnb25zZWFyY2guY29tIiwiaWF0IjoxNTYzODAxMjcxLCJleHAiOjE1NjM4ODc2NzF9.Sxgo-ZIluiuR22xHnhMwuMFP2pIlPuxwS-PnyQdLiit1qOqt-ff4sdFtkpDxPEuOGejKFW4_98lP8ZVh_NRVyw",
+						"value": "{{jwtToken}}",
 						"type": "text"
 					}
 				],
@@ -512,17 +609,81 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/job/publishJob/43",
+					"raw": "http://localhost:9000/api/job/publishJob/326",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"job",
 						"publishJob",
-						"43"
+						"326"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Archive Job",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{jwtToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9000/api/job/archiveJob/325",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"job",
+						"archiveJob",
+						"325"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Unarchive Job",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{jwtToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9000/api/job/unarchiveJob/325",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"job",
+						"unarchiveJob",
+						"325"
 					]
 				}
 			},
@@ -530,6 +691,19 @@
 		},
 		{
 			"name": "Test : Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "4bd2fb6b-3390-4fda-a903-0b3882565cc2",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"jwtToken-test\", \"Bearer \"+jsonData.jwtToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -544,15 +718,15 @@
 					"raw": "{\n\t\"email\":\"shital@hexagonsearch.com\",\n\t\"password\":\"123456\"\n}"
 				},
 				"url": {
-					"raw": "http://13.90.151.97:8080/api/auth/login",
-					"protocol": "http",
+					"raw": "https://13.90.151.97:8443/api/auth/login",
+					"protocol": "https",
 					"host": [
 						"13",
 						"90",
 						"151",
 						"97"
 					],
-					"port": "8080",
+					"port": "8443",
 					"path": [
 						"api",
 						"auth",
@@ -602,10 +776,6 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": ""
-				},
 				"url": {
 					"raw": "http://localhost:8080/api/noAuth/screeningQuestion?uuid=2462a22e-ad02-11e9-b52e-74e5f9b964b9",
 					"protocol": "http",
@@ -623,6 +793,38 @@
 							"key": "uuid",
 							"value": "2462a22e-ad02-11e9-b52e-74e5f9b964b9"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Company Update",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "{{jwtToken}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\"companyName\":\"Rowdy\",\n\"companyDescription\":\"asdfghjkxcvbn sdfgtyj\",\n\"website\":\"www.infosys.com\",\n\"landline\":\"022-23454\",\n\"industry\":{\"id\":144},\n\"linkedin\":\"LinkedIn.io\",\n\"facebook\":\"facebook.com\",\n\"twitter\":\"twitter\"\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9000/api/company/update/326",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"company",
+						"update",
+						"326"
 					]
 				}
 			},
@@ -667,6 +869,19 @@
 		},
 		{
 			"name": "Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "1d39b56c-c1c5-4b32-ac87-ab52c0839f7e",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"jwtToken\", \"Bearer \"+jsonData.jwtToken);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [
@@ -678,15 +893,15 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"email\":\"shital@hexagonsearch.com\",\n\t\"password\":\"123456\"\n}"
+					"raw": "{\n\t\"email\":\"pratima@litmusblox.io\",\n\t\"password\":\"123456\"\n}"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/auth/login",
+					"raw": "http://localhost:9000/api/auth/login",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9000",
 					"path": [
 						"api",
 						"auth",
@@ -708,21 +923,21 @@
 					},
 					{
 						"key": "Authorization",
-						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfU3VwZXJBZG1pbiIsInVzZXJJZCI6MiwiY29tcGFueSI6MSwic3ViIjoic2hpdGFsQGhleGFnb25zZWFyY2guY29tIiwiaWF0IjoxNTYzOTc1NTEyLCJleHAiOjE1NjQwNjE5MTJ9.lH2sOTH7famJAhbcUfaRn7rm0p5hDT6pPr6QAFchug4alF0iPxfkZU8ZCSBcaUJfXtR_COydH94BgjbqL_-GJw",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfUmVjcnVpdGVyIiwidXNlcklkIjoyLCJjb21wYW55IjoxLCJzdWIiOiJzaGl0YWxAaGV4YWdvbnNlYXJjaC5jb20iLCJpYXQiOjE1NjQ3NTQwMzIsImV4cCI6MTU2NDg0MDQzMn0.51vqXgPCWJJ0oPA5TJ4VKhF-m61SLnQuNr5lo_hGQug1GuC60QCEw450aiJ_G8WnRWBqdY615U274jdMK-er4Q",
 						"type": "text"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "[\n\t{\n\t\t\"firstName\":\"Shital\",\n\t\t\"lastName\":\"Raval\",\n\t\t\"email\":\"shital@hexagonsearch.com\",\n\t\t\"mobile\":\"9881409097\",\n\t\t\"countryCode\":\"+91\"\n\t},\n\t{\n\t\t\"firstName\":\"Someone\",\n\t\t\"lastName\":\"Else\",\n\t\t\"email\":\"someone@else.com\",\n\t\t\"mobile\":\"8222222222\",\n\t\t\"countryCode\":\"+91\"\n\t}\n]"
+					"raw": "[\n\t{\n\t\t\"firstName\":\"Candidate\",\n\t\t\"lastName\":\"three\",\n\t\t\"email\":\"candi3@hexagonsearch.com\",\n\t\t\"mobile\":\"9733322333\",\n\t\t\"countryCode\":\"+91\"\n\t}\n]"
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/jcm/addCandidate/individual?jobId=22",
+					"raw": "http://localhost:9001/api/jcm/addCandidate/individual?jobId=316",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8080",
+					"port": "9001",
 					"path": [
 						"api",
 						"jcm",
@@ -732,7 +947,7 @@
 					"query": [
 						{
 							"key": "jobId",
-							"value": "22"
+							"value": "316"
 						}
 					]
 				}
@@ -761,8 +976,8 @@
 					"formdata": [
 						{
 							"key": "file",
-							"type": "file",
-							"src": ""
+							"value": "",
+							"type": "file"
 						}
 					]
 				},
@@ -815,8 +1030,8 @@
 					"formdata": [
 						{
 							"key": "file",
-							"type": "file",
-							"src": ""
+							"value": "",
+							"type": "file"
 						}
 					]
 				},
@@ -869,8 +1084,8 @@
 					"formdata": [
 						{
 							"key": "file",
-							"type": "file",
-							"src": ""
+							"value": "",
+							"type": "file"
 						}
 					]
 				},
@@ -923,8 +1138,8 @@
 					"formdata": [
 						{
 							"key": "file",
-							"type": "file",
-							"src": ""
+							"value": "",
+							"type": "file"
 						}
 					]
 				},
@@ -950,6 +1165,86 @@
 							"key": "fileFormat",
 							"value": "Naukri"
 						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Invite Candidate",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJyb2xlcyI6IlJPTEVfUmVjcnVpdGVyIiwidXNlcklkIjoyLCJjb21wYW55IjoxLCJzdWIiOiJzaGl0YWxAaGV4YWdvbnNlYXJjaC5jb20iLCJpYXQiOjE1NjQ3NTQwMzIsImV4cCI6MTU2NDg0MDQzMn0.51vqXgPCWJJ0oPA5TJ4VKhF-m61SLnQuNr5lo_hGQug1GuC60QCEw450aiJ_G8WnRWBqdY615U274jdMK-er4Q"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[8]"
+				},
+				"url": {
+					"raw": "http://localhost:9001/api/jcm/inviteCandidates",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9001",
+					"path": [
+						"api",
+						"jcm",
+						"inviteCandidates"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Company",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Job Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "{{jwtToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:9000/api/job/getDetails/5000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9000",
+					"path": [
+						"api",
+						"job",
+						"getDetails",
+						"5000"
 					]
 				}
 			},

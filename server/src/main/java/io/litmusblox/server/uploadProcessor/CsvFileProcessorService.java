@@ -10,7 +10,6 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.UploadResponseBean;
-import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -54,12 +53,13 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
                     null == headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()) || headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()) != 3) {
 
                 Map<String, String> breadCrumb= new HashMap<>();
+                breadCrumb.put("File Name", fileName);
+                breadCrumb.put("File Type",IConstant.PROCESS_FILE_TYPE.CsvFile.toString());
                 breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).toString());
                 breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).toString());
                 breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).toString());
                 breadCrumb.put(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue(), headers.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).toString());
-                Util.sendSentryErrorMail(fileName, breadCrumb, IConstant.PROCESS_FILE_TYPE.CsvFile.toString());
-                throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY);
+                throw new WebException(IErrorMessages.MISSING_COLUMN_NAMES_FIRST_ROW, HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
             }
 
             User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

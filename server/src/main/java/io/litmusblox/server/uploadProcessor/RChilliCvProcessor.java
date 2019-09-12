@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.uploadProcessor;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
@@ -126,14 +127,14 @@ public class RChilliCvProcessor {
             }
 
              if(!rChilliErrorResponse) {
-                rchilliJsonResponse = rchilliJsonResponse.replace("{\n" +
-                        "  \"ResumeParserData\" : ", "");
 
-                rchilliFormattedJson = rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf(",\n" +
-                        "    \"DetailResume\"")) + "\n" + "}";
+                 rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
+                 rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
+
                 //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 bean = mapper.readValue(rchilliJsonResponse, ResumeParserDataRchilliBean.class);
                 //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
                 candidate = setCandidateModel(bean, user);

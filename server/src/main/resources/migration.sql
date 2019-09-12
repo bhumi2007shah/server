@@ -234,6 +234,25 @@ CREATE TABLE JOB_HISTORY (
 ALTER TABLE CV_PARSING_DETAILS
 ADD COLUMN ERROR_MESSAGE varchar(100);
 
+
+-- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id
+DELETE
+FROM job_key_skills
+where skill_id in (
+SELECT ID
+FROM skills_master
+where
+id not in (select min(id)
+from skills_master
+group by skill_name)
+);
+
+Delete
+FROM skills_master
+WHERE ID NOT IN (SELECT MIN(id)
+FROM skills_master
+GROUP BY skill_name);
+
 -- For ticket #123
 ALTER TABLE JOB_CANDIDATE_MAPPING
 ADD COLUMN CHATBOT_STATUS VARCHAR(15),

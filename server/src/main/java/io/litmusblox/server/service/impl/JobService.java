@@ -368,12 +368,7 @@ public class JobService implements IJobService {
             //if none if found, add a skill
             if (null == skillFromDb) {
                 skillFromDb = new SkillsMaster(skill.getName());
-                try {
-                    skillMasterRepository.save(skillFromDb);
-                }
-                catch(Exception e){
-                    e.printStackTrace();
-                }
+                skillMasterRepository.save(skillFromDb);
             }
             //add a record in job_key_skills with this skill id
             jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));

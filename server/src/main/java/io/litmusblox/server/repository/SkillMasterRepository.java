@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.SkillsMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * @author : Sumit
@@ -15,5 +16,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface SkillMasterRepository extends JpaRepository<SkillsMaster, Long> {
-    public SkillsMaster findBySkillName(String skillName);
+    public SkillsMaster findBySkillNameIgnoreCase(String skillName);
 }

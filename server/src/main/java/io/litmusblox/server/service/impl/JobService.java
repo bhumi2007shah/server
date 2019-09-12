@@ -364,11 +364,16 @@ public class JobService implements IJobService {
         List<JobKeySkills> jobKeySkillsToSave = new ArrayList<>(skillsList.size());
         skillsList.forEach(skill-> {
             //find a skill from the master table for the skill name provided
-            SkillsMaster skillFromDb = skillMasterRepository.findBySkillName(skill.getName());
+            SkillsMaster skillFromDb = skillMasterRepository.findBySkillNameIgnoreCase(skill.getName());
             //if none if found, add a skill
             if (null == skillFromDb) {
                 skillFromDb = new SkillsMaster(skill.getName());
-                skillMasterRepository.save(skillFromDb);
+                try {
+                    skillMasterRepository.save(skillFromDb);
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
             }
             //add a record in job_key_skills with this skill id
             jobKeySkillsToSave.add(new JobKeySkills(skillFromDb, true,true, new Date(), (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));

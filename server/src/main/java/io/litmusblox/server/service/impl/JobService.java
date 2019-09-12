@@ -13,7 +13,6 @@ import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
 import io.litmusblox.server.utils.RestClient;
-import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;

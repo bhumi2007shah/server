@@ -4,13 +4,11 @@
 
 package io.litmusblox.server.uploadProcessor;
 
-import com.sun.org.apache.bcel.internal.generic.ICONST;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.service.UploadResponseBean;
-import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

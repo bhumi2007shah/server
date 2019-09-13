@@ -187,6 +187,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             if(Util.isNull(candidate.getCountryCode()))
                 candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
             candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser);
+            candidate.setId(candidateObjToUse.getId());
             msg.append(" New");
         }
         else {
@@ -219,7 +220,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         if(null!=uploadResponseBean){
             uploadResponseBean.getSuccessfulCandidates().add(candidateObjToUse);
         }
-        return candidateObjToUse;
+        return candidate;
     }
 
 

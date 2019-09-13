@@ -152,6 +152,10 @@ public class CandidateService implements ICandidateService {
         if(!Util.isNull(candidateDetails.getWorkSummary()) && candidateDetails.getWorkSummary().length() > IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue()) {
             candidateDetails.setWorkSummary(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.name(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue(), candidateDetails.getWorkSummary()));
         }
+        if(!Util.isNull(candidateDetails.getGender()) && candidateDetails.getGender().length() > IConstant.MAX_FIELD_LENGTHS.GENDER.getValue()) {
+            candidateDetails.setGender(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.GENDER.name(), IConstant.MAX_FIELD_LENGTHS.GENDER.getValue(), candidateDetails.getGender()).toUpperCase());
+        }
+
         candidateDetails.setCandidateId(candidate);
         candidateDetailsRepository.save(candidateDetails);
         return candidateDetails;

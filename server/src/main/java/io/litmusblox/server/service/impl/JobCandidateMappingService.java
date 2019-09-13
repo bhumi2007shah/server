@@ -134,7 +134,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         for (Candidate candidate:candidateList) {
-            saveCandidateSupportiveInfo(candidate, loggedInUser);
+            if(null!=candidate.getId())
+                saveCandidateSupportiveInfo(candidate, loggedInUser);
         }
     }
 

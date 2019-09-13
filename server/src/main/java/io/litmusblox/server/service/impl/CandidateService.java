@@ -13,6 +13,7 @@ import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,7 +98,7 @@ public class CandidateService implements ICandidateService {
         if(null != dupCandidateByEmail && null != dupCandidateByMobile) {
             //found different candidate ids for the email and mobile number combination
             if(!dupCandidateByEmail.getId().equals(dupCandidateByMobile.getId()))
-                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email);
+                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email, HttpStatus.BAD_REQUEST);
         }
         else {
 

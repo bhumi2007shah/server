@@ -227,7 +227,6 @@ insert into skills_master (skill_name) values
 ('VB'),
 ('MVC'),
 ('ADO'),
-('Windows'),
 ('Azure'),
 ('C#'),
 ('Sharepoint'),

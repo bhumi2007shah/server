@@ -236,10 +236,6 @@ ADD COLUMN ERROR_MESSAGE varchar(100);
 
 
 -- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id
-CREATE EXTENSION IF NOT EXISTS citext;
-
-Alter table skills_master alter column skill_name type citext;
-
 DELETE
 FROM job_key_skills
 where skill_id in (

@@ -451,6 +451,8 @@ public class JobService implements IJobService {
         if (userProvidedJobKeySkillslist.size() > 0) {
             jobKeySkillsRepository.deleteAll(userProvidedJobKeySkillslist);
         }
+        jobKeySkillsRepository.flush();
+
 
         //For each keyskill in the request (will have only the mlProvided true ones), update the values for selected
         Map<Long, JobKeySkills> newSkillValues = new HashMap();

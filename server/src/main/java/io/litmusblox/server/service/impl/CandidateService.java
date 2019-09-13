@@ -172,6 +172,10 @@ public class CandidateService implements ICandidateService {
             if (!Util.isNull(obj.getInstituteName()) && obj.getInstituteName().length() > IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue()){
                 obj.setInstituteName(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.name(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue(), obj.getInstituteName()));
             }
+            if (!Util.isNull(obj.getDegree()) && obj.getDegree().length() > IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue()){
+                obj.setDegree(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.DEGREE.name(), IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue(), obj.getDegree()));
+            }
+
             obj.setCandidateId(candidateId);
             candidateEducationDetailsRepository.save(obj);});
     }

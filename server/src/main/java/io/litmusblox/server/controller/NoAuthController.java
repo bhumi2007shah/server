@@ -100,7 +100,7 @@ public class NoAuthController {
                     put("Candidate", Arrays.asList("CandidateDetails","candidateDetails","candidateEducationDetails","candidateProjectDetails",
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy","candidateSource","firstName","lastName","candidateSource","CandidateCompanyDetails"));
                     put("Company", Arrays.asList("companyAddressList", "companyBuList"));
-                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy"));
+                    put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy","techResponseData"));
 
             }}
         );

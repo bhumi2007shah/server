@@ -8,10 +8,7 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
-import io.litmusblox.server.repository.CandidateRepository;
-import io.litmusblox.server.repository.JcmCommunicationDetailsRepository;
-import io.litmusblox.server.repository.JobCandidateMappingRepository;
-import io.litmusblox.server.repository.JobRepository;
+import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.UploadResponseBean;
@@ -52,6 +49,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
     @Resource
     JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
+
+    @Resource
+    JcmHistoryRepository jcmHistoryRepository;
 
     @Autowired
     ICandidateService candidateService;
@@ -210,6 +210,10 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             candidateObjToUse.setMobile(candidate.getMobile());
 
             JobCandidateMapping savedObj = jobCandidateMappingRepository.save(new JobCandidateMapping(job,candidateObjToUse,MasterDataBean.getInstance().getSourceStage(), candidate.getCandidateSource(), new Date(),loggedInUser, UUID.randomUUID(), candidate.getFirstName(), candidate.getLastName()));
+
+            //string to store detail about jcmHistory
+            String candidateDetail = "jcm created for "+msg;
+            jcmHistoryRepository.save(new JcmHistory(savedObj, candidateDetail, new Date(), loggedInUser));
             savedObj.setTechResponseData(new CandidateTechResponseData(savedObj));
             jobCandidateMappingRepository.save(savedObj);
             //create an empty record in jcm Communication details table

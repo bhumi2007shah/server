@@ -81,6 +81,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     JcmProfileSharingMasterRepository jcmProfileSharingMasterRepository;
 
+    @Resource
+    JcmHistoryRepository jcmHistoryRepository;
+
     @Value("${scoringEngineBaseUrl}")
     private String scoringEngineBaseUrl;
 
@@ -370,6 +373,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
+        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null));
     }
 
     /**
@@ -429,7 +433,19 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if(jcmList == null || jcmList.size() == 0)
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+
+        List<JcmHistory> jcmHistoryList = new ArrayList<>();
+
+        for(Long jcmId: jcmList){
+            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
+        }
+
+        if(jcmHistoryList.size()>0){
+            jcmHistoryRepository.saveAll(jcmHistoryList);
+        }
 
         //make an api call to scoring engine for each of the jcm
         jcmList.stream().forEach(jcmId->{
@@ -464,6 +480,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
+        List<String> recieverEmails = new ArrayList<>();
+
         for (String[] array:requestBean.getReceiverInfo()) {
 
             String receiverNameToUse = array[0], receiverEmailToUse =  array[1];
@@ -496,7 +514,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
             });
             jcmProfileSharingDetailsRepository.saveAll(detailsSet);
+            recieverEmails.add(array[1]);
         }
+
+        jcmHistoryRepository.save(new JcmHistory(new JobCandidateMapping(requestBean.getJcmId().get(0)), "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser));
     }
 
     /**

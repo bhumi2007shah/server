@@ -643,12 +643,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         Integer[] countArray = new Integer[0];
 
         for (MultipartFile fileToProcess :multipartFiles) {
-            String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
+            String extension = Util.getFileExtension(fileToProcess.getOriginalFilename()).toLowerCase();
             if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.MAX_FILES_PER_UPLOAD);
             }
             //check if the extension is supported by RChilli
-            else if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension.toLowerCase())) {
+            else if(!Arrays.asList(IConstant.cvUploadSupportedExtensions).contains(extension)) {
                 failureCount++;
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.UNSUPPORTED_FILE_TYPE + extension);
             }

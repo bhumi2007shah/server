@@ -32,7 +32,7 @@ public class ZipFileProcessUtil {
 
     public static Integer[] extractZipFile(String filePath, String tempRepoLocation, long loginUserId, long jobId, CvUploadResponseBean responseBean, Integer failureCount, Integer successCount) {
 
-        String extension = Util.getFileExtension(filePath);
+        String extension = Util.getFileExtension(filePath).toLowerCase();
         File newFile=null;
         if(extension.equals(IConstant.FILE_TYPE.zip.toString())){
 

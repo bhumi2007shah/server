@@ -63,7 +63,7 @@ public class CompanyService implements ICompanyService {
 
         Company companyFromDb=companyRepository.findByCompanyName(company.getCompanyName());
         if(null==companyFromDb)
-            throw new ValidationException("Company not found for this name "+company.getCompanyName());
+            throw new ValidationException("Company not found for this name "+company.getCompanyName(), HttpStatus.BAD_REQUEST);
 
         company.setId(companyFromDb.getId());
 
@@ -129,7 +129,7 @@ public class CompanyService implements ICompanyService {
     public void blockCompany(Company company, boolean blockCompany) throws Exception {
         Company companyObjFromDb = companyRepository.findByCompanyName(company.getCompanyName());
         if(null == companyObjFromDb)
-            throw new ValidationException("Company not found: " + company.getCompanyName());
+            throw new ValidationException("Company not found: " + company.getCompanyName(), HttpStatus.BAD_REQUEST);
         companyObjFromDb.setActive(!blockCompany);
         companyObjFromDb.setUpdatedOn(new Date());
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

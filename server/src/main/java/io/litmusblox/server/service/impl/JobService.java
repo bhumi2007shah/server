@@ -524,7 +524,7 @@ public class JobService implements IJobService {
     private void addJobCapabilities(Job job, Job oldJob, User loggedInUser) { //add job capabilities
 
         if (null != job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()) {
-            throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId());
+            throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         //For each capability in the request, update the values for selected and importance_level

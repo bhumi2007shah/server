@@ -135,7 +135,7 @@ public class CompanyService implements ICompanyService {
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         companyObjFromDb.setUpdatedBy(loggedInUser.getId());
         companyRepository.save(companyObjFromDb);
-        saveCompanyHistory(companyObjFromDb.getId(), company.getActive() ? "Unblocked":"Blocked", loggedInUser);
+        saveCompanyHistory(companyObjFromDb.getId(), blockCompany ? "Unblocked":"Blocked", loggedInUser);
     }
 
     /**

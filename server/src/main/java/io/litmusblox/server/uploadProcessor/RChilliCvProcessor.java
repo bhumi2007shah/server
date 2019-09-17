@@ -227,11 +227,24 @@ public class RChilliCvProcessor {
     }
 
     private Candidate setCandidateModel(ResumeParserDataRchilliBean bean, User user, String cvType) {
+        String alternateMobile=null;
+        String[] mobileString=null;
         String mobile=bean.getFormattedMobile().isEmpty() ? bean.getFormattedPhone() : bean.getFormattedMobile();
+
+        if(mobile.contains(",")){
+            mobileString =mobile.split(",");
+        }
+        mobile = mobileString[0];
+        alternateMobile=mobileString[1];
+
         //Format mobile no
         mobile=Util.indianMobileConvertor(mobile);
+        if(null!=alternateMobile)
+            alternateMobile=Util.indianMobileConvertor(alternateMobile);
 
         Candidate candidate = new Candidate(bean.getFirstName(), bean.getLastName(), bean.getEmail(), mobile, null, new Date(), null);
+        if(null!=alternateMobile)
+            candidate.setAlternateMobile(alternateMobile);
         candidate.setCandidateName(bean.getFullName());
         candidate.setCandidateSource(IConstant.CandidateSource.DragDropCv.toString());
         candidate.setCountryCode(user.getCountryId().getCountryCode());

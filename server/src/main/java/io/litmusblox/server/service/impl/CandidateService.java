@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Service class for Candidate related operations
@@ -80,7 +77,7 @@ public class CandidateService implements ICandidateService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser) throws Exception {
+    public Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception {
         //check if candidate exists for email
         Candidate dupCandidateByEmail = null;
         CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(email);
@@ -89,29 +86,54 @@ public class CandidateService implements ICandidateService {
 
         //check if candidate exists for mobile
         Candidate dupCandidateByMobile = null;
+        Candidate dupCandidateByAlternateMobile = null;
+        boolean isAlternateMobilePresentInDb = false;
         if (Util.isNotNull(mobile)) {
             CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(mobile, countryCode);
             if (null != candidateMobileHistory)
                 dupCandidateByMobile = candidateMobileHistory.getCandidate();
         }
-
-        if(null != dupCandidateByEmail && null != dupCandidateByMobile) {
-            //found different candidate ids for the email and mobile number combination
-            if(!dupCandidateByEmail.getId().equals(dupCandidateByMobile.getId()))
-                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email, HttpStatus.BAD_REQUEST);
+        if (alternateMobile.isPresent()) {
+            CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(alternateMobile.get(), countryCode);
+            if (null != candidateMobileHistory) {
+                if (dupCandidateByMobile == null)
+                    dupCandidateByAlternateMobile = candidateMobileHistory.getCandidate();
+                isAlternateMobilePresentInDb = true;
+            }
         }
-        else {
 
-            if (null == dupCandidateByEmail && null != dupCandidateByMobile) {
+        if (null != dupCandidateByEmail) {
+            //found different candidate ids for the email and mobile number combination
+            if (null != dupCandidateByMobile && !dupCandidateByEmail.getId().equals(dupCandidateByMobile.getId()))
+                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + mobile + " " + email, HttpStatus.BAD_REQUEST);
+            else if(null != dupCandidateByAlternateMobile && !dupCandidateByEmail.getId().equals(dupCandidateByAlternateMobile.getId()))
+                throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY + (alternateMobile.isPresent()?alternateMobile.get():null) + " " + email, HttpStatus.BAD_REQUEST);
+
+        }
+
+        if (null == dupCandidateByEmail) {
+            if (null != dupCandidateByMobile) {
                 //Candidate by mobile exists, add email history
                 candidateEmailHistoryRepository.save(new CandidateEmailHistory(dupCandidateByMobile, email, new Date(), loggedInUser));
                 return dupCandidateByMobile;
+            } else if (null != dupCandidateByAlternateMobile) {
+                //Candidate by Alternate mobile exists, add email history
+                candidateEmailHistoryRepository.save(new CandidateEmailHistory(dupCandidateByAlternateMobile, email, new Date(), loggedInUser));
+                return dupCandidateByAlternateMobile;
             }
-            if (null != dupCandidateByEmail && null == dupCandidateByMobile && Util.isNotNull(mobile)) {
+
+        }
+        if (null != dupCandidateByEmail) {
+
+            if (null == dupCandidateByMobile && Util.isNotNull(mobile)) {
                 //Candidate by email exists, add mobile history
                 candidateMobileHistoryRepository.save(new CandidateMobileHistory(dupCandidateByEmail, mobile, countryCode, new Date(), loggedInUser));
-                return dupCandidateByEmail;
             }
+            if (!isAlternateMobilePresentInDb) {
+                //Candidate by email exists, add alternate mobile history
+                candidateMobileHistoryRepository.save(new CandidateMobileHistory(dupCandidateByEmail, alternateMobile.get(), countryCode, new Date(), loggedInUser));
+            }
+            return dupCandidateByEmail;
         }
         return dupCandidateByEmail;
     }
@@ -128,12 +150,13 @@ public class CandidateService implements ICandidateService {
      * @return
      */
     @Override
-    public Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser) throws Exception {
+    public Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception {
 
         Candidate candidate = candidateRepository.save(new Candidate(firstName, lastName, email, mobile, countryCode, new Date(), loggedInUser));
         candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate, email, new Date(), loggedInUser));
         candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate, mobile, countryCode, new Date(), loggedInUser));
-
+        if(alternateMobile.isPresent())
+            candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate, alternateMobile.get(), countryCode, new Date(), loggedInUser));
         return candidate;
     }
 

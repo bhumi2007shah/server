@@ -7,6 +7,7 @@ package io.litmusblox.server.service;
 import io.litmusblox.server.model.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class for operations on candidate
@@ -27,7 +28,7 @@ public interface ICandidateService {
      * @return
      * @throws Exception
      */
-    Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser) throws Exception;
+    Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception;
 
     /**
      * Method to create a new candidate, candidateEmailHistory and candidateMobileHistory
@@ -40,7 +41,7 @@ public interface ICandidateService {
      * @param loggedInUser
      * @return
      */
-    Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser) throws Exception;
+    Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception;
 
     /**
      * Method to update candidate details

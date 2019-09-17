@@ -233,9 +233,9 @@ public class RChilliCvProcessor {
 
         if(mobile.contains(",")){
             mobileString =mobile.split(",");
+            mobile = mobileString[0];
+            alternateMobile=mobileString[1];
         }
-        mobile = mobileString[0];
-        alternateMobile=mobileString[1];
 
         //Format mobile no
         mobile=Util.indianMobileConvertor(mobile);

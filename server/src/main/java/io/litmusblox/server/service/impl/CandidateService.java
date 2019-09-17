@@ -129,7 +129,7 @@ public class CandidateService implements ICandidateService {
                 //Candidate by email exists, add mobile history
                 candidateMobileHistoryRepository.save(new CandidateMobileHistory(dupCandidateByEmail, mobile, countryCode, new Date(), loggedInUser));
             }
-            if (!isAlternateMobilePresentInDb) {
+            if (!isAlternateMobilePresentInDb && alternateMobile.isPresent()) {
                 //Candidate by email exists, add alternate mobile history
                 candidateMobileHistoryRepository.save(new CandidateMobileHistory(dupCandidateByEmail, alternateMobile.get(), countryCode, new Date(), loggedInUser));
             }

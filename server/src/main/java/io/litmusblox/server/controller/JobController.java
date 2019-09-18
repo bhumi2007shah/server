@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
+import io.litmusblox.server.model.JobHistory;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import io.litmusblox.server.utils.Util;
@@ -165,5 +166,22 @@ public class JobController {
                     put("UserScreeningQuestion",new ArrayList<>(0));
                 }}));
         //return jobService.getJobDetails(jobId);
+    }
+
+    @GetMapping(value="/getHistory/{jobId}")
+    @ResponseBody
+    String getJobHistory(@PathVariable("jobId") Long jobId)throws Exception{
+        return Util.stripExtraInfoFromResponseBean(
+                jobService.getJobHistory(jobId),
+                (new HashMap<String, List<String>>(){{
+                    put("User",Arrays.asList("displayName"));
+                }}),
+                (new HashMap<String, List<String>>(){{
+                    put("Job",new ArrayList<>(0));
+                    put("JobScreeningQuestions",new ArrayList<>(0));
+                    put("ScreeningQuestions",new ArrayList<>(0));
+                    put("CompanyScreeningQuestion",new ArrayList<>(0));
+                    put("UserScreeningQuestion",new ArrayList<>(0));
+                }}));
     }
 }

@@ -439,15 +439,20 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             }
             else {
                 JobCandidateMapping jcm = jcmOptional.get();
-                try {
-                    Map queryParams = new HashMap(3);
-                    queryParams.put("lbJobId",jcm.getJob().getId());
-                    queryParams.put("candidateId", jcm.getCandidate().getId());
-                    queryParams.put("candidateUuid", jcm.getChatbotUuid());
-                    log.info("Calling Scoring Engine api to add candidate to job");
-                    String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl+scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT,null, Optional.of(queryParams));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(jcm.getJob().getScoringEngineJobAvailable()) {
+                    try {
+                        Map queryParams = new HashMap(3);
+                        queryParams.put("lbJobId", jcm.getJob().getId());
+                        queryParams.put("candidateId", jcm.getCandidate().getId());
+                        queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                        log.info("Calling Scoring Engine api to add candidate to job");
+                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                    } catch (Exception e) {
+                        log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
+                    }
+                }
+                else {
+                    log.info("Job has not been added to Scoring engine. Cannot call create candidate api. " + jcm.getJob().getId());
                 }
             }
         });

@@ -78,7 +78,7 @@ public class User implements Serializable, UserDetails {
     private Company company;
 
    // @NotNull
-    @OneToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "COUNTRY_ID")
     private Country countryId;
 
@@ -190,5 +190,22 @@ public class User implements Serializable, UserDetails {
     @Override
     public boolean isEnabled() {
         return status.equals(IConstant.UserStatus.Active.name());
+    }
+
+    public User(){};
+
+    public User(Long id, String email, String password, String firstName, String lastName, String mobile, String role, String designation, String status, Company company, Country country, UUID uuid){
+        this.id=id;
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.mobile = mobile;
+        this.role = role;
+        this.designation = designation;
+        this.status = status;
+        this.company = company;
+        this.countryId = country;
+        this.userUuid = uuid;
     }
 }

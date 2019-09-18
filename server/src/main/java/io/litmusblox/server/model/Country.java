@@ -45,4 +45,13 @@ public class Country implements Serializable {
 
     @Column(name = "COUNTRY_SHORT_CODE")
     private String countryShortCode;
+
+    public Country(){}
+
+    public Country(String countryName, String countryCode, Long maxMobileLength, String countryShortCode) {
+        this.countryName = countryName;
+        this.countryCode = countryCode;
+        this.maxMobileLength = maxMobileLength;
+        this.countryShortCode = countryShortCode;
+    }
 }

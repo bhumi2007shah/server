@@ -299,7 +299,7 @@ public class LbUserDetailsService implements UserDetailsService {
             }
             else {
                 if(!objFromDb.getCompany().getActive())
-                    throw new ValidationException("Cannot unblock user of a blocked company");
+                    throw new ValidationException("Cannot unblock user of a blocked company", HttpStatus.BAD_REQUEST);
             }
         }
         else {

@@ -90,16 +90,7 @@ public class RChilliCvProcessor {
      * @param filePath
      */
     public void processFile(String filePath) {
-        // TODO:
-        // 1. call the RChilli api to parse the candidate via RestClient
-        // 2. from the name of file (<userId>_<jobId>_actualFileName), retrieve user Id and job id, to be used
-        // 3. add jcm, and jcm communication details records
-        // 4. increment the number of candidates processed by the user
-        // 5. add a record in the new table cv_parsing_details with required details
-        // 6. move the file to the job folder using the candidate id generated
-        // In case of error from RChilli
-        // 1. add record in cv_parsing_details <repolocation>/error_files/job_id
-
+        // remove task steps
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
         String[] s = fileName.split("_");
 
@@ -136,7 +127,8 @@ public class RChilliCvProcessor {
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 bean = mapper.readValue(rchilliJsonResponse, ResumeParserDataRchilliBean.class);
                 //log.info("ResumeParserDataRchilliBean :"+resumeParserDataRchilliBean);
-                candidate = setCandidateModel(bean, user);
+                 String cvType="."+Util.getFileExtension(fileName);
+                candidate = setCandidateModel(bean, user, cvType);
 
                 candidateId = processCandidate(candidate, user, job);
                 if(candidateId==0)
@@ -234,12 +226,25 @@ public class RChilliCvProcessor {
         }
     }
 
-    private Candidate setCandidateModel(ResumeParserDataRchilliBean bean, User user) {
+    private Candidate setCandidateModel(ResumeParserDataRchilliBean bean, User user, String cvType) {
+        String alternateMobile=null;
+        String[] mobileString=null;
         String mobile=bean.getFormattedMobile().isEmpty() ? bean.getFormattedPhone() : bean.getFormattedMobile();
+
+        if(mobile.contains(",")){
+            mobileString =mobile.split(",");
+            mobile = mobileString[0];
+            alternateMobile=mobileString[1];
+        }
+
         //Format mobile no
         mobile=Util.indianMobileConvertor(mobile);
+        if(null!=alternateMobile)
+            alternateMobile=Util.indianMobileConvertor(alternateMobile);
 
         Candidate candidate = new Candidate(bean.getFirstName(), bean.getLastName(), bean.getEmail(), mobile, null, new Date(), null);
+        if(null!=alternateMobile)
+            candidate.setAlternateMobile(alternateMobile);
         candidate.setCandidateName(bean.getFullName());
         candidate.setCandidateSource(IConstant.CandidateSource.DragDropCv.toString());
         candidate.setCountryCode(user.getCountryId().getCountryCode());
@@ -254,6 +259,7 @@ public class RChilliCvProcessor {
             candidateDetails.setKeySkills(bean.getSkills());
 
         candidateDetails.setMaritalStatus(bean.getMaritalStatus());
+        candidateDetails.setCvFileType(cvType);
         if(bean.getFormattedAddress().isEmpty())
             candidateDetails.setCurrentAddress(bean.getAddress());
         else
@@ -317,26 +323,5 @@ public class RChilliCvProcessor {
         });
         return candidate;
     }
-
-    /*private void storeFile(String filePath, Boolean isCandidateFailedToProcess, Long jobId, Long candidateId) throws Exception {
-
-        File file=new File(filePath);
-        DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length() , file.getParentFile());
-        InputStream input = new FileInputStream(file);
-        OutputStream os = fileItem.getOutputStream();
-        int ret = input.read();
-        while ( ret != -1 )
-        {
-            os.write(ret);
-            ret = input.read();
-        }
-        os.flush();
-        MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
-        if(isCandidateFailedToProcess){
-            StoreFileUtil.storeFile(multipartFile, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES,candidateId);
-        }else{
-            StoreFileUtil.storeFile(multipartFile, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),candidateId);
-        }
-        file.delete();
-    }*/
+    //Remove storeFile method because repeated code
 }

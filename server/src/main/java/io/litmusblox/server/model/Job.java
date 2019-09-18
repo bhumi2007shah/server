@@ -84,6 +84,10 @@ public class Job implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateArchived;
 
+
+    @Column(name = "SCORING_ENGINE_JOB_AVAILABLE")
+    private Boolean scoringEngineJobAvailable  = false;
+
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)

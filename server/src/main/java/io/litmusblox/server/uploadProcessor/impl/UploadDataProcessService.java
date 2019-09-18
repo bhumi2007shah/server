@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -155,7 +156,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());
 
         if(Util.isNotNull(candidate.getMobile())) {
-            if (!Util.validateMobile(candidate.getMobile(), loggedInUser.getCountryId().getCountryCode())) {
+            if (!Util.validateMobile(candidate.getMobile(), (null != candidate.getCountryCode())?candidate.getCountryCode():loggedInUser.getCountryId().getCountryCode())) {
                 String cleanMobile = candidate.getMobile().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                 log.error("Special characters found, cleaning mobile number \"" + candidate.getMobile() + "\" to " + cleanMobile);
                 if (!Util.validateMobile(cleanMobile, candidate.getCountryCode()))
@@ -179,14 +180,15 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
         //create a candidate if no history found for email and mobile
         long candidateId;
-        Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()), loggedInUser);
+        Candidate existingCandidate = candidateService.findByMobileOrEmail(candidate.getEmail(),candidate.getMobile(),(Util.isNull(candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode()), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
         Candidate candidateObjToUse = existingCandidate;
         if(null == existingCandidate) {
             candidate.setCreatedOn(new Date());
             candidate.setCreatedBy(loggedInUser);
             if(Util.isNull(candidate.getCountryCode()))
                 candidate.setCountryCode(loggedInUser.getCountryId().getCountryCode());
-            candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser);
+            candidateObjToUse = candidateService.createCandidate(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail(), candidate.getMobile(), candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
+            candidate.setId(candidateObjToUse.getId());
             msg.append(" New");
         }
         else {
@@ -223,7 +225,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         if(null!=uploadResponseBean){
             uploadResponseBean.getSuccessfulCandidates().add(candidateObjToUse);
         }
-        return candidateObjToUse;
+        return candidate;
     }
 
 

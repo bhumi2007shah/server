@@ -142,4 +142,8 @@ public class Candidate implements Serializable {
     @JsonProperty
     @Transient
     private List<JobScreeningQuestions> screeningQuestionResponses;
+
+    @JsonProperty
+    @Transient
+    private String alternateMobile;
 }

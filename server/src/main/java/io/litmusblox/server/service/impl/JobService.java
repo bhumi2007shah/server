@@ -111,11 +111,10 @@ public class JobService implements IJobService {
 
     @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
-
-        log.info("Received request to add job for page " + pageName);
-        long startTime = System.currentTimeMillis();
-
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        log.info("Received request to add job for page " + pageName + " from user: " + loggedInUser.getEmail());
+        long startTime = System.currentTimeMillis();
 
         Job oldJob = null;
 
@@ -451,6 +450,8 @@ public class JobService implements IJobService {
         if (userProvidedJobKeySkillslist.size() > 0) {
             jobKeySkillsRepository.deleteAll(userProvidedJobKeySkillslist);
         }
+        jobKeySkillsRepository.flush();
+
 
         //For each keyskill in the request (will have only the mlProvided true ones), update the values for selected
         Map<Long, JobKeySkills> newSkillValues = new HashMap();
@@ -521,8 +522,11 @@ public class JobService implements IJobService {
 
     private void addJobCapabilities(Job job, Job oldJob, User loggedInUser) { //add job capabilities
 
-        if (null != job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()) {
-            throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId());
+        Hibernate.initialize(oldJob.getJobCapabilityList());
+
+        //if there are capabilities that were returned from ML, and the request for add job - capabilities has a 0 length array, throw an error, otherwise, proceed
+        if (oldJob.getJobCapabilityList().size() > 0 && null != job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()) {
+            throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         //For each capability in the request, update the values for selected and importance_level
@@ -648,13 +652,20 @@ public class JobService implements IJobService {
     @Transactional
     public void publishJob(Long jobId) throws Exception {
         log.info("Received request to publish job with id: " + jobId);
-        changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
+        Job publishedJob = changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
         log.info("Completed publishing job with id: " + jobId);
-        log.info("Calling Scoring Engine Api to create a job");
-        try {
-            String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId), scoringEngineBaseUrl+scoringEngineAddJobUrlSuffix, HttpMethod.POST,null);
-        } catch (Exception e) {
-            e.printStackTrace();
+        Hibernate.initialize(publishedJob.getJobCapabilityList());
+        if(publishedJob.getJobCapabilityList().size() == 0)
+            log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
+        else {
+            log.info("Calling Scoring Engine Api to create a job");
+            try {
+                String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId), scoringEngineBaseUrl + scoringEngineAddJobUrlSuffix, HttpMethod.POST, null);
+                publishedJob.setScoringEngineJobAvailable(true);
+                jobRepository.save(publishedJob);
+            } catch (Exception e) {
+                log.error("Error during create job api call on Scoring engine: " + e.getMessage());
+            }
         }
     }
 

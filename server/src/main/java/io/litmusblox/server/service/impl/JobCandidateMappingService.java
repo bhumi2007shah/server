@@ -152,7 +152,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
 
         //find candidateId
-        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser);
+        Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
 
         Long candidateId = null;
         if (null != candidateFromDb)
@@ -455,15 +455,20 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             }
             else {
                 JobCandidateMapping jcm = jcmOptional.get();
-                try {
-                    Map queryParams = new HashMap(3);
-                    queryParams.put("lbJobId",jcm.getJob().getId());
-                    queryParams.put("candidateId", jcm.getCandidate().getId());
-                    queryParams.put("candidateUuid", jcm.getChatbotUuid());
-                    log.info("Calling Scoring Engine api to add candidate to job");
-                    String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl+scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT,null, Optional.of(queryParams));
-                } catch (Exception e) {
-                    e.printStackTrace();
+                if(jcm.getJob().getScoringEngineJobAvailable()) {
+                    try {
+                        Map queryParams = new HashMap(3);
+                        queryParams.put("lbJobId", jcm.getJob().getId());
+                        queryParams.put("candidateId", jcm.getCandidate().getId());
+                        queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                        log.info("Calling Scoring Engine api to add candidate to job");
+                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                    } catch (Exception e) {
+                        log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
+                    }
+                }
+                else {
+                    log.info("Job has not been added to Scoring engine. Cannot call create candidate api. " + jcm.getJob().getId());
                 }
             }
         });
@@ -664,7 +669,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         Integer[] countArray = new Integer[0];
 
         for (MultipartFile fileToProcess :multipartFiles) {
-            String extension = Util.getFileExtension(fileToProcess.getOriginalFilename());
+            String extension = Util.getFileExtension(fileToProcess.getOriginalFilename()).toLowerCase();
             if (filesProcessed == MasterDataBean.getInstance().getConfigSettings().getMaxCvFiles()) {
                 responseBean.getCvUploadMessage().put(fileToProcess.getOriginalFilename(), IErrorMessages.MAX_FILES_PER_UPLOAD);
             }

@@ -554,7 +554,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      */
     @Transactional
     public Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception {
-        JobCandidateMapping objFromDb = jobCandidateMappingRepository.getOne(jobCandidateMappingId);
+        JobCandidateMapping objFromDb = jobCandidateMappingRepository.findById(jobCandidateMappingId).orElse(null);
         if(null == objFromDb)
             throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -594,6 +594,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
+        returnObj.setDisplayName(objFromDb.getCandidateFirstName()+" "+objFromDb.getCandidateLastName());
         return returnObj;
     }
 

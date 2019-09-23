@@ -60,7 +60,7 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     String addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
-        log.info("Candidate name: " + candidate.get(0).getDisplayName());
+        log.info("Candidate name: " + candidate.get(0).getFirstName()+" "+candidate.get(0).getLastName());
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobCandidateMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -165,9 +165,10 @@ public class JobCandidateMappingController {
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
                     put("ScreeningQuestions", Arrays.asList("question"));
+                    put("JobCandidateMapping", Arrays.asList("displayName"));
                 }},
                 new HashMap<String, List<String>>() {{
-                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"/*, "firstName", "lastName", "displayName"*/));
                     put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
                     put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
                     put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));

@@ -2,6 +2,8 @@ package io.litmusblox.server.utils;
 
 import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.User;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,11 +21,12 @@ public class UsersUtil {
     private List<User> userList= new ArrayList<>();
 
     public List<User> getUserList() {
-        if(this.userList.size()==0){
-            addUser(new User(1L, "sameer@hexagonsearch.com", "123456", "sameer", "khan", "8109698905", "SuperAdmin", "SE", "active", new Company("Hexagon", true, new Date(), 1L), CountryUtil.getCountry(), UUID.randomUUID()));
-            addUser(new User(1L, "sumit@litmusblox.io", "123456", "sumit", "bagul", "8856835916", "ClientAdmin", "SE", "active", new Company("Hexagon", true, new Date(), 1L), CountryUtil.getCountry(), UUID.randomUUID()));
-        }
-        return userList;
+        List<User> mockList = new ArrayList<>();
+        User user1 = Mockito.mock(User.class);
+        mockList.add(user1);
+        User user2 = Mockito.mock(User.class);
+        mockList.add(user2);
+        return mockList;
     }
 
     public void setUserList(List<User> userList) {

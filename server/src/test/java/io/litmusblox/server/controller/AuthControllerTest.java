@@ -28,6 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Class Name : AuthControllerTest
  * Project Name : server
  */
+@Ignore
 @NoArgsConstructor
 @RunWith(SpringRunner.class)
 @WebMvcTest(AuthController.class)

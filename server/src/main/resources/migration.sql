@@ -235,23 +235,26 @@ ALTER TABLE CV_PARSING_DETAILS
 ADD COLUMN ERROR_MESSAGE varchar(100);
 
 
--- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id
-DELETE
-FROM job_key_skills
-where skill_id in (
-SELECT ID
-FROM skills_master
-where
-id not in (select min(id)
-from skills_master
-group by skill_name)
-);
+-- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id. Need to match by lower case.
+SELECT
+    LOWER(skill_name),
+    COUNT( LOWER(skill_name) )
+FROM
+    skills_master
+GROUP BY
+    LOWER(skill_name)
+HAVING
+    COUNT( LOWER(skill_name) )> 1
+ORDER BY
+    LOWER(skill_name);
 
-Delete
-FROM skills_master
-WHERE ID NOT IN (SELECT MIN(id)
-FROM skills_master
-GROUP BY skill_name);
+DELETE
+FROM
+    skills_master a
+        USING skills_master b
+WHERE
+    a.id < b.id
+    AND LOWER(a.skill_name) = LOWER(b.skill_name);
 
 -- Added unique constraint on skill_name in skills_master with case insensitivity
 Alter table skills_master add constraint unique_skill_name unique(skill_name);

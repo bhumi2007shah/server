@@ -402,10 +402,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 }
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
-            if(!objFromDb.getJob().getScoringEngineJobAvailable() || objFromDb.getChatbotStatus().equals("Complete")){
-                jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
-            }
         });
+        if(!objFromDb.getJob().getScoringEngineJobAvailable() || (objFromDb.getChatbotStatus()!=null && objFromDb.getChatbotStatus().equals("Complete"))){
+            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
+        }
     }
 
     /**
@@ -738,6 +738,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
-        jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
+        if(requestBean.getChatbotStatus().equals("Complete")) {
+            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
+        }
     }
 }

@@ -67,9 +67,9 @@ public class Candidate implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    public String getDisplayName() {
-        return firstName + " " + lastName;
-    }
+    @JsonProperty
+    @Transient
+    private String displayName;
 
     @Transient
     @JsonProperty
@@ -146,4 +146,5 @@ public class Candidate implements Serializable {
     @JsonProperty
     @Transient
     private String alternateMobile;
+
 }

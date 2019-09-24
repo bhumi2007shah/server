@@ -763,4 +763,13 @@ public class JobService implements IJobService {
     private void saveJobHistory(Long jobId, String historyMsg, User loggedInUser) {
         jobHistoryRepository.save(new JobHistory(jobId, historyMsg, loggedInUser));
     }
+
+    @Transactional
+    public List<JobHistory>getJobHistory(Long jobId)throws Exception{
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if (null == job) {
+            throw new WebException("Job with id " + jobId + "does not exist ", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+        return jobHistoryRepository.findByJobIdOrderByIdDesc(jobId);
+    }
 }

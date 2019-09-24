@@ -144,6 +144,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
         this.candidateLastName = candidateLastName;
     }
 
+    public JobCandidateMapping(Long id) {
+        this.id = id;
+    }
+
     @Override
     public int compareTo(Object o) {
         int returnVal = 0;

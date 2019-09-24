@@ -87,6 +87,9 @@ public class JcmCommunicationDetails {
     @Column(name="CHAT_COMPLETE_FLAG")
     private boolean chatCompleteFlag;
 
+    @Column(name="HR_CHAT_COMPLETE_FLAG")
+    private boolean hrChatCompleteFlag;
+
     public JcmCommunicationDetails(Long jcmId) {
         this.jcmId = jcmId;
         chatInviteFlag = false;

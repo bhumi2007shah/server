@@ -403,6 +403,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
         });
+
+        //updating hr_chat_complete_flag
+        jcmCommunicationDetailsRepository.updateHrChatbotFlagByJcmId(objFromDb.getId());
+
+        //updating chat_complete_flag if corresponding job is not available on scoring engine due to lack of ML data,
+        // or candidate already filled all the capabilities in some other job and we already have candidate responses for technical chatbot.
         if(!objFromDb.getJob().getScoringEngineJobAvailable() || (objFromDb.getChatbotStatus()!=null && objFromDb.getChatbotStatus().equals("Complete"))){
             jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         }

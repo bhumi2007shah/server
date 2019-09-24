@@ -18,6 +18,7 @@ import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.utils.RestClient;
+import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.StoreFileUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
@@ -39,6 +40,8 @@ import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Service class to process the CV uploaded against RChilli application
@@ -140,7 +143,12 @@ public class RChilliCvProcessor {
             }
             else {
                 log.error("Failed to process CV against RChilli: " + rchilliJsonResponse);
-                 //TODO: Add sentry here?
+                 Map<String, String> breadCrumb = new HashMap<>();
+                 breadCrumb.put("User Id",user.getId().toString());
+                 breadCrumb.put("User email",user.getEmail());
+                 breadCrumb.put("Job id",job.getId().toString());
+                 breadCrumb.put("Drag & Drop filename", fileName);
+                 SentryUtil.logWithStaticAPI(null,"Failed to process CV against RChilli",breadCrumb);
             }
 
         } catch (Exception e) {
@@ -161,11 +169,11 @@ public class RChilliCvProcessor {
             os.flush();
             MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
             if(isCandidateFailedToProcess && rChilliErrorResponse)
-                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, user.getId());
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES,null, user);
             else if (isCandidateFailedToProcess)
-                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate.getId());
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate, null);
             else
-                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate.getId());
+                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate, null);
 
             file.delete();
         } catch (Exception ex) {

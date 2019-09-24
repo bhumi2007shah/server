@@ -97,7 +97,7 @@ public class CompanyService implements ICompanyService {
         }
 
         //Store Company logo on repo and save its filepath in to the company logo field
-        String fileName = StoreFileUtil.storeFile(logo, company.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.Logo.toString(),null);
+        String fileName = StoreFileUtil.storeFile(logo, company.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.Logo.toString(),null, null);
         log.info("Company " + company.getCompanyName() + " uploaded " + fileName);
         company.setLogo(fileName);
 

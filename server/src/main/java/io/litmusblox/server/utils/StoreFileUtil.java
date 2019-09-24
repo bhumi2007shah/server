@@ -7,6 +7,8 @@ package io.litmusblox.server.utils;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.WebException;
+import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.User;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,7 +42,7 @@ public class StoreFileUtil {
      * @throws Exception
      */
 
-    public static String storeFile(MultipartFile multipartFile, long id, String repoLocation, String uploadType, Long candidateId) throws Exception {
+    public static String storeFile(MultipartFile multipartFile, long id, String repoLocation, String uploadType, Candidate candidate, User user) throws Exception {
         File targetFile =  null;
         Boolean isZipFile=false;
         try {
@@ -48,16 +50,25 @@ public class StoreFileUtil {
                 isZipFile=true;
             }
             InputStream is = multipartFile.getInputStream();
-            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, candidateId, isZipFile);
+            String filePath = getFileName(multipartFile.getOriginalFilename(), id, repoLocation, uploadType, (null!=candidate)?candidate.getId():(null!=user)?user.getId():null, isZipFile);
             //Util.storeFile(is, filePath,repoLocation);
             if(Util.isNull(filePath)){
                 StringBuffer info = new StringBuffer(multipartFile.getName()).append(" FilePath is null ");
                 log.info(info.toString());
                 Map<String, String> breadCrumb = new HashMap<>();
-                breadCrumb.put("Candidate Id",candidateId.toString());
+                if(null!=user){
+                    breadCrumb.put("User Id",user.getId().toString());
+                    breadCrumb.put("User email",user.getEmail());
+                    breadCrumb.put("User mobile", user.getMobile());
+                }
+                if(null!=candidate){
+                    breadCrumb.put("Candidate Id",candidate.getId().toString());
+                    breadCrumb.put("Candidate email",candidate.getEmail());
+                    breadCrumb.put("Candidate Mobile",candidate.getMobile());
+                }
                 breadCrumb.put("filePath", filePath);
                 breadCrumb.put("detail", info.toString());
-                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED);
+                throw new WebException(IErrorMessages.INVALID_SETTINGS, HttpStatus.EXPECTATION_FAILED, breadCrumb);
             }
             targetFile = new File(repoLocation + File.separator + filePath);
             Files.copy(is, targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

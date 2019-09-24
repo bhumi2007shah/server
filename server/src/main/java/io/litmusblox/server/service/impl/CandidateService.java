@@ -14,6 +14,7 @@ import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -273,10 +274,21 @@ public class CandidateService implements ICandidateService {
 
     //Method to truncate the value in the field and send out a sentry message for the same
     private String truncateField(String candidateId, String fieldName, int fieldLength, String fieldValue) {
+        Candidate candidate = candidateRepository.findById(Long.parseLong(candidateId)).orElse(null);
+        User loggedInUser = null;
+        if(!SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
+            loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);
         log.info(info.toString());
         Map<String, String> breadCrumb = new HashMap<>();
+        if(null!=loggedInUser){
+            breadCrumb.put("User Id",loggedInUser.getId().toString());
+            breadCrumb.put("User Email", loggedInUser.getEmail());
+        }
         breadCrumb.put("Candidate Id",candidateId);
+        breadCrumb.put("Candidate Email",candidate.getEmail());
+        breadCrumb.put("Candidate Mobile",candidate.getMobile());
         breadCrumb.put(fieldName, fieldValue);
         SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
         return fieldValue.substring(0, fieldLength);

@@ -323,19 +323,21 @@ public class JobService implements IJobService {
         }
         saveJobHistory(job.getId(), historyMsg + " job overview", loggedInUser);
         //make a call to ML api to obtain skills and capabilities
-        try {
-            callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
-            if(null == oldJob) {
-                job.setMlDataAvailable(true);
-                jobRepository.save(job);
+        if(MasterDataBean.getInstance().getConfigSettings().getMlCall()==1) {
+            try {
+                callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
+                if(null == oldJob) {
+                    job.setMlDataAvailable(true);
+                    jobRepository.save(job);
+                }
+                else {
+                    oldJob.setMlDataAvailable(true);
+                    jobRepository.save(oldJob);
+                }
+            } catch (Exception e) {
+                log.error("Error while fetching data from ML: " + e.getMessage());
+                job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
             }
-            else {
-                oldJob.setMlDataAvailable(true);
-                jobRepository.save(oldJob);
-            }
-        } catch (Exception e) {
-            log.error("Error while fetching data from ML: " + e.getMessage());
-            job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
         }
     }
 

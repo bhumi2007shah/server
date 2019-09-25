@@ -25,4 +25,5 @@ public class ConfigSettings {
     int sendSms;
     int maxCvFiles;
     long maxUploadDataLimit;
+    int mlCall;
 }

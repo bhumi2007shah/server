@@ -57,4 +57,15 @@ public class CandidateCompanyDetails {
     @Column(name = "END_DATE")
     @JsonDeserialize(using = DateDeserializer.class)
     private Date endDate;
+
+    public CandidateCompanyDetails(long candidateId, String companyName, String noticePeriod, String designation) {
+        this.candidateId = candidateId;
+        this.companyName = companyName;
+        this.noticePeriod = noticePeriod;
+        this.designation = designation;
+    }
+
+    public CandidateCompanyDetails() {
+        super();
+    }
 }

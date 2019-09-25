@@ -160,4 +160,11 @@ public interface IJobCandidateMappingService {
      * @throws Exception
      */
     void updateTechResponseStatus(TechChatbotRequestBean requestBean) throws Exception;
+
+    /**
+     * Service to update Jcm and candidate related models
+     *
+     * @param jobCandidateMapping updated data come from JobCandidateMapping model
+     */
+    void updateJcm(JobCandidateMapping jobCandidateMapping);
 }

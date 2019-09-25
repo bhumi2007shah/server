@@ -70,7 +70,16 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     CandidateMobileHistoryRepository candidateMobileHistoryRepository;
 
     @Resource
+    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+
+    @Resource
     JobScreeningQuestionsRepository jobScreeningQuestionsRepository;
+
+    @Resource
+    CandidateDetailsRepository candidateDetailsRepository;
+
+    @Resource
+    CandidateCompanyDetailsRepository candidateCompanyDetailsRepository;
 
     @Autowired
     ICandidateService candidateService;
@@ -80,9 +89,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     JcmProfileSharingMasterRepository jcmProfileSharingMasterRepository;
-
-    @Resource
-    JcmHistoryRepository jcmHistoryRepository;
 
     @Value("${scoringEngineBaseUrl}")
     private String scoringEngineBaseUrl;
@@ -190,12 +196,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         educationDetails.setInstituteName(educationDetails.getInstituteName().substring(0,IConstant.MAX_INSTITUTE_LENGTH));
                     }
                 });
-                candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateId);
+                candidateService.saveUpdateCandidateEducationDetails(candidate.getCandidateEducationDetails(), candidateFromDb);
             }
 
             //candidate company details
             if(null != candidate.getCandidateCompanyDetails() && candidate.getCandidateCompanyDetails().size() > 0)
-                candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateId);
+                candidateService.saveUpdateCandidateCompanyDetails(candidate.getCandidateCompanyDetails(), candidateFromDb);
 
             //candidate project details
             if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
@@ -203,7 +209,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
             //candidate online profile
             if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
-                candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateId);
+                candidateService.saveUpdateCandidateOnlineProfile(candidate.getCandidateOnlineProfiles(), candidateFromDb);
 
             //candidate language proficiency
             if(null != candidate.getCandidateLanguageProficiencies() && candidate.getCandidateLanguageProficiencies().size() > 0)
@@ -268,7 +274,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         //Save file
-        String fileName = StoreFileUtil.storeFile(multipartFile, loggedInUser.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.Candidates.toString(),null, null);
+        String fileName = StoreFileUtil.storeFile(multipartFile, loggedInUser.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.Candidates.toString(),null,null);
         log.info("User " + loggedInUser.getDisplayName() + " uploaded " + fileName);
         List<Candidate> candidateList = processUploadedFile(fileName, uploadResponseBean, loggedInUser, fileFormat, environment.getProperty(IConstant.REPO_LOCATION));
 
@@ -337,7 +343,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             try{
                 if(null!=candidateCv) {
                     if (responseBean.getSuccessfulCandidates().size()>0)
-                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getSuccessfulCandidates().get(0), null);
+                        StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getSuccessfulCandidates().get(0),null);
                     else
                         StoreFileUtil.storeFile(candidateCv, jobId, environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(),responseBean.getFailedCandidates().get(0), null);
 
@@ -373,7 +379,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
-        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null));
     }
 
     /**
@@ -402,16 +407,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 }
             }
             candidateScreeningQuestionResponseRepository.save(new CandidateScreeningQuestionResponse(objFromDb.getId(),key, valuesToSave[0], (valuesToSave.length > 1)?valuesToSave[1]:null));
-        });
-
-        //updating hr_chat_complete_flag
-        jcmCommunicationDetailsRepository.updateHrChatbotFlagByJcmId(objFromDb.getId());
-
-        //updating chat_complete_flag if corresponding job is not available on scoring engine due to lack of ML data,
-        // or candidate already filled all the capabilities in some other job and we already have candidate responses for technical chatbot.
-        if(!objFromDb.getJob().getScoringEngineJobAvailable() || (objFromDb.getChatbotStatus()!=null && objFromDb.getChatbotStatus().equals("Complete"))){
             jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
-        }
+        });
     }
 
     /**
@@ -441,19 +438,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if(jcmList == null || jcmList.size() == 0)
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
-        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
-
-        List<JcmHistory> jcmHistoryList = new ArrayList<>();
-
-        for(Long jcmId: jcmList){
-            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
-        }
-
-        if(jcmHistoryList.size()>0){
-            jcmHistoryRepository.saveAll(jcmHistoryList);
-        }
 
         //make an api call to scoring engine for each of the jcm
         jcmList.stream().forEach(jcmId->{
@@ -493,8 +478,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        List<String> recieverEmails = new ArrayList<>();
-
         for (String[] array:requestBean.getReceiverInfo()) {
 
             String receiverNameToUse = array[0], receiverEmailToUse =  array[1];
@@ -527,10 +510,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
             });
             jcmProfileSharingDetailsRepository.saveAll(detailsSet);
-            recieverEmails.add(array[1]);
         }
-
-        jcmHistoryRepository.save(new JcmHistory(new JobCandidateMapping(requestBean.getJcmId().get(0)), "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser));
     }
 
     /**
@@ -698,7 +678,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
                 User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
                 try {
-                    filePath = StoreFileUtil.storeFile(fileToProcess, jobId, environment.getProperty(IConstant.TEMP_REPO_LOCATION), fileType,null,loggedInUser);
+                    filePath = StoreFileUtil.storeFile(fileToProcess, jobId, environment.getProperty(IConstant.TEMP_REPO_LOCATION), fileType,null, loggedInUser);
                     successCount++;
                 } catch (Exception e) {
                     log.error(fileToProcess.getOriginalFilename()+" not save to temp location : "+e.getMessage());
@@ -745,8 +725,77 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
-        if(requestBean.getChatbotStatus().equals("Complete")) {
-            jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
+    }
+
+    /**
+     * Service to update Jcm and candidate related models
+     *
+     * @param jobCandidateMapping updated data come from JobCandidateMapping model
+     */
+    @Transactional
+    @Override
+    public void updateJcm(JobCandidateMapping jobCandidateMapping) {
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        JobCandidateMapping jcmFromDb = jobCandidateMappingRepository.findById(jobCandidateMapping.getId()).orElse(null);
+        //Update or create mobile no
+       try {
+           if(null!=jobCandidateMapping.getCandidate().getMobile() && !jobCandidateMapping.getCandidate().getMobile().isEmpty()){
+               validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+               CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+               if(null == candidateMobileHistory)
+                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jobCandidateMapping.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jcmFromDb.getCandidate().getCountryCode(), new Date(), loggedInUser));
+           }
+       }catch (Exception e){
+           log.info("Enter Mobile no not valid : "+jobCandidateMapping.getCandidate().getMobile());
+       }
+
+        //Update or create email id
+        CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getCandidate().getEmail());
+        if(null == candidateEmailHistory)
+            candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getEmail(), new Date(), loggedInUser));
+
+        //Update Candidate total experience
+        CandidateDetails candidateDetails = candidateDetailsRepository.findById(jcmFromDb.getCandidate().getCandidateDetails().getId()).orElse(null);
+        if(null == candidateDetails.getTotalExperience() || !candidateDetails.getTotalExperience().equals(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience())){
+            candidateDetails.setTotalExperience(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience());
+            candidateDetailsRepository.save(candidateDetails);
         }
+
+        //Update Company
+        CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
+        CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());
+        if (!Util.isNull(candidateCompanyDetail.getDesignation()) && candidateCompanyDetail.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue())
+            candidateCompanyDetail.setDesignation(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), candidateCompanyDetail.getDesignation()));
+
+        if(null == UpdatedCandidateCompanyDetail && !candidateCompanyDetail.getCompanyName().isEmpty()){
+            if (!Util.isNull(candidateCompanyDetail.getCompanyName()) && candidateCompanyDetail.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
+                //truncate institute name to max length
+                candidateCompanyDetail.setCompanyName(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), candidateCompanyDetail.getCompanyName()));
+            }
+            candidateCompanyDetailsRepository.save(new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(),candidateCompanyDetail.getCompanyName(),candidateCompanyDetail.getNoticePeriod(),candidateCompanyDetail.getDesignation()));
+
+        }else {
+            if(!candidateCompanyDetail.getNoticePeriod().isEmpty() && !candidateCompanyDetail.getNoticePeriod().equals(UpdatedCandidateCompanyDetail.getNoticePeriod())){
+                UpdatedCandidateCompanyDetail.setNoticePeriod(candidateCompanyDetail.getNoticePeriod());
+            }
+            if(!candidateCompanyDetail.getDesignation().equals(UpdatedCandidateCompanyDetail.getDesignation())){
+                UpdatedCandidateCompanyDetail.setDesignation(candidateCompanyDetail.getDesignation());
+            }
+            candidateCompanyDetailsRepository.save(UpdatedCandidateCompanyDetail);
+        }
+    }
+
+
+    private String validateMobile(String mobile, String countryCode){
+        if(Util.isNotNull(mobile)) {
+            if (!Util.validateMobile(mobile, countryCode)) {
+                String cleanMobile = mobile.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
+                log.error("Special characters found, cleaning mobile number \"" + mobile + "\" to " + cleanMobile);
+                if (!Util.validateMobile(cleanMobile, countryCode))
+                    throw new ValidationException(IErrorMessages.MOBILE_INVALID_DATA + " - " + mobile, HttpStatus.BAD_REQUEST);
+               return cleanMobile;
+            }
+        }
+        return mobile;
     }
 }

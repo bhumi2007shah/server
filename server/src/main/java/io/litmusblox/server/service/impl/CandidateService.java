@@ -10,17 +10,17 @@ import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.ICandidateService;
-import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Service class for Candidate related operations
@@ -168,16 +168,16 @@ public class CandidateService implements ICandidateService {
         candidateDetailsRepository.deleteByCandidateId(candidate);
 
         if(!Util.isNull(candidateDetails.getCurrentAddress()) && candidateDetails.getCurrentAddress().length() > IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue()) {
-            candidateDetails.setCurrentAddress(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.ADDRESS.name(), IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue(), candidateDetails.getCurrentAddress()));
+            candidateDetails.setCurrentAddress(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ADDRESS.name(), IConstant.MAX_FIELD_LENGTHS.ADDRESS.getValue(), candidateDetails.getCurrentAddress()));
         }
         if(!Util.isNull(candidateDetails.getKeySkills()) && candidateDetails.getKeySkills().length() > IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.getValue()) {
-            candidateDetails.setKeySkills(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.name(), IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.getValue(), candidateDetails.getKeySkills()));
+            candidateDetails.setKeySkills(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.name(), IConstant.MAX_FIELD_LENGTHS.KEY_SKILLS.getValue(), candidateDetails.getKeySkills()));
         }
         if(!Util.isNull(candidateDetails.getWorkSummary()) && candidateDetails.getWorkSummary().length() > IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue()) {
-            candidateDetails.setWorkSummary(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.name(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue(), candidateDetails.getWorkSummary()));
+            candidateDetails.setWorkSummary(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.name(), IConstant.MAX_FIELD_LENGTHS.WORK_SUMMARY.getValue(), candidateDetails.getWorkSummary()));
         }
         if(!Util.isNull(candidateDetails.getGender()) && candidateDetails.getGender().length() > IConstant.MAX_FIELD_LENGTHS.GENDER.getValue()) {
-            candidateDetails.setGender(truncateField(candidate.getId().toString(), IConstant.MAX_FIELD_LENGTHS.GENDER.name(), IConstant.MAX_FIELD_LENGTHS.GENDER.getValue(), candidateDetails.getGender()).toUpperCase());
+            candidateDetails.setGender(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.GENDER.name(), IConstant.MAX_FIELD_LENGTHS.GENDER.getValue(), candidateDetails.getGender()).toUpperCase());
         }
 
         candidateDetails.setCandidateId(candidate);
@@ -187,20 +187,20 @@ public class CandidateService implements ICandidateService {
 
     @Override
     @Transactional
-    public void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Long candidateId) throws Exception {
+    public void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Candidate candidate) throws Exception {
         //delete existing records
-        candidateEducationDetailsRepository.deleteByCandidateId(candidateId);
+        candidateEducationDetailsRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
         candidateEducationDetails.forEach(obj -> {
             //check if institute name is more than 75 characters
             if (!Util.isNull(obj.getInstituteName()) && obj.getInstituteName().length() > IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue()){
-                obj.setInstituteName(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.name(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue(), obj.getInstituteName()));
+                obj.setInstituteName(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.name(), IConstant.MAX_FIELD_LENGTHS.INSTITUTE_NAME.getValue(), obj.getInstituteName()));
             }
             if (!Util.isNull(obj.getDegree()) && obj.getDegree().length() > IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue()){
-                obj.setDegree(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.DEGREE.name(), IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue(), obj.getDegree()));
+                obj.setDegree(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.DEGREE.name(), IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue(), obj.getDegree()));
             }
 
-            obj.setCandidateId(candidateId);
+            obj.setCandidateId(candidate.getId());
             candidateEducationDetailsRepository.save(obj);});
     }
 
@@ -215,15 +215,15 @@ public class CandidateService implements ICandidateService {
 
     @Transactional
     @Override
-    public void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfiles, Long candidateId) throws Exception {
+    public void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfiles, Candidate candidate) throws Exception {
         //delete existing records
-        candidateOnlineProfilesRepository.deleteByCandidateId(candidateId);
+        candidateOnlineProfilesRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
         candidateOnlineProfiles.forEach(obj -> {
             if(!Util.isNull(obj.getUrl()) && obj.getUrl().length() > IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue()) {
-                obj.setUrl(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.name(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue(), obj.getUrl()));
+                obj.setUrl(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.name(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue(), obj.getUrl()));
             }
-            obj.setCandidateId(candidateId);candidateOnlineProfilesRepository.save(obj);});
+            obj.setCandidateId(candidate.getId());candidateOnlineProfilesRepository.save(obj);});
     }
 
     @Transactional
@@ -253,45 +253,25 @@ public class CandidateService implements ICandidateService {
     }
 
     @Transactional
-    public void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetails, Long candidateId) throws Exception {
+    public void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetails, Candidate candidate) throws Exception {
         //delete existing records
-        candidateCompanyDetailsRepository.deleteByCandidateId(candidateId);
+        candidateCompanyDetailsRepository.deleteByCandidateId(candidate.getId());
 
         //insert new ones
         candidateCompanyDetails.forEach(obj -> {
-            obj.setCandidateId(candidateId);
+            obj.setCandidateId(candidate.getId());
             //Check for company name
             if (!Util.isNull(obj.getCompanyName()) && obj.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
                 //truncate institute name to max length
-                obj.setCompanyName(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), obj.getCompanyName()));
+                obj.setCompanyName(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), obj.getCompanyName()));
             }
             //check for designation
             if (!Util.isNull(obj.getDesignation()) && obj.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue()) {
-                obj.setDesignation(truncateField(candidateId.toString(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), obj.getDesignation()));
+                obj.setDesignation(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), obj.getDesignation()));
             }
             candidateCompanyDetailsRepository.save(obj);});
     }
 
     //Method to truncate the value in the field and send out a sentry message for the same
-    private String truncateField(String candidateId, String fieldName, int fieldLength, String fieldValue) {
-        Candidate candidate = candidateRepository.findById(Long.parseLong(candidateId)).orElse(null);
-        User loggedInUser = null;
-        if(!SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
-            loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);
-        log.info(info.toString());
-        Map<String, String> breadCrumb = new HashMap<>();
-        if(null!=loggedInUser){
-            breadCrumb.put("User Id",loggedInUser.getId().toString());
-            breadCrumb.put("User Email", loggedInUser.getEmail());
-        }
-        breadCrumb.put("Candidate Id",candidateId);
-        breadCrumb.put("Candidate Email",candidate.getEmail());
-        breadCrumb.put("Candidate Mobile",candidate.getMobile());
-        breadCrumb.put(fieldName, fieldValue);
-        SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
-        return fieldValue.substring(0, fieldLength);
-    }
-
+    //move this truncateField method to Util class because it is use in other place also like CandidateCompanyDetails model
 }

@@ -53,11 +53,11 @@ public interface ICandidateService {
      */
     CandidateDetails saveUpdateCandidateDetails(CandidateDetails candidateDetails, Candidate candidateId) throws Exception;
 
-    void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Long candidateId) throws Exception;
+    void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Candidate candidate) throws Exception;
 
     void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetailsList, Long candidateId) throws Exception;
 
-    void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfileList, Long candidateId) throws Exception;
+    void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfileList, Candidate candidate) throws Exception;
 
     void saveUpdateCandidateLanguageProficiency(List<CandidateLanguageProficiency> candidateLanguageProficiencyList, Long candidateId) throws Exception;
 
@@ -65,5 +65,5 @@ public interface ICandidateService {
 
     void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception;
 
-    void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetailsList, Long candidateId) throws Exception;
+    void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetailsList, Candidate candidate) throws Exception;
 }

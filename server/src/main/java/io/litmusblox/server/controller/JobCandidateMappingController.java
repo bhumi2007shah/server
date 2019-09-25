@@ -6,6 +6,7 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CvUploadResponseBean;
 import io.litmusblox.server.service.IJobCandidateMappingService;
@@ -200,5 +201,17 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
         return jobCandidateMappingService.processDragAndDropCv(multipartFiles, jobId);
+    }
+
+    /**
+     * Api to update Jcm and also candidate
+     *
+     * @param jobCandidateMapping updated jcm object
+     */
+    @PostMapping("/updateJcm")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    void updateJcm(@RequestBody JobCandidateMapping jobCandidateMapping){
+        jobCandidateMappingService.updateJcm(jobCandidateMapping);
     }
 }

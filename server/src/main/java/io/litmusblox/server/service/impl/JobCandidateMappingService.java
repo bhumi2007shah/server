@@ -774,8 +774,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
            if(null!=jobCandidateMapping.getCandidate().getMobile() && !jobCandidateMapping.getCandidate().getMobile().isEmpty()){
                validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
                CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
-               if(null == candidateMobileHistory)
+               if(null == candidateMobileHistory) {
                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
+                   jcmFromDb.setMobile(jobCandidateMapping.getCandidate().getMobile());
+               }
            }
        }catch (Exception e){
            log.info("Enter Mobile no not valid : "+jobCandidateMapping.getCandidate().getMobile());
@@ -783,14 +785,25 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         //Update or create email id
         CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getCandidate().getEmail());
-        if(null == candidateEmailHistory)
+        if(null == candidateEmailHistory){
             candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getEmail(), new Date(), loggedInUser));
+            jcmFromDb.setEmail(jobCandidateMapping.getCandidate().getEmail());
+        }
+        jobCandidateMappingRepository.save(jcmFromDb);
 
         //Update Candidate total experience
-        CandidateDetails candidateDetails = candidateDetailsRepository.findById(jcmFromDb.getCandidate().getCandidateDetails().getId()).orElse(null);
-        if(null == candidateDetails.getTotalExperience() || !candidateDetails.getTotalExperience().equals(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience())){
-            candidateDetails.setTotalExperience(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience());
-            candidateDetailsRepository.save(candidateDetails);
+        CandidateDetails candidateDetails = null;
+        if(null!=jcmFromDb.getCandidate().getCandidateDetails()){
+            candidateDetails = candidateDetailsRepository.findById(jcmFromDb.getCandidate().getCandidateDetails().getId()).orElse(null);
+        }
+
+        if(null != candidateDetails){
+            if(!candidateDetails.getTotalExperience().equals(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience())){
+                candidateDetails.setTotalExperience(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience());
+                candidateDetailsRepository.save(candidateDetails);
+            }
+        }else if(null != jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()){
+            candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
         //Update Company

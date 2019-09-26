@@ -644,8 +644,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         Hibernate.initialize(objFromDb.getJob().getCompanyId());
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
-        if(null!=objFromDb.getJob().getJobDetail() && null!=objFromDb.getJob().getJobDetail().getExpertise()){
-            Hibernate.initialize(objFromDb.getJob().getJobDetail().getExpertise());
+        if(null!=objFromDb.getJob() && null!=objFromDb.getJob().getExpertise()){
+            Hibernate.initialize(objFromDb.getJob().getExpertise());
         }
         objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
@@ -775,7 +775,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
                CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
                if(null == candidateMobileHistory)
-                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jobCandidateMapping.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jcmFromDb.getCandidate().getCountryCode(), new Date(), loggedInUser));
+                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
            }
        }catch (Exception e){
            log.info("Enter Mobile no not valid : "+jobCandidateMapping.getCandidate().getMobile());
@@ -820,7 +820,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     private String validateMobile(String mobile, String countryCode){
         if(Util.isNotNull(mobile)) {
-            if (!Util.validateMobile(mobile, countryCode)) {
+            if (!Util.validateMobile(mobile, countryCode) && !countryCode.equals(IConstant.INDIA_CODE)) {
                 String cleanMobile = mobile.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                 log.error("Special characters found, cleaning mobile number \"" + mobile + "\" to " + cleanMobile);
                 if (!Util.validateMobile(cleanMobile, countryCode))

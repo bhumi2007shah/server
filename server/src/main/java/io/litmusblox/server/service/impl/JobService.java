@@ -83,9 +83,6 @@ public class JobService implements IJobService {
     CompanyBuRepository companyBuRepository;
 
     @Resource
-    JobDetailRepository jobDetailRepository;
-
-    @Resource
     CompanyStageStepRepository companyStageStepRepository;
 
     @Resource
@@ -120,8 +117,8 @@ public class JobService implements IJobService {
 
         if (null != job.getId()) {
             //get handle to existing job object
-            Optional<Job> tempJobObj = jobRepository.findById(job.getId());
-            oldJob = tempJobObj.isPresent() ? tempJobObj.get() : null;
+            oldJob = jobRepository.findById(job.getId()).orElse(null);
+           // oldJob = tempJobObj.isPresent() ? tempJobObj.get() : null;
         }
 
         switch (IConstant.AddJobPages.valueOf(pageName)) {
@@ -261,8 +258,8 @@ public class JobService implements IJobService {
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
         });
 
-        if(null!=job.getJobDetail() && null!=job.getJobDetail().getExpertise()){
-            Hibernate.initialize(job.getJobDetail().getExpertise());
+        if(null!=job && null!=job.getExpertise()){
+            Hibernate.initialize(job.getExpertise());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());
@@ -561,24 +558,22 @@ public class JobService implements IJobService {
     }
 
     private void addJobDetail(Job job, Job oldJob, User loggedInUser) {//add job details
-        if (null == job.getJobDetail()) {
-            throw new ValidationException("Job detail " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-        }
-
-        //delete existing jobDetail record from the database
-        jobDetailRepository.deleteByJobId(oldJob);
 
         MasterDataBean masterDataBean = MasterDataBean.getInstance();
-        if (null == masterDataBean.getFunction().get(job.getJobDetail().getFunction().getId())) {
-            throw new ValidationException("In Job detail, function " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if (null == masterDataBean.getFunction().get(job.getFunction().getId())) {
+            throw new ValidationException("In Job, function " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        if (null == masterDataBean.getEducation().get(job.getJobDetail().getEducation().getId())) {
-            throw new ValidationException("In Job detail, education " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if (null == job.getCurrency()) {
+            throw new ValidationException("In Job, Currency " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        if (null == masterDataBean.getExpertise().get(job.getJobDetail().getExpertise().getId())) {
-            throw new ValidationException("In Job detail, expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if (null == masterDataBean.getEducation().get(job.getEducation().getId())) {
+            throw new ValidationException("In Job, education " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        }
+
+        if (null == masterDataBean.getExpertise().get(job.getExpertise().getId())) {
+            throw new ValidationException("In Job, expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
         List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(loggedInUser.getCompany().getId());
@@ -590,31 +585,33 @@ public class JobService implements IJobService {
         companyBuList.forEach(companyBu -> companyBuMap.put(companyBu.getId(), companyBu));
         companyAddressList.forEach(companyAddress -> companyAddressMap.put(companyAddress.getId(), companyAddress));
 
-        if (companyAddressList.isEmpty() || null == companyAddressMap.get(job.getJobDetail().getJobLocation().getId())
-                || null == companyAddressMap.get(job.getJobDetail().getInterviewLocation().getId())) {
-            throw new ValidationException("In Job detail, company address " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if (companyAddressList.isEmpty() || null == companyAddressMap.get(job.getJobLocation().getId())
+                || null == companyAddressMap.get(job.getInterviewLocation().getId())) {
+            throw new ValidationException("In Job, company address " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        if (companyBuList.isEmpty() || null == companyBuMap.get(job.getJobDetail().getBuId().getId())) {
-            throw new ValidationException("In Job detail, company bu " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if (companyBuList.isEmpty() || null == companyBuMap.get(job.getBuId().getId())) {
+            throw new ValidationException("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        String expRange = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId());
+        String expRange = masterDataBean.getExperienceRange().get(job.getExperienceRange().getId());
 
         if (null == expRange) {
-            throw new ValidationException("In Job detail, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        JobDetail detail = job.getJobDetail();
-        String[] range = masterDataBean.getExperienceRange().get(job.getJobDetail().getExperienceRange().getId()).split(" ");
-        detail.setMinExperience(Double.parseDouble(range[0]));
-        detail.setMaxExperience(Double.parseDouble(range[2]));
-        detail.setMinSalary(0l);
-        detail.setMaxSalary(0l);
-        detail.setJobId(oldJob);
-        detail.setCreatedBy(loggedInUser);
-        detail.setCreatedOn(new Date());
-        oldJob.setJobDetail(detail);
+        String[] range = expRange.split(" ");
+        oldJob.setMinExperience(Double.parseDouble(range[0]));
+        oldJob.setMaxExperience(Double.parseDouble(range[2]));
+        oldJob.setMinSalary(0l);
+        oldJob.setMaxSalary(0l);
+        oldJob.setCurrency(job.getCurrency());
+        oldJob.setInterviewLocation(companyAddressMap.get(job.getInterviewLocation().getId()));
+        oldJob.setJobLocation(companyAddressMap.get(job.getJobLocation().getId()));
+        oldJob.setFunction(job.getFunction());
+        oldJob.setExpertise(job.getExpertise());
+        oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
+        oldJob.setEducation(job.getEducation());
         oldJob.setUpdatedOn(new Date());
 
         jobRepository.save(oldJob);
@@ -758,8 +755,8 @@ public class JobService implements IJobService {
         Hibernate.initialize(job.getJobScreeningQuestionsList());
         Hibernate.initialize(job.getJobKeySkillsList());
         Hibernate.initialize(job.getJobCapabilityList());
-        if(null!=job.getJobDetail() && null!=job.getJobDetail().getExpertise()){
-            Hibernate.initialize(job.getJobDetail().getExpertise());
+        if(null!=job && null!=job.getExpertise()){
+            Hibernate.initialize(job.getExpertise());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());

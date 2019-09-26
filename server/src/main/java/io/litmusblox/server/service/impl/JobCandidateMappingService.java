@@ -743,7 +743,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
                CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
                if(null == candidateMobileHistory)
-                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jobCandidateMapping.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jcmFromDb.getCandidate().getCountryCode(), new Date(), loggedInUser));
+                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
            }
        }catch (Exception e){
            log.info("Enter Mobile no not valid : "+jobCandidateMapping.getCandidate().getMobile());
@@ -788,7 +788,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     private String validateMobile(String mobile, String countryCode){
         if(Util.isNotNull(mobile)) {
-            if (!Util.validateMobile(mobile, countryCode)) {
+            if (!Util.validateMobile(mobile, countryCode) && !countryCode.equals(IConstant.INDIA_CODE)) {
                 String cleanMobile = mobile.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                 log.error("Special characters found, cleaning mobile number \"" + mobile + "\" to " + cleanMobile);
                 if (!Util.validateMobile(cleanMobile, countryCode))

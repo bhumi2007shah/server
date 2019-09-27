@@ -140,7 +140,15 @@ VALUES
  ( 'experienceRange', '8 - 12 yrs'),
  ( 'experienceRange', '13 - 15 yrs'),
  ( 'experienceRange', '17 - 20 yrs'),
- ( 'experienceRange', '20+ yrs');
+ ( 'experienceRange', '20+ yrs'),
+
+ ( 'noticePeriod','0 days'),
+ ( 'noticePeriod','15 days'),
+ ( 'noticePeriod','30 days'),
+ ( 'noticePeriod','60 days'),
+ ( 'noticePeriod','45 days'),
+ ( 'noticePeriod','90 days'),
+ ( 'noticePeriod','Others');
 
 
 -- max limits for various parameters

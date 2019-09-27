@@ -314,3 +314,13 @@ ADD COLUMN EXPERTISE INTEGER REFERENCES MASTER_DATA(ID);
 
 ALTER TABLE JOB ALTER COLUMN NO_OF_POSITIONS SET DEFAULT 1;
 
+-- For ticket #151
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+( 'noticePeriod','0 days'),
+ ( 'noticePeriod','15 days'),
+ ( 'noticePeriod','30 days'),
+ ( 'noticePeriod','60 days'),
+ ( 'noticePeriod','45 days'),
+ ( 'noticePeriod','90 days'),
+ ( 'noticePeriod','Others');

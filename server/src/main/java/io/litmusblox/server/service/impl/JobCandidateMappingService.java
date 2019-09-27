@@ -157,7 +157,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @param candidate for which candidate add this info
      * @param loggedInUser user which is login currently
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
 
         //find candidateId
@@ -167,20 +167,26 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if (null != candidateFromDb)
             candidateId = candidateFromDb.getId();
         if (null != candidateId) {
-            //if telephone field has value, save to mobile history table
-            if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
-                //check if an entry exists in the mobile history record for this number
-                String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
+            try {
+                //if telephone field has value, save to mobile history table
+                if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 6) {
+                    //check if an entry exists in the mobile history record for this number
+                    String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                    if (telephone.length() > 15)
-                        telephone = telephone.substring(0, 15);
+                    if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
 
-                    if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
-                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
+                        if (telephone.length() > 15)
+                            telephone = telephone.substring(0, 15);
+
+                        if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
+                        candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateFromDb, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode(), new Date(), loggedInUser));
+                    }
                 }
+            }catch (Exception ex){
+                log.error("Error while add telephone number :: " +candidate.getTelephone()+" "+ ex.getMessage());
             }
+
 
             //process other information
             if(null != candidate.getCandidateDetails()) {

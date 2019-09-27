@@ -58,6 +58,8 @@ public class MasterDataBean {
     //added the master data for 'Source' status as that will be used for all candidates uploaded
     private MasterData sourceStage = null;
 
+    private Map<String, MasterData> noticePeriodMapping = new HashMap<>();
+
     private ConfigSettings configSettings = new ConfigSettings();
 
     // sentryDSN is only read from application.properties file as per profile it is not save in database

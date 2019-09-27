@@ -47,8 +47,11 @@ public class CandidateCompanyDetails {
     @Column(name = "LOCATION")
     private String location;
 
-    @Column(name = "NOTICE_PERIOD")
     private String noticePeriod;
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "NOTICE_PERIOD")
+    private MasterData noticePeriodInDb;
 
     @Column(name = "START_DATE")
     @JsonDeserialize(using = DateDeserializer.class)
@@ -58,10 +61,10 @@ public class CandidateCompanyDetails {
     @JsonDeserialize(using = DateDeserializer.class)
     private Date endDate;
 
-    public CandidateCompanyDetails(long candidateId, String companyName, String noticePeriod, String designation) {
+    public CandidateCompanyDetails(long candidateId, String companyName, MasterData noticePeriod, String designation) {
         this.candidateId = candidateId;
         this.companyName = companyName;
-        this.noticePeriod = noticePeriod;
+        this.noticePeriodInDb = noticePeriod;
         this.designation = designation;
     }
 

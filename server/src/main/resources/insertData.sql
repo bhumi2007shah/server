@@ -142,12 +142,12 @@ VALUES
  ( 'experienceRange', '17 - 20 yrs'),
  ( 'experienceRange', '20+ yrs'),
 
- ( 'noticePeriod','0 days'),
- ( 'noticePeriod','15 days'),
- ( 'noticePeriod','30 days'),
- ( 'noticePeriod','60 days'),
- ( 'noticePeriod','45 days'),
- ( 'noticePeriod','90 days'),
+ ( 'noticePeriod','0'),
+ ( 'noticePeriod','15'),
+ ( 'noticePeriod','30'),
+ ( 'noticePeriod','60'),
+ ( 'noticePeriod','45'),
+ ( 'noticePeriod','90'),
  ( 'noticePeriod','Others');
 
 

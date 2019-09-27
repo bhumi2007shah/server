@@ -98,6 +98,9 @@ public class MasterDataService implements IMasterDataService {
             if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
                 MasterDataBean.getInstance().setSourceStage(data);
             }
+
+            if(data.getType().equalsIgnoreCase("noticePeriod"))
+                MasterDataBean.getInstance().getNoticePeriodMapping().put(data.getValue(), data);
         });
 
         //populate various configuration settings like max limits, send sms/email flag,etc
@@ -115,6 +118,8 @@ public class MasterDataService implements IMasterDataService {
 
         // sentryDSN is only read from application.properties file as per profile it is not save in database
         MasterDataBean.getInstance().setSentryDSN(environment.getProperty(IConstant.SENTRY_DSN));
+
+
     }
 
     /**

@@ -204,14 +204,14 @@ public class JobCandidateMappingController {
     }
 
     /**
-     * Api to update Jcm and also candidate
+     * Service to edit candidate info like:mobile,email,TotalExperience
      *
-     * @param jobCandidateMapping updated jcm object
+     * @param jobCandidateMapping updated data from JobCandidateMapping model
      */
-    @PostMapping("/updateJcm")
+    @PostMapping("/editCandidate")
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    void updateJcm(@RequestBody JobCandidateMapping jobCandidateMapping){
-        jobCandidateMappingService.updateJcm(jobCandidateMapping);
+    void editCandidate(@RequestBody JobCandidateMapping jobCandidateMapping){
+        jobCandidateMappingService.editCandidate(jobCandidateMapping);
     }
 }

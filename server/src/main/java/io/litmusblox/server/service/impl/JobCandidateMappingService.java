@@ -826,6 +826,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
+        CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
+        if(null != candidateCompanyDetail.getNoticePeriod()){
+            candidateCompanyDetail.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
+        }
+
         //In Company details only update notice period
        /* CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
         CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());

@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.litmusblox.server.utils.DateDeserializer;
 import lombok.Data;
@@ -47,6 +48,8 @@ public class CandidateCompanyDetails {
     @Column(name = "LOCATION")
     private String location;
 
+    @JsonProperty
+    @Transient
     private String noticePeriod;
 
     @OneToOne(fetch = FetchType.EAGER)

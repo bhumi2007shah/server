@@ -64,4 +64,7 @@ public interface IErrorMessages {
     String JCM_NOT_FOUND = "No Job Candidate Mapping found for id: ";
     String UUID_NOT_FOUND = "No mapping found for uuid ";
     String ML_DATA_DUPLICATE_SKILLS = "Received ML response with duplicate skills\n";
+
+    String CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_MOBILE = "Found different Candidate ids for mobile : ";
+    String CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_EMAIL = "Found different Candidate ids for email : ";
 }

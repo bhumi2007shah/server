@@ -760,35 +760,44 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     }
 
     /**
-     * Service to update Jcm and candidate related models
+     * Service to edit candidate info like:mobile,email,TotalExperience
      *
-     * @param jobCandidateMapping updated data come from JobCandidateMapping model
+     * @param jobCandidateMapping updated data from JobCandidateMapping model
      */
     @Transactional
     @Override
-    public void updateJcm(JobCandidateMapping jobCandidateMapping) {
+    public void editCandidate(JobCandidateMapping jobCandidateMapping) {
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobCandidateMapping jcmFromDb = jobCandidateMappingRepository.findById(jobCandidateMapping.getId()).orElse(null);
         //Update or create mobile no
-       try {
-           if(null!=jobCandidateMapping.getCandidate().getMobile() && !jobCandidateMapping.getCandidate().getMobile().isEmpty()){
-               validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
-               CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
-               if(null == candidateMobileHistory) {
-                   candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
-                   jcmFromDb.setMobile(jobCandidateMapping.getCandidate().getMobile());
-               }
-           }
-       }catch (Exception e){
-           log.info("Enter Mobile no not valid : "+jobCandidateMapping.getCandidate().getMobile());
-       }
-
-        //Update or create email id
-        CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getCandidate().getEmail());
-        if(null == candidateEmailHistory){
-            candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getEmail(), new Date(), loggedInUser));
-            jcmFromDb.setEmail(jobCandidateMapping.getCandidate().getEmail());
+        if(null!=jobCandidateMapping.getCandidate().getMobile() && !jobCandidateMapping.getCandidate().getMobile().isEmpty()){
+            validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+            CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+            if(null == candidateMobileHistory) {
+                candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
+                jcmFromDb.setMobile(jobCandidateMapping.getCandidate().getMobile());
+            }else {
+                if(!jcmFromDb.getCandidate().getId().equals(candidateMobileHistory.getCandidate().getId()))
+                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_MOBILE + jobCandidateMapping.getCandidate().getMobile() + " " + jobCandidateMapping.getCandidate().getEmail(), HttpStatus.BAD_REQUEST);
+                else
+                    jcmFromDb.setMobile(candidateMobileHistory.getMobile());
+            }
         }
+        //Update or create email id
+        if(null!=jobCandidateMapping.getCandidate().getEmail() && !jobCandidateMapping.getCandidate().getEmail().isEmpty()) {
+            validateEmail(jobCandidateMapping.getCandidate().getEmail());
+            CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getCandidate().getEmail());
+            if (null == candidateEmailHistory) {
+                candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getEmail(), new Date(), loggedInUser));
+                jcmFromDb.setEmail(jobCandidateMapping.getCandidate().getEmail());
+            } else {
+                if (!jcmFromDb.getCandidate().getId().equals(candidateEmailHistory.getCandidate().getId()))
+                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_EMAIL + jobCandidateMapping.getCandidate().getMobile() + " " + jobCandidateMapping.getCandidate().getEmail(), HttpStatus.BAD_REQUEST);
+                else
+                    jcmFromDb.setEmail(candidateEmailHistory.getEmail());
+            }
+        }
+
         jobCandidateMappingRepository.save(jcmFromDb);
 
         //Update Candidate total experience
@@ -798,16 +807,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         if(null != candidateDetails){
-            if(!candidateDetails.getTotalExperience().equals(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience())){
-                candidateDetails.setTotalExperience(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience());
-                candidateDetailsRepository.save(candidateDetails);
-            }
+            candidateDetails.setTotalExperience(jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience());
+            candidateDetailsRepository.save(candidateDetails);
         }else if(null != jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()){
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
-        //Update Company
-        CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
+        //In Company details only update notice period
+       /* CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
         CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());
         if (!Util.isNull(candidateCompanyDetail.getDesignation()) && candidateCompanyDetail.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue())
             candidateCompanyDetail.setDesignation(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), candidateCompanyDetail.getDesignation()));
@@ -827,7 +834,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 UpdatedCandidateCompanyDetail.setDesignation(candidateCompanyDetail.getDesignation());
             }
             candidateCompanyDetailsRepository.save(UpdatedCandidateCompanyDetail);
-        }
+        }*/
     }
 
 
@@ -842,5 +849,20 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             }
         }
         return mobile;
+    }
+
+    private String validateEmail(String receiverEmailToUse){
+        if (!Util.validateEmail(receiverEmailToUse)) {
+            String cleanEmail = receiverEmailToUse.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_EMAIL,"");
+            log.error("Special characters found, cleaning Email \"" + receiverEmailToUse + "\" to " + cleanEmail);
+            if (!Util.validateEmail(cleanEmail)) {
+                throw new ValidationException(IErrorMessages.INVALID_EMAIL + " - " + receiverEmailToUse, HttpStatus.BAD_REQUEST);
+            }
+            receiverEmailToUse=cleanEmail;
+        }
+        if(receiverEmailToUse.length()>50)
+            throw new ValidationException(IErrorMessages.EMAIL_TOO_LONG, HttpStatus.BAD_REQUEST);
+
+        return receiverEmailToUse;
     }
 }

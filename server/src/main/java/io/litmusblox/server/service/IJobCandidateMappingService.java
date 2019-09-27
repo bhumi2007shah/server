@@ -162,9 +162,9 @@ public interface IJobCandidateMappingService {
     void updateTechResponseStatus(TechChatbotRequestBean requestBean) throws Exception;
 
     /**
-     * Service to update Jcm and candidate related models
+     * Service to edit candidate info like:mobile,email,TotalExperience
      *
-     * @param jobCandidateMapping updated data come from JobCandidateMapping model
+     * @param jobCandidateMapping updated data from JobCandidateMapping model
      */
-    void updateJcm(JobCandidateMapping jobCandidateMapping);
+    void editCandidate(JobCandidateMapping jobCandidateMapping);
 }

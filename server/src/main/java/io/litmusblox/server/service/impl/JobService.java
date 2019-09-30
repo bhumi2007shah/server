@@ -144,9 +144,30 @@ public class JobService implements IJobService {
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
         }
 
+        populateDataForNextPage(job, pageName);
+
         log.info("Completed processing request to add job in " + (System.currentTimeMillis() - startTime) + "ms");
         return job;
     }
+
+    private void populateDataForNextPage(Job job, String pageName) throws Exception {
+        int currentPageIndex = MasterDataBean.getInstance().getJobPageNamesInOrder().indexOf(pageName);
+        if (currentPageIndex != -1) {
+            switch (IConstant.AddJobPages.valueOf(MasterDataBean.getInstance().getJobPageNamesInOrder().get(currentPageIndex+1))) {
+                case keySkills:
+                    //populate key skills for the job
+                    job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+                    break;
+                case capabilities:
+                    //populate the capabilities for the job
+                    job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 
     /**
      * Fetch details of currently logged in user and
@@ -437,9 +458,6 @@ public class JobService implements IJobService {
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
         saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);
-
-        //populate key skills for the job
-        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void addJobKeySkills(Job job, Job oldJob, User loggedInUser) throws Exception { //update and add new key skill
@@ -520,8 +538,6 @@ public class JobService implements IJobService {
             }
         }
         saveJobHistory(job.getId(), "Added key skills", loggedInUser);
-        //populate the capabilities for the job
-        job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
     }
 
 

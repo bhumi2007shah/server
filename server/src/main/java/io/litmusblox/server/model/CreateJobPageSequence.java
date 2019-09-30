@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -30,6 +31,10 @@ public class CreateJobPageSequence implements Serializable {
     private Long id;
 
     @NotNull
+    @Column(name = "PAGE_NAME")
+    private String pageName;
+
+    @NotNull
     @Column(name = "PAGE_DISPLAY_NAME")
     private String pageDisplayName;
 
@@ -37,6 +42,11 @@ public class CreateJobPageSequence implements Serializable {
     @Column(name = "PAGE_DISPLAY_ORDER")
     private int pageDisplayOrder;
 
+    @JsonIgnore
     @Column(name = "DISPLAY_FLAG")
     private boolean displayFlag;
+
+    @NotNull
+    @Column(name = "SUBSCRIPTION_AVAILABILITY")
+    private String subscriptionAvailability;
 }

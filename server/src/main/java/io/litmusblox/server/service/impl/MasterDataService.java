@@ -81,8 +81,11 @@ public class MasterDataService implements IMasterDataService {
 
         MasterDataBean.getInstance().getCountryList().addAll(countryRepository.findAll());
 
-        //add all pages that need to be de
-        MasterDataBean.getInstance().getAddJobPages().addAll(createJobPageSequenceRepository.findByDisplayFlagIsTrueOrderByPageDisplayOrderAsc());
+        //add all pages that need to be displayed for the add job process
+        createJobPageSequenceRepository.findByDisplayFlagIsTrueOrderByPageDisplayOrderAsc().stream().forEach(page-> {
+            MasterDataBean.getInstance().getAddJobPages().add(page);
+            MasterDataBean.getInstance().getJobPageNamesInOrder().add(page.getPageDisplayName());
+        });
 
         List<MasterData> masterDataFromDb = masterDataRepository.findAll();
 

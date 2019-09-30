@@ -339,19 +339,20 @@ ALTER TABLE CANDIDATE_COMPANY_DETAILS DROP COLUMN NOTICE_PERIOD_OLD;
 -- For ticket #147
 CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(
 	ID serial PRIMARY KEY NOT NULL,
+	PAGE_NAME VARCHAR(25) NOT NULL,
 	PAGE_DISPLAY_NAME VARCHAR(25) NOT NULL,
 	PAGE_DISPLAY_ORDER SMALLINT NOT NULL,
 	DISPLAY_FLAG BOOL NOT NULL DEFAULT 'T',
 	SUBSCRIPTION_AVAILABILITY VARCHAR(5) NOT NULL DEFAULT 'LITE'
 );
 
-INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
+INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
 VALUES
-( 'Overview', 1, 'T','Lite'),
-( 'Expertise', 2, 'F','Lite'),
-( 'Job Detail', 3, 'F','Max'),
-( 'Screening Questions', 4, 'T','Lite'),
-( 'Key Skills', 5, 'T','Lite'),
-( 'Hiring Team', 6, 'F','Max'),
-( 'Capabilities', 7, 'T','Lite'),
-( 'Preview', 8, 'T','Lite');
+('Overview', 'overview', 1, 'T','Lite'),
+('Expertise', 'expertise', 2, 'F','Lite'),
+('Job Detail', 'jobDetail', 3, 'F','Max'),
+('Screening Questions', 'screeningQuestions', 4, 'T','Lite'),
+('Key Skills', 'keySkills', 5, 'T','Lite'),
+('Hiring Team', 'hiringTeam', 6, 'F','Max'),
+('Capabilities', 'capabilities', 7, 'T','Lite'),
+('Preview', 'preview', 8, 'T','Lite');

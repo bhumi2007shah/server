@@ -663,3 +663,14 @@ INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('LinkNotVisitedReminder2','[[${commBean.receiverfirstname}]], are you not interested in this job? [[${commBean.senderfirstname}]] from [[${commBean.sendercompany}]] has invited you to apply for the [[${commBean.jobtitle}]] position. Click the link below to apply. [[${commBean.chatlink}]]'),
 ('ChatNotVisitedReminder1','Hi [[${commBean.receiverfirstname}]],%nHere is your link to create your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It''s required to submit completed profile to be considered for the job. The link is valid only for 48 hours. Click the link to begin. [[${commBean.chatlink}]] '),
 ('ChatNotVisitedReminder2','[[${commBean.receiverfirstname}]],%nJust a reminder to complete your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It will take just a few minutes to finish it.  It''s required that you finish the profile to be considered for the job.  This link will expire in 24 hours.%nClick the link to apply. [[${commBean.chatlink}]] ');
+
+INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
+VALUES
+('Overview', 'overview', 1, 'T','Lite'),
+('Expertise', 'expertise', 2, 'F','Lite'),
+('Job Detail', 'jobDetail', 3, 'F','Max'),
+('Screening Questions', 'screeningQuestions', 4, 'T','Lite'),
+('Key Skills', 'keySkills', 5, 'T','Lite'),
+('Hiring Team', 'hiringTeam', 6, 'F','Max'),
+('Capabilities', 'capabilities', 7, 'T','Lite'),
+('Preview', 'preview', 8, 'T','Lite');

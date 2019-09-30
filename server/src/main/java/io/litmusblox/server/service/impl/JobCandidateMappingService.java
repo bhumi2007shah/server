@@ -93,6 +93,17 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     JcmHistoryRepository jcmHistoryRepository;
 
+    @Transactional(readOnly = true)
+    Job getJob(long jobId) {
+        return jobRepository.findById(jobId).get();
+    }
+
+    @Transactional(readOnly = true)
+    User getUser(){return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();}
+
+    @Transactional(readOnly = true)
+    int getUploadCount(Date createdOn, User loggedInUser){return jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);}
+
     @Value("${scoringEngineBaseUrl}")
     private String scoringEngineBaseUrl;
 
@@ -243,7 +254,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @return the status of upload operation
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+   // @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadCandidatesFromFile(MultipartFile multipartFile, Long jobId, String fileFormat) throws Exception {
 
         //validate the file source is supported by application
@@ -258,7 +269,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         //verify that the job is live before processing candidates
-        Job job = jobRepository.getOne(jobId);
+        Job job = getJob(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId-").append(jobId);
             Map<String, String> breadCrumb = new HashMap<>();
@@ -270,12 +281,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         //validate that the file has an extension that is supported by the application
         Util.validateUploadFileType(multipartFile.getOriginalFilename());
 
-        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User loggedInUser = getUser();
         Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
 
-        int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);
+        int candidatesProcessed = getUploadCount(createdOn, loggedInUser);
 
         if (candidatesProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not saving file " + multipartFile);

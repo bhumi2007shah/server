@@ -353,8 +353,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId, MultipartFile candidateCv) throws Exception {
         UploadResponseBean responseBean = null;
         if (null != candidate) {
-            //populate the first name and last name of the candidate
-            Util.handleCandidateName(candidate, candidate.getCandidateName());
+
+            if(null == candidate.getCandidateName() || candidate.getCandidateName().isEmpty()){
+               candidate.setCandidateName(IConstant.NOT_AVAILABLE);
+               candidate.setFirstName(IConstant.NOT_AVAILABLE);
+            }else{
+                //populate the first name and last name of the candidate
+                Util.handleCandidateName(candidate, candidate.getCandidateName());
+            }
             //set source as plugin
             candidate.setCandidateSource(IConstant.CandidateSource.Plugin.getValue());
             if (candidate.getCandidateCompanyDetails() != null && candidate.getCandidateCompanyDetails().size() >1) {
@@ -845,33 +851,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
         CandidateCompanyDetails objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).get();
-        if(null != candidateCompanyDetail.getNoticePeriod()){
+        if(null != objFromDb && null != candidateCompanyDetail.getNoticePeriod()){
             objFromDb.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
         }
         candidateCompanyDetailsRepository.save(objFromDb);
-
-        //In Company details only update notice period
-       /* CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
-        CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());
-        if (!Util.isNull(candidateCompanyDetail.getDesignation()) && candidateCompanyDetail.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue())
-            candidateCompanyDetail.setDesignation(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), candidateCompanyDetail.getDesignation()));
-
-        if(null == UpdatedCandidateCompanyDetail && !candidateCompanyDetail.getCompanyName().isEmpty()){
-            if (!Util.isNull(candidateCompanyDetail.getCompanyName()) && candidateCompanyDetail.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
-                //truncate institute name to max length
-                candidateCompanyDetail.setCompanyName(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), candidateCompanyDetail.getCompanyName()));
-            }
-            //candidateCompanyDetailsRepository.save(new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(),candidateCompanyDetail.getCompanyName(),candidateCompanyDetail.getNoticePeriod(),candidateCompanyDetail.getDesignation()));
-
-        }else {
-            if(null != candidateCompanyDetail.getNoticePeriod() && !candidateCompanyDetail.getNoticePeriod().equals(UpdatedCandidateCompanyDetail.getNoticePeriod())){
-                UpdatedCandidateCompanyDetail.setNoticePeriod(candidateCompanyDetail.getNoticePeriod());
-            }
-            if(!candidateCompanyDetail.getDesignation().equals(UpdatedCandidateCompanyDetail.getDesignation())){
-                UpdatedCandidateCompanyDetail.setDesignation(candidateCompanyDetail.getDesignation());
-            }
-            candidateCompanyDetailsRepository.save(UpdatedCandidateCompanyDetail);
-        }*/
     }
 
 

@@ -78,7 +78,7 @@ public interface IConstant {
     }
 
     enum AddJobPages {
-        overview, screeningQuestions, keySkills, capabilities, jobDetail, hiringTeam;
+        overview, screeningQuestions, keySkills, capabilities, jobDetail, hiringTeam, expertise;
     }
 
     enum JobStatus {
@@ -186,4 +186,5 @@ public interface IConstant {
     String RCHILLI_API_URL="rchilliApiUrl";
     String FILE_STORAGE_URL="fileStorageUrl";
     String ERROR_FILES="error_files";
+    String NOT_AVAILABLE= "Not Available";
 }

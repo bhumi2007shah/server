@@ -357,6 +357,19 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             Util.handleCandidateName(candidate, candidate.getCandidateName());
             //set source as plugin
             candidate.setCandidateSource(IConstant.CandidateSource.Plugin.getValue());
+            if (candidate.getCandidateCompanyDetails() != null && candidate.getCandidateCompanyDetails().size() >1) {
+                candidate.getCandidateCompanyDetails().stream().forEach(candidateCompanyDetails -> {
+                    if(!Util.isNull(candidateCompanyDetails.getNoticePeriod()) && candidateCompanyDetails.getNoticePeriod().length() > 0) {
+                        candidateCompanyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetails.getNoticePeriod()));
+                        if (null == candidateCompanyDetails.getNoticePeriodInDb()) {
+                            //value in request object is not available in db
+                            SentryUtil.logWithStaticAPI(null,"Unmapped notice period: " + candidateCompanyDetails.getNoticePeriod(), new HashMap<>());
+                            candidateCompanyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get("Others"));
+                        }
+
+                    }
+                });
+            }
             responseBean = uploadIndividualCandidate(Arrays.asList(candidate), jobId);
 
             //Store candidate cv to repository location
@@ -830,6 +843,13 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
+        CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
+        CandidateCompanyDetails objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).get();
+        if(null != candidateCompanyDetail.getNoticePeriod()){
+            objFromDb.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
+        }
+        candidateCompanyDetailsRepository.save(objFromDb);
+
         //In Company details only update notice period
        /* CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
         CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());
@@ -841,10 +861,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 //truncate institute name to max length
                 candidateCompanyDetail.setCompanyName(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), candidateCompanyDetail.getCompanyName()));
             }
-            candidateCompanyDetailsRepository.save(new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(),candidateCompanyDetail.getCompanyName(),candidateCompanyDetail.getNoticePeriod(),candidateCompanyDetail.getDesignation()));
+            //candidateCompanyDetailsRepository.save(new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(),candidateCompanyDetail.getCompanyName(),candidateCompanyDetail.getNoticePeriod(),candidateCompanyDetail.getDesignation()));
 
         }else {
-            if(!candidateCompanyDetail.getNoticePeriod().isEmpty() && !candidateCompanyDetail.getNoticePeriod().equals(UpdatedCandidateCompanyDetail.getNoticePeriod())){
+            if(null != candidateCompanyDetail.getNoticePeriod() && !candidateCompanyDetail.getNoticePeriod().equals(UpdatedCandidateCompanyDetail.getNoticePeriod())){
                 UpdatedCandidateCompanyDetail.setNoticePeriod(candidateCompanyDetail.getNoticePeriod());
             }
             if(!candidateCompanyDetail.getDesignation().equals(UpdatedCandidateCompanyDetail.getDesignation())){

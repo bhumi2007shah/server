@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
-import io.litmusblox.server.model.JobHistory;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import io.litmusblox.server.utils.Util;
@@ -104,7 +103,7 @@ public class JobController {
                             "candidateOnlineProfiles","candidateWorkAuthorizations","candidateLanguageProficiencies","candidateSkillDetails","createdOn","createdBy", "firstName", "lastName", "displayName"));
                     put("JobCandidateMapping", Arrays.asList("updatedOn","updatedBy","techResponseData"));
                     put("CandidateDetails", Arrays.asList("id","candidateId"));
-                    put("CandidateCompanyDetails", Arrays.asList("id","candidateId"));
+                    put("CandidateCompanyDetails", Arrays.asList("candidateId"));
                 }})
         );
     }

@@ -5,6 +5,7 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Country;
+import io.litmusblox.server.model.CreateJobPageSequence;
 import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
@@ -39,4 +40,5 @@ public class MasterDataResponse {
     private List<String> supportedFileFormats = new ArrayList<>();
     private List<String> supportedCvFileFormats = new ArrayList<>();
     private long sourceStageId;
+    private List<CreateJobPageSequence> addJobPages = new ArrayList<>();
 }

@@ -64,6 +64,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     ConfigurationSettingsRepository configurationSettingsRepository;
 
+    @Resource
+    CreateJobPageSequenceRepository createJobPageSequenceRepository;
+
     @Autowired
     Environment environment;
 
@@ -77,6 +80,9 @@ public class MasterDataService implements IMasterDataService {
     public void loadStaticMasterData() throws Exception {
 
         MasterDataBean.getInstance().getCountryList().addAll(countryRepository.findAll());
+
+        //add all pages that need to be de
+        MasterDataBean.getInstance().getAddJobPages().addAll(createJobPageSequenceRepository.findByDisplayFlagIsTrueOrderByPageDisplayOrderAsc());
 
         List<MasterData> masterDataFromDb = masterDataRepository.findAll();
 
@@ -200,6 +206,7 @@ public class MasterDataService implements IMasterDataService {
     private static final String SUPPORTED_FILE_FORMATS = "supportedFileFormats";
     private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
     private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
+    private static final String ADD_JOB_PAGES = "addJobPages";
 
     /**
      * Method to fetch specific master data from cache
@@ -212,6 +219,9 @@ public class MasterDataService implements IMasterDataService {
         switch (input) {
             case COUNTRY_MASTER_DATA:
                 master.getCountries().addAll(MasterDataBean.getInstance().getCountryList());
+                break;
+            case ADD_JOB_PAGES:
+                master.getAddJobPages().addAll(MasterDataBean.getInstance().getAddJobPages());
                 break;
             case SCREENING_QUESTIONS_MASTER_DATA:
                 master.getScreeningQuestions().addAll(MasterDataBean.getInstance().getScreeningQuestions());

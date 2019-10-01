@@ -140,6 +140,9 @@ public class JobService implements IJobService {
             case hiringTeam:
                 addJobHiringTeam(job, oldJob, loggedInUser);
                 break;
+            case expertise:
+                addJobExpertise(job, oldJob);
+                break;
             default:
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
         }
@@ -572,10 +575,6 @@ public class JobService implements IJobService {
             throw new ValidationException("In Job, education " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        if (null == masterDataBean.getExpertise().get(job.getExpertise().getId())) {
-            throw new ValidationException("In Job, expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-        }
-
         List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(loggedInUser.getCompany().getId());
         List<CompanyBu> companyBuList = companyBuRepository.findByCompanyId(loggedInUser.getCompany().getId());
 
@@ -609,7 +608,7 @@ public class JobService implements IJobService {
         oldJob.setInterviewLocation(companyAddressMap.get(job.getInterviewLocation().getId()));
         oldJob.setJobLocation(companyAddressMap.get(job.getJobLocation().getId()));
         oldJob.setFunction(job.getFunction());
-        oldJob.setExpertise(job.getExpertise());
+        //Remove set Expertise code because we set separately in addJobExpertise method
         oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
         oldJob.setEducation(job.getEducation());
         oldJob.setUpdatedOn(new Date());
@@ -647,6 +646,15 @@ public class JobService implements IJobService {
             companyStageStep = companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(), companyStageStep.getCompanyId(), companyStageStep.getStage(), new Date(), loggedInUser));
             jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), companyStageStep, jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
         }
+    }
+
+    private void addJobExpertise(Job job, Job oldJob){
+        MasterDataBean masterDataBean = MasterDataBean.getInstance();
+        if(null == masterDataBean.getExpertise().get(job.getExpertise().getId())){
+            throw new ValidationException("In Job, Expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        }
+        oldJob.setExpertise(job.getExpertise());
+        jobRepository.save(oldJob);
     }
 
     /**

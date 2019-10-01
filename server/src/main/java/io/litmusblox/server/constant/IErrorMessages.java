@@ -67,4 +67,10 @@ public interface IErrorMessages {
 
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_MOBILE = "Found different Candidate ids for mobile : ";
     String CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_EMAIL = "Found different Candidate ids for email : ";
+
+    String INVALID_AUSTRALIA_MOBILE_NUMBER = "Mobile number is not a valid Australian Mobile number ";
+    String INVALID_CANADA_MOBILE_NUMBER = "Mobile number is not a valid Canada Mobile number ";
+    String INVALID_UK_MOBILE_NUMBER = "Mobile number is not a valid Uk Mobile number ";
+    String INVALID_US_MOBILE_NUMBER = "Mobile number is not a valid Us Mobile number ";
+    String INVALID_SINGAPORE_MOBILE_NUMBER = "Mobile number is not a valid Singapore Mobile number ";
 }

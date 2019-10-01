@@ -112,7 +112,7 @@ public class Candidate implements Serializable {
     private List<CandidateEducationDetails> candidateEducationDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
-    @OrderBy("startDate DESC")
+    @OrderBy("startDate DESC, companyName ASC")
     private List<CandidateCompanyDetails> candidateCompanyDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")

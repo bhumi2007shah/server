@@ -31,4 +31,6 @@ public class ScoringEngineJobBean {
 class Capability {
     long capabilityId;
     int weightage;
+    long cutoff;
+    long percentage;
 }

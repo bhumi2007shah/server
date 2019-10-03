@@ -77,6 +77,11 @@ public class JobCapabilities implements Serializable {
     @JoinColumn(name = "JOB_ID")
     private Long jobId;
 
+    @Column(name = "PERCENTAGE")
+    private Long percentage;
+
+    @Column(name = "CUTOFF")
+    private Long cutoff;
 
     public JobCapabilities(@NotNull Long capabilityId, @NotNull String capabilityName, @NotNull Boolean selected, @NotNull int weightage, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
         this.capabilityId = capabilityId;

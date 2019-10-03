@@ -91,6 +91,12 @@ public class JobService implements IJobService {
     @Resource
     JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
 
+    @Resource
+    WeightageCutoffByCompanyMappingRepository weightageCutoffByCompanyMappingRepository;
+
+    @Resource
+    WeightageCutoffMappingRepository weightageCutoffMappingRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
@@ -436,6 +442,8 @@ public class JobService implements IJobService {
         job.getJobScreeningQuestionsList().forEach(n -> {
             n.setCreatedBy(loggedInUser.getId());
             n.setCreatedOn(new Date());
+            n.setUpdatedOn(new Date());
+            n.setUpdatedBy(loggedInUser.getId());
             n.setJobId(job.getId());
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
@@ -543,6 +551,17 @@ public class JobService implements IJobService {
 
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
+            WeightageCutoffByCompanyMapping wtgCompanyMapping = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
+            if(null != wtgCompanyMapping){
+                oldCapability.setCutoff(wtgCompanyMapping.getCutoff());
+                oldCapability.setPercentage(wtgCompanyMapping.getPercentage());
+            }else{
+                WeightageCutoffMapping  weightageCutoffMapping = weightageCutoffMappingRepository.findByWeightage(newValue.getWeightage());
+                if(null != weightageCutoffMapping){
+                    oldCapability.setCutoff(wtgCompanyMapping.getCutoff());
+                    oldCapability.setPercentage(wtgCompanyMapping.getPercentage());
+                }
+            }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
             oldCapability.setUpdatedOn(new Date());
@@ -687,7 +706,7 @@ public class JobService implements IJobService {
         List<JobCapabilities> jobCapabilities = jobCapabilitiesRepository.findByJobIdAndSelected(jobId,true);
         List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
         jobCapabilities.stream().forEach(jobCapability -> {
-            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage()));
+            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage(), jobCapability.getCutoff(), jobCapability.getPercentage()));
         });
         ScoringEngineJobBean jobRequestBean = new ScoringEngineJobBean(jobId, capabilityList);
         return (new ObjectMapper()).writeValueAsString(jobRequestBean);

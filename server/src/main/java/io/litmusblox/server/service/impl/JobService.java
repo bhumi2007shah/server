@@ -541,10 +541,13 @@ public class JobService implements IJobService {
         Map<Long, JobCapabilities> newCapabilityValues = new HashMap();
         job.getJobCapabilityList().stream().forEach(jobCapability -> newCapabilityValues.put(jobCapability.getId(), jobCapability));
 
+        log.info("Capability count: Old Job: " + oldJob.getJobCapabilityList().size() + " new capability list size: " + newCapabilityValues.size());
+
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
-            oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
+            if(newValue.getSelected())
+                oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setUpdatedOn(new Date());
             oldCapability.setUpdatedBy(loggedInUser);
         });

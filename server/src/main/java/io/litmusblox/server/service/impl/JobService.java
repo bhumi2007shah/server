@@ -186,7 +186,10 @@ public class JobService implements IJobService {
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
         }
         log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
-
+        responseBean.getListOfJobs().forEach(job -> {
+            Hibernate.initialize(job.getExpertise());
+            Hibernate.initialize(job.getInterviewLocation());
+        });
         return responseBean;
     }
 
@@ -437,6 +440,8 @@ public class JobService implements IJobService {
             n.setCreatedBy(loggedInUser.getId());
             n.setCreatedOn(new Date());
             n.setJobId(job.getId());
+            n.setUpdatedOn(new Date());
+            n.setUpdatedBy(loggedInUser.getId());
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
         saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);

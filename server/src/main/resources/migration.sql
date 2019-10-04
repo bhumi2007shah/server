@@ -336,3 +336,23 @@ SET NOTICE_PERIOD = (SELECT ID FROM MASTER_DATA WHERE TYPE = 'noticePeriod' AND 
 
 ALTER TABLE CANDIDATE_COMPANY_DETAILS DROP COLUMN NOTICE_PERIOD_OLD;
 
+--For ticket #161
+update master_data set value='0 - 2 yrs' where value='0 - 3 yrs';
+update master_data set value='2 - 4 yrs' where value='4 - 7 yrs';
+update master_data set value='4 - 6 yrs' where value='8 - 12 yrs';
+update master_data set value='6 - 8 yrs' where value='13 - 15 yrs';
+update master_data set value='8 - 10 yrs' where value='17 - 20 yrs';
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES( 'experienceRange', '10 - 15 yrs'),
+ ( 'experienceRange', '16 - 20 yrs');
+
+ALTER TABLE JOB
+ADD COLUMN NOTICE_PERIOD INTEGER REFERENCES MASTER_DATA(ID);
+
+ALTER TABLE JOB
+ALTER COLUMN min_salary SET DEFAULT 0,
+ALTER COLUMN max_salary SET DEFAULT 0;
+
+
+

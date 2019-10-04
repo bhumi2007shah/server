@@ -151,6 +151,10 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "NOTICE_PERIOD")
+    private MasterData noticePeriod;
+
     /*@OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
     private JobDetail jobDetail;*/
 

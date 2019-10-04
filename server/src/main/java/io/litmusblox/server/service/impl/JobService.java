@@ -91,6 +91,9 @@ public class JobService implements IJobService {
     @Resource
     JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
 
+    @Resource
+    JcmProfileSharingDetailsRepository jcmProfileSharingDetailsRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
@@ -262,6 +265,7 @@ public class JobService implements IJobService {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
+            jcmFromDb.setProfileSharingDetails(jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId()));
         });
 
         if(null!=job && null!=job.getExpertise()){

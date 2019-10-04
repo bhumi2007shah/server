@@ -15,6 +15,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -124,6 +125,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @Transient
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;
+
+    @Transient
+    @JsonProperty
+    private List<JcmProfileSharingDetails> profileSharingDetails;
 
     public String getDisplayName() {
         return candidateFirstName + " " + candidateLastName;

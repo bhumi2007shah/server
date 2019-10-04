@@ -614,12 +614,14 @@ public class JobService implements IJobService {
         String[] range = expRange.split(" ");
         oldJob.setMinExperience(Double.parseDouble(range[0]));
         oldJob.setMaxExperience(Double.parseDouble(range[2]));
-        oldJob.setMinSalary(0l);
-        oldJob.setMaxSalary(0l);
+        oldJob.setMinSalary(job.getMinSalary());
+        oldJob.setMaxSalary(job.getMaxSalary());
         oldJob.setCurrency(job.getCurrency());
         oldJob.setInterviewLocation(companyAddressMap.get(job.getInterviewLocation().getId()));
         oldJob.setJobLocation(companyAddressMap.get(job.getJobLocation().getId()));
         oldJob.setFunction(job.getFunction());
+        oldJob.setNoticePeriod(job.getNoticePeriod());
+
         //Remove set Expertise code because we set separately in addJobExpertise method
         oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
         oldJob.setEducation(job.getEducation());

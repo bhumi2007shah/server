@@ -225,7 +225,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
             //candidate project details
             if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
-                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
+                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateFromDb);
 
             //candidate online profile
             if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)

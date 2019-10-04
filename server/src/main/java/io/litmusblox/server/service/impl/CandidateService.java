@@ -206,11 +206,15 @@ public class CandidateService implements ICandidateService {
 
     @Transactional
     @Override
-    public void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetails, Long candidateId) throws Exception {
+    public void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetails, Candidate candidate) throws Exception {
         //delete existing records
-        candidateProjectDetailsRepository.deleteByCandidateId(candidateId);
+        candidateProjectDetailsRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
-        candidateProjectDetails.forEach(obj -> {obj.setCandidateId(candidateId);candidateProjectDetailsRepository.save(obj);});
+        candidateProjectDetails.forEach(obj -> {
+            if(!Util.isNull(obj.getCompanyName()) && obj.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
+                obj.setCompanyName(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), obj.getCompanyName()));
+            }
+            obj.setCandidateId(candidate.getId());candidateProjectDetailsRepository.save(obj);});
     }
 
     @Transactional

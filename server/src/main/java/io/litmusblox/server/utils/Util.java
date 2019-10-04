@@ -13,9 +13,13 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.User;
+import io.litmusblox.server.repository.CandidateRepository;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.*;
 import java.nio.file.FileSystem;
@@ -38,6 +42,9 @@ import java.util.regex.Pattern;
 @Configuration
 @Log4j2
 public class Util {
+
+    @Autowired
+    CandidateRepository candidateRepository;
 
     private static Pattern INDIAN_MOBILE_PATTERN = Pattern.compile(IConstant.INDIAN_MOBILE_PATTERN);
 
@@ -265,5 +272,26 @@ public class Util {
 
     public static String getYearFromStringDate(String dateString){
         return dateString.split("/")[2];
+    }
+
+    public static String truncateField(Candidate candidate, String fieldName, int fieldLength, String fieldValue) {
+        //Candidate candidate = candidateRepository.findById(Long.parseLong(candidateId)).orElse(null);
+        User loggedInUser = null;
+        if(!SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
+            loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);
+        log.info(info.toString());
+        Map<String, String> breadCrumb = new HashMap<>();
+        if(null!=loggedInUser){
+            breadCrumb.put("User Id",loggedInUser.getId().toString());
+            breadCrumb.put("User Email", loggedInUser.getEmail());
+        }
+        breadCrumb.put("Candidate Id",candidate.getId().toString());
+        breadCrumb.put("Candidate Email",candidate.getEmail());
+        breadCrumb.put("Candidate Mobile",candidate.getMobile());
+        breadCrumb.put(fieldName, fieldValue);
+        SentryUtil.logWithStaticAPI(null, info.toString(), breadCrumb);
+        return fieldValue.substring(0, fieldLength);
     }
 }

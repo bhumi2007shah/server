@@ -52,10 +52,13 @@ public class MasterDataBean {
     private Map<Long, String> expertise = new HashMap<>();
     private Map<Long, String> education = new HashMap<>();
     private Map<Long, String> industry = new HashMap<>();
+    private Map<Long, String> noticePeriod = new HashMap<>();
     private List<ScreeningQuestions> screeningQuestions = new ArrayList<>();
 
     //added the master data for 'Source' status as that will be used for all candidates uploaded
     private MasterData sourceStage = null;
+
+    private Map<String, MasterData> noticePeriodMapping = new HashMap<>();
 
     private ConfigSettings configSettings = new ConfigSettings();
 

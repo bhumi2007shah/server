@@ -67,9 +67,9 @@ public class Candidate implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    public String getDisplayName() {
-        return firstName + " " + lastName;
-    }
+    @JsonProperty
+    @Transient
+    private String displayName;
 
     @Transient
     @JsonProperty
@@ -112,7 +112,7 @@ public class Candidate implements Serializable {
     private List<CandidateEducationDetails> candidateEducationDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
-    @OrderBy("startDate DESC")
+    @OrderBy("startDate DESC, companyName ASC")
     private List<CandidateCompanyDetails> candidateCompanyDetails = new ArrayList<>(0);
 
     @OneToMany(cascade = {CascadeType.MERGE}, mappedBy = "candidateId")
@@ -146,4 +146,5 @@ public class Candidate implements Serializable {
     @JsonProperty
     @Transient
     private String alternateMobile;
+
 }

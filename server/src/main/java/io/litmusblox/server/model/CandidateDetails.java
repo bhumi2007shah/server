@@ -104,4 +104,12 @@ public class CandidateDetails implements Serializable {
     @Transient
     @JsonProperty
     private String cvLocation;
+
+    public CandidateDetails(Candidate candidateId, Double totalExperience) {
+        this.candidateId = candidateId;
+        this.totalExperience = totalExperience;
+    }
+
+    public CandidateDetails() {
+    }
 }

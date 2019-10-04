@@ -54,7 +54,7 @@ public class Job implements Serializable {
     @Column(name = "JOB_TITLE")
     private String jobTitle;
 
-    @NotNull(message = "No of positions " + IErrorMessages.NULL_MESSAGE)
+    //set default value 1
     @Column(name = "NO_OF_POSITIONS")
     private Integer noOfPositions;
 
@@ -84,9 +84,54 @@ public class Job implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date dateArchived;
 
-
     @Column(name = "SCORING_ENGINE_JOB_AVAILABLE")
     private Boolean scoringEngineJobAvailable  = false;
+
+    //@NotNull(message = "Company bu "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "BU_ID")
+    private CompanyBu buId;
+
+    //@NotNull(message = "Function "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "FUNCTION")
+    private MasterData function;
+
+    //@NotNull
+    @Column(name = "CURRENCY")
+    private String currency;
+
+    @Column(name = "MIN_SALARY")
+    private Long minSalary;
+
+    @Column(name = "MAX_SALARY")
+    private Long maxSalary;
+
+    @Column(name = "MIN_EXPERIENCE")
+    private Double minExperience;
+
+    @Column(name = "MAX_EXPERIENCE")
+    private Double maxExperience;
+
+    //@NotNull(message = "Education "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "EDUCATION")
+    private MasterData education;
+
+    //@NotNull(message = "Job location "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "JOB_LOCATION")
+    private CompanyAddress jobLocation;
+
+   // @NotNull(message = "Interview Location "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "INTERVIEW_LOCATION")
+    private CompanyAddress interviewLocation;
+
+    //@NotNull(message = "Expertise "+ IErrorMessages.NULL_MESSAGE)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EXPERTISE")
+    private MasterData expertise;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -106,8 +151,8 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    @OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
-    private JobDetail jobDetail;
+    /*@OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
+    private JobDetail jobDetail;*/
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY,mappedBy = "jobId")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -137,4 +182,7 @@ public class Job implements Serializable {
 
     @Transient
     private String mlErrorMessage;
+
+    @Transient
+    private MasterData experienceRange;
 }

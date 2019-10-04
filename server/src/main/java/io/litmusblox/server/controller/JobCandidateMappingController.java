@@ -4,8 +4,10 @@
 
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
+import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.CvUploadResponseBean;
 import io.litmusblox.server.service.IJobCandidateMappingService;
@@ -60,7 +62,7 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     String addSingleCandidate(@RequestBody List<Candidate> candidate, @RequestParam("jobId") Long jobId) throws Exception{
         log.info("Received request to add a list of individually added candidates. Number of candidates to be added: " + candidate.size());
-        log.info("Candidate name: " + candidate.get(0).getDisplayName());
+        log.info("Candidate name: " + candidate.get(0).getFirstName()+" "+candidate.get(0).getLastName());
         long startTime = System.currentTimeMillis();
         UploadResponseBean responseBean = jobCandidateMappingService.uploadIndividualCandidate(candidate, jobId);
         log.info("Completed processing list of candidates in " + (System.currentTimeMillis()-startTime) + "ms.");
@@ -107,7 +109,9 @@ public class JobCandidateMappingController {
     String uploadCandidateFromPlugin(@RequestParam(name = "candidateCv", required = false) MultipartFile candidateCv, @RequestParam("candidate") String candidateString, @RequestParam("jobId") Long jobId) throws Exception {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
-        Candidate candidate=new ObjectMapper().readValue(candidateString, Candidate.class);
+        ObjectMapper objectMapper=new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Candidate candidate=objectMapper.readValue(candidateString, Candidate.class);
         UploadResponseBean responseBean = jobCandidateMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,
@@ -165,9 +169,10 @@ public class JobCandidateMappingController {
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
                     put("ScreeningQuestions", Arrays.asList("question"));
+                    put("JobCandidateMapping", Arrays.asList("displayName"));
                 }},
                 new HashMap<String, List<String>>() {{
-                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
+                    put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage", "firstName", "lastName"));
                     put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
                     put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
                     put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
@@ -199,5 +204,17 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     CvUploadResponseBean dragAndDropCV(@RequestParam("files") MultipartFile[] multipartFiles, @RequestParam("jobId")Long jobId) throws Exception {
         return jobCandidateMappingService.processDragAndDropCv(multipartFiles, jobId);
+    }
+
+    /**
+     * Service to edit candidate info like:mobile,email,TotalExperience
+     *
+     * @param jobCandidateMapping updated data from JobCandidateMapping model
+     */
+    @PostMapping("/editCandidate")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    void editCandidate(@RequestBody JobCandidateMapping jobCandidateMapping){
+        jobCandidateMappingService.editCandidate(jobCandidateMapping);
     }
 }

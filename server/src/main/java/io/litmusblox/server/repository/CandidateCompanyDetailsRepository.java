@@ -19,4 +19,6 @@ public interface CandidateCompanyDetailsRepository extends JpaRepository<Candida
 
     @Transactional
     void deleteByCandidateId(Long candidateId);
+
+    CandidateCompanyDetails findByCandidateIdAndCompanyName(long candidateId, String companyName);
 }

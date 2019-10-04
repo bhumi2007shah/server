@@ -6,6 +6,9 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
+import io.litmusblox.server.model.JobHistory;
+
+import java.util.List;
 
 /**
  * Interface definition for Job Service
@@ -73,4 +76,13 @@ public interface IJobService {
      * @param jobId id for which details will be retrieved
      */
     Job getJobDetails(Long jobId) throws Exception;
+
+    /**
+     * Service method to get job history by job id
+     *
+     * @param jobId id for which history will be retrieved
+     *
+     * @return a list of job history objects
+     */
+    List<JobHistory> getJobHistory(Long jobId) throws Exception;
 }

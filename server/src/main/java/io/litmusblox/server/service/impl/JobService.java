@@ -328,6 +328,7 @@ public class JobService implements IJobService {
             //End of code to be removed
             oldJob = jobRepository.save(job);
         }
+        //TODO: remove one JobRepository call
         //Add Job details
         addJobDetail(job, oldJob, loggedInUser);
 
@@ -349,6 +350,9 @@ public class JobService implements IJobService {
                 job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
             }
         }
+
+        //populate key skills for the job
+        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
@@ -454,7 +458,7 @@ public class JobService implements IJobService {
         saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);
 
         //populate key skills for the job
-        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+       // job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void addJobKeySkills(Job job, Job oldJob, User loggedInUser) throws Exception { //update and add new key skill

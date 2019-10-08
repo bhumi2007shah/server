@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -128,7 +129,15 @@ public class JobCandidateMapping implements Serializable, Comparable {
 
     @Transient
     @JsonProperty
-    private List<JcmProfileSharingDetails> profileSharingDetails;
+    List<JcmProfileSharingDetails> interestedHiringManagers = new ArrayList<>();
+
+    @Transient
+    @JsonProperty
+    List<JcmProfileSharingDetails> notInterestedHiringManagers = new ArrayList<>();
+
+    @Transient
+    @JsonProperty
+    List<JcmProfileSharingDetails> notRespondedHiringManagers = new ArrayList<>();
 
     public String getDisplayName() {
         return candidateFirstName + " " + candidateLastName;

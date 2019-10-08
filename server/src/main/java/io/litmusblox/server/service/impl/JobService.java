@@ -15,6 +15,7 @@ import io.litmusblox.server.service.*;
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
+import lombok.experimental.Helper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -265,7 +266,32 @@ public class JobService implements IJobService {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
-            jcmFromDb.setProfileSharingDetails(jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId()));
+
+            List<JcmProfileSharingDetails>jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId());
+            jcmProfileSharingDetails.forEach(detail->{
+                detail.setHiringManagerName(detail.getProfileSharingMaster().getReceiverName());
+                detail.setHiringManagerEmail(detail.getProfileSharingMaster().getReceiverEmail());
+            });
+            jcmFromDb.setInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
+
+            jcmFromDb.setNotInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && !jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
+
+            jcmFromDb.setNotRespondedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()==null )
+                            .collect(Collectors.toList())
+            );
         });
 
         if(null!=job && null!=job.getExpertise()){

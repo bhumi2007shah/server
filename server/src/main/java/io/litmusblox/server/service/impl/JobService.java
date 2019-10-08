@@ -696,7 +696,7 @@ public class JobService implements IJobService {
         else {
             log.info("Calling Scoring Engine Api to create a job");
             try {
-                String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId), scoringEngineBaseUrl + scoringEngineAddJobUrlSuffix, HttpMethod.POST, null);
+                String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId, publishedJob), scoringEngineBaseUrl + scoringEngineAddJobUrlSuffix, HttpMethod.POST, null);
                 publishedJob.setScoringEngineJobAvailable(true);
                 jobRepository.save(publishedJob);
             } catch (Exception e) {
@@ -706,13 +706,22 @@ public class JobService implements IJobService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private String convertJobToRequestPayload(Long jobId) throws Exception {
+    private String convertJobToRequestPayload(Long jobId, Job publishedJob) throws Exception {
         List<JobCapabilities> jobCapabilities = jobCapabilitiesRepository.findByJobIdAndSelected(jobId,true);
+        MasterData expertise = null;
+        if(null != publishedJob.getExpertise())
+            expertise = MasterDataBean.getInstance().getExpertise().get(publishedJob.getExpertise().getId());
+
         List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
         jobCapabilities.stream().forEach(jobCapability -> {
             capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage(), jobCapability.getCutoff(), jobCapability.getPercentage()));
         });
-        ScoringEngineJobBean jobRequestBean = new ScoringEngineJobBean(jobId, capabilityList);
+        ScoringEngineJobBean jobRequestBean;
+        if(null != expertise)
+             jobRequestBean = new ScoringEngineJobBean(jobId, expertise.getValueToUSe(),capabilityList);
+        else
+             jobRequestBean = new ScoringEngineJobBean(jobId, null, capabilityList);
+
         return (new ObjectMapper()).writeValueAsString(jobRequestBean);
     }
 

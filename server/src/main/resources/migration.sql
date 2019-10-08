@@ -359,5 +359,15 @@ ALTER TABLE JOB_CAPABILITIES
 ADD COLUMN CUTOFF SMALLINT DEFAULT NULL,
 ADD COLUMN PERCENTAGE SMALLINT DEFAULT NULL;
 
+--For ticket #162
+ALTER TABLE MASTER_DATA
+ADD COLUMN VALUE_TO_USE SMALLINT,
+ADD COLUMN COMMENTS VARCHAR (255);
 
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 1, COMMENTS = 'Candidate has 1-2 years of relevant work experience and works on given tasks on day to day basis. Exposure to job complexities is limited and needs support/guidance for complex tasks.' where value='Beginner';
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 2, COMMENTS = 'Candidate can independently handle all tasks. Typically has 2 - 5 years of relevant work experience. Dependable on senior for assigned work. Can participate in training/grooming of juniors' where value = 'Competent';
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 3, COMMENTS = 'Considered as a Master in the organization/industry. Candidate can handle highly complex scenarios and is the go-to person for others. Such candidates are rare to find and often come at a high cost. Select this option if you want to hire a expert.' where value = 'Expert';
 

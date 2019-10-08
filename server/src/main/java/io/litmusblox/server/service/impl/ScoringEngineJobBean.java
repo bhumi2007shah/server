@@ -22,6 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScoringEngineJobBean {
     Long lbJobId;
+    Long expertise;
     List<Capability> capabilities;
 }
 

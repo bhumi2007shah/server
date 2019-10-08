@@ -131,10 +131,6 @@ VALUES
  ( 'process','Interview'),
  ( 'process','Offer Management'),
 
- ( 'expertise','Beginner'),
- ( 'expertise','Competent'),
- ( 'expertise','Expert'),
-
  ( 'experienceRange', '0 - 3 yrs'),
  ( 'experienceRange', '4 - 7 yrs'),
  ( 'experienceRange', '8 - 12 yrs'),
@@ -663,3 +659,9 @@ INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('LinkNotVisitedReminder2','[[${commBean.receiverfirstname}]], are you not interested in this job? [[${commBean.senderfirstname}]] from [[${commBean.sendercompany}]] has invited you to apply for the [[${commBean.jobtitle}]] position. Click the link below to apply. [[${commBean.chatlink}]]'),
 ('ChatNotVisitedReminder1','Hi [[${commBean.receiverfirstname}]],%nHere is your link to create your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It''s required to submit completed profile to be considered for the job. The link is valid only for 48 hours. Click the link to begin. [[${commBean.chatlink}]] '),
 ('ChatNotVisitedReminder2','[[${commBean.receiverfirstname}]],%nJust a reminder to complete your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It will take just a few minutes to finish it.  It''s required that you finish the profile to be considered for the job.  This link will expire in 24 hours.%nClick the link to apply. [[${commBean.chatlink}]] ');
+
+INSERT INTO MASTER_DATA (TYPE, VALUE, VALUE_TO_USE, COMMENTS)
+VALUES
+ ( 'expertise','Beginner', 1, 'Candidate has 1-2 years of relevant work experience and works on given tasks on day to day basis. Exposure to job complexities is limited and needs support/guidance for complex tasks.'),
+ ( 'expertise','Competent', 2, 'Candidate can independently handle all tasks. Typically has 2 - 5 years of relevant work experience. Dependable on senior for assigned work. Can participate in training/grooming of juniors'),
+ ( 'expertise','Expert', 3, 'Considered as a Master in the organization/industry. Candidate can handle highly complex scenarios and is the go-to person for others. Such candidates are rare to find and often come at a high cost. Select this option if you want to hire a expert.');

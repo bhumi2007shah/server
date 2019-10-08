@@ -92,15 +92,16 @@ public class MasterDataService implements IMasterDataService {
 
         //For every master data record from database, populate the corresponding map with key-value pairs
         masterDataFromDb.forEach(data -> {
-            ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
+                ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
+                //special handling for Source stage
+                if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
+                    MasterDataBean.getInstance().setSourceStage(data);
+                }
+                if(data.getType().equalsIgnoreCase("noticePeriod"))
+                    MasterDataBean.getInstance().getNoticePeriodMapping().put(data.getValue(), data);
 
-            //special handling for Source stage
-            if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
-                MasterDataBean.getInstance().setSourceStage(data);
-            }
-
-            if(data.getType().equalsIgnoreCase("noticePeriod"))
-                MasterDataBean.getInstance().getNoticePeriodMapping().put(data.getValue(), data);
+                if(data.getType().equalsIgnoreCase("expertise"))
+                    MasterDataBean.getInstance().getExpertise().put(data.getId(), data);
         });
 
         //populate various configuration settings like max limits, send sms/email flag,etc

@@ -79,6 +79,7 @@ public class CandidateService implements ICandidateService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public Candidate findByMobileOrEmail(String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception {
+        log.info("Inside findByMobileOrEmail method");
         //check if candidate exists for email
         Candidate dupCandidateByEmail = null;
         CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(email);
@@ -153,6 +154,7 @@ public class CandidateService implements ICandidateService {
     @Override
     public Candidate createCandidate(String firstName, String lastName, String email, String mobile, String countryCode, User loggedInUser, Optional<String> alternateMobile) throws Exception {
 
+        log.info("Inside createCandidate method - create candidate, emailHistory, mobileHistory");
         Candidate candidate = candidateRepository.save(new Candidate(firstName, lastName, email, mobile, countryCode, new Date(), loggedInUser));
         candidateEmailHistoryRepository.save(new CandidateEmailHistory(candidate, email, new Date(), loggedInUser));
         candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidate, mobile, countryCode, new Date(), loggedInUser));
@@ -163,6 +165,7 @@ public class CandidateService implements ICandidateService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public CandidateDetails saveUpdateCandidateDetails(CandidateDetails candidateDetails, Candidate candidate){
+        log.info("Inside saveUpdateCandidateDetails method");
         //delete from CandidateDetails
 
         candidateDetailsRepository.deleteByCandidateId(candidate);
@@ -181,13 +184,15 @@ public class CandidateService implements ICandidateService {
         }
 
         candidateDetails.setCandidateId(candidate);
-        candidateDetailsRepository.save(candidateDetails);
+        candidateDetails =candidateDetailsRepository.save(candidateDetails);
+        log.info("Candidate Details created candidateDetailsId : "+candidateDetails.getId());
         return candidateDetails;
     }
 
     @Override
     @Transactional
     public void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Candidate candidate) throws Exception {
+        log.info("Inside saveUpdateCandidateEducationDetails method");
         //delete existing records
         candidateEducationDetailsRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
@@ -207,6 +212,7 @@ public class CandidateService implements ICandidateService {
     @Transactional
     @Override
     public void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetails, Candidate candidate) throws Exception {
+        log.info("Inside saveUpdateCandidateProjectDetails method");
         //delete existing records
         candidateProjectDetailsRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
@@ -220,6 +226,7 @@ public class CandidateService implements ICandidateService {
     @Transactional
     @Override
     public void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfiles, Candidate candidate) throws Exception {
+        log.info("Inside saveUpdateCandidateOnlineProfile method");
         //delete existing records
         candidateOnlineProfilesRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
@@ -233,6 +240,7 @@ public class CandidateService implements ICandidateService {
     @Transactional
     @Override
     public void saveUpdateCandidateLanguageProficiency(List<CandidateLanguageProficiency> candidateLanguageProficiencies, Long candidateId) throws Exception {
+        log.info("Inside saveUpdateCandidateLanguageProficiency method");
         //delete existing records
         candidateLanguageProficiencyRepository.deleteByCandidateId(candidateId);
         //insert new ones
@@ -241,6 +249,7 @@ public class CandidateService implements ICandidateService {
 
     @Transactional
     public void saveUpdateCandidateWorkAuthorization(List<CandidateWorkAuthorization> candidateWorkAuthorizations, Long candidateId) throws Exception {
+        log.info("Inside saveUpdateCandidateWorkAuthorization method");
         //delete existing records
         candidateWorkAuthorizationRepository.deleteByCandidateId(candidateId);
         //insert new ones
@@ -249,6 +258,7 @@ public class CandidateService implements ICandidateService {
 
     @Transactional
     public void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception {
+        log.info("Inside saveUpdateCandidateSkillDetails method");
         //delete existing records
         candidateSkillDetailsRepository.deleteByCandidateId(candidateId);
         //insert new ones
@@ -258,6 +268,7 @@ public class CandidateService implements ICandidateService {
 
     @Transactional
     public void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetails, Candidate candidate) throws Exception {
+        log.info("Inside saveUpdateCandidateCompanyDetails method");
         //delete existing records
         candidateCompanyDetailsRepository.deleteByCandidateId(candidate.getId());
 

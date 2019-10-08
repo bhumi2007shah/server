@@ -170,6 +170,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
+        log.info("Inside saveCandidateSupportiveInfo Method");
 
         //find candidateId
         Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));

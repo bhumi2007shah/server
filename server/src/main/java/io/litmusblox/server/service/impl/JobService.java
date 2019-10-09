@@ -192,6 +192,7 @@ public class JobService implements IJobService {
         responseBean.getListOfJobs().forEach(job -> {
             Hibernate.initialize(job.getExpertise());
             Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getExperienceRange());
         });
         return responseBean;
     }
@@ -295,6 +296,10 @@ public class JobService implements IJobService {
 
         if(null!=job && null!=job.getExpertise()){
             Hibernate.initialize(job.getExpertise());
+            Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(job.getCompanyId().getCompanyBuList());
+            Hibernate.initialize(job.getExperienceRange());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());

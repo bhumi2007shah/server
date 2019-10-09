@@ -362,5 +362,23 @@ ALTER TABLE JOB
 ALTER COLUMN min_salary SET DEFAULT 0,
 ALTER COLUMN max_salary SET DEFAULT 0;
 
+--For ticket #175
+ALTER TABLE JOB
+DROP COLUMN MIN_EXPERIENCE,
+DROP COLUMN MAX_EXPERIENCE;
+
+ALTER TABLE JOB
+ADD COLUMN EXPERIENCE_RANGE INTEGER REFERENCES MASTER_DATA(ID);
+
+update master_data set value='0 - 2 Years' where value='0 - 2 yrs';
+update master_data set value='2 - 4 Years' where value='2 - 4 yrs';
+update master_data set value='4 - 6 Years' where value='4 - 6 yrs';
+update master_data set value='6 - 8 Years' where value='6 - 8 yrs';
+update master_data set value='8 - 10 Years' where value='8 - 10 yrs';
+update master_data set value='10 - 15 Years' where value='10 - 15 yrs';
+update master_data set value='15 - 20 Years' where value='16 - 20 yrs';
+update master_data set value='20+ Years' where value='20+ yrs';
+
+
 
 

@@ -135,13 +135,6 @@ VALUES
  ( 'expertise','Competent'),
  ( 'expertise','Expert'),
 
- ( 'experienceRange', '0 - 3 yrs'),
- ( 'experienceRange', '4 - 7 yrs'),
- ( 'experienceRange', '8 - 12 yrs'),
- ( 'experienceRange', '13 - 15 yrs'),
- ( 'experienceRange', '17 - 20 yrs'),
- ( 'experienceRange', '20+ yrs'),
-
  ( 'noticePeriod','0'),
  ( 'noticePeriod','15'),
  ( 'noticePeriod','30'),
@@ -663,3 +656,15 @@ INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('LinkNotVisitedReminder2','[[${commBean.receiverfirstname}]], are you not interested in this job? [[${commBean.senderfirstname}]] from [[${commBean.sendercompany}]] has invited you to apply for the [[${commBean.jobtitle}]] position. Click the link below to apply. [[${commBean.chatlink}]]'),
 ('ChatNotVisitedReminder1','Hi [[${commBean.receiverfirstname}]],%nHere is your link to create your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It''s required to submit completed profile to be considered for the job. The link is valid only for 48 hours. Click the link to begin. [[${commBean.chatlink}]] '),
 ('ChatNotVisitedReminder2','[[${commBean.receiverfirstname}]],%nJust a reminder to complete your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It will take just a few minutes to finish it.  It''s required that you finish the profile to be considered for the job.  This link will expire in 24 hours.%nClick the link to apply. [[${commBean.chatlink}]] ');
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+( 'experienceRange', '0 - 2 Years'),
+ ( 'experienceRange', '2 - 4 Years'),
+ ( 'experienceRange', '4 - 6 Years'),
+ ( 'experienceRange', '6 - 8 Years'),
+ ( 'experienceRange', '8 - 10 Years'),
+ ( 'experienceRange', '10 - 15 Years'),
+ ( 'experienceRange', '15 - 20 Years'),
+ ( 'experienceRange', '20+ Years');
+

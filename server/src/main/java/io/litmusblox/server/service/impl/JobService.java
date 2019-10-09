@@ -15,7 +15,6 @@ import io.litmusblox.server.service.*;
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
-import lombok.experimental.Helper;
 import lombok.extern.log4j.Log4j2;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -656,18 +655,13 @@ public class JobService implements IJobService {
                 oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
             }
         }
-        String expRange = masterDataBean.getExperienceRange().get(job.getExperienceRange().getId());
 
-        if (null == expRange) {
-           // throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-            log.error("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId());
+        if(null != job.getExperienceRange() && null != masterDataBean.getExperienceRange().get(job.getExperienceRange().getId())){
+            oldJob.setExperienceRange(job.getExperienceRange());
         }else{
-            String[] range = expRange.split(" ");
-            oldJob.setMinExperience(Double.parseDouble(range[0]));
-            oldJob.setMaxExperience(Double.parseDouble(range[2]));
+            // throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, ExperienceRange " + IErrorMessages.NULL_MESSAGE + job.getId());
         }
-
-
         oldJob.setMinSalary(job.getMinSalary());
         oldJob.setMaxSalary(job.getMaxSalary());
         oldJob.setNoticePeriod(job.getNoticePeriod());

@@ -55,7 +55,7 @@ public interface ICandidateService {
 
     void saveUpdateCandidateEducationDetails(List<CandidateEducationDetails> candidateEducationDetails, Candidate candidate) throws Exception;
 
-    void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetailsList, Long candidateId) throws Exception;
+    void saveUpdateCandidateProjectDetails(List<CandidateProjectDetails> candidateProjectDetailsList, Candidate candidate) throws Exception;
 
     void saveUpdateCandidateOnlineProfile(List<CandidateOnlineProfile> candidateOnlineProfileList, Candidate candidate) throws Exception;
 

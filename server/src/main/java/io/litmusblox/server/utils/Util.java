@@ -290,7 +290,7 @@ public class Util {
                 log.error("Given string not convert in Date...");
             }
         }
-        log.info("Given date string is empty");
+        //log.info("Given date string is empty");
         return null;
     }
 
@@ -299,9 +299,10 @@ public class Util {
     }
 
     public static String truncateField(Candidate candidate, String fieldName, int fieldLength, String fieldValue) {
+        log.info("Inside truncateField method");
         //Candidate candidate = candidateRepository.findById(Long.parseLong(candidateId)).orElse(null);
         User loggedInUser = null;
-        if(!SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
+        if(null != SecurityContextHolder.getContext().getAuthentication() && !SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
             loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);

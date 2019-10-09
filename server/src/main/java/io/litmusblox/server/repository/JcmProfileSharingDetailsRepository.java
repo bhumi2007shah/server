@@ -7,6 +7,7 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.JcmProfileSharingDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -19,4 +20,6 @@ import java.util.UUID;
 public interface JcmProfileSharingDetailsRepository extends JpaRepository<JcmProfileSharingDetails, Long> {
 
     JcmProfileSharingDetails findById(UUID id);
+
+    List<JcmProfileSharingDetails> findByJobCandidateMappingId(Long jcmId);
 }

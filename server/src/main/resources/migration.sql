@@ -235,23 +235,26 @@ ALTER TABLE CV_PARSING_DETAILS
 ADD COLUMN ERROR_MESSAGE varchar(100);
 
 
--- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id
-DELETE
-FROM job_key_skills
-where skill_id in (
-SELECT ID
-FROM skills_master
-where
-id not in (select min(id)
-from skills_master
-group by skill_name)
-);
+-- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id. Need to match by lower case.
+SELECT
+    LOWER(skill_name),
+    COUNT( LOWER(skill_name) )
+FROM
+    skills_master
+GROUP BY
+    LOWER(skill_name)
+HAVING
+    COUNT( LOWER(skill_name) )> 1
+ORDER BY
+    LOWER(skill_name);
 
-Delete
-FROM skills_master
-WHERE ID NOT IN (SELECT MIN(id)
-FROM skills_master
-GROUP BY skill_name);
+DELETE
+FROM
+    skills_master a
+        USING skills_master b
+WHERE
+    a.id < b.id
+    AND LOWER(a.skill_name) = LOWER(b.skill_name);
 
 -- Added unique constraint on skill_name in skills_master with case insensitivity
 Alter table skills_master add constraint unique_skill_name unique(skill_name);
@@ -334,6 +337,11 @@ ADD COLUMN NOTICE_PERIOD INTEGER REFERENCES MASTER_DATA(ID);
 UPDATE CANDIDATE_COMPANY_DETAILS
 SET NOTICE_PERIOD = (SELECT ID FROM MASTER_DATA WHERE TYPE = 'noticePeriod' AND VALUE = CANDIDATE_COMPANY_DETAILS.NOTICE_PERIOD_OLD);
 
+-- Note: If above query does not work using the next one.
+UPDATE CANDIDATE_COMPANY_DETAILS
+SET NOTICE_PERIOD = (SELECT ID FROM MASTER_DATA WHERE TYPE = 'noticePeriod' AND VALUE = CANDIDATE_COMPANY_DETAILS.NOTICE_PERIOD_OLD::character varying);
+
+
 ALTER TABLE CANDIDATE_COMPANY_DETAILS DROP COLUMN NOTICE_PERIOD_OLD;
 
 -- For ticket #154
@@ -370,4 +378,42 @@ UPDATE MASTER_DATA
 SET VALUE_TO_USE = 2, COMMENTS = 'Candidate can independently handle all tasks. Typically has 2 - 5 years of relevant work experience. Dependable on senior for assigned work. Can participate in training/grooming of juniors' where value = 'Competent';
 UPDATE MASTER_DATA
 SET VALUE_TO_USE = 3, COMMENTS = 'Considered as a Master in the organization/industry. Candidate can handle highly complex scenarios and is the go-to person for others. Such candidates are rare to find and often come at a high cost. Select this option if you want to hire a expert.' where value = 'Expert';
+
+--For ticket #161
+update master_data set value='0 - 2 yrs' where value='0 - 3 yrs';
+update master_data set value='2 - 4 yrs' where value='4 - 7 yrs';
+update master_data set value='4 - 6 yrs' where value='8 - 12 yrs';
+update master_data set value='6 - 8 yrs' where value='13 - 15 yrs';
+update master_data set value='8 - 10 yrs' where value='17 - 20 yrs';
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES( 'experienceRange', '10 - 15 yrs'),
+ ( 'experienceRange', '16 - 20 yrs');
+
+ALTER TABLE JOB
+ADD COLUMN NOTICE_PERIOD INTEGER REFERENCES MASTER_DATA(ID);
+
+ALTER TABLE JOB
+ALTER COLUMN min_salary SET DEFAULT 0,
+ALTER COLUMN max_salary SET DEFAULT 0;
+
+--For ticket #175
+ALTER TABLE JOB
+DROP COLUMN MIN_EXPERIENCE,
+DROP COLUMN MAX_EXPERIENCE;
+
+ALTER TABLE JOB
+ADD COLUMN EXPERIENCE_RANGE INTEGER REFERENCES MASTER_DATA(ID);
+
+update master_data set value='0 - 2 Years' where value='0 - 2 yrs';
+update master_data set value='2 - 4 Years' where value='2 - 4 yrs';
+update master_data set value='4 - 6 Years' where value='4 - 6 yrs';
+update master_data set value='6 - 8 Years' where value='6 - 8 yrs';
+update master_data set value='8 - 10 Years' where value='8 - 10 yrs';
+update master_data set value='10 - 15 Years' where value='10 - 15 yrs';
+update master_data set value='15 - 20 Years' where value='16 - 20 yrs';
+update master_data set value='20+ Years' where value='20+ yrs';
+
+
+
 

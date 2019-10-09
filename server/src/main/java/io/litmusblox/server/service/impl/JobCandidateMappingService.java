@@ -170,6 +170,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
+        log.info("Inside saveCandidateSupportiveInfo Method");
 
         //find candidateId
         Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
@@ -178,7 +179,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if (null != candidateFromDb)
             candidateId = candidateFromDb.getId();
         if (null != candidateId) {
-
+            candidateFromDb.setMobile(candidate.getMobile());
+            candidateFromDb.setEmail(candidate.getEmail());
             try {
                 //if telephone field has value, save to mobile history table
                 if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 6) {
@@ -225,7 +227,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
             //candidate project details
             if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
-                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
+                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateFromDb);
 
             //candidate online profile
             if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
@@ -569,7 +571,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), receiverNameToUse, receiverEmailToUse));
             Set<JcmProfileSharingDetails> detailsSet = new HashSet<>(requestBean.getJcmId().size());
             requestBean.getJcmId().forEach(jcmId ->{
-                detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
+                detailsSet.add(new JcmProfileSharingDetails(masterObj,jcmId));
             });
             jcmProfileSharingDetailsRepository.saveAll(detailsSet);
             recieverEmails.add(array[1]);
@@ -849,12 +851,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
+        CandidateCompanyDetails objFromDb = null;
         CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
-        CandidateCompanyDetails objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).get();
+        if(null != candidateCompanyDetail.getId())
+            objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).orElse(null);
         if(null != objFromDb && null != candidateCompanyDetail.getNoticePeriod()){
             objFromDb.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
+            candidateCompanyDetailsRepository.save(objFromDb);
         }
-        candidateCompanyDetailsRepository.save(objFromDb);
     }
 
 

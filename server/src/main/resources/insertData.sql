@@ -131,13 +131,6 @@ VALUES
  ( 'process','Interview'),
  ( 'process','Offer Management'),
 
- ( 'experienceRange', '0 - 3 yrs'),
- ( 'experienceRange', '4 - 7 yrs'),
- ( 'experienceRange', '8 - 12 yrs'),
- ( 'experienceRange', '13 - 15 yrs'),
- ( 'experienceRange', '17 - 20 yrs'),
- ( 'experienceRange', '20+ yrs'),
-
  ( 'noticePeriod','0'),
  ( 'noticePeriod','15'),
  ( 'noticePeriod','30'),
@@ -665,3 +658,15 @@ VALUES
  ( 'expertise','Beginner', 1, 'Candidate has 1-2 years of relevant work experience and works on given tasks on day to day basis. Exposure to job complexities is limited and needs support/guidance for complex tasks.'),
  ( 'expertise','Competent', 2, 'Candidate can independently handle all tasks. Typically has 2 - 5 years of relevant work experience. Dependable on senior for assigned work. Can participate in training/grooming of juniors'),
  ( 'expertise','Expert', 3, 'Considered as a Master in the organization/industry. Candidate can handle highly complex scenarios and is the go-to person for others. Such candidates are rare to find and often come at a high cost. Select this option if you want to hire a expert.');
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+( 'experienceRange', '0 - 2 Years'),
+ ( 'experienceRange', '2 - 4 Years'),
+ ( 'experienceRange', '4 - 6 Years'),
+ ( 'experienceRange', '6 - 8 Years'),
+ ( 'experienceRange', '8 - 10 Years'),
+ ( 'experienceRange', '10 - 15 Years'),
+ ( 'experienceRange', '15 - 20 Years'),
+ ( 'experienceRange', '20+ Years');
+

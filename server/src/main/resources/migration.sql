@@ -477,3 +477,65 @@ UPDATE master_data set value = 'PR/Advertising (PR/Advertising)' where value = '
 UPDATE master_data set value = 'Tourism (Tourism)' where value = 'Tourism';
 UPDATE master_data set value = 'Vocational-Training (Vocational Training)' where value = 'Vocational Training';
 INSERT into master_data(type, value) values ('education','Masters in Information Management (MIM)');
+
+UPDATE MASTER_DATA SET VALUE = '0 Days' WHERE VALUE = '0';
+UPDATE MASTER_DATA SET VALUE = '15 Days' WHERE VALUE = '15';
+UPDATE MASTER_DATA SET VALUE = '30 Days' WHERE VALUE = '30';
+UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE VALUE = '60';
+UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '45';
+UPDATE MASTER_DATA SET VALUE = '90 Days' WHERE VALUE = '90';
+
+UPDATE MASTER_DATA SET VALUE = 'Accounting / Tax / Company Secretary / Audit' WHERE VALUE = 'BPO';
+ UPDATE MASTER_DATA SET VALUE = 'Agent' WHERE VALUE = 'Human Resources (HR)';
+ UPDATE MASTER_DATA SET VALUE = 'Airline / Reservations / Ticketing / Travel' WHERE VALUE = 'Information Technology (IT)';
+ UPDATE MASTER_DATA SET VALUE = 'Analytics & Business Intelligence' WHERE VALUE = 'Office Administration';
+ UPDATE MASTER_DATA SET VALUE = 'Anchoring / TV / Films / Production' WHERE VALUE = 'Sales';
+ UPDATE MASTER_DATA SET VALUE = 'Architects / Interior Design / Naval Arch' WHERE VALUE='Manufacturing';
+
+ INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+('function','Art Director / Graphic / Web Designer'),
+('function','Banking / Insurance'),
+('function','Content / Editors / Journalists'),
+('unction','Corporate Planning / Consulting / Strategy'),
+('function','Entrepreneur / Businessman / Outside Management Consultant'),
+('function','Export / Import'),
+('function','Fashion'),
+('function', 'Front Office Staff / Secretarial / Computer Operator'),
+('function','Hotels / Restaurant Management'),
+('function', 'HR / Admin / PM / IR / Training'),
+('function', 'ITES / BPO / Operations / Customer Service / Telecalling'),
+('function','Legal / Law'),
+('function','Medical Professional / Healthcare Practitioner / Technician'),
+('function','Mktg / Advtg / MR / Media Planning / PR / Corp. Comm'),
+('function','Packaging Development'),
+('function','Production / Service Engineering / Manufacturing / Maintenance'),
+('function','Project Management / Site Engineers'),
+('function','Purchase / SCM'),
+('function','R&D / Engineering Design'),
+('function','Sales / Business Development / Client Servicing'),
+('function','Security'),
+('function','Shipping'),
+('function','Software Development -'),
+('function','Software Development - Application Programming'),
+('function','Software Development - Client Server'),
+('function','Software Development - Database Administration'),
+('function','Software Development - e-commerce / Internet Technologies'),
+('function','Software Development - Embedded Technologies'),
+('function','Software Development - ERP / CRM'),
+('function','Software Development - Network Administration'),
+('function','Software Development - Others'),
+('function','Software Development - QA and Testing'),
+('function','Software Development - System Programming'),
+('function','Software Development - Telecom Software'),
+('function','Software Development - Systems / EDP / MIS'),
+('function','Teaching / Education / Language Specialist'),
+('function', 'Telecom / IT-Hardware / Tech. Staff / Support'),
+('function','Top Management'),
+('function','Any Other');
+
+--drop unique constraints of master_data for type and value
+UPDATE MASTER_DATA SET VALUE = '10 - 15 Years' WHERE VALUE = '20+ Years';
+UPDATE MASTER_DATA SET VALUE = '15 - 20 Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '10 - 15 Years');
+UPDATE MASTER_DATA SET VALUE = '20+ Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '15 - 20 Years');
+--add again unique constraints of master_data for type and value

@@ -8,6 +8,8 @@ import io.litmusblox.server.model.WeightageCutoffMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author : Sumit
  * Date : 01/10/19
@@ -18,6 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface WeightageCutoffMappingRepository extends JpaRepository<WeightageCutoffMapping,Long> {
 
     @Transactional
-    WeightageCutoffMapping findByWeightage(int weightage);
+    List<WeightageCutoffMapping> findByWeightage(int weightage);
 
 }

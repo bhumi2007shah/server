@@ -34,8 +34,11 @@ public class WeightageCutoffByCompanyMapping {
     private int weightage;
 
     @Column(name = "PERCENTAGE")
-    private Long percentage;
+    private int percentage;
 
     @Column(name = "CUTOFF")
-    private Long cutoff;
+    private int cutoff;
+
+    @Column(name = "STAR_RATING")
+    private int starRating;
 }

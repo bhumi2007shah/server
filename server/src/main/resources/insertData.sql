@@ -670,3 +670,21 @@ VALUES
  ( 'experienceRange', '15 - 20 Years'),
  ( 'experienceRange', '20+ Years');
 
+
+insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)
+values
+(2,100,10,1),
+(2,100,20,2),
+(2,80,40,3),
+(2,40,80,4),
+(2,20,100,5),
+(6,100,20,1),
+(6,100,40,2),
+(6,60,60,3),
+(6,20,100,4),
+(6,0,100,5),
+(10,0,30,1),
+(10,0,50,2),
+(10,0,70,3),
+(10,0,80,4),
+(10,0,100,5);

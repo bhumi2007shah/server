@@ -8,6 +8,8 @@ import io.litmusblox.server.model.WeightageCutoffByCompanyMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * @author : Sumit
  * Date : 01/10/19
@@ -18,5 +20,5 @@ import org.springframework.transaction.annotation.Transactional;
 public interface WeightageCutoffByCompanyMappingRepository extends JpaRepository<WeightageCutoffByCompanyMapping,Long> {
 
     @Transactional
-    WeightageCutoffByCompanyMapping findByCompanyIdAndWeightage(long companyId, int weightage);
+    List<WeightageCutoffByCompanyMapping> findByCompanyIdAndWeightage(long companyId, int weightage);
 }

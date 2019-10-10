@@ -103,8 +103,11 @@ public class JobService implements IJobService {
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
-    @Autowired
+    @Resource
     JobHistoryRepository jobHistoryRepository;
+
+    @Resource
+    JobCapabilityStarRatingMappingRepository jobCapabilityStarRatingMappingRepository;
 
     @Value("${mlApiUrl}")
     private String mlUrl;
@@ -592,16 +595,20 @@ public class JobService implements IJobService {
 
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
-            WeightageCutoffByCompanyMapping wtgCompanyMapping = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
-            if(null != wtgCompanyMapping){
-                oldCapability.setCutoff(wtgCompanyMapping.getCutoff());
-                oldCapability.setPercentage(wtgCompanyMapping.getPercentage());
-            }else{
-                WeightageCutoffMapping  weightageCutoffMapping = weightageCutoffMappingRepository.findByWeightage(newValue.getWeightage());
-                if(null != weightageCutoffMapping){
-                    oldCapability.setCutoff(wtgCompanyMapping.getCutoff());
-                    oldCapability.setPercentage(wtgCompanyMapping.getPercentage());
+            if(newValue.getSelected()) {
+                //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
+                List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
+                if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
+                    wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+
+                } else {
+                    List<WeightageCutoffMapping> weightageCutoffMappings = weightageCutoffMappingRepository.findByWeightage(newValue.getWeightage());
+                    if (null != weightageCutoffMappings && weightageCutoffMappings.size() > 0) {
+                        weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+                    }
                 }
+                //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);
+                //jobCapabilityStarRatingMappingRepository.saveAll(starRatingMappingList);
             }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
@@ -764,7 +771,7 @@ public class JobService implements IJobService {
 
         List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
         jobCapabilities.stream().forEach(jobCapability -> {
-            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage(), jobCapability.getCutoff(), jobCapability.getPercentage()));
+            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage(), jobCapability.getJobCapabilityStarRatingMappingList()));
         });
         ScoringEngineJobBean jobRequestBean;
         if(null != expertise)

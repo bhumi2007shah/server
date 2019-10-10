@@ -17,7 +17,6 @@ import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
 import io.litmusblox.server.utils.*;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -626,23 +625,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         });
 
         Candidate returnObj = objFromDb.getCandidate();
-        Hibernate.initialize(objFromDb.getTechResponseData());
         returnObj.setTechResponseData(objFromDb.getTechResponseData().getTechResponse());
 
-        Hibernate.initialize(returnObj.getCandidateDetails());
         //set the cv location
         if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
             StringBuffer cvLocation = new StringBuffer("");
             cvLocation.append(IConstant.CANDIDATE_CV).append(File.separator).append(objFromDb.getJob().getId()).append(File.separator).append(objFromDb.getCandidate().getId()).append(returnObj.getCandidateDetails().getCvFileType());
             returnObj.getCandidateDetails().setCvLocation(cvLocation.toString());
         }
-        Hibernate.initialize(returnObj.getCandidateEducationDetails());
-        Hibernate.initialize(returnObj.getCandidateCompanyDetails());
-        Hibernate.initialize(returnObj.getCandidateProjectDetails());
-        Hibernate.initialize(returnObj.getCandidateLanguageProficiencies());
-        Hibernate.initialize(returnObj.getCandidateOnlineProfiles());
-        Hibernate.initialize(returnObj.getCandidateSkillDetails());
-        Hibernate.initialize(returnObj.getCandidateWorkAuthorizations());
         returnObj.setScreeningQuestionResponses(new ArrayList<>(screeningQuestionsMap.values()));
 
         returnObj.setEmail(objFromDb.getEmail());
@@ -680,17 +670,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
-        Hibernate.initialize(objFromDb.getJob().getCompanyId());
-        Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
-        if(null!=objFromDb.getJob() && null!=objFromDb.getJob().getExpertise()){
-            Hibernate.initialize(objFromDb.getJob().getExpertise());
-            Hibernate.initialize(objFromDb.getJob().getExperienceRange());
-        }
-        objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
-        });
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
     }
@@ -789,7 +768,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setScore(requestBean.getScore());
         objFromDb.setChatbotUpdatedOn(requestBean.getChatbotUpdatedOn());
         if(null != requestBean.getTechResponseJson()) {
-            Hibernate.initialize(objFromDb.getTechResponseData());
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);

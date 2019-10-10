@@ -497,7 +497,7 @@ VALUES
 ('function','Art Director / Graphic / Web Designer'),
 ('function','Banking / Insurance'),
 ('function','Content / Editors / Journalists'),
-('unction','Corporate Planning / Consulting / Strategy'),
+('function','Corporate Planning / Consulting / Strategy'),
 ('function','Entrepreneur / Businessman / Outside Management Consultant'),
 ('function','Export / Import'),
 ('function','Fashion'),

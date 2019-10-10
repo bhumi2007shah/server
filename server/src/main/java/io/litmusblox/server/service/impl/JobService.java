@@ -198,6 +198,7 @@ public class JobService implements IJobService {
         responseBean.getListOfJobs().forEach(job -> {
             Hibernate.initialize(job.getExpertise());
             Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getExperienceRange());
         });
         return responseBean;
     }
@@ -301,6 +302,10 @@ public class JobService implements IJobService {
 
         if(null!=job && null!=job.getExpertise()){
             Hibernate.initialize(job.getExpertise());
+            Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(job.getCompanyId().getCompanyBuList());
+            Hibernate.initialize(job.getExperienceRange());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());
@@ -845,12 +850,16 @@ public class JobService implements IJobService {
         Hibernate.initialize(job.getJobScreeningQuestionsList());
         Hibernate.initialize(job.getJobKeySkillsList());
         Hibernate.initialize(job.getJobCapabilityList());
+        Hibernate.initialize(job.getInterviewLocation());
+        Hibernate.initialize(job.getExperienceRange());
         if(null!=job && null!=job.getExpertise()){
             Hibernate.initialize(job.getExpertise());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());
             Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
         });
         return job;
     }
@@ -865,6 +874,7 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist ", HttpStatus.UNPROCESSABLE_ENTITY);
         }
+        Hibernate.initialize(job.getExperienceRange());
         return jobHistoryRepository.findByJobIdOrderByIdDesc(jobId);
     }
 }

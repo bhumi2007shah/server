@@ -684,6 +684,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
         if(null!=objFromDb.getJob() && null!=objFromDb.getJob().getExpertise()){
             Hibernate.initialize(objFromDb.getJob().getExpertise());
+            Hibernate.initialize(objFromDb.getJob().getExperienceRange());
         }
         objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());

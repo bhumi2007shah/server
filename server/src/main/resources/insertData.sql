@@ -9,13 +9,6 @@ INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHOR
 
 INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES
- ( 'function','BPO'),
- ( 'function','Human Resources (HR)'),
- ( 'function','Information Technology (IT)'),
- ( 'function','Manufacturing'),
- ( 'function','Office Administration'),
- ( 'function','Sales'),
-
  ( 'education','BA'),
  ( 'education','BAMS'),
  ( 'education','BArch'),
@@ -662,13 +655,23 @@ VALUES
 INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES
 ( 'experienceRange', '0 - 2 Years'),
- ( 'experienceRange', '2 - 4 Years'),
- ( 'experienceRange', '4 - 6 Years'),
- ( 'experienceRange', '6 - 8 Years'),
- ( 'experienceRange', '8 - 10 Years'),
- ( 'experienceRange', '10 - 15 Years'),
- ( 'experienceRange', '15 - 20 Years'),
- ( 'experienceRange', '20+ Years');
+( 'experienceRange', '2 - 4 Years'),
+( 'experienceRange', '4 - 6 Years'),
+( 'experienceRange', '6 - 8 Years'),
+( 'experienceRange', '8 - 10 Years'),
+( 'experienceRange', '10 - 15 Years'),
+( 'experienceRange', '15 - 20 Years'),
+( 'experienceRange', '20+ Years'),
+
+( 'function','Accounting / Tax / Company Secretary / Audit'),
+( 'function','Agent'),
+( 'function','Airline / Reservations / Ticketing / Travel'),
+( 'function','Analytics & Business Intelligence'),
+( 'function','Anchoring / TV / Films / Production'),
+( 'function','Architects / Interior Design / Naval Arch');
+
+
+
 
 
 insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)

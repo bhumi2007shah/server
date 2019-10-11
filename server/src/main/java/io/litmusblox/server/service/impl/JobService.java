@@ -16,7 +16,6 @@ import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -91,11 +90,23 @@ public class JobService implements IJobService {
     @Resource
     JcmCommunicationDetailsRepository jcmCommunicationDetailsRepository;
 
+    @Resource
+    WeightageCutoffByCompanyMappingRepository weightageCutoffByCompanyMappingRepository;
+
+    @Resource
+    WeightageCutoffMappingRepository weightageCutoffMappingRepository;
+
+    @Resource
+    JcmProfileSharingDetailsRepository jcmProfileSharingDetailsRepository;
+
     @Autowired
     IScreeningQuestionService screeningQuestionService;
 
-    @Autowired
+    @Resource
     JobHistoryRepository jobHistoryRepository;
+
+    @Resource
+    JobCapabilityStarRatingMappingRepository jobCapabilityStarRatingMappingRepository;
 
     @Value("${mlApiUrl}")
     private String mlUrl;
@@ -113,6 +124,11 @@ public class JobService implements IJobService {
         log.info("Received request to add job for page " + pageName + " from user: " + loggedInUser.getEmail());
         long startTime = System.currentTimeMillis();
 
+        if (pageName.equalsIgnoreCase(IConstant.AddJobPages.capabilities.name())) {
+            //delete all existing records in the job_capability_star_rating_mapping table for the current job
+            jobCapabilityStarRatingMappingRepository.deleteByJobId(job.getId());
+            jobCapabilityStarRatingMappingRepository.flush();
+        }
         Job oldJob = null;
 
         if (null != job.getId()) {
@@ -139,6 +155,9 @@ public class JobService implements IJobService {
                 break;
             case hiringTeam:
                 addJobHiringTeam(job, oldJob, loggedInUser);
+                break;
+            case expertise:
+                addJobExpertise(job, oldJob);
                 break;
             default:
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
@@ -204,7 +223,6 @@ public class JobService implements IJobService {
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
         }
         log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
-
         return responseBean;
     }
 
@@ -275,18 +293,32 @@ public class JobService implements IJobService {
 
         jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
-            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
-            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
-        });
+            List<JcmProfileSharingDetails>jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId());
+            jcmProfileSharingDetails.forEach(detail->{
+                detail.setHiringManagerName(detail.getProfileSharingMaster().getReceiverName());
+                detail.setHiringManagerEmail(detail.getProfileSharingMaster().getReceiverEmail());
+            });
+            jcmFromDb.setInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
 
-        if(null!=job && null!=job.getExpertise()){
-            Hibernate.initialize(job.getExpertise());
-        }
-        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-        });
+            jcmFromDb.setNotInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && !jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
 
+            jcmFromDb.setNotRespondedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()==null )
+                            .collect(Collectors.toList())
+            );
+        });
         Collections.sort(jcmList);
 
         responseBean.setCandidateList(jcmList);
@@ -320,7 +352,7 @@ public class JobService implements IJobService {
             oldJob.setJobDescription(job.getJobDescription());
             oldJob.setUpdatedBy(loggedInUser);
             oldJob.setUpdatedOn(new Date());
-            jobRepository.save(oldJob);
+            oldJob = jobRepository.save(oldJob);
             historyMsg = "Updated";
 
             //remove all data from job_key_skills and job_capabilities
@@ -337,8 +369,12 @@ public class JobService implements IJobService {
             job.setCreatedBy(loggedInUser);
 
             //End of code to be removed
-            jobRepository.save(job);
+            oldJob = jobRepository.save(job);
         }
+        //TODO: remove one JobRepository call
+        //Add Job details
+        addJobDetail(job, oldJob, loggedInUser);
+
         saveJobHistory(job.getId(), historyMsg + " job overview", loggedInUser);
         //make a call to ML api to obtain skills and capabilities
         if(MasterDataBean.getInstance().getConfigSettings().getMlCall()==1) {
@@ -357,6 +393,9 @@ public class JobService implements IJobService {
                 job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
             }
         }
+
+        //populate key skills for the job
+        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
@@ -455,9 +494,14 @@ public class JobService implements IJobService {
             n.setCreatedBy(loggedInUser.getId());
             n.setCreatedOn(new Date());
             n.setJobId(job.getId());
+            n.setUpdatedOn(new Date());
+            n.setUpdatedBy(loggedInUser.getId());
         });
         jobScreeningQuestionsRepository.saveAll(job.getJobScreeningQuestionsList());
         saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);
+
+        //populate key skills for the job
+       // job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void addJobKeySkills(Job job, Job oldJob, User loggedInUser) throws Exception { //update and add new key skill
@@ -538,12 +582,12 @@ public class JobService implements IJobService {
             }
         }
         saveJobHistory(job.getId(), "Added key skills", loggedInUser);
+        //populate the capabilities for the job
+        job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
     }
 
 
     private void addJobCapabilities(Job job, Job oldJob, User loggedInUser) { //add job capabilities
-
-        Hibernate.initialize(oldJob.getJobCapabilityList());
 
         //if there are capabilities that were returned from ML, and the request for add job - capabilities has a 0 length array, throw an error, otherwise, proceed
         if (oldJob.getJobCapabilityList().size() > 0 && null != job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()) {
@@ -554,10 +598,29 @@ public class JobService implements IJobService {
         Map<Long, JobCapabilities> newCapabilityValues = new HashMap();
         job.getJobCapabilityList().stream().forEach(jobCapability -> newCapabilityValues.put(jobCapability.getId(), jobCapability));
 
+        log.info("Capability count: Old Job: " + oldJob.getJobCapabilityList().size() + " new capability list size: " + newCapabilityValues.size());
+
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
+            if(newValue.getSelected()) {
+                //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
+                List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
+                if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
+                    wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+
+                } else {
+                    List<WeightageCutoffMapping> weightageCutoffMappings = weightageCutoffMappingRepository.findByWeightage(newValue.getWeightage());
+                    if (null != weightageCutoffMappings && weightageCutoffMappings.size() > 0) {
+                        weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+                    }
+                }
+                //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);
+                //jobCapabilityStarRatingMappingRepository.saveAll(starRatingMappingList);
+            }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());
+            if(newValue.getSelected())
+                oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setUpdatedOn(new Date());
             oldCapability.setUpdatedBy(loggedInUser);
         });
@@ -577,19 +640,24 @@ public class JobService implements IJobService {
 
         MasterDataBean masterDataBean = MasterDataBean.getInstance();
         if (null == masterDataBean.getFunction().get(job.getFunction().getId())) {
-            throw new ValidationException("In Job, function " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            //throw new ValidationException("In Job, function " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, function " + IErrorMessages.NULL_MESSAGE + job.getId());
+        }else{
+            oldJob.setFunction(job.getFunction());
         }
 
         if (null == job.getCurrency()) {
-            throw new ValidationException("In Job, Currency " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+           // throw new ValidationException("In Job, Currency " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, Currency " + IErrorMessages.NULL_MESSAGE + job.getId());
+        }else{
+            oldJob.setCurrency(job.getCurrency());
         }
 
         if (null == masterDataBean.getEducation().get(job.getEducation().getId())) {
-            throw new ValidationException("In Job, education " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-        }
-
-        if (null == masterDataBean.getExpertise().get(job.getExpertise().getId())) {
-            throw new ValidationException("In Job, expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            //throw new ValidationException("In Job, education " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, education " + IErrorMessages.NULL_MESSAGE + job.getId());
+        }else{
+            oldJob.setEducation(job.getEducation());
         }
 
         List<CompanyAddress> companyAddressList = companyAddressRepository.findByCompanyId(loggedInUser.getCompany().getId());
@@ -601,33 +669,35 @@ public class JobService implements IJobService {
         companyBuList.forEach(companyBu -> companyBuMap.put(companyBu.getId(), companyBu));
         companyAddressList.forEach(companyAddress -> companyAddressMap.put(companyAddress.getId(), companyAddress));
 
-        if (companyAddressList.isEmpty() || null == companyAddressMap.get(job.getJobLocation().getId())
-                || null == companyAddressMap.get(job.getInterviewLocation().getId())) {
-            throw new ValidationException("In Job, company address " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if(null != job.getJobLocation() && null != job.getInterviewLocation()){
+            if (companyAddressList.isEmpty() || null == companyAddressMap.get(job.getJobLocation().getId())
+                    || null == companyAddressMap.get(job.getInterviewLocation().getId())) {
+                // throw new ValidationException("In Job, company address " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+                log.error("In Job, company address " + IErrorMessages.NULL_MESSAGE + job.getId());
+            }else{
+                oldJob.setInterviewLocation(companyAddressMap.get(job.getInterviewLocation().getId()));
+                oldJob.setJobLocation(companyAddressMap.get(job.getJobLocation().getId()));
+            }
+        }
+        if(null != job.getBuId()){
+            if (companyBuList.isEmpty() || null == companyBuMap.get(job.getBuId().getId())) {
+                // throw new ValidationException("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+                log.error("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId());
+            }else{
+                oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
+            }
         }
 
-        if (companyBuList.isEmpty() || null == companyBuMap.get(job.getBuId().getId())) {
-            throw new ValidationException("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        if(null != job.getExperienceRange() && null != masterDataBean.getExperienceRange().get(job.getExperienceRange().getId())){
+            oldJob.setExperienceRange(job.getExperienceRange());
+        }else{
+            // throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, ExperienceRange " + IErrorMessages.NULL_MESSAGE + job.getId());
         }
-
-        String expRange = masterDataBean.getExperienceRange().get(job.getExperienceRange().getId());
-
-        if (null == expRange) {
-            throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-        }
-
-        String[] range = expRange.split(" ");
-        oldJob.setMinExperience(Double.parseDouble(range[0]));
-        oldJob.setMaxExperience(Double.parseDouble(range[2]));
-        oldJob.setMinSalary(0l);
-        oldJob.setMaxSalary(0l);
-        oldJob.setCurrency(job.getCurrency());
-        oldJob.setInterviewLocation(companyAddressMap.get(job.getInterviewLocation().getId()));
-        oldJob.setJobLocation(companyAddressMap.get(job.getJobLocation().getId()));
-        oldJob.setFunction(job.getFunction());
-        oldJob.setExpertise(job.getExpertise());
-        oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
-        oldJob.setEducation(job.getEducation());
+        oldJob.setMinSalary(job.getMinSalary());
+        oldJob.setMaxSalary(job.getMaxSalary());
+        oldJob.setNoticePeriod(job.getNoticePeriod());
+        //Remove set Expertise code because we set separately in addJobExpertise method
         oldJob.setUpdatedOn(new Date());
 
         jobRepository.save(oldJob);
@@ -665,6 +735,15 @@ public class JobService implements IJobService {
         }
     }
 
+    private void addJobExpertise(Job job, Job oldJob){
+        MasterDataBean masterDataBean = MasterDataBean.getInstance();
+        if(null == masterDataBean.getExpertise().get(job.getExpertise().getId())){
+            throw new ValidationException("In Job, Expertise " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+        }
+        oldJob.setExpertise(job.getExpertise());
+        jobRepository.save(oldJob);
+    }
+
     /**
      * Service method to publish a job
      *
@@ -675,13 +754,12 @@ public class JobService implements IJobService {
         log.info("Received request to publish job with id: " + jobId);
         Job publishedJob = changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
         log.info("Completed publishing job with id: " + jobId);
-        Hibernate.initialize(publishedJob.getJobCapabilityList());
         if(publishedJob.getJobCapabilityList().size() == 0)
             log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
         else {
             log.info("Calling Scoring Engine Api to create a job");
             try {
-                String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId), scoringEngineBaseUrl + scoringEngineAddJobUrlSuffix, HttpMethod.POST, null);
+                String scoringEngineResponse = RestClient.getInstance().consumeRestApi(convertJobToRequestPayload(jobId, publishedJob), scoringEngineBaseUrl + scoringEngineAddJobUrlSuffix, HttpMethod.POST, null);
                 publishedJob.setScoringEngineJobAvailable(true);
                 jobRepository.save(publishedJob);
             } catch (Exception e) {
@@ -691,13 +769,22 @@ public class JobService implements IJobService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private String convertJobToRequestPayload(Long jobId) throws Exception {
+    private String convertJobToRequestPayload(Long jobId, Job publishedJob) throws Exception {
         List<JobCapabilities> jobCapabilities = jobCapabilitiesRepository.findByJobIdAndSelected(jobId,true);
+        MasterData expertise = null;
+        if(null != publishedJob.getExpertise())
+            expertise = MasterDataBean.getInstance().getExpertise().get(publishedJob.getExpertise().getId());
+
         List<Capability> capabilityList = new ArrayList<>(jobCapabilities.size());
         jobCapabilities.stream().forEach(jobCapability -> {
-            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage()));
+            capabilityList.add(new Capability(jobCapability.getCapabilityId(), jobCapability.getWeightage(), jobCapability.getJobCapabilityStarRatingMappingList()));
         });
-        ScoringEngineJobBean jobRequestBean = new ScoringEngineJobBean(jobId, capabilityList);
+        ScoringEngineJobBean jobRequestBean;
+        if(null != expertise)
+             jobRequestBean = new ScoringEngineJobBean(jobId, expertise.getValueToUSe(),capabilityList);
+        else
+             jobRequestBean = new ScoringEngineJobBean(jobId, null, capabilityList);
+
         return (new ObjectMapper()).writeValueAsString(jobRequestBean);
     }
 
@@ -767,17 +854,6 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + " does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        Hibernate.initialize(job.getCompanyId());
-        Hibernate.initialize(job.getJobScreeningQuestionsList());
-        Hibernate.initialize(job.getJobKeySkillsList());
-        Hibernate.initialize(job.getJobCapabilityList());
-        if(null!=job && null!=job.getExpertise()){
-            Hibernate.initialize(job.getExpertise());
-        }
-        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-        });
         return job;
     }
 

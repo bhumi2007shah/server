@@ -12,7 +12,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -77,6 +79,8 @@ public class JobCapabilities implements Serializable {
     @JoinColumn(name = "JOB_ID")
     private Long jobId;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "jobCapabilityId", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<JobCapabilityStarRatingMapping> jobCapabilityStarRatingMappingList = new ArrayList<>();
 
     public JobCapabilities(@NotNull Long capabilityId, @NotNull String capabilityName, @NotNull Boolean selected, @NotNull int weightage, @NotNull Date createdOn, @NotNull User createdBy, Long jobId) {
         this.capabilityId = capabilityId;

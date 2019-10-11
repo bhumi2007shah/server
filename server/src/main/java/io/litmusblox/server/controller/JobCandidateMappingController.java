@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.JobCandidateMapping;
@@ -108,7 +109,9 @@ public class JobCandidateMappingController {
     String uploadCandidateFromPlugin(@RequestParam(name = "candidateCv", required = false) MultipartFile candidateCv, @RequestParam("candidate") String candidateString, @RequestParam("jobId") Long jobId) throws Exception {
         log.info("Received request to add a candidate from plugin");
         long startTime = System.currentTimeMillis();
-        Candidate candidate=new ObjectMapper().readValue(candidateString, Candidate.class);
+        ObjectMapper objectMapper=new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Candidate candidate=objectMapper.readValue(candidateString, Candidate.class);
         UploadResponseBean responseBean = jobCandidateMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");
         return Util.stripExtraInfoFromResponseBean(responseBean, null,

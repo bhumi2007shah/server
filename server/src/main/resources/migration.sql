@@ -235,23 +235,26 @@ ALTER TABLE CV_PARSING_DETAILS
 ADD COLUMN ERROR_MESSAGE varchar(100);
 
 
--- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id
-DELETE
-FROM job_key_skills
-where skill_id in (
-SELECT ID
-FROM skills_master
-where
-id not in (select min(id)
-from skills_master
-group by skill_name)
-);
+-- delete duplicate entry in skills master table and also remove rows from job key skills which references skill_id. Need to match by lower case.
+SELECT
+    LOWER(skill_name),
+    COUNT( LOWER(skill_name) )
+FROM
+    skills_master
+GROUP BY
+    LOWER(skill_name)
+HAVING
+    COUNT( LOWER(skill_name) )> 1
+ORDER BY
+    LOWER(skill_name);
 
-Delete
-FROM skills_master
-WHERE ID NOT IN (SELECT MIN(id)
-FROM skills_master
-GROUP BY skill_name);
+DELETE
+FROM
+    skills_master a
+        USING skills_master b
+WHERE
+    a.id < b.id
+    AND LOWER(a.skill_name) = LOWER(b.skill_name);
 
 -- Added unique constraint on skill_name in skills_master with case insensitivity
 Alter table skills_master add constraint unique_skill_name unique(skill_name);
@@ -334,7 +337,214 @@ ADD COLUMN NOTICE_PERIOD INTEGER REFERENCES MASTER_DATA(ID);
 UPDATE CANDIDATE_COMPANY_DETAILS
 SET NOTICE_PERIOD = (SELECT ID FROM MASTER_DATA WHERE TYPE = 'noticePeriod' AND VALUE = CANDIDATE_COMPANY_DETAILS.NOTICE_PERIOD_OLD);
 
+-- Note: If above query does not work using the next one.
+UPDATE CANDIDATE_COMPANY_DETAILS
+SET NOTICE_PERIOD = (SELECT ID FROM MASTER_DATA WHERE TYPE = 'noticePeriod' AND VALUE = CANDIDATE_COMPANY_DETAILS.NOTICE_PERIOD_OLD::character varying);
+
+
 ALTER TABLE CANDIDATE_COMPANY_DETAILS DROP COLUMN NOTICE_PERIOD_OLD;
+
+-- For ticket #154
+
+CREATE TABLE WEIGHTAGE_CUTOFF_MAPPING(
+    ID serial PRIMARY KEY NOT NULL,
+    WEIGHTAGE INTEGER DEFAULT NULL,
+    PERCENTAGE SMALLINT DEFAULT NULL,
+    CUTOFF SMALLINT DEFAULT NULL,
+    STAR_RATING SMALLINT NOT NULL,
+    CONSTRAINT UNIQUE_WEIGHTAGE_STAR_RATING_MAPPING UNIQUE(WEIGHTAGE, STAR_RATING)
+);
+
+CREATE TABLE WEIGHTAGE_CUTOFF_BY_COMPANY_MAPPING(
+    ID serial PRIMARY KEY NOT NULL,
+    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
+    WEIGHTAGE INTEGER DEFAULT NULL,
+    PERCENTAGE SMALLINT DEFAULT NULL,
+    CUTOFF SMALLINT DEFAULT NULL,
+    STAR_RATING SMALLINT NOT NULL,
+    CONSTRAINT UNIQUE_WEIGHTAGE_STAR_RATING_BY_COMPANY_MAPPING UNIQUE(COMPANY_ID, WEIGHTAGE, STAR_RATING)
+);
+
+CREATE TABLE JOB_CAPABILITY_STAR_RATING_MAPPING (
+   ID serial PRIMARY KEY NOT NULL,
+   JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
+   JOB_CAPABILITY_ID INTEGER REFERENCES JOB_CAPABILITIES(ID) NOT NULL,
+   WEIGHTAGE SMALLINT NOT NULL,
+   CUTOFF SMALLINT NOT NULL,
+   PERCENTAGE SMALLINT NOT NULL,
+   STAR_RATING SMALLINT NOT NULL,
+   CONSTRAINT UNIQUE_JOB_CAPABILITY_WEIGHTAGE_STAR_RATING UNIQUE(JOB_CAPABILITY_ID,WEIGHTAGE,STAR_RATING)
+);
+
+insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)
+values
+(2,100,10,1),
+(2,100,20,2),
+(2,80,40,3),
+(2,40,80,4),
+(2,20,100,5),
+(6,100,20,1),
+(6,100,40,2),
+(6,60,60,3),
+(6,20,100,4),
+(6,0,100,5),
+(10,0,30,1),
+(10,0,50,2),
+(10,0,70,3),
+(10,0,80,4),
+(10,0,100,5);
+
+--For ticket #162
+ALTER TABLE MASTER_DATA
+ADD COLUMN VALUE_TO_USE SMALLINT,
+ADD COLUMN COMMENTS VARCHAR (255);
+
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 1, COMMENTS = 'Candidate has 1-2 years of relevant work experience and works on given tasks on day to day basis. Exposure to job complexities is limited and needs support/guidance for complex tasks.' where value='Beginner';
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 2, COMMENTS = 'Candidate can independently handle all tasks. Typically has 2 - 5 years of relevant work experience. Dependable on senior for assigned work. Can participate in training/grooming of juniors' where value = 'Competent';
+UPDATE MASTER_DATA
+SET VALUE_TO_USE = 3, COMMENTS = 'Considered as a Master in the organization/industry. Candidate can handle highly complex scenarios and is the go-to person for others. Such candidates are rare to find and often come at a high cost. Select this option if you want to hire a expert.' where value = 'Expert';
+
+--For ticket #161
+update master_data set value='0 - 2 yrs' where value='0 - 3 yrs';
+update master_data set value='2 - 4 yrs' where value='4 - 7 yrs';
+update master_data set value='4 - 6 yrs' where value='8 - 12 yrs';
+update master_data set value='6 - 8 yrs' where value='13 - 15 yrs';
+update master_data set value='8 - 10 yrs' where value='17 - 20 yrs';
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES( 'experienceRange', '10 - 15 yrs'),
+ ( 'experienceRange', '16 - 20 yrs');
+
+ALTER TABLE JOB
+ADD COLUMN NOTICE_PERIOD INTEGER REFERENCES MASTER_DATA(ID);
+
+ALTER TABLE JOB
+ALTER COLUMN min_salary SET DEFAULT 0,
+ALTER COLUMN max_salary SET DEFAULT 0;
+
+--For ticket #175
+update master_data set value='0 - 2 Years' where value='0 - 2 yrs';
+update master_data set value='2 - 4 Years' where value='2 - 4 yrs';
+update master_data set value='4 - 6 Years' where value='4 - 6 yrs';
+update master_data set value='6 - 8 Years' where value='6 - 8 yrs';
+update master_data set value='8 - 10 Years' where value='8 - 10 yrs';
+update master_data set value='10 - 15 Years' where value='10 - 15 yrs';
+update master_data set value='15 - 20 Years' where value='16 - 20 yrs';
+update master_data set value='20+ Years' where value='20+ yrs';
+
+ALTER TABLE JOB
+ADD COLUMN EXPERIENCE_RANGE INTEGER REFERENCES MASTER_DATA(ID);
+
+update Job j set experience_range =
+(select id from master_data where value = (select concat((SELECT concat_ws(' - ',replace(cast(min_experience As VARCHAR), '.00',''), replace(cast(max_experience As VARCHAR), '.00',''))), ' Years') from job
+where id=j.id and min_experience is not null and max_experience is not null));
+
+ALTER TABLE JOB
+DROP COLUMN MIN_EXPERIENCE,
+DROP COLUMN MAX_EXPERIENCE;
+
+--Update education values shown in the drop down in master data #178
+UPDATE master_data set value = 'ACCA (ACCA)' where value = 'ACCA';
+UPDATE master_data set value = 'B.S.S.E (BSSE)' where value = 'BSSE';
+UPDATE master_data set value = 'Bachelor in Fine Arts (BFA)' where value = 'BFA';
+UPDATE master_data set value = 'Bachelor in Foreign Trade (BFT)' where value = 'BFT';
+UPDATE master_data set value = 'Bachelor in Management Studies (BMS)' where value = 'BMS';
+UPDATE master_data set value = 'Bachelor of Architecture (BArch)' where value = 'BArch';
+UPDATE master_data set value = 'Bachelor of Arts (BA)' where value = 'BA';
+UPDATE master_data set value = 'Bachelor of Business Administration (BBA)' where value = 'BBA';
+UPDATE master_data set value = 'Bachelor of Commerce (BCom)' where value = 'BCom';
+UPDATE master_data set value = 'Bachelor of Commerce in Computer Application (BCCA)' where value = 'BCCA';
+UPDATE master_data set value = 'Bachelor of Computer Applications (BCA)' where value = 'BCA';
+UPDATE master_data set value = 'Bachelor of Computer Science (BCS)' where value = 'BCS';
+UPDATE master_data set value = 'Bachelor of Dental Science (BDS)' where value = 'BDS';
+UPDATE master_data set value = 'Bachelor of Design (BDes)' where value = 'BDes';
+UPDATE master_data set value = 'Bachelor of Education (BEd)' where value = 'BEd';
+UPDATE master_data set value = 'Bachelor of Engineering (BE)' where value = 'BE';
+UPDATE master_data set value = 'Bachelor of Hotel Management (BHM)' where value = 'BHM';
+UPDATE master_data set value = 'Bachelor of Information Technology (BIT)' where value = 'BIT';
+UPDATE master_data set value = 'Bachelor of Pharmacy (BPharma)' where value = 'BPharma';
+UPDATE master_data set value = 'Bachelor of Science (BSc)' where value = 'BSc';
+UPDATE master_data set value = 'Bachelor of Technology. (BTech)' where value = 'BTech';
+UPDATE master_data set value = 'Bachelor of Veterinary Science (BVSc)' where value = 'BVSc';
+UPDATE master_data set value = 'Bachelors of Ayurveda where value =  Medicine & Surgery (BAMS)' where value = 'BAMS';
+UPDATE master_data set value = 'Bachelors of Business Studies (BBS)' where value = 'BBS';
+UPDATE master_data set value = 'Bachelors of Law (LLB)' where value = 'LLB';
+UPDATE master_data set value = 'BBM (BBM)' where value = 'BBM';
+UPDATE master_data set value = 'BHMS (BHMS)' where value = 'BHMS';
+UPDATE master_data set value = 'BMM (BMM)' where value = 'BMM';
+UPDATE master_data set value = 'Business Capacity Management (BCM)' where value = 'BCM';
+UPDATE master_data set value = 'CA IPCC (CA IPCC)' where value = 'CA IPCC';
+UPDATE master_data set value = 'CFA (CFA)' where value = 'CFA';
+UPDATE master_data set value = 'Chartered Accountant (CA)' where value = 'CA';
+UPDATE master_data set value = 'Company Secretary (CS)' where value = 'CS';
+UPDATE master_data set value = 'CWA (CWA)' where value = 'CWA';
+UPDATE master_data set value = 'Diploma (Diploma)' where value = 'Diploma';
+UPDATE master_data set value = 'Diploma in Graphics & Animation (Diploma in Graphics & Animation)' where value = 'Diploma in Graphics & Animation';
+UPDATE master_data set value = 'Doctor Of Philosophy (PHD)' where value = 'PHD';
+UPDATE master_data set value = 'Executive Post Graduate Diploma in Business Management (EMBA)' where value = 'EMBA';
+UPDATE master_data set value = 'Fashion/Designing (Fashion/Designing)' where value = 'Fashion/Designing';
+UPDATE master_data set value = 'FCA (FCA)' where value = 'FCA';
+UPDATE master_data set value = 'GD Art Commercial (Commercial Art)' where value = 'Commercial Art';
+UPDATE master_data set value = 'Graduate Diploma in Business Administration (GDBA)' where value = 'GDBA';
+UPDATE master_data set value = 'HSC (HSC)' where value = 'HSC';
+UPDATE master_data set value = 'ICAI  CMA (ICAI/CMA)' where value = 'ICAI/CMA';
+UPDATE master_data set value = 'ICWA (ICWA)' where value = 'ICWA';
+UPDATE master_data set value = 'Integrated PG Course (I PG Course)' where value = 'I PG Course';
+UPDATE master_data set value = 'Journalism/Mass Comunication (Journalism/Mass Comm.)' where value = 'Journalism/Mass Comm';
+UPDATE master_data set value = 'M.E (ME)' where value = 'ME';
+UPDATE master_data set value = 'M.phil (MPhil)' where value = 'MPhil';
+UPDATE master_data set value = 'Management Development Programmes (MDP)' where value = 'MDP';
+UPDATE master_data set value = 'Master of Architecture (MArch)' where value = 'MArch';
+UPDATE master_data set value = 'Master of Arts (MA)' where value = 'MA';
+UPDATE master_data set value = 'Master of Business Administration (MBA)' where value = 'MBA';
+UPDATE master_data set value = 'Master of Business Management (MBM)' where value = 'MBM';
+UPDATE master_data set value = 'Master of Commerce (MCom)' where value = 'MCom';
+UPDATE master_data set value = 'Master of Computer Applications (MCA)' where value = 'MCA';
+UPDATE master_data set value = 'Master of Computer Management (MCM)' where value = 'MCM';
+UPDATE master_data set value = 'Master of Computer Science (MS CS)' where value = 'MS CS';
+UPDATE master_data set value = 'Master of Education (MEd)' where value = 'MEd';
+UPDATE master_data set value = 'Master of Financial Management (MFM)' where value = 'MFM';
+UPDATE master_data set value = 'Master of Law (LLM)' where value = 'LLM';
+UPDATE master_data set value = 'Master of Personnel Management (MPM)' where value = 'MPM';
+UPDATE master_data set value = 'Master of Pharmacy (MPharma)' where value = 'MPharma';
+UPDATE master_data set value = 'Master of Science (MSc)' where value = 'MSc';
+UPDATE master_data set value = 'Master of Social Work (MSW)' where value = 'MSW';
+UPDATE master_data set value = 'Master of Technology (MTech)' where value = 'MTech';
+UPDATE master_data set value = 'Master of Veterinary Science (MVSc)' where value = 'MVSc';
+UPDATE master_data set value = 'Master''s in Diploma in Business Administration (MDBA)' where value = 'MDBA';
+UPDATE master_data set value = 'Masters in Fine Arts (MFA)' where value = 'MFA';
+UPDATE master_data set value = 'Masters in Industrial Psychology (MS in Industrial Psychology)' where value = 'MS in Industrial Psychology';
+UPDATE master_data set value = 'Masters in Information Management (MIM)' where value = 'MIM';
+UPDATE master_data set value = 'Masters in Management Studies (MMS)' where value = 'MMS';
+UPDATE master_data set value = 'Masters of finance and control (MFC)' where value = 'MFC';
+UPDATE master_data set value = 'MBA/PGDM (MBA/PGDM)' where value = 'MBA/PGDM';
+UPDATE master_data set value = 'MBBS (MBBS)' where value = 'MBBS';
+UPDATE master_data set value = 'Medical (MS/MD)' where value = 'MS/MD';
+UPDATE master_data set value = 'MEP (MEP)' where value = 'MEP';
+UPDATE master_data set value = 'MS (MS)' where value = 'MS';
+UPDATE master_data set value = 'Other (Other)' where value = 'Other';
+UPDATE master_data set value = 'PG Diploma (PG Diploma)' where value = 'PG Diploma';
+UPDATE master_data set value = 'PGDBA (PGDBA)' where value = 'PGDBA';
+UPDATE master_data set value = 'Post Graduate Certification in Business Management (PGCBM)' where value = 'PGCBM';
+UPDATE master_data set value = 'Post Graduate Diploma in Analytical Chemistry (PGDAC)' where value = 'PGDAC';
+UPDATE master_data set value = 'Post Graduate Diploma in Computer Application (PGDCA)' where value = 'PGDCA';
+UPDATE master_data set value = 'Post Graduate Program (PGP)' where value = 'PGP';
+UPDATE master_data set value = 'Post Graduate Programme in Business Management ... (PGPBM)' where value = 'PGPBM';
+UPDATE master_data set value = 'Post Graduate Programme in Management (PGPBM)' where value = 'PGPBM';
+UPDATE master_data set value = 'Post Graduate Programme in Management (PGM)' where value = 'PGM';
+UPDATE master_data set value = 'Postgraduate Certificate in Human Resource Management (PGCHRM)' where value = 'PGCHRM';
+UPDATE master_data set value = 'PR/Advertising (PR/Advertising)' where value = 'PR/Advertising';
+UPDATE master_data set value = 'Tourism (Tourism)' where value = 'Tourism';
+UPDATE master_data set value = 'Vocational-Training (Vocational Training)' where value = 'Vocational Training';
+INSERT into master_data(type, value) values ('education','Masters in Information Management (MIM)');
+
+-- For ticket #182
+DELETE FROM JOB_CAPABILITY_STAR_RATING_MAPPING;
+
+ALTER TABLE JOB_CAPABILITY_STAR_RATING_MAPPING
+ADD COLUMN JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL;
 
 -- For ticket #147
 CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(

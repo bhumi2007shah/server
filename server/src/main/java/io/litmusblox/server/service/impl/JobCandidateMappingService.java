@@ -17,7 +17,6 @@ import io.litmusblox.server.uploadProcessor.IUploadDataProcessService;
 import io.litmusblox.server.uploadProcessor.NaukriExcelFileProcessorService;
 import io.litmusblox.server.utils.*;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -93,6 +92,17 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     JcmHistoryRepository jcmHistoryRepository;
 
+    @Transactional(readOnly = true)
+    Job getJob(long jobId) {
+        return jobRepository.findById(jobId).get();
+    }
+
+    @Transactional(readOnly = true)
+    User getUser(){return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();}
+
+    @Transactional(readOnly = true)
+    int getUploadCount(Date createdOn, User loggedInUser){return jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);}
+
     @Value("${scoringEngineBaseUrl}")
     private String scoringEngineBaseUrl;
 
@@ -157,8 +167,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @param candidate for which candidate add this info
      * @param loggedInUser user which is login currently
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
+        log.info("Inside saveCandidateSupportiveInfo Method");
 
         //find candidateId
         Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
@@ -167,20 +178,27 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if (null != candidateFromDb)
             candidateId = candidateFromDb.getId();
         if (null != candidateId) {
-            //if telephone field has value, save to mobile history table
-            if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 0) {
-                //check if an entry exists in the mobile history record for this number
-                String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
+            candidateFromDb.setMobile(candidate.getMobile());
+            candidateFromDb.setEmail(candidate.getEmail());
+            try {
+                //if telephone field has value, save to mobile history table
+                if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 6) {
+                    //check if an entry exists in the mobile history record for this number
+                    String telephone = candidate.getTelephone().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
 
-                if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
+                    if (!candidateFromDb.getMobile().trim().equals(telephone.trim())) {
 
-                    if (telephone.length() > 15)
-                        telephone = telephone.substring(0, 15);
+                        if (telephone.length() > 15)
+                            telephone = telephone.substring(0, 15);
 
-                    if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
-                    candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateId, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode()));
+                        if (null == candidateMobileHistoryRepository.findByMobileAndCountryCode(telephone, candidate.getCountryCode()));
+                        candidateMobileHistoryRepository.save(new CandidateMobileHistory(candidateFromDb, telephone, (null == candidateFromDb.getCountryCode()) ? loggedInUser.getCountryId().getCountryCode() : candidateFromDb.getCountryCode(), new Date(), loggedInUser));
+                    }
                 }
+            }catch (Exception ex){
+                log.error("Error while add telephone number :: " +candidate.getTelephone()+" "+ ex.getMessage());
             }
+
 
             //process other information
             if(null != candidate.getCandidateDetails()) {
@@ -208,7 +226,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
             //candidate project details
             if(null != candidate.getCandidateProjectDetails() && candidate.getCandidateProjectDetails().size() > 0)
-                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateId);
+                candidateService.saveUpdateCandidateProjectDetails(candidate.getCandidateProjectDetails(), candidateFromDb);
 
             //candidate online profile
             if(null != candidate.getCandidateOnlineProfiles() && candidate.getCandidateOnlineProfiles().size() > 0)
@@ -237,7 +255,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @return the status of upload operation
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
+   // @Transactional(propagation = Propagation.REQUIRED)
     public UploadResponseBean uploadCandidatesFromFile(MultipartFile multipartFile, Long jobId, String fileFormat) throws Exception {
 
         //validate the file source is supported by application
@@ -252,7 +270,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         //verify that the job is live before processing candidates
-        Job job = jobRepository.getOne(jobId);
+        Job job = getJob(jobId);
         if(null == job || !job.getStatus().equals(IConstant.JobStatus.PUBLISHED.getValue())) {
             StringBuffer info = new StringBuffer("Selected job is not live ").append("JobId-").append(jobId);
             Map<String, String> breadCrumb = new HashMap<>();
@@ -264,12 +282,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         //validate that the file has an extension that is supported by the application
         Util.validateUploadFileType(multipartFile.getOriginalFilename());
 
-        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User loggedInUser = getUser();
         Date createdOn=Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         UploadResponseBean uploadResponseBean = new UploadResponseBean();
 
-        int candidatesProcessed = jobCandidateMappingRepository.getUploadedCandidateCount(createdOn, loggedInUser);
+        int candidatesProcessed = getUploadCount(createdOn, loggedInUser);
 
         if (candidatesProcessed >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
             log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " :: user id : " + loggedInUser.getId() + " : not saving file " + multipartFile);
@@ -336,8 +354,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public UploadResponseBean uploadCandidateFromPlugin(Candidate candidate, Long jobId, MultipartFile candidateCv) throws Exception {
         UploadResponseBean responseBean = null;
         if (null != candidate) {
-            //populate the first name and last name of the candidate
-            Util.handleCandidateName(candidate, candidate.getCandidateName());
+
+            if(null == candidate.getCandidateName() || candidate.getCandidateName().isEmpty()){
+               candidate.setCandidateName(IConstant.NOT_AVAILABLE);
+               candidate.setFirstName(IConstant.NOT_AVAILABLE);
+            }else{
+                //populate the first name and last name of the candidate
+                Util.handleCandidateName(candidate, candidate.getCandidateName());
+            }
             //set source as plugin
             candidate.setCandidateSource(IConstant.CandidateSource.Plugin.getValue());
             if (candidate.getCandidateCompanyDetails() != null && candidate.getCandidateCompanyDetails().size() >1) {
@@ -546,7 +570,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), receiverNameToUse, receiverEmailToUse));
             Set<JcmProfileSharingDetails> detailsSet = new HashSet<>(requestBean.getJcmId().size());
             requestBean.getJcmId().forEach(jcmId ->{
-                detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
+                detailsSet.add(new JcmProfileSharingDetails(masterObj,jcmId));
             });
             jcmProfileSharingDetailsRepository.saveAll(detailsSet);
             recieverEmails.add(array[1]);
@@ -601,23 +625,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         });
 
         Candidate returnObj = objFromDb.getCandidate();
-        Hibernate.initialize(objFromDb.getTechResponseData());
         returnObj.setTechResponseData(objFromDb.getTechResponseData().getTechResponse());
 
-        Hibernate.initialize(returnObj.getCandidateDetails());
         //set the cv location
         if(null != returnObj.getCandidateDetails() && null != returnObj.getCandidateDetails().getCvFileType()) {
             StringBuffer cvLocation = new StringBuffer("");
             cvLocation.append(IConstant.CANDIDATE_CV).append(File.separator).append(objFromDb.getJob().getId()).append(File.separator).append(objFromDb.getCandidate().getId()).append(returnObj.getCandidateDetails().getCvFileType());
             returnObj.getCandidateDetails().setCvLocation(cvLocation.toString());
         }
-        Hibernate.initialize(returnObj.getCandidateEducationDetails());
-        Hibernate.initialize(returnObj.getCandidateCompanyDetails());
-        Hibernate.initialize(returnObj.getCandidateProjectDetails());
-        Hibernate.initialize(returnObj.getCandidateLanguageProficiencies());
-        Hibernate.initialize(returnObj.getCandidateOnlineProfiles());
-        Hibernate.initialize(returnObj.getCandidateSkillDetails());
-        Hibernate.initialize(returnObj.getCandidateWorkAuthorizations());
         returnObj.setScreeningQuestionResponses(new ArrayList<>(screeningQuestionsMap.values()));
 
         returnObj.setEmail(objFromDb.getEmail());
@@ -655,16 +670,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             throw new WebException(IErrorMessages.UUID_NOT_FOUND + uuid, HttpStatus.UNPROCESSABLE_ENTITY);
 
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
-        Hibernate.initialize(objFromDb.getJob().getCompanyId());
-        Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
-        if(null!=objFromDb.getJob() && null!=objFromDb.getJob().getExpertise()){
-            Hibernate.initialize(objFromDb.getJob().getExpertise());
-        }
-        objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
-        });
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
         return objFromDb;
     }
@@ -763,7 +768,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setScore(requestBean.getScore());
         objFromDb.setChatbotUpdatedOn(requestBean.getChatbotUpdatedOn());
         if(null != requestBean.getTechResponseJson()) {
-            Hibernate.initialize(objFromDb.getTechResponseData());
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
@@ -826,35 +830,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
+        CandidateCompanyDetails objFromDb = null;
         CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
-        CandidateCompanyDetails objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).get();
-        if(null != candidateCompanyDetail.getNoticePeriod()){
+        if(null != candidateCompanyDetail.getId())
+            objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).orElse(null);
+        if(null != objFromDb && null != candidateCompanyDetail.getNoticePeriod()){
             objFromDb.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
+            candidateCompanyDetailsRepository.save(objFromDb);
         }
-        candidateCompanyDetailsRepository.save(objFromDb);
-
-        //In Company details only update notice period
-       /* CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
-        CandidateCompanyDetails UpdatedCandidateCompanyDetail = candidateCompanyDetailsRepository.findByCandidateIdAndCompanyName(jcmFromDb.getCandidate().getId(), candidateCompanyDetail.getCompanyName());
-        if (!Util.isNull(candidateCompanyDetail.getDesignation()) && candidateCompanyDetail.getDesignation().length() > IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue())
-            candidateCompanyDetail.setDesignation(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.name(), IConstant.MAX_FIELD_LENGTHS.DESIGNATION.getValue(), candidateCompanyDetail.getDesignation()));
-
-        if(null == UpdatedCandidateCompanyDetail && !candidateCompanyDetail.getCompanyName().isEmpty()){
-            if (!Util.isNull(candidateCompanyDetail.getCompanyName()) && candidateCompanyDetail.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
-                //truncate institute name to max length
-                candidateCompanyDetail.setCompanyName(Util.truncateField(jcmFromDb.getCandidate(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), candidateCompanyDetail.getCompanyName()));
-            }
-            //candidateCompanyDetailsRepository.save(new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(),candidateCompanyDetail.getCompanyName(),candidateCompanyDetail.getNoticePeriod(),candidateCompanyDetail.getDesignation()));
-
-        }else {
-            if(null != candidateCompanyDetail.getNoticePeriod() && !candidateCompanyDetail.getNoticePeriod().equals(UpdatedCandidateCompanyDetail.getNoticePeriod())){
-                UpdatedCandidateCompanyDetail.setNoticePeriod(candidateCompanyDetail.getNoticePeriod());
-            }
-            if(!candidateCompanyDetail.getDesignation().equals(UpdatedCandidateCompanyDetail.getDesignation())){
-                UpdatedCandidateCompanyDetail.setDesignation(candidateCompanyDetail.getDesignation());
-            }
-            candidateCompanyDetailsRepository.save(UpdatedCandidateCompanyDetail);
-        }*/
     }
 
 

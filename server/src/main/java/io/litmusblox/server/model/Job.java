@@ -87,17 +87,14 @@ public class Job implements Serializable {
     @Column(name = "SCORING_ENGINE_JOB_AVAILABLE")
     private Boolean scoringEngineJobAvailable  = false;
 
-    //@NotNull(message = "Company bu "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "BU_ID")
     private CompanyBu buId;
 
-    //@NotNull(message = "Function "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FUNCTION")
     private MasterData function;
 
-    //@NotNull
     @Column(name = "CURRENCY")
     private String currency;
 
@@ -107,28 +104,18 @@ public class Job implements Serializable {
     @Column(name = "MAX_SALARY")
     private Long maxSalary;
 
-    @Column(name = "MIN_EXPERIENCE")
-    private Double minExperience;
-
-    @Column(name = "MAX_EXPERIENCE")
-    private Double maxExperience;
-
-    //@NotNull(message = "Education "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "EDUCATION")
     private MasterData education;
 
-    //@NotNull(message = "Job location "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "JOB_LOCATION")
     private CompanyAddress jobLocation;
 
-   // @NotNull(message = "Interview Location "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "INTERVIEW_LOCATION")
     private CompanyAddress interviewLocation;
 
-    //@NotNull(message = "Expertise "+ IErrorMessages.NULL_MESSAGE)
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
@@ -151,8 +138,13 @@ public class Job implements Serializable {
     @JoinColumn(name="UPDATED_BY")
     private User updatedBy;
 
-    /*@OneToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY, mappedBy = "jobId")
-    private JobDetail jobDetail;*/
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "NOTICE_PERIOD")
+    private MasterData noticePeriod;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EXPERIENCE_RANGE")
+    private MasterData experienceRange;
 
     @OneToMany(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY,mappedBy = "jobId")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -162,7 +154,7 @@ public class Job implements Serializable {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobScreeningQuestions> jobScreeningQuestionsList=new ArrayList<>();
 
-    @OneToMany(/*cascade = {CascadeType.MERGE},*/fetch = FetchType.LAZY, mappedBy = "jobId")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "jobId")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<JobKeySkills> jobKeySkillsList=new ArrayList<>();
 
@@ -183,6 +175,6 @@ public class Job implements Serializable {
     @Transient
     private String mlErrorMessage;
 
-    @Transient
-    private MasterData experienceRange;
+    //Remove minExperience, maxExperience, experienceRange because add masterdata for experience
+    //Also add jobdetail model in job
 }

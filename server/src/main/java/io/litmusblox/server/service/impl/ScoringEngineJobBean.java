@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service.impl;
 
+import io.litmusblox.server.model.JobCapabilityStarRatingMapping;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScoringEngineJobBean {
     Long lbJobId;
+    Long expertise;
     List<Capability> capabilities;
 }
 
@@ -31,4 +33,5 @@ public class ScoringEngineJobBean {
 class Capability {
     long capabilityId;
     int weightage;
+    List<JobCapabilityStarRatingMapping> jobCapabilityStarRatingMappings;
 }

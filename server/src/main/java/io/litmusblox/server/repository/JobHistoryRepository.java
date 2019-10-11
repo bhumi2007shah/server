@@ -6,7 +6,6 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.JobHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

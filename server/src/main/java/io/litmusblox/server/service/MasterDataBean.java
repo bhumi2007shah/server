@@ -50,7 +50,7 @@ public class MasterDataBean {
     private Map<Long, String> stage = new HashMap<>();
     private Map<Long, String> process = new HashMap<>();
     private Map<Long, String> function = new HashMap<>();
-    private Map<Long, String> expertise = new HashMap<>();
+    private Map<Long, MasterData> expertise = new HashMap<>();
     private Map<Long, String> education = new HashMap<>();
     private Map<Long, String> industry = new HashMap<>();
     private Map<Long, String> noticePeriod = new HashMap<>();

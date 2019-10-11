@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -34,8 +35,9 @@ public class JcmProfileSharingDetails {
     @GeneratedValue(generator="system-uuid")
     private UUID id;
 
-    @Column(name="PROFILE_SHARING_MASTER_ID")
-    private Long profileSharingMasterId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="PROFILE_SHARING_MASTER_ID")
+    private JcmProfileSharingMaster profileSharingMaster;
 
     @NotNull
     @Column(name="JOB_CANDIDATE_MAPPING_ID")
@@ -48,9 +50,17 @@ public class JcmProfileSharingDetails {
     @Temporal(TemporalType.TIMESTAMP)
     private Date hiringManagerInterestDate;
 
+    @Transient
+    @JsonProperty
+    private String hiringManagerName;
 
-    public JcmProfileSharingDetails(Long profileSharingMasterId, @NotNull Long jobCandidateMappingId) {
-        this.profileSharingMasterId = profileSharingMasterId;
+    @Transient
+    @JsonProperty
+    private String hiringManagerEmail;
+
+
+    public JcmProfileSharingDetails(JcmProfileSharingMaster profileSharingMasterId, @NotNull Long jobCandidateMappingId) {
+        this.profileSharingMaster = profileSharingMasterId;
         this.jobCandidateMappingId = jobCandidateMappingId;
     }
 }

@@ -39,4 +39,9 @@ public class MasterData implements Serializable {
     @Column(name = "VALUE")
     private String value;
 
+    @Column(name = "VALUE_TO_USE")
+    private Long valueToUSe;
+
+    @Column(name = "COMMENTS")
+    private String comments;
 }

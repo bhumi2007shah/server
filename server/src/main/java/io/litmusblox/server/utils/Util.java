@@ -15,6 +15,7 @@ import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.repository.CandidateRepository;
+import io.litmusblox.server.service.MasterDataBean;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -131,6 +132,11 @@ public class Util {
     }
 
     public static boolean validateMobile(String mobile, String countryCode) throws ValidationException  {
+        Map<String, Long> countryMap =new HashMap<>();
+        MasterDataBean.getInstance().getCountryList().forEach(country -> {
+            countryMap.put(country.getCountryCode(), country.getMaxMobileLength());
+        });
+
         if(Util.isNull(mobile) || mobile.trim().length() == 0)
             throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + mobile, HttpStatus.BAD_REQUEST);
 
@@ -141,6 +147,24 @@ public class Util {
             Matcher m = INDIAN_MOBILE_PATTERN.matcher(mobile);
             if(!(m.find() && m.group().equals(mobile))) //did not pass the Indian mobile number pattern
                 throw new ValidationException(IErrorMessages.INVALID_INDIAN_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+        }
+
+        if(!countryCode.equals(IConstant.INDIA_CODE)){
+            if(countryCode.equals(IConstant.AUS_CODE) && mobile.length() != countryMap.get(IConstant.AUS_CODE))
+                throw new ValidationException(IErrorMessages.INVALID_AUSTRALIA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+
+            if(countryCode.equals(IConstant.CAN_CODE) && mobile.length() != countryMap.get(IConstant.CAN_CODE))
+                throw new ValidationException(IErrorMessages.INVALID_CANADA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+
+            if(countryCode.equals(IConstant.UK_CODE) && mobile.length() != countryMap.get(IConstant.UK_CODE))
+                throw new ValidationException(IErrorMessages.INVALID_UK_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+
+            if(countryCode.equals(IConstant.US_CODE) && mobile.length() != countryMap.get(IConstant.US_CODE))
+                throw new ValidationException(IErrorMessages.INVALID_US_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+
+            if(countryCode.equals(IConstant.SING_CODE) && mobile.length() != countryMap.get(IConstant.SING_CODE))
+                throw new ValidationException(IErrorMessages.INVALID_SINGAPORE_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
+
         }
 
         //check if the number is junk, like all the same digits
@@ -266,7 +290,7 @@ public class Util {
                 log.error("Given string not convert in Date...");
             }
         }
-        log.info("Given date string is empty");
+        //log.info("Given date string is empty");
         return null;
     }
 
@@ -275,9 +299,10 @@ public class Util {
     }
 
     public static String truncateField(Candidate candidate, String fieldName, int fieldLength, String fieldValue) {
+        log.info("Inside truncateField method");
         //Candidate candidate = candidateRepository.findById(Long.parseLong(candidateId)).orElse(null);
         User loggedInUser = null;
-        if(!SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
+        if(null != SecurityContextHolder.getContext().getAuthentication() && !SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals("anonymousUser"))
             loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         StringBuffer info = new StringBuffer(fieldName).append(" is longer than the permitted length of ").append(fieldLength).append(" ").append(fieldValue);

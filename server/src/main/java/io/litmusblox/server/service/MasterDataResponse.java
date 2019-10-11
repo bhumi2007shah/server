@@ -6,6 +6,7 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Country;
 import io.litmusblox.server.model.CreateJobPageSequence;
+import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.model.ScreeningQuestions;
 import lombok.Data;
 
@@ -30,7 +31,7 @@ public class MasterDataResponse {
     private Map<Long,String> stage = new HashMap<>();
     private Map<Long,String> process = new HashMap<>();
     private Map<Long,String> function  = new HashMap<>();
-    private Map<Long,String> expertise  = new HashMap<>();
+    private Map<Long, MasterData> expertise  = new HashMap<>();
     private Map<Long,String> education  = new HashMap<>();
     private Map<Long,String> industry = new HashMap<>();
     private Map<Long, String> keySkills = new HashMap<>();

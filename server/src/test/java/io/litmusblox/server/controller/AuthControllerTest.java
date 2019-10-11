@@ -1,14 +1,12 @@
 package io.litmusblox.server.controller;
 
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.UserRepository;
 import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import lombok.NoArgsConstructor;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

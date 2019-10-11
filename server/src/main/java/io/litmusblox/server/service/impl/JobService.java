@@ -16,7 +16,6 @@ import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -31,6 +30,8 @@ import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
+
+//import org.hibernate.Hibernate;
 
 /**
  * Implementation class for JobService
@@ -198,10 +199,6 @@ public class JobService implements IJobService {
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
         }
         log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
-        responseBean.getListOfJobs().forEach(job -> {
-            Hibernate.initialize(job.getExpertise());
-            Hibernate.initialize(job.getInterviewLocation());
-        });
         return responseBean;
     }
 
@@ -272,9 +269,6 @@ public class JobService implements IJobService {
 
         jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
-            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
-            Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
-
             List<JcmProfileSharingDetails>jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId());
             jcmProfileSharingDetails.forEach(detail->{
                 detail.setHiringManagerName(detail.getProfileSharingMaster().getReceiverName());
@@ -301,15 +295,6 @@ public class JobService implements IJobService {
                             .collect(Collectors.toList())
             );
         });
-
-        if(null!=job && null!=job.getExpertise()){
-            Hibernate.initialize(job.getExpertise());
-        }
-        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-        });
-
         Collections.sort(jcmList);
 
         responseBean.setCandidateList(jcmList);
@@ -580,8 +565,6 @@ public class JobService implements IJobService {
 
     private void addJobCapabilities(Job job, Job oldJob, User loggedInUser) { //add job capabilities
 
-        Hibernate.initialize(oldJob.getJobCapabilityList());
-
         //if there are capabilities that were returned from ML, and the request for add job - capabilities has a 0 length array, throw an error, otherwise, proceed
         if (oldJob.getJobCapabilityList().size() > 0 && null != job.getJobCapabilityList() && job.getJobCapabilityList().isEmpty()) {
             throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
@@ -747,7 +730,6 @@ public class JobService implements IJobService {
         log.info("Received request to publish job with id: " + jobId);
         Job publishedJob = changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
         log.info("Completed publishing job with id: " + jobId);
-        Hibernate.initialize(publishedJob.getJobCapabilityList());
         if(publishedJob.getJobCapabilityList().size() == 0)
             log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
         else {
@@ -848,17 +830,6 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + " does not exist", HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        Hibernate.initialize(job.getCompanyId());
-        Hibernate.initialize(job.getJobScreeningQuestionsList());
-        Hibernate.initialize(job.getJobKeySkillsList());
-        Hibernate.initialize(job.getJobCapabilityList());
-        if(null!=job && null!=job.getExpertise()){
-            Hibernate.initialize(job.getExpertise());
-        }
-        job.getJobHiringTeamList().forEach(jobHiringTeam -> {
-            Hibernate.initialize(jobHiringTeam.getStageStepId());
-            Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
-        });
         return job;
     }
 

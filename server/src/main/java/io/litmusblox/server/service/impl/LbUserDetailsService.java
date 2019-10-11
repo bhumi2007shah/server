@@ -150,7 +150,10 @@ public class LbUserDetailsService implements UserDetailsService {
         u.setFirstName(user.getFirstName());
         u.setLastName(user.getLastName());
         u.setEmail(user.getEmail());
-        u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
+        if(null == companyObjToUse)
+            companyObjToUse=loggedInUser.getCompany();
+        //u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
+        u.setCompany(companyObjToUse);
         u.setRole(IConstant.UserRole.Names.RECRUITER);
         if (null == user.getRole()) {
             //If a superadmin is creating a user, the role should be set to client admin for the first user, else it should be as set in the request object

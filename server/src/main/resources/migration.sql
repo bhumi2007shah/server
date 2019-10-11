@@ -539,3 +539,9 @@ UPDATE master_data set value = 'PR/Advertising (PR/Advertising)' where value = '
 UPDATE master_data set value = 'Tourism (Tourism)' where value = 'Tourism';
 UPDATE master_data set value = 'Vocational-Training (Vocational Training)' where value = 'Vocational Training';
 INSERT into master_data(type, value) values ('education','Masters in Information Management (MIM)');
+
+-- For ticket #182
+DELETE FROM JOB_CAPABILITY_STAR_RATING_MAPPING;
+
+ALTER TABLE JOB_CAPABILITY_STAR_RATING_MAPPING
+ADD COLUMN JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL;

@@ -35,6 +35,11 @@ public class JobCapabilityStarRatingMapping {
     private Long jobCapabilityId;
 
     @NotNull
+    @Column
+    @JsonIgnore
+    private Long jobId;
+
+    @NotNull
     @Column(name = "WEIGHTAGE")
     private int weightage;
 
@@ -50,8 +55,9 @@ public class JobCapabilityStarRatingMapping {
     @Column(name = "STAR_RATING")
     private int starRating;
 
-    public JobCapabilityStarRatingMapping(@NotNull Long jobCapabilityId, @NotNull int weightage, @NotNull int cutoff, @NotNull int percentage, @NotNull int starRating) {
+    public JobCapabilityStarRatingMapping(@NotNull Long jobCapabilityId, @NotNull Long jobId, @NotNull int weightage, @NotNull int cutoff, @NotNull int percentage, @NotNull int starRating) {
         this.jobCapabilityId = jobCapabilityId;
+        this.jobId = jobId;
         this.weightage = weightage;
         this.cutoff = cutoff;
         this.percentage = percentage;

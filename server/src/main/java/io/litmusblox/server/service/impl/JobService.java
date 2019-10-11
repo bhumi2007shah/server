@@ -126,6 +126,11 @@ public class JobService implements IJobService {
         log.info("Received request to add job for page " + pageName + " from user: " + loggedInUser.getEmail());
         long startTime = System.currentTimeMillis();
 
+        if (pageName.equalsIgnoreCase(IConstant.AddJobPages.capabilities.name())) {
+            //delete all existing records in the job_capability_star_rating_mapping table for the current job
+            jobCapabilityStarRatingMappingRepository.deleteByJobId(job.getId());
+            jobCapabilityStarRatingMappingRepository.flush();
+        }
         Job oldJob = null;
 
         if (null != job.getId()) {
@@ -582,12 +587,12 @@ public class JobService implements IJobService {
                 //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
                 List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
                 if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
-                    wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+                    wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
 
                 } else {
                     List<WeightageCutoffMapping> weightageCutoffMappings = weightageCutoffMappingRepository.findByWeightage(newValue.getWeightage());
                     if (null != weightageCutoffMappings && weightageCutoffMappings.size() > 0) {
-                        weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
+                        weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
                     }
                 }
                 //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);

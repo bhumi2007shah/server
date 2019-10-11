@@ -17,4 +17,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface JobCapabilityStarRatingMappingRepository extends JpaRepository<JobCapabilityStarRatingMapping, Long> {
+    void deleteByJobId(Long jobId);
 }

@@ -540,6 +540,85 @@ UPDATE master_data set value = 'Tourism (Tourism)' where value = 'Tourism';
 UPDATE master_data set value = 'Vocational-Training (Vocational Training)' where value = 'Vocational Training';
 INSERT into master_data(type, value) values ('education','Masters in Information Management (MIM)');
 
+UPDATE MASTER_DATA SET VALUE = '0 Days' WHERE VALUE = '0';
+UPDATE MASTER_DATA SET VALUE = '15 Days' WHERE VALUE = '15';
+UPDATE MASTER_DATA SET VALUE = '30 Days' WHERE VALUE = '30';
+UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE VALUE = '60';
+UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '45';
+UPDATE MASTER_DATA SET VALUE = '90 Days' WHERE VALUE = '90';
+
+ INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+('function','Accounting / Tax / Company Secretary / Audit'),
+('function','Agent'),
+('function','Airline / Reservations / Ticketing / Travel'),
+('function','Analytics & Business Intelligence'),
+('function','Anchoring / TV / Films / Production'),
+('function','Architects / Interior Design / Naval Arch'),
+
+('function','Art Director / Graphic / Web Designer'),
+('function','Banking / Insurance'),
+('function','Content / Editors / Journalists'),
+('function','Corporate Planning / Consulting / Strategy'),
+('function','Entrepreneur / Businessman / Outside Management Consultant'),
+('function','Export / Import'),
+('function','Fashion'),
+('function', 'Front Office Staff / Secretarial / Computer Operator'),
+('function','Hotels / Restaurant Management'),
+('function', 'HR / Admin / PM / IR / Training'),
+('function', 'ITES / BPO / Operations / Customer Service / Telecalling'),
+('function','Legal / Law'),
+('function','Medical Professional / Healthcare Practitioner / Technician'),
+('function','Mktg / Advtg / MR / Media Planning / PR / Corp. Comm'),
+('function','Packaging Development'),
+('function','Production / Service Engineering / Manufacturing / Maintenance'),
+('function','Project Management / Site Engineers'),
+('function','Purchase / SCM'),
+('function','R&D / Engineering Design'),
+('function','Sales / Business Development / Client Servicing'),
+('function','Security'),
+('function','Shipping'),
+('function','Software Development -'),
+('function','Software Development - Application Programming'),
+('function','Software Development - Client Server'),
+('function','Software Development - Database Administration'),
+('function','Software Development - e-commerce / Internet Technologies'),
+('function','Software Development - Embedded Technologies'),
+('function','Software Development - ERP / CRM'),
+('function','Software Development - Network Administration'),
+('function','Software Development - Others'),
+('function','Software Development - QA and Testing'),
+('function','Software Development - System Programming'),
+('function','Software Development - Telecom Software'),
+('function','Software Development - Systems / EDP / MIS'),
+('function','Teaching / Education / Language Specialist'),
+('function', 'Telecom / IT-Hardware / Tech. Staff / Support'),
+('function','Top Management'),
+('function','Any Other');
+
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ITES / BPO / Operations / Customer Service / Telecalling') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BPO');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'HR / Admin / PM / IR / Training') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Software Development -') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = '') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Office Administration');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales / Business Development / Client Servicing') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Production / Service Engineering / Manufacturing / Maintenance') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Manufacturing');
+
+DELETE FROM MASTER_DATA WHERE VALUE = 'BPO';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Office Administration';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Sales';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Manufacturing';
+
+--drop unique constraints of master_data for type and value
+UPDATE MASTER_DATA SET VALUE = '10 - 15 Years' WHERE VALUE = '20+ Years';
+UPDATE MASTER_DATA SET VALUE = '15 - 20 Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '10 - 15 Years');
+UPDATE MASTER_DATA SET VALUE = '20+ Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '15 - 20 Years');
+UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '60 Days';
+UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '45 Days')
+--add again unique constraints of master_data for type and value
+
+
 -- For ticket #182
 DELETE FROM JOB_CAPABILITY_STAR_RATING_MAPPING;
 

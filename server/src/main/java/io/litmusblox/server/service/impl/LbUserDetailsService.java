@@ -147,9 +147,9 @@ public class LbUserDetailsService implements UserDetailsService {
         }
 
         User u = new User();
-        u.setFirstName(user.getFirstName());
-        u.setLastName(user.getLastName());
-        u.setEmail(user.getEmail());
+        u.setFirstName(Util.capitalize(user.getFirstName()));
+        u.setLastName(Util.capitalize(user.getLastName()));
+        u.setEmail(user.getEmail().toLowerCase());
         u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
         u.setRole(IConstant.UserRole.Names.RECRUITER);
         if (null == user.getRole()) {

@@ -485,15 +485,15 @@ UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE VALUE = '60';
 UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '45';
 UPDATE MASTER_DATA SET VALUE = '90 Days' WHERE VALUE = '90';
 
-UPDATE MASTER_DATA SET VALUE = 'Accounting / Tax / Company Secretary / Audit' WHERE VALUE = 'BPO';
- UPDATE MASTER_DATA SET VALUE = 'Agent' WHERE VALUE = 'Human Resources (HR)';
- UPDATE MASTER_DATA SET VALUE = 'Airline / Reservations / Ticketing / Travel' WHERE VALUE = 'Information Technology (IT)';
- UPDATE MASTER_DATA SET VALUE = 'Analytics & Business Intelligence' WHERE VALUE = 'Office Administration';
- UPDATE MASTER_DATA SET VALUE = 'Anchoring / TV / Films / Production' WHERE VALUE = 'Sales';
- UPDATE MASTER_DATA SET VALUE = 'Architects / Interior Design / Naval Arch' WHERE VALUE='Manufacturing';
-
  INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES
+('function','Accounting / Tax / Company Secretary / Audit'),
+('function','Agent'),
+('function','Airline / Reservations / Ticketing / Travel'),
+('function','Analytics & Business Intelligence'),
+('function','Anchoring / TV / Films / Production'),
+('function','Architects / Interior Design / Naval Arch'),
+
 ('function','Art Director / Graphic / Web Designer'),
 ('function','Banking / Insurance'),
 ('function','Content / Editors / Journalists'),
@@ -533,6 +533,20 @@ VALUES
 ('function', 'Telecom / IT-Hardware / Tech. Staff / Support'),
 ('function','Top Management'),
 ('function','Any Other');
+
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ITES / BPO / Operations / Customer Service / Telecalling') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BPO');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'HR / Admin / PM / IR / Training') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Software Development -') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = '') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Office Administration');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales / Business Development / Client Servicing') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Production / Service Engineering / Manufacturing / Maintenance') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Manufacturing');
+
+DELETE FROM MASTER_DATA WHERE VALUE = 'BPO';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Office Administration';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Sales';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Manufacturing';
 
 --drop unique constraints of master_data for type and value
 UPDATE MASTER_DATA SET VALUE = '10 - 15 Years' WHERE VALUE = '20+ Years';

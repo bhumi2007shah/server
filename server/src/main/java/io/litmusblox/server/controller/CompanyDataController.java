@@ -7,6 +7,9 @@ package io.litmusblox.server.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.CompanyAddress;
+import io.litmusblox.server.model.MasterData;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.utils.Util;
@@ -90,6 +93,50 @@ public class CompanyDataController {
         long startTime = System.currentTimeMillis();
         companyService.blockCompany(company,blockCompany);
         log.info("Complete block company request in " + (System.currentTimeMillis() - startTime) + "ms.");
+    }
+
+    /**
+     * REST Api to return a list of users for a given company
+     * @param company the company name for which the list of users needs to be sent
+     * @return List of users
+     * @throws Exception
+     */
+    @GetMapping("/usersForCompany")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<User> findUserList(@RequestParam String company) throws Exception {
+       //TODO: Make a call to the service layer and return appropriate list
+       return null;
+    }
+
+
+    /**
+     * REST Api to return a list of BUs for a given company
+     * @param company the company name for which the list of BUs needs to be found
+     * @return List of BUs
+     * @throws Exception
+     */
+    @GetMapping("/buForCompany")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<User> findBuList(@RequestParam String company) throws Exception {
+        //TODO: Make a call to the service layer and return appropriate list
+        return null;
+    }
+
+    /**
+     * REST Api to return a list of addresses for the company by address type
+     * @param company the company name for which the list of addresses needs to be found
+     * @param addressType the type of address, like job location, interview or both. The master data corresponding to one of these selections should be passed to the api call
+     * @return List of company addresses
+     * @throws Exception
+     */
+    @GetMapping("/addressByCompanyByType")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam MasterData addressType) throws Exception {
+        //TODO: Make a call to the service layer and return appropriate list
+        return null;
     }
 
 }

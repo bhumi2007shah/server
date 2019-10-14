@@ -11,10 +11,7 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
 import io.litmusblox.server.model.*;
-import io.litmusblox.server.repository.CvParsingDetailsRepository;
-import io.litmusblox.server.repository.JobCandidateMappingRepository;
-import io.litmusblox.server.repository.JobRepository;
-import io.litmusblox.server.repository.UserRepository;
+import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.utils.RestClient;
@@ -33,14 +30,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import javax.annotation.Resource;
+import java.io.*;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -76,6 +72,9 @@ public class RChilliCvProcessor {
 
     @Autowired
     CvParsingDetailsRepository cvParsingDetailsRepository;
+
+    @Resource
+    CandidateRepository candidateRepository;
 
     @Transactional(readOnly = true)
     User getUser(long userId) {
@@ -159,30 +158,24 @@ public class RChilliCvProcessor {
         }
 
         try {
+            //For converting multipart file create private method
             File file = new File(filePath);
-            DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(), file.getParentFile());
-            InputStream input = new FileInputStream(file);
-            OutputStream os = fileItem.getOutputStream();
-            int ret = input.read();
-            while (ret != -1) {
-                os.write(ret);
-                ret = input.read();
-            }
-            os.flush();
-            MultipartFile multipartFile = new CommonsMultipartFile(fileItem);
+            MultipartFile multipartFile = createMultipartFile(file);
             if(isCandidateFailedToProcess && rChilliErrorResponse)
                 StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES,null, user);
-            else if (isCandidateFailedToProcess)
-                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate, null);
-            else
-                StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate, null);
+            else{
+                if (isCandidateFailedToProcess && candidateId==0)
+                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.ERROR_FILES, candidate, null);
+                else
+                    StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate, null);
 
+            }
             file.delete();
         } catch (Exception ex) {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
             log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
         }
-        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null);
+        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -199,21 +192,30 @@ public class RChilliCvProcessor {
         }
         try {
             candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
-            jobCandidateMappingService.saveCandidateSupportiveInfo(candidate, user);
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
-            log.error("Error while processing candidate information received from RChilli : " + ve.getErrorMessage()+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
-            return 0;
+            log.error("Error while validate candidate data and save jcm received from RChilliJson : " + ve.getErrorMessage()+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
+            //return 0;
         } catch (Exception e) {
             e.printStackTrace();
-            log.error("Error while processing candidate information received from RChilli : " + e.getMessage()+", CandidateEmail : "+candidate.getEmail()+", CandidateMobile : "+candidate.getMobile());
-            return 0;
+            log.error("Error while validate candidate data and save jcm received from RChilliJson : " + e.getMessage()+", CandidateEmail : "+candidate.getEmail()+", CandidateMobile : "+candidate.getMobile());
+            //return 0;
+        }
+
+        try {
+            jobCandidateMappingService.saveCandidateSupportiveInfo(candidate, user);
+        }catch (ValidationException ve){
+            ve.printStackTrace();
+            log.error("Error while saving candidate supportive information received from RChilliJson : " + ve.getMessage()+", CandidateEmail : "+candidate.getEmail()+", CandidateMobile : "+candidate.getMobile());
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("Error while saving candidate supportive information received from RChilliJson : " + e.getMessage()+", CandidateEmail : "+candidate.getEmail()+", CandidateMobile : "+candidate.getMobile());
         }
         return candidate.getId();
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage) {
+    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId) {
         log.info("Inside addCvParsingDetails method");
         try {
             //Add cv_parsing_details
@@ -221,8 +223,13 @@ public class RChilliCvProcessor {
             cvParsingDetails.setCvFileName(fileName);
             cvParsingDetails.setProcessedOn(new Date());
             cvParsingDetails.setProcessingTime(rchilliResponseTime);
+
+            if(null != candidateId || candidateId != 0)
+                cvParsingDetails.setCandidateId(candidateId);
+
             if (isCandidateFailedToProcess){
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
+                cvParsingDetails.setRchilliJsonProcessed(false);
                 log.info("CvParsingDetails status is Failure errorMessage : "+errorMessage);
             }else
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
@@ -262,7 +269,8 @@ public class RChilliCvProcessor {
             candidate.setAlternateMobile(alternateMobile);
         candidate.setCandidateName(bean.getFullName());
         candidate.setCandidateSource(IConstant.CandidateSource.DragDropCv.toString());
-        candidate.setCountryCode(user.getCountryId().getCountryCode());
+        if(user != null)
+            candidate.setCountryCode(user.getCountryId().getCountryCode());
 
         CandidateDetails candidateDetails = new CandidateDetails();
         candidateDetails.setDateOfBirth(Util.convertStringToDate(bean.getDateOfBirth()));
@@ -275,6 +283,7 @@ public class RChilliCvProcessor {
 
         candidateDetails.setMaritalStatus(bean.getMaritalStatus());
         candidateDetails.setCvFileType(cvType);
+
         if(bean.getFormattedAddress().isEmpty())
             candidateDetails.setCurrentAddress(bean.getAddress());
         else
@@ -339,4 +348,81 @@ public class RChilliCvProcessor {
         return candidate;
     }
     //Remove storeFile method because repeated code
+
+   public void processRchilliJson(){
+        log.info("inside processRchilliJson method");
+        List<CvParsingDetails> cvParsingDetailsList = cvParsingDetailsRepository.findByRchilliJsonProcessed(false);
+        for (CvParsingDetails cvParsingDetails : cvParsingDetailsList){
+            updateCandidateInfo(cvParsingDetails);
+        }
+    }
+
+    private void updateCandidateInfo(CvParsingDetails cvParsingDetails){
+        log.info("inside updateCandidateInfo method");
+        log.info("ProcessRchilliJson start for candidate : "+cvParsingDetails.getCandidateId());
+        ResumeParserDataRchilliBean bean = null;
+        StringBuffer errorFilePath=new StringBuffer();
+        Long candidateId = null;
+        Candidate candidateByData = null;
+        Candidate candidate = null;
+        if(null != cvParsingDetails.getCandidateId()){
+             candidate = candidateRepository.findById(cvParsingDetails.getCandidateId()).orElse(null);
+            if(null == candidate){
+                log.error("Candidate not found For id "+cvParsingDetails.getCandidateId());
+                return;
+            }
+        }else{
+            log.error("Candidate id is null");
+            return;
+        }
+
+        String[] s = cvParsingDetails.getCvFileName().split("_");
+        User user = getUser(Long.parseLong(s[0]));
+        Job job = getJob(Long.parseLong(s[1]));
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            bean = mapper.readValue(cvParsingDetails.getParsingResponseJson(), ResumeParserDataRchilliBean.class);
+        }catch (Exception e){
+            e.printStackTrace();
+            log.error("Error while processing rchilli Json : " + candidate.getEmail()+ " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
+           // isCandidateFailedToProcess = true;
+        }
+
+        errorFilePath.append(environment.getProperty(IConstant.REPO_LOCATION)).append(IConstant.ERROR_FILES).append(File.separator).append(cvParsingDetails.getCvFileName());
+        log.info("Get Error file from : "+errorFilePath);
+        String cvFileType = "."+Util.getFileExtension(errorFilePath.toString());
+        candidateByData = setCandidateModel(bean, null, cvFileType);
+        candidateId = processCandidate(candidateByData, user, job);
+        try {
+            File file = new File(errorFilePath.toString());
+            MultipartFile multipartFile = createMultipartFile(file);
+            StoreFileUtil.storeFile(multipartFile, job.getId(), environment.getProperty(IConstant.REPO_LOCATION), IConstant.UPLOAD_TYPE.CandidateCv.toString(), candidate, null);
+
+            cvParsingDetails.setRchilliJsonProcessed(true);
+            cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
+            cvParsingDetailsRepository.save(cvParsingDetails);
+            file.delete();
+        } catch (Exception ex) {
+            log.error("Error while get and save candidate resume : " + cvParsingDetails.getCvFileName() + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+            log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
+        }
+    }
+
+    private MultipartFile createMultipartFile(File file) throws IOException {
+        log.info("inside createMultipartFile method");
+        //File file = new File(filePath);
+        DiskFileItem fileItem = new DiskFileItem("file", "text/plain", false, file.getName(), (int) file.length(), file.getParentFile());
+        InputStream input = new FileInputStream(file);
+        OutputStream os = fileItem.getOutputStream();
+        int ret = input.read();
+        while (ret != -1) {
+            os.write(ret);
+            ret = input.read();
+        }
+        os.flush();
+        return new CommonsMultipartFile(fileItem);
+    }
 }

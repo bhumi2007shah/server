@@ -63,7 +63,7 @@ public interface ICandidateService {
 
     void saveUpdateCandidateWorkAuthorization(List<CandidateWorkAuthorization> candidateWorkAuthorizations, Long candidateId) throws Exception;
 
-    void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception;
+    void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Candidate candidate) throws Exception;
 
     void saveUpdateCandidateCompanyDetails(List<CandidateCompanyDetails> candidateCompanyDetailsList, Candidate candidate) throws Exception;
 }

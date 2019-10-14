@@ -242,7 +242,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
             //candidate skill details
             if(null != candidate.getCandidateSkillDetails() && candidate.getCandidateSkillDetails().size() > 0)
-                candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateId);
+                candidateService.saveUpdateCandidateSkillDetails(candidate.getCandidateSkillDetails(), candidateFromDb);
         }
     }
 

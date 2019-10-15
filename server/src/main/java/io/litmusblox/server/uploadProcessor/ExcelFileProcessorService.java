@@ -79,10 +79,10 @@ public class ExcelFileProcessorService implements IUploadFileProcessorService {
                             discardRow = false;
                         switch (index) {
                             case 0:
-                                candidate.setFirstName(Util.capitalize(cellValue.trim()));
+                                candidate.setFirstName(Util.toSentenceCase(cellValue.trim()));
                                 break;
                             case 1:
-                                candidate.setLastName(Util.capitalize(cellValue.trim()));
+                                candidate.setLastName(Util.toSentenceCase(cellValue.trim()));
                                 break;
                             case 2:
                                 candidate.setEmail(cellValue.trim());

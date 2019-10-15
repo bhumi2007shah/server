@@ -131,7 +131,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 log.error("Special characters found, cleaning First name \"" + candidate.getFirstName() + "\" to " + cleanFirstName);
                 if (!Util.validateName(cleanFirstName))
                     throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getFirstName(), HttpStatus.BAD_REQUEST);
-                candidate.setFirstName(Util.capitalize(cleanFirstName));
+                candidate.setFirstName(Util.toSentenceCase(cleanFirstName));
             }
         }
 
@@ -141,7 +141,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 log.error("Special characters found, cleaning Last name \"" + candidate.getLastName() + "\" to " + cleanLastName);
                 if (!Util.validateName(cleanLastName))
                     throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getLastName(), HttpStatus.BAD_REQUEST);
-                candidate.setLastName(Util.capitalize(cleanLastName));
+                candidate.setLastName(Util.toSentenceCase(cleanLastName));
             }
         }
 

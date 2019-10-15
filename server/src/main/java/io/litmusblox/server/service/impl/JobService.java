@@ -217,6 +217,7 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
@@ -230,11 +231,13 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
         }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
     private void getCandidateCountByStage(List<Job> jobs) {
         if(jobs != null & jobs.size() > 0) {
+            log.info("Getting candidate count for " + jobs.size() + " jobs");
             jobs.stream().forEach((job) -> {
                 try {
                     List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(job.getId());

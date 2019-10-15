@@ -482,8 +482,42 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @param jcmList list of jcm ids for chatbot invitation
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     public void inviteCandidates(List<Long> jcmList) throws Exception {
+        performInvitationAndHistoryUpdation(jcmList);
+        callScoringEngineToAddCandidates(jcmList);
+    }
+
+    @Transactional(readOnly = true)
+    private void callScoringEngineToAddCandidates(List<Long> jcmList) {
+        //make an api call to scoring engine for each of the jcm
+        jcmList.stream().forEach(jcmId->{
+            log.info("Calling scoring engine - add candidate api for : " + jcmId);
+            JobCandidateMapping jcm = jobCandidateMappingRepository.getOne(jcmId);
+            if (null == jcm) {
+                log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);
+            }
+            else {
+                if(jcm.getJob().getScoringEngineJobAvailable()) {
+                    try {
+                        Map queryParams = new HashMap(3);
+                        queryParams.put("lbJobId", jcm.getJob().getId());
+                        queryParams.put("candidateId", jcm.getCandidate().getId());
+                        queryParams.put("candidateUuid", jcm.getChatbotUuid());
+                        log.info("Calling Scoring Engine api to add candidate to job");
+                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                    } catch (Exception e) {
+                        log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
+                    }
+                }
+                else {
+                    log.info("Job has not been added to Scoring engine. Cannot call create candidate api. " + jcm.getJob().getId());
+                }
+            }
+        });
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void performInvitationAndHistoryUpdation(List<Long> jcmList) throws Exception {
         if(jcmList == null || jcmList.size() == 0)
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -504,34 +538,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         log.info("Added jmcHistory data");
-
-        //make an api call to scoring engine for each of the jcm
-        jcmList.stream().forEach(jcmId->{
-            log.info("Calling scoring engine - add candidate api for : " + jcmId);
-            Optional<JobCandidateMapping> jcmOptional = jobCandidateMappingRepository.findById(jcmId);
-            if (!jcmOptional.isPresent()) {
-                log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);
-            }
-            else {
-                JobCandidateMapping jcm = jcmOptional.get();
-                if(jcm.getJob().getScoringEngineJobAvailable()) {
-                    try {
-                        Map queryParams = new HashMap(3);
-                        queryParams.put("lbJobId", jcm.getJob().getId());
-                        queryParams.put("candidateId", jcm.getCandidate().getId());
-                        queryParams.put("candidateUuid", jcm.getChatbotUuid());
-                        log.info("Calling Scoring Engine api to add candidate to job");
-                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
-                    } catch (Exception e) {
-                        log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
-                    }
-                }
-                else {
-                    log.info("Job has not been added to Scoring engine. Cannot call create candidate api. " + jcm.getJob().getId());
-                }
-            }
-        });
     }
+
 
     /**
      * Service method to process sharing of candidate profiles with Hiring managers

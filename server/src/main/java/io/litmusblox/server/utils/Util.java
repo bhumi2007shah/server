@@ -312,7 +312,8 @@ public class Util {
             breadCrumb.put("User Id",loggedInUser.getId().toString());
             breadCrumb.put("User Email", loggedInUser.getEmail());
         }
-        breadCrumb.put("Candidate Id",candidate.getId().toString());
+        if(null != candidate.getId())
+            breadCrumb.put("Candidate Id",candidate.getId().toString());
         breadCrumb.put("Candidate Email",candidate.getEmail());
         breadCrumb.put("Candidate Mobile",candidate.getMobile());
         breadCrumb.put(fieldName, fieldValue);
@@ -326,5 +327,29 @@ public class Util {
      */
     public static String capitalize(String value){
         return value.substring(0,1).toUpperCase() + value.substring(1, value.length()-1).toLowerCase();
+    }
+
+    public static Date getFormattedEndDate(String toDate, String dateFormat) {
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+        try {
+            Date date = null;
+            if (null != toDate) {
+                date = sdf.parse(toDate);
+            } else {
+                // set todays date
+                date = Calendar.getInstance().getTime();
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.set(Calendar.HOUR_OF_DAY, 23);
+            calendar.set(Calendar.MINUTE, 59);
+            calendar.set(Calendar.SECOND, 59);
+            calendar.set(Calendar.MILLISECOND, 999);
+            return calendar.getTime();
+        } catch (ParseException e) {
+            e.printStackTrace();
+            // ignore
+        }
+        return null;
     }
 }

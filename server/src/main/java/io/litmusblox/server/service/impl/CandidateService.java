@@ -208,6 +208,17 @@ public class CandidateService implements ICandidateService {
                 obj.setDegree(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.DEGREE.name(), IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue(), obj.getDegree()));
             }
 
+            try{
+                int yearOfPassing = Integer.parseInt(obj.getYearOfPassing());
+            }catch (Exception e){
+                log.error("Year of passing contain character value - "+ obj.getYearOfPassing());
+                obj.setYearOfPassing(null);
+            }
+
+            if(!Util.isNull(obj.getYearOfPassing()) && obj.getYearOfPassing().length() > IConstant.MAX_FIELD_LENGTHS.YEAR_OF_PASSING.getValue()){
+                obj.setYearOfPassing(Util.truncateField(candidate, IConstant.YEAR_OF_PASSING,IConstant.MAX_FIELD_LENGTHS.YEAR_OF_PASSING.getValue(), obj.getYearOfPassing()));
+            }
+
             obj.setCandidateId(candidate.getId());
             candidateEducationDetailsRepository.save(obj);});
     }

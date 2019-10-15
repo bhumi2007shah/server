@@ -482,33 +482,21 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @param jcmList list of jcm ids for chatbot invitation
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     public void inviteCandidates(List<Long> jcmList) throws Exception {
-        if(jcmList == null || jcmList.size() == 0)
-            throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
+        performInvitationAndHistoryUpdation(jcmList);
+        callScoringEngineToAddCandidates(jcmList);
+    }
 
-        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
-
-        List<JcmHistory> jcmHistoryList = new ArrayList<>();
-
-        for(Long jcmId: jcmList){
-            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
-        }
-
-        if(jcmHistoryList.size()>0){
-            jcmHistoryRepository.saveAll(jcmHistoryList);
-        }
-
+    @Transactional(readOnly = true)
+    private void callScoringEngineToAddCandidates(List<Long> jcmList) {
         //make an api call to scoring engine for each of the jcm
         jcmList.stream().forEach(jcmId->{
-            Optional<JobCandidateMapping> jcmOptional = jobCandidateMappingRepository.findById(jcmId);
-            if (!jcmOptional.isPresent()) {
+            log.info("Calling scoring engine - add candidate api for : " + jcmId);
+            JobCandidateMapping jcm = jobCandidateMappingRepository.getOne(jcmId);
+            if (null == jcm) {
                 log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);
             }
             else {
-                JobCandidateMapping jcm = jcmOptional.get();
                 if(jcm.getJob().getScoringEngineJobAvailable()) {
                     try {
                         Map queryParams = new HashMap(3);
@@ -527,6 +515,31 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             }
         });
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void performInvitationAndHistoryUpdation(List<Long> jcmList) throws Exception {
+        if(jcmList == null || jcmList.size() == 0)
+            throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
+
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
+
+        log.info("Completed updating chat_invite_flag for the list of jcm");
+
+        List<JcmHistory> jcmHistoryList = new ArrayList<>();
+
+        for(Long jcmId: jcmList){
+            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
+        }
+
+        if(jcmHistoryList.size()>0){
+            jcmHistoryRepository.saveAll(jcmHistoryList);
+        }
+
+        log.info("Added jmcHistory data");
+    }
+
 
     /**
      * Service method to process sharing of candidate profiles with Hiring managers

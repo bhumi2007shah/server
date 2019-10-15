@@ -195,7 +195,7 @@ public class JobService implements IJobService {
                 if (Util.isNull(companyName))
                     throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
                 log.info("Request from Super Admin for jobs of Company : " + companyName);
-                Company companyObjToUse = companyRepository.findByCompanyName(companyName);
+                Company companyObjToUse = companyRepository.findByCompanyNameIgnoreCase(companyName);
                 if (null == companyObjToUse)
                     throw new ValidationException("Company not found : " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
                 jobsForCompany(responseBean, archived, companyObjToUse);

@@ -192,4 +192,8 @@ public interface IConstant {
     String FILE_STORAGE_URL="fileStorageUrl";
     String ERROR_FILES="error_files";
     String NOT_AVAILABLE= "Not Available";
+
+    enum COMPANY_PAGES{
+        Company, BusinessUnit, UsersAndTeams, Addresses, ScreeningQuestions
+    }
 }

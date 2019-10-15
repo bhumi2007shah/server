@@ -29,12 +29,16 @@ public class CompanyAddress implements Serializable {
 
     @Id
     @Column(name = "ID")
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotNull
     @Column(name = "ADDRESS")
     private String address;
+
+    @NotNull
+    @Column(name="ADDRESS_TITLE")
+    private String addressTitle;
 
     @Column(name = "LATITUDE")
     private Double latitude;

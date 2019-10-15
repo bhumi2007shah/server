@@ -5,6 +5,7 @@
 package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.CompanyAddress;
+import io.litmusblox.server.model.MasterData;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -18,5 +19,6 @@ import java.util.List;
  */
 public interface CompanyAddressRepository extends JpaRepository<CompanyAddress, Long> {
 
+    // find list of company address by company Id
     List<CompanyAddress> findByCompanyId(Long companyId);
 }

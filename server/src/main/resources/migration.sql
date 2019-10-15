@@ -624,3 +624,10 @@ DELETE FROM JOB_CAPABILITY_STAR_RATING_MAPPING;
 
 ALTER TABLE JOB_CAPABILITY_STAR_RATING_MAPPING
 ADD COLUMN JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL;
+
+-- For ticket #165
+alter table company_bu
+drop column updated_on, drop column updated_by;
+
+alter table company_address
+add column address_title varchar(100) not null unique default 'Default Address';

@@ -117,6 +117,12 @@
 			<version>0.7</version>
 		</dependency>
 
+		<!-- for google maps coordinates -->
+		<dependency>
+			<groupId>com.google.maps</groupId>
+			<artifactId>google-maps-services</artifactId>
+			<version>0.2.6</version>
+		</dependency>
 
 		<!-- for unit testing -->
 		<dependency>

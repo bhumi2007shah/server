@@ -182,6 +182,9 @@ public class CandidateService implements ICandidateService {
         if(!Util.isNull(candidateDetails.getGender()) && candidateDetails.getGender().length() > IConstant.MAX_FIELD_LENGTHS.GENDER.getValue()) {
             candidateDetails.setGender(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.GENDER.name(), IConstant.MAX_FIELD_LENGTHS.GENDER.getValue(), candidateDetails.getGender()).toUpperCase());
         }
+        if(!Util.isNull(candidateDetails.getGender()) && candidateDetails.getGender().length() > IConstant.MAX_FIELD_LENGTHS.ROLE.getValue()) {
+            candidateDetails.setRole(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ROLE.name(), IConstant.MAX_FIELD_LENGTHS.ROLE.getValue(), candidateDetails.getGender()).toUpperCase());
+        }
 
         candidateDetails.setCandidateId(candidate);
         candidateDetails =candidateDetailsRepository.save(candidateDetails);
@@ -220,6 +223,9 @@ public class CandidateService implements ICandidateService {
             if(!Util.isNull(obj.getCompanyName()) && obj.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue()) {
                 obj.setCompanyName(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.name(), IConstant.MAX_FIELD_LENGTHS.COMPANY_NAME.getValue(), obj.getCompanyName()));
             }
+            if(!Util.isNull(obj.getCompanyName()) && obj.getCompanyName().length() > IConstant.MAX_FIELD_LENGTHS.ROLE.getValue()) {
+                obj.setRole(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ROLE.name(), IConstant.MAX_FIELD_LENGTHS.ROLE.getValue(), obj.getCompanyName()));
+            }
             obj.setCandidateId(candidate.getId());candidateProjectDetailsRepository.save(obj);});
     }
 
@@ -257,12 +263,16 @@ public class CandidateService implements ICandidateService {
     }
 
     @Transactional
-    public void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Long candidateId) throws Exception {
+    public void saveUpdateCandidateSkillDetails(List<CandidateSkillDetails> candidateSkillDetails, Candidate candidate) throws Exception {
         log.info("Inside saveUpdateCandidateSkillDetails method");
         //delete existing records
-        candidateSkillDetailsRepository.deleteByCandidateId(candidateId);
+        candidateSkillDetailsRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
-        candidateSkillDetails.forEach(obj -> {obj.setCandidateId(candidateId);candidateSkillDetailsRepository.save(obj);});
+        candidateSkillDetails.forEach(obj -> {
+            if(!Util.isNull(obj.getSkill()) && obj.getSkill().length() > IConstant.MAX_FIELD_LENGTHS.SKILL.getValue()) {
+                obj.setSkill(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.SKILL.name(), IConstant.MAX_FIELD_LENGTHS.SKILL.getValue(), obj.getSkill()));
+            }
+            obj.setCandidateId(candidate.getId());candidateSkillDetailsRepository.save(obj);});
 
     }
 

@@ -52,4 +52,10 @@ public class CvParsingDetails {
 
     @Column(name = "ERROR_MESSAGE")
     private String errorMessage;
+
+    @Column(name = "CANDIDATE_ID")
+    private Long candidateId;
+
+    @Column(name = "RCHILLI_JSON_PROCESSED")
+    private Boolean rchilliJsonProcessed;
 }

@@ -14,6 +14,7 @@ import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.ShareCandidateProfileRequestBean;
 import io.litmusblox.server.service.UploadResponseBean;
 import io.litmusblox.server.uploadProcessor.IProcessUploadedCV;
+import io.litmusblox.server.uploadProcessor.RChilliCvProcessor;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +51,9 @@ public class JobCandidateMappingController {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    RChilliCvProcessor rChilliCvProcessor;
 
     /**
      * Api to add a single candidate to a job
@@ -216,5 +220,15 @@ public class JobCandidateMappingController {
     @ResponseStatus(value = HttpStatus.OK)
     void editCandidate(@RequestBody JobCandidateMapping jobCandidateMapping){
         jobCandidateMappingService.editCandidate(jobCandidateMapping);
+    }
+
+    /**
+     * Service to process rchilli json which is failed 1st time in drag and drop process
+     */
+    @GetMapping("/processRchilliJson")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    void processRchilliJson(){
+        rChilliCvProcessor.processRchilliJson();
     }
 }

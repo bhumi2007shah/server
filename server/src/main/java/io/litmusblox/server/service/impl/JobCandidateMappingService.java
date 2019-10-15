@@ -491,6 +491,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         jcmCommunicationDetailsRepository.inviteCandidates(jcmList);
 
+        log.info("Completed updating chat_invite_flag for the list of jcm");
+
         List<JcmHistory> jcmHistoryList = new ArrayList<>();
 
         for(Long jcmId: jcmList){
@@ -501,8 +503,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             jcmHistoryRepository.saveAll(jcmHistoryList);
         }
 
+        log.info("Added jmcHistory data");
+
         //make an api call to scoring engine for each of the jcm
         jcmList.stream().forEach(jcmId->{
+            log.info("Calling scoring engine - add candidate api for : " + jcmId);
             Optional<JobCandidateMapping> jcmOptional = jobCandidateMappingRepository.findById(jcmId);
             if (!jcmOptional.isPresent()) {
                 log.error(IErrorMessages.JCM_NOT_FOUND + jcmId);

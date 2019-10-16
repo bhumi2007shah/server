@@ -325,6 +325,6 @@ public class Util {
      * @return capitalized string i.e: if input is abc it will return Abc
      */
     public static String capitalize(String value){
-        return value.substring(0,1).toUpperCase() + value.substring(1, value.length()-1).toLowerCase();
+        return value.substring(0,1).toUpperCase() + value.substring(1, value.length()).toLowerCase();
     }
 }

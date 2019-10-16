@@ -34,6 +34,12 @@ public interface JobCandidateMappingRepository extends JpaRepository<JobCandidat
     @Query(value = "select stage, count(candidate_id) from job_candidate_mapping where job_id=:jobId group by stage", nativeQuery = true)
     List<Object[]> findCandidateCountByStage(Long jobId) throws Exception;
 
+
+    //find count of candidates per stage
+    @Transactional
+    @Query(value = "select job_id, stage, count(candidate_id) from job_candidate_mapping where job_id in :jobIds group by job_id, stage order by job_id", nativeQuery = true)
+    List<Object[]> findCandidateCountByStageJobIds(List<Long> jobIds) throws Exception;
+
     //find by job and Candidate
     @Transactional
     JobCandidateMapping findByJobAndCandidate(Job job, Candidate candidate);

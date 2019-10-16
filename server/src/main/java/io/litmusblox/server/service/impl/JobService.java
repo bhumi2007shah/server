@@ -194,7 +194,7 @@ public class JobService implements IJobService {
      * @param companyName name of the company for which jobs have to be found
      * @return List of jobs created by the logged in user
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public JobWorspaceResponseBean findAllJobsForUser(boolean archived, String companyName) throws Exception {
 
         log.info("Received request to request to find all jobs for user for archived = " + archived);

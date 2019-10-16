@@ -48,11 +48,12 @@ public class CompanyBu implements Serializable {
     @Column(name="CREATED_BY")
     private Long createdBy;
 
-    @Column(name = "UPDATED_ON")
+    // We don't need these columns as we will create or delete BU, not update
+    /*@Column(name = "UPDATED_ON")
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedOn = new Date();
 
     @Column(name="UPDATED_BY")
-    private Long updatedBy;
+    private Long updatedBy;*/
 
 }

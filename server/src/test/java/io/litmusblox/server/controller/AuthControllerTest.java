@@ -1,25 +1,27 @@
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.repository.UserRepository;
-import io.litmusblox.server.service.LoginResponseBean;
+import io.litmusblox.server.security.JwtTokenUtil;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
-import lombok.NoArgsConstructor;
+import io.litmusblox.server.utils.UsersUtil;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * @author : sameer
@@ -29,44 +31,77 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Project Name : server
  */
 @Ignore
-@NoArgsConstructor
 @RunWith(SpringRunner.class)
-@WebMvcTest(AuthController.class)
+@SpringBootTest
 public class AuthControllerTest {
 
+    private MockMvc mockMvc;
+
     @Autowired
-    MockMvc mockMvc;
+    private WebApplicationContext context;
+
+    @MockBean
+    JwtTokenUtil jwtTokenUtil;
 
     @MockBean
     LbUserDetailsService lbUserDetailsService;
 
-    @org.junit.jupiter.api.BeforeEach
-    void setUp() {
-        List<User> mockList = new ArrayList<>();
+    @Autowired
+    UsersUtil usersUtil;
 
-        //add a list of users.
-        User user1 = Mockito.mock(User.class);
-        mockList.add(user1);
-        User user2 = Mockito.mock(User.class);
-        mockList.add(user2);
+    @Before
+    public void setup(){
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+    }
+    /*@org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        List<User> userList = usersUtil.getUserList();
+
+        when(lbUserDetailsService.login(new User())).thenReturn(userList);
     }
 
     @org.junit.jupiter.api.AfterEach
     void tearDown() {
-    }
+    }*/
 
     @Test
+    @DisplayName("Test for login with valid user")
     public void login() throws Exception {
         User user = new User();
-        user.setEmail("sameer@hexagonsearch.com");
+
+        user.setEmail("shital@hexagonsearch.com");
         user.setPassword("123456");
-        try {
-            LoginResponseBean loginResponseBean = lbUserDetailsService.login(user);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String jsonRequest = objectMapper.writeValueAsString(user);
+            /*LoginResponseBean loginResponseBean = lbUserDetailsService.login(user);
             assertThat(loginResponseBean!=null).isTrue();
-            assertThat(loginResponseBean.getCompany()!=null).isTrue();
-        }
-        catch(Exception e){
-        }
+            assertThat(loginResponseBean.getCompany()!=null).isTrue();*/
+            /*when(lbUserDetailsService.login(Mockito.any(User.class))).thenReturn(new LoginResponseBean());*/
+            MvcResult mvcResult = mockMvc.perform(post("/api/auth/login")
+                    .content(jsonRequest)
+                    .contentType(MediaType.APPLICATION_JSON_VALUE)
+                    .accept(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andReturn();
+
+            String result = mvcResult.getResponse().getContentAsString();
     }
 
+    /*@org.junit.jupiter.api.Test
+    @DisplayName("Test for login with invalid user")
+    public void loginWithInvalidUser() throws Exception {
+        String user = "{\"email\":\"sameer@hexagonsearch.com\", \"password\":\"\"}";
+            *//*LoginResponseBean loginResponseBean = lbUserDetailsService.login(user);
+            assertThat(loginResponseBean!=null).isTrue();
+            assertThat(loginResponseBean.getCompany()!=null).isTrue();*//*
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(user)
+                .accept(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isUnauthorized()
+                );
+    }*/
 }

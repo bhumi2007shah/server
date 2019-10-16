@@ -6,12 +6,11 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
-import io.litmusblox.server.model.Company;
-import io.litmusblox.server.model.CompanyAddress;
-import io.litmusblox.server.model.MasterData;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.model.*;
 import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
+import io.litmusblox.server.service.UserWorkspaceBean;
+import io.litmusblox.server.service.impl.LbUserDetailsService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +44,10 @@ public class CompanyDataController {
     @Autowired
     ICompanyService companyService;
 
+    @Autowired
+    LbUserDetailsService lbUserDetailsService;
+
+
     @GetMapping("/screeningQuestions")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
@@ -70,10 +73,12 @@ public class CompanyDataController {
     @PutMapping(value = "/update",consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
-    void updateCompany(@RequestParam("logo") MultipartFile logo,
-                       @RequestParam("company") String companyString) throws Exception {
+    Company updateCompany(
+            @RequestParam(value = "logo", required = false) MultipartFile logo,
+            @RequestParam("company") String companyString
+    ) throws Exception {
         Company company=new ObjectMapper().readValue(companyString, Company.class);
-        companyService.saveCompany(company, logo);
+        return companyService.saveCompany(company, logo);
     }
 
 
@@ -104,9 +109,9 @@ public class CompanyDataController {
     @GetMapping("/usersForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<User> findUserList(@RequestParam String company) throws Exception {
-       //TODO: Make a call to the service layer and return appropriate list
-       return null;
+    List<UserWorkspaceBean> findUserList(@RequestParam String company) throws Exception {
+       //we already have a method in LbUserDetailsService.java which returns list of users for a compay with extra data like no. of jobs created. reusing that.
+       return lbUserDetailsService.fetchUsers(company);
     }
 
 
@@ -119,9 +124,9 @@ public class CompanyDataController {
     @GetMapping("/buForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<User> findBuList(@RequestParam String company) throws Exception {
+    List<CompanyBu> findBuList(@RequestParam String company) throws Exception {
         //TODO: Make a call to the service layer and return appropriate list
-        return null;
+        return companyService.getCompanyBuList(company);
     }
 
     /**
@@ -134,9 +139,8 @@ public class CompanyDataController {
     @GetMapping("/addressByCompanyByType")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam MasterData addressType) throws Exception {
-        //TODO: Make a call to the service layer and return appropriate list
-        return null;
+    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam String addressType) throws Exception {
+        MasterData masterDataAddressType = new ObjectMapper().readValue(addressType, MasterData.class);
+        return companyService.getCompanyAddressesByType(company, masterDataAddressType);
     }
-
 }

@@ -135,7 +135,7 @@ public class LbUserDetailsService implements UserDetailsService {
         Company companyObjToUse = null;
         if(IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())) {
             //check if company exists
-            Company userCompany = companyRepository.findByCompanyName(user.getCompany().getCompanyName());
+            Company userCompany = companyRepository.findByCompanyNameIgnoreCase(user.getCompany().getCompanyName());
 
             if (null == userCompany) {
                 //create a company
@@ -147,9 +147,9 @@ public class LbUserDetailsService implements UserDetailsService {
         }
 
         User u = new User();
-        u.setFirstName(Util.capitalize(user.getFirstName()));
-        u.setLastName(Util.capitalize(user.getLastName()));
-        u.setEmail(user.getEmail());
+        u.setFirstName(Util.toSentenceCase(user.getFirstName()));
+        u.setLastName(Util.toSentenceCase(user.getLastName()));
+        u.setEmail(user.getEmail().toLowerCase());
         if(null == companyObjToUse)
             companyObjToUse=loggedInUser.getCompany();
         //u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
@@ -332,7 +332,7 @@ public class LbUserDetailsService implements UserDetailsService {
         log.info("Received request to get list of users");
         long startTime = System.currentTimeMillis();
 
-        Company company = companyRepository.findByCompanyName(companyName);
+        Company company = companyRepository.findByCompanyNameIgnoreCase(companyName);
         if(null == company)
             throw new ValidationException("Company not found: " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
 

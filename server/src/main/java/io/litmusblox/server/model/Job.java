@@ -17,9 +17,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Entity class for Job table
@@ -182,6 +180,9 @@ public class Job implements Serializable {
 
     @Transient
     private String mlErrorMessage;
+
+    @Transient
+    private Map<Long,Integer> candidateCountByStage = new HashMap<>();
 
     //Remove minExperience, maxExperience, experienceRange because add masterdata for experience
     //Also add jobdetail model in job

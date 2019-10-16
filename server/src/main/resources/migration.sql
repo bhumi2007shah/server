@@ -629,6 +629,13 @@ ADD COLUMN JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL;
 ALTER TABLE CV_PARSING_DETAILS
 ADD COLUMN CANDIDATE_ID INTEGER,
 ADD COLUMN RCHILLI_JSON_PROCESSED BOOL;
+-- For ticket #165
+alter table company_bu
+drop column updated_on, drop column updated_by;
+
+alter table company_address
+add column address_title varchar(100) not null unique default 'Default Address';
+
 
 --For ticket #166
 ALTER TABLE JOB DROP COLUMN CURRENCY

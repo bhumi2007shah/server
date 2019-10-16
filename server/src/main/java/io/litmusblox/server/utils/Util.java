@@ -228,29 +228,29 @@ public class Util {
         if (candidateName.indexOf('.') != -1) { //a dot (.) is found in the name, process accordingly
             String[] name = candidateName.split(IConstant.REGEX_FOR_DOT_IN_NAME);
             if (name.length > 1) {
-                candidate.setLastName(capitalize(name[0]));
-                candidate.setFirstName(capitalize(name[1]));
+                candidate.setLastName(toSentenceCase(name[0]));
+                candidate.setFirstName(toSentenceCase(name[1]));
                 return;
             }
             else if (name.length > 0) {
-                candidate.setFirstName(capitalize(name[0]));
+                candidate.setFirstName(toSentenceCase(name[0]));
                 return;
             }
         }
 
         String[] name = candidateName.split("\\s+");
-        candidate.setFirstName(capitalize(name[0]));
+        candidate.setFirstName(toSentenceCase(name[0]));
         StringBuffer lastName = null;
         if (name.length > 1) {
             lastName = new StringBuffer();
             for (int i = 1; i < name.length; i++) {
                 if (i > 1)
                     lastName.append(" ");
-                lastName.append(capitalize(name[i]));
+                lastName.append(toSentenceCase(name[i]));
             }
         }
         if (null != lastName)
-            candidate.setLastName(capitalize(lastName.toString()));
+            candidate.setLastName(toSentenceCase(lastName.toString()));
 
     }
 
@@ -325,8 +325,8 @@ public class Util {
      * @param value to be capitalized
      * @return capitalized string i.e: if input is abc it will return Abc
      */
-    public static String capitalize(String value){
-        return value.substring(0,1).toUpperCase() + value.substring(1, value.length()-1).toLowerCase();
+    public static String toSentenceCase(String value){
+        return value.substring(0,1).toUpperCase() + value.substring(1).toLowerCase();
     }
 
     public static Date getFormattedEndDate(String toDate, String dateFormat) {

@@ -4,9 +4,7 @@
 
 package io.litmusblox.server.repository;
 
-import io.litmusblox.server.model.Company;
-import io.litmusblox.server.model.Job;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.model.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,4 +61,12 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     //count of all archived jobs by company
     @Transactional
     Long countByCompanyIdAndDateArchivedIsNotNull(Company company);
+
+    //count of all job attached to a BU
+    @Transactional
+    int countByBuId(CompanyBu companyBu);
+
+    //count of all job attached to a company address
+    @Transactional
+    int countByJobLocationOrInterviewLocation(CompanyAddress jobLocation, CompanyAddress interviewLocation);
 }

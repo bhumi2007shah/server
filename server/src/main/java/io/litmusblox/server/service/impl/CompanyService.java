@@ -450,7 +450,7 @@ public class CompanyService implements ICompanyService {
                 .filter(companyAddress -> {
                     return companyAddress.getAddressType().getId().equals(addressType.getId());
                 }).collect(Collectors.toList());
-        log.info("Completed processing list of BUs for company: "+ companyName +" in " + (System.currentTimeMillis() - startTime) + "ms.");
+        log.info("Completed processing list of Addresses for company: "+ companyName +" in " + (System.currentTimeMillis() - startTime) + "ms.");
         return companyAddresses;
     }
 

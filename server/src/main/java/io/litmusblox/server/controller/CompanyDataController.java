@@ -139,9 +139,8 @@ public class CompanyDataController {
     @GetMapping("/addressByCompanyByType")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam MasterData addressType) throws Exception {
-        //TODO: Make a call to the service layer and return appropriate list
-        return null;
+    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam String addressType) throws Exception {
+        MasterData masterDataAddressType = new ObjectMapper().readValue(addressType, MasterData.class);
+        return companyService.getCompanyAddressesByType(company, masterDataAddressType);
     }
-
 }

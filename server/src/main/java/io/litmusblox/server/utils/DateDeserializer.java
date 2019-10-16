@@ -28,7 +28,8 @@ public class DateDeserializer extends StdDeserializer {
         String date = p.getText();
         try {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            return sdf.parse(date);
+            date = sdf.format(sdf.parse(date));
+            return Util.getFormattedEndDate(date,"yyyy-MM-dd");
         } catch (Exception e) {
             return null;
         }

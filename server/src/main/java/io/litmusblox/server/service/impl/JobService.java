@@ -217,6 +217,8 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
+        getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
     private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, Company company) {
@@ -228,6 +230,25 @@ public class JobService implements IJobService {
             responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(company));
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
+        }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
+        getCandidateCountByStage(responseBean.getListOfJobs());
+    }
+
+    private void getCandidateCountByStage(List<Job> jobs) {
+        if(jobs != null & jobs.size() > 0) {
+            log.info("Getting candidate count for " + jobs.size() + " jobs");
+            jobs.stream().forEach((job) -> {
+                try {
+                    List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(job.getId());
+
+                    stageCountList.stream().forEach(objArray -> {
+                        job.getCandidateCountByStage().put(((Integer) objArray[0]).longValue(), ((BigInteger) objArray[1]).intValue());
+                    });
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+            });
         }
     }
 

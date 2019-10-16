@@ -66,8 +66,8 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
             User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             for (CSVRecord record : parser.getRecords()) {
                 try {
-                    Candidate candidate = new Candidate(Util.capitalize(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()),
-                            Util.capitalize(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()),
+                    Candidate candidate = new Candidate(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()),
+                            Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).trim(),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).trim(),
                             loggedInUser.getCountryId().getCountryCode(),
@@ -78,8 +78,8 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
                 } catch (Exception pe) {
                     log.error("Error while processing row from CSV file: " + pe.getMessage());
                     Candidate candidate = new Candidate();
-                    candidate.setFirstName(Util.capitalize(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()));
-                    candidate.setLastName(Util.capitalize(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()));
+                    candidate.setFirstName(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()));
+                    candidate.setLastName(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()));
                     candidate.setEmail(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).trim());
                     if(ignoreMobile) {
                         candidateList.add(candidate);

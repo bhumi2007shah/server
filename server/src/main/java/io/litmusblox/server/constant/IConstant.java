@@ -54,6 +54,7 @@ public interface IConstant {
     String SENTRY_DSN="sentryDSN";
     String UPLOAD_FILE_TYPE="Upload file type";
     String LOCALHOST_LOOPBACK = "0:0:0:0:0:0:0:1";
+    String YEAR_OF_PASSING = "yearOfPassing";
 
 
     enum UserStatus {
@@ -156,7 +157,7 @@ public interface IConstant {
 
 
     enum MAX_FIELD_LENGTHS {
-        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), WORK_SUMMARY(255), GENDER(1), DEGREE(50), SKILL(50), ROLE(40);
+        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), WORK_SUMMARY(255), GENDER(1), DEGREE(50), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
 
         private int value;
 

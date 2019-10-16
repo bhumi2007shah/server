@@ -94,7 +94,7 @@ public class Job implements Serializable {
     private MasterData function;
 
     @Column(name = "CURRENCY")
-    private String currency;
+    private String currency = "INR";
 
     @Column(name = "MIN_SALARY")
     private Long minSalary;

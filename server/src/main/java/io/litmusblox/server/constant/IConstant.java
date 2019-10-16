@@ -55,6 +55,7 @@ public interface IConstant {
     String UPLOAD_FILE_TYPE="Upload file type";
     String LOCALHOST_LOOPBACK = "0:0:0:0:0:0:0:1";
     String YEAR_OF_PASSING = "yearOfPassing";
+    String DAYS = "Days";
 
 
     enum UserStatus {

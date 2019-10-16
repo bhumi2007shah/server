@@ -367,6 +367,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             if (candidate.getCandidateCompanyDetails() != null && candidate.getCandidateCompanyDetails().size() >1) {
                 candidate.getCandidateCompanyDetails().stream().forEach(candidateCompanyDetails -> {
                     if(!Util.isNull(candidateCompanyDetails.getNoticePeriod()) && candidateCompanyDetails.getNoticePeriod().length() > 0) {
+                        candidateCompanyDetails.setNoticePeriod(candidateCompanyDetails.getNoticePeriod()+" "+IConstant.DAYS);
                         candidateCompanyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetails.getNoticePeriod()));
                         if (null == candidateCompanyDetails.getNoticePeriodInDb()) {
                             //value in request object is not available in db

@@ -120,6 +120,14 @@ public class Job implements Serializable {
     @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="HIRING_MANAGER")
+    private User hiringManager;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="RECRUITER")
+    private User recruiter;
+
     @NotNull
     @Column(name = "CREATED_ON")
     @Temporal(TemporalType.TIMESTAMP)

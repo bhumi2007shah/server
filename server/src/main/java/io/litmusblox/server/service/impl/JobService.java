@@ -121,6 +121,9 @@ public class JobService implements IJobService {
 
     @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
+
+        User recruiter = null;
+        User hiringManager = null;
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         log.info("Received request to add job for page " + pageName + " from user: " + loggedInUser.getEmail());
@@ -137,6 +140,20 @@ public class JobService implements IJobService {
             //get handle to existing job object
             oldJob = jobRepository.findById(job.getId()).orElse(null);
            // oldJob = tempJobObj.isPresent() ? tempJobObj.get() : null;
+        }
+
+        //set recruiter
+        if(null != job.getRecruiter() && null != job.getRecruiter().getId()){
+            recruiter =  userRepository.findById(job.getRecruiter().getId()).orElse(null);
+            if(null != recruiter)
+                job.setRecruiter(recruiter);
+        }
+
+        //set hiringManager
+        if(null != job.getHiringManager() && null != job.getHiringManager().getId()){
+            hiringManager =  userRepository.findById(job.getHiringManager().getId()).orElse(null);
+            if(null != hiringManager)
+                job.setHiringManager(hiringManager);
         }
 
         switch (IConstant.AddJobPages.valueOf(pageName)) {
@@ -315,7 +332,6 @@ public class JobService implements IJobService {
     }
 
     private void addJobOverview(Job job, Job oldJob, User loggedInUser) { //method for add job for Overview page
-
         //validate title
         if (job.getJobTitle().length() > IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
             job.setJobTitle(job.getJobTitle().substring(0, IConstant.TITLE_MAX_LENGTH));
@@ -324,10 +340,15 @@ public class JobService implements IJobService {
         if (null == userCompany) {
             throw new ValidationException("Cannot find company for logged in user", HttpStatus.EXPECTATION_FAILED);
         }
+
         job.setCompanyId(userCompany);
         String historyMsg = "Created";
 
         if (null != oldJob) {//only update existing job
+            if(null != job.getHiringManager())
+                oldJob.setHiringManager(job.getHiringManager());
+            if(null != job.getRecruiter())
+                oldJob.setRecruiter(job.getRecruiter());
             oldJob.setCompanyJobId(job.getCompanyJobId());
             oldJob.setJobTitle(job.getJobTitle());
             oldJob.setJobDescription(job.getJobDescription());

@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
@@ -12,6 +14,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
+import io.litmusblox.server.service.impl.ml.RolePredictionBean;
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
@@ -401,8 +404,17 @@ public class JobService implements IJobService {
         saveJobHistory(job.getId(), historyMsg + " job overview", loggedInUser);
         //make a call to ML api to obtain skills and capabilities
         if(MasterDataBean.getInstance().getConfigSettings().getMlCall()==1) {
+            if(null == job.getSelectedRole())
+                job.setSelectedRole(" ");
+
             try {
-                callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
+                RolePredictionBean rolePredictionBean = new RolePredictionBean();
+                RolePredictionBean.RolePrediction rolePrediction= new RolePredictionBean.RolePrediction();
+                rolePrediction.setJobTitle(job.getJobTitle());
+                rolePrediction.setJobDescription(job.getJobDescription());
+                rolePrediction.setRecruiterRoles(job.getSelectedRole());
+                rolePredictionBean.setRolePrediction(rolePrediction);
+                callMl(rolePredictionBean, job.getId(), job);
                 if(null == oldJob) {
                     job.setMlDataAvailable(true);
                     jobRepository.save(job);
@@ -421,22 +433,54 @@ public class JobService implements IJobService {
         job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
-    private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
+    private void callMl(RolePredictionBean requestBean, long jobId, Job job) throws Exception {
+        log.info("inside callMl method");
         ObjectMapper objectMapper = new ObjectMapper();
+        List<String> roles = new ArrayList<>();
+
+        if(null != job.getSelectedRole()){
+            requestBean.getRolePrediction().setRecruiterRoles(job.getSelectedRole());
+        }
+        objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
         log.info("Response received: " + mlResponse);
         long startTime = System.currentTimeMillis();
         MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
-        int numUniqueSkills = handleSkillsFromML(responseBean.getSkills(), jobId);
-        if(numUniqueSkills != responseBean.getSkills().size()) {
+
+        //if ml status is jdc_jtm_Error
+        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue())){
+            log.info("ml response status is jdc_jtm_Error for job id : "+jobId);
+            responseBean.getRolePrediction().getJdRoles().forEach(role -> {
+                roles.add(role.getRoleName());
+            });
+            responseBean.getRolePrediction().getJtRoles().forEach(role -> {
+                roles.add(role.getRoleName());
+            });
+            job.setRoles(roles);
+            return;
+        }
+
+        //if ml status is suff_Error
+        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())){
+            log.info("ml response status is suff_Error for job id : "+jobId);
+            throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
+        }
+
+        //if ml status is no_Error
+        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.NO_ERROR.getValue())){
+            log.info("ml response status is no_Error for job id : "+jobId);
+            int numUniqueSkills = handleSkillsFromML(responseBean.getTowerGeneration().getSkills(), jobId);
+        if(numUniqueSkills != responseBean.getTowerGeneration().getSkills().size()) {
             log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
             Map breadCrumb = new HashMap<String, String>();
             breadCrumb.put("Job Id: ", String.valueOf(jobId));
             SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
         }
         Set<Integer> uniqueCapabilityIds = new HashSet<>();
-        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
-        handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
+            handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
+            handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
+        }
         log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
@@ -481,9 +525,9 @@ public class JobService implements IJobService {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
-            if (capability.getId() !=0 && !uniqueCapabilityIds.contains(capability.getId())) {
-                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
-                uniqueCapabilityIds.add(capability.getId());
+            if (capability.getCapCode() !=0 && !uniqueCapabilityIds.contains(capability.getCapCode())) {
+                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getCapCode()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+                uniqueCapabilityIds.add(capability.getCapCode());
             }
         });
         jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);

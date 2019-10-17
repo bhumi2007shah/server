@@ -459,6 +459,13 @@ public class CompanyService implements ICompanyService {
         companyHistoryRepository.save(new CompanyHistory(companyId, historyMsg, loggedInUser));
     }
 
+    @Transactional
+    public Company getCompanyDetail(Long companyId) {
+        log.info("inside getCompanyDetail method");
+        Company company = companyRepository.findById(companyId).orElse(null);
+        if(null == company)
+            throw new ValidationException("Company not found for id : " + companyId, HttpStatus.BAD_REQUEST);
 
-
+        return company;
+    }
 }

@@ -8,7 +8,6 @@ import io.litmusblox.server.model.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Service class for various operations to be performed for a company
@@ -64,4 +63,11 @@ public interface ICompanyService {
      * @param loggedInUser
      */
     void saveCompanyHistory(Long companyId, String historyMsg, User loggedInUser);
+
+    /**
+     * Service method to get Company details by company id.
+     * @param companyId
+     * @return Company model
+     */
+    Company getCompanyDetail(Long companyId);
 }

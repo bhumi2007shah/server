@@ -170,6 +170,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveCandidateSupportiveInfo(Candidate candidate, User loggedInUser) throws Exception {
+        log.info("Inside saveCandidateSupportiveInfo Method");
 
         //find candidateId
         Candidate candidateFromDb=candidateService.findByMobileOrEmail(candidate.getEmail(), candidate.getMobile(), (null==candidate.getCountryCode())?loggedInUser.getCountryId().getCountryCode():candidate.getCountryCode(), loggedInUser, Optional.ofNullable(candidate.getAlternateMobile()));
@@ -178,7 +179,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if (null != candidateFromDb)
             candidateId = candidateFromDb.getId();
         if (null != candidateId) {
-
+            candidateFromDb.setMobile(candidate.getMobile());
+            candidateFromDb.setEmail(candidate.getEmail());
             try {
                 //if telephone field has value, save to mobile history table
                 if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 6) {
@@ -582,7 +584,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             JcmProfileSharingMaster masterObj = jcmProfileSharingMasterRepository.save(new JcmProfileSharingMaster(loggedInUser.getId(), receiverNameToUse, receiverEmailToUse));
             Set<JcmProfileSharingDetails> detailsSet = new HashSet<>(requestBean.getJcmId().size());
             requestBean.getJcmId().forEach(jcmId ->{
-                detailsSet.add(new JcmProfileSharingDetails(masterObj.getId(),jcmId));
+                detailsSet.add(new JcmProfileSharingDetails(masterObj,jcmId));
             });
             jcmProfileSharingDetailsRepository.saveAll(detailsSet);
             recieverEmails.add(array[1]);
@@ -695,6 +697,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         Hibernate.initialize(objFromDb.getCandidate().getCandidateCompanyDetails());
         if(null!=objFromDb.getJob() && null!=objFromDb.getJob().getExpertise()){
             Hibernate.initialize(objFromDb.getJob().getExpertise());
+            Hibernate.initialize(objFromDb.getJob().getExperienceRange());
         }
         objFromDb.getJob().getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());

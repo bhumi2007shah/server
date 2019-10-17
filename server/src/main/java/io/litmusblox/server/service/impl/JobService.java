@@ -192,6 +192,7 @@ public class JobService implements IJobService {
         responseBean.getListOfJobs().forEach(job -> {
             Hibernate.initialize(job.getExpertise());
             Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getExperienceRange());
         });
         return responseBean;
     }
@@ -265,11 +266,40 @@ public class JobService implements IJobService {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateDetails());
             Hibernate.initialize(jcmFromDb.getCandidate().getCandidateCompanyDetails());
-            jcmFromDb.setProfileSharingDetails(jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId()));
+
+            List<JcmProfileSharingDetails>jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId());
+            jcmProfileSharingDetails.forEach(detail->{
+                detail.setHiringManagerName(detail.getProfileSharingMaster().getReceiverName());
+                detail.setHiringManagerEmail(detail.getProfileSharingMaster().getReceiverEmail());
+            });
+            jcmFromDb.setInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
+
+            jcmFromDb.setNotInterestedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()!=null && !jcmProfileSharingDetail.getHiringManagerInterest())
+                            .collect(Collectors.toList())
+            );
+
+            jcmFromDb.setNotRespondedHiringManagers(
+                    jcmProfileSharingDetails
+                            .stream()
+                            .filter( jcmProfileSharingDetail -> jcmProfileSharingDetail.getHiringManagerInterestDate()==null )
+                            .collect(Collectors.toList())
+            );
         });
 
         if(null!=job && null!=job.getExpertise()){
             Hibernate.initialize(job.getExpertise());
+            Hibernate.initialize(job.getInterviewLocation());
+            Hibernate.initialize(job.getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(job.getCompanyId().getCompanyBuList());
+            Hibernate.initialize(job.getExperienceRange());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());
@@ -328,6 +358,7 @@ public class JobService implements IJobService {
             //End of code to be removed
             oldJob = jobRepository.save(job);
         }
+        //TODO: remove one JobRepository call
         //Add Job details
         addJobDetail(job, oldJob, loggedInUser);
 
@@ -349,6 +380,9 @@ public class JobService implements IJobService {
                 job.setMlErrorMessage(IErrorMessages.ML_DATA_UNAVAILABLE);
             }
         }
+
+        //populate key skills for the job
+        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
@@ -454,7 +488,7 @@ public class JobService implements IJobService {
         saveJobHistory(job.getId(), historyMsg + " screening questions", loggedInUser);
 
         //populate key skills for the job
-        job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+       // job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
     private void addJobKeySkills(Job job, Job oldJob, User loggedInUser) throws Exception { //update and add new key skill
@@ -626,18 +660,13 @@ public class JobService implements IJobService {
                 oldJob.setBuId(companyBuMap.get(job.getBuId().getId()));
             }
         }
-        String expRange = masterDataBean.getExperienceRange().get(job.getExperienceRange().getId());
 
-        if (null == expRange) {
-           // throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-            log.error("In Job, company bu " + IErrorMessages.NULL_MESSAGE + job.getId());
+        if(null != job.getExperienceRange() && null != masterDataBean.getExperienceRange().get(job.getExperienceRange().getId())){
+            oldJob.setExperienceRange(job.getExperienceRange());
         }else{
-            String[] range = expRange.split(" ");
-            oldJob.setMinExperience(Double.parseDouble(range[0]));
-            oldJob.setMaxExperience(Double.parseDouble(range[2]));
+            // throw new ValidationException("In Job, experience Range " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
+            log.error("In Job, ExperienceRange " + IErrorMessages.NULL_MESSAGE + job.getId());
         }
-
-
         oldJob.setMinSalary(job.getMinSalary());
         oldJob.setMaxSalary(job.getMaxSalary());
         oldJob.setNoticePeriod(job.getNoticePeriod());
@@ -794,12 +823,16 @@ public class JobService implements IJobService {
         Hibernate.initialize(job.getJobScreeningQuestionsList());
         Hibernate.initialize(job.getJobKeySkillsList());
         Hibernate.initialize(job.getJobCapabilityList());
+        Hibernate.initialize(job.getInterviewLocation());
+        Hibernate.initialize(job.getExperienceRange());
         if(null!=job && null!=job.getExpertise()){
             Hibernate.initialize(job.getExpertise());
         }
         job.getJobHiringTeamList().forEach(jobHiringTeam -> {
             Hibernate.initialize(jobHiringTeam.getStageStepId());
             Hibernate.initialize(jobHiringTeam.getStageStepId().getStage());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyAddressList());
+            Hibernate.initialize(jobHiringTeam.getStageStepId().getCompanyId().getCompanyBuList());
         });
         return job;
     }
@@ -814,6 +847,7 @@ public class JobService implements IJobService {
         if (null == job) {
             throw new WebException("Job with id " + jobId + "does not exist ", HttpStatus.UNPROCESSABLE_ENTITY);
         }
+        Hibernate.initialize(job.getExperienceRange());
         return jobHistoryRepository.findByJobIdOrderByIdDesc(jobId);
     }
 }

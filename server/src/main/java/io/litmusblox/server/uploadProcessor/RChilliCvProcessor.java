@@ -93,6 +93,7 @@ public class RChilliCvProcessor {
      * @param filePath
      */
     public void processFile(String filePath) {
+        log.info("Inside processFile method");
         // remove task steps
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
         String[] s = fileName.split("_");
@@ -152,6 +153,7 @@ public class RChilliCvProcessor {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Error while processing candidate in drag and drop : " + ((null != candidate) ? candidate.getEmail() : user.getEmail()) + " : " + e.getMessage(), HttpStatus.BAD_REQUEST);
             isCandidateFailedToProcess = true;
         }
@@ -178,6 +180,7 @@ public class RChilliCvProcessor {
             file.delete();
         } catch (Exception ex) {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
+            log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
         }
         addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null);
     }
@@ -199,10 +202,11 @@ public class RChilliCvProcessor {
             jobCandidateMappingService.saveCandidateSupportiveInfo(candidate, user);
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
-            log.error("Error while processing candidate information received from RChilli : " + ve.getErrorMessage());
+            log.error("Error while processing candidate information received from RChilli : " + ve.getErrorMessage()+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
             return 0;
         } catch (Exception e) {
-            log.error("Error while processing candidate information received from RChilli : " + e.getMessage());
+            e.printStackTrace();
+            log.error("Error while processing candidate information received from RChilli : " + e.getMessage()+", CandidateEmail : "+candidate.getEmail()+", CandidateMobile : "+candidate.getMobile());
             return 0;
         }
         return candidate.getId();
@@ -210,15 +214,17 @@ public class RChilliCvProcessor {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage) {
+        log.info("Inside addCvParsingDetails method");
         try {
             //Add cv_parsing_details
             CvParsingDetails cvParsingDetails = new CvParsingDetails();
             cvParsingDetails.setCvFileName(fileName);
             cvParsingDetails.setProcessedOn(new Date());
             cvParsingDetails.setProcessingTime(rchilliResponseTime);
-            if (isCandidateFailedToProcess)
+            if (isCandidateFailedToProcess){
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
-            else
+                log.info("CvParsingDetails status is Failure errorMessage : "+errorMessage);
+            }else
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());
 
             if (null != bean) {
@@ -228,13 +234,14 @@ public class RChilliCvProcessor {
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetails.setErrorMessage(errorMessage);
             cvParsingDetailsRepository.save(cvParsingDetails);
-        } catch (Exception e) {
             log.info("Save CvParsingDetails");
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     private Candidate setCandidateModel(ResumeParserDataRchilliBean bean, User user, String cvType) {
+        log.info("Inside setCandidateModel by rchilli data");
         String alternateMobile=null;
         String[] mobileString=null;
         String mobile=bean.getFormattedMobile().isEmpty() ? bean.getFormattedPhone() : bean.getFormattedMobile();

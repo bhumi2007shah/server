@@ -124,6 +124,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Candidate validateDataAndSaveJcmAndJcmCommModel(UploadResponseBean uploadResponseBean, Candidate candidate, User loggedInUser, Boolean ignoreMobile, Job job) throws Exception {
 
+        log.info("Inside validateDataAndSaveJcmAndJcmCommModel method");
         if (null != candidate.getFirstName()) {
             if (!Util.validateName(candidate.getFirstName().trim())) {
                 String cleanFirstName = candidate.getFirstName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");

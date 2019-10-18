@@ -505,7 +505,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         queryParams.put("candidateId", jcm.getCandidate().getId());
                         queryParams.put("candidateUuid", jcm.getChatbotUuid());
                         log.info("Calling Scoring Engine api to add candidate to job");
-                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams), null);
                     } catch (Exception e) {
                         log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
                     }

@@ -662,7 +662,6 @@ public class JobService implements IJobService {
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
             if(newValue.getSelected()) {
-                //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
                 List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
                 if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
                     wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
@@ -673,8 +672,6 @@ public class JobService implements IJobService {
                         weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
                     }
                 }
-                //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);
-                //jobCapabilityStarRatingMappingRepository.saveAll(starRatingMappingList);
             }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());

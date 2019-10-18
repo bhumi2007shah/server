@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
@@ -506,6 +507,36 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         queryParams.put("candidateUuid", jcm.getChatbotUuid());
                         log.info("Calling Scoring Engine api to add candidate to job");
                         String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                        log.info(scoringEngineResponse);
+
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        TechChatbotRequestBean techChatbotRequestBean = objectMapper.readValue(scoringEngineResponse, TechChatbotRequestBean.class);
+                        jcm.setChatbotUpdatedOn(techChatbotRequestBean.getChatbotUpdatedOn());
+                        if(techChatbotRequestBean.getTechResponseJson() != null && !techChatbotRequestBean.getTechResponseJson().isEmpty()) {
+                            jcm.getTechResponseData().setTechResponse(techChatbotRequestBean.getTechResponseJson());
+                        }
+                        if(techChatbotRequestBean.getScore() > 0) {
+                            jcm.setScore(techChatbotRequestBean.getScore());
+                        }
+                        if(techChatbotRequestBean.getChatbotUpdatedOn() != null) {
+                            jcm.setChatbotUpdatedOn(techChatbotRequestBean.getChatbotUpdatedOn());
+                        }
+
+                        //Candidate has already completed the tech chatbot
+                        if(IConstant.CHATBOT_STATUS.Complete.name().equalsIgnoreCase(techChatbotRequestBean.getChatbotStatus())) {
+                            log.info("Found complete status from scoring engine: " + jcm.getEmail() + " ~ " + jcm.getId());
+                            //Set chatCompleteFlag = true
+                            JcmCommunicationDetails jcmCommunicationDetails = jcmCommunicationDetailsRepository.findByJcmId(jcm.getId());
+                            jcmCommunicationDetails.setChatCompleteFlag(true);
+                            jcmCommunicationDetailsRepository.save(jcmCommunicationDetails);
+
+                            //If hr chat flag is also complete, set chatstatus = complete
+                            if(jcmCommunicationDetails.isHrChatCompleteFlag()) {
+                                log.info("Found complete status for hr chat: " + jcm.getEmail() + " ~ " + jcm.getId());
+                                jcm.setChatbotStatus(techChatbotRequestBean.getChatbotStatus());
+                            }
+                        }
+                        jobCandidateMappingRepository.save(jcm);
                     } catch (Exception e) {
                         log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
                     }
@@ -785,7 +816,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
-        if(requestBean.getChatbotStatus().equals("Complete")) {
+        if(requestBean.getChatbotStatus().equals(IConstant.CHATBOT_STATUS.Complete.name())) {
             jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         }
     }

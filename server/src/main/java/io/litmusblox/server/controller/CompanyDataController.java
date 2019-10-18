@@ -7,8 +7,13 @@ package io.litmusblox.server.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.CompanyAddress;
+import io.litmusblox.server.model.CompanyBu;
+import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
+import io.litmusblox.server.service.UserWorkspaceBean;
+import io.litmusblox.server.service.impl.LbUserDetailsService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +47,10 @@ public class CompanyDataController {
     @Autowired
     ICompanyService companyService;
 
+    @Autowired
+    LbUserDetailsService lbUserDetailsService;
+
+
     @GetMapping("/screeningQuestions")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
@@ -67,10 +76,12 @@ public class CompanyDataController {
     @PutMapping(value = "/update",consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')")
-    void updateCompany(@RequestParam("logo") MultipartFile logo,
-                       @RequestParam("company") String companyString) throws Exception {
+    Company updateCompany(
+            @RequestParam(value = "logo", required = false) MultipartFile logo,
+            @RequestParam("company") String companyString
+    ) throws Exception {
         Company company=new ObjectMapper().readValue(companyString, Company.class);
-        companyService.saveCompany(company, logo);
+        return companyService.saveCompany(company, logo);
     }
 
 
@@ -92,4 +103,47 @@ public class CompanyDataController {
         log.info("Complete block company request in " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
+    /**
+     * REST Api to return a list of users for a given company
+     * @param company the company name for which the list of users needs to be sent
+     * @return List of users
+     * @throws Exception
+     */
+    @GetMapping("/usersForCompany")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<UserWorkspaceBean> findUserList(@RequestParam String company) throws Exception {
+       //we already have a method in LbUserDetailsService.java which returns list of users for a compay with extra data like no. of jobs created. reusing that.
+       return lbUserDetailsService.fetchUsers(company);
+    }
+
+
+    /**
+     * REST Api to return a list of BUs for a given company
+     * @param company the company name for which the list of BUs needs to be found
+     * @return List of BUs
+     * @throws Exception
+     */
+    @GetMapping("/buForCompany")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<CompanyBu> findBuList(@RequestParam String company) throws Exception {
+        //TODO: Make a call to the service layer and return appropriate list
+        return companyService.getCompanyBuList(company);
+    }
+
+    /**
+     * REST Api to return a list of addresses for the company by address type
+     * @param company the company name for which the list of addresses needs to be found
+     * @param addressType the type of address, like job location, interview or both. The master data corresponding to one of these selections should be passed to the api call
+     * @return List of company addresses
+     * @throws Exception
+     */
+    @GetMapping("/addressByCompanyByType")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam String addressType) throws Exception {
+        MasterData masterDataAddressType = new ObjectMapper().readValue(addressType, MasterData.class);
+        return companyService.getCompanyAddressesByType(company, masterDataAddressType);
+    }
 }

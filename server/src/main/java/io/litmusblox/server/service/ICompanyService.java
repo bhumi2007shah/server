@@ -4,8 +4,7 @@
 
 package io.litmusblox.server.service;
 
-import io.litmusblox.server.model.Company;
-import io.litmusblox.server.model.User;
+import io.litmusblox.server.model.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -27,7 +26,7 @@ public interface ICompanyService {
      * @param logo    file containing the company logo
      * @throws Exception
      */
-    void saveCompany(Company company, MultipartFile logo) throws Exception;
+    Company saveCompany(Company company, MultipartFile logo) throws Exception;
 
     /**
      * Service method to block or unblock a company
@@ -46,6 +45,16 @@ public interface ICompanyService {
      * @throws Exception
      */
     List<CompanyWorspaceBean> getCompanyList() throws Exception;
+
+    /**
+     *
+     * @param companyName for which BUs to be fetched
+     * @return List of company BUs
+     * @throws Exception
+     */
+    List<CompanyBu> getCompanyBuList(String companyName) throws Exception;
+
+    List<CompanyAddress> getCompanyAddressesByType(String companyName, MasterData addressType) throws Exception;
 
     /**
      * Service method to save company history. Need a service method because needs to be called from LbUserDetailsService on company create

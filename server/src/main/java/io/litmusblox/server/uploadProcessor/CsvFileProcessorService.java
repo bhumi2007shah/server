@@ -10,6 +10,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.UploadResponseBean;
+import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -65,8 +66,8 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
             User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             for (CSVRecord record : parser.getRecords()) {
                 try {
-                    Candidate candidate = new Candidate(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim(),
-                            record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim(),
+                    Candidate candidate = new Candidate(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()),
+                            Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).trim(),
                             record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Mobile.getValue()).trim(),
                             loggedInUser.getCountryId().getCountryCode(),
@@ -77,8 +78,8 @@ public class CsvFileProcessorService implements IUploadFileProcessorService {
                 } catch (Exception pe) {
                     log.error("Error while processing row from CSV file: " + pe.getMessage());
                     Candidate candidate = new Candidate();
-                    candidate.setFirstName(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim());
-                    candidate.setLastName(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim());
+                    candidate.setFirstName(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.FirstName.getValue()).trim()));
+                    candidate.setLastName(Util.toSentenceCase(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.LastName.getValue()).trim()));
                     candidate.setEmail(record.get(IConstant.LITMUSBLOX_FILE_COLUMNS.Email.getValue()).trim());
                     if(ignoreMobile) {
                         candidateList.add(candidate);

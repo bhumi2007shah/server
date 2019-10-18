@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.CompanyBu;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -18,5 +19,11 @@ import java.util.List;
  */
 public interface CompanyBuRepository extends JpaRepository<CompanyBu, Long> {
 
+    //find all BUs of company
+    @Transactional
     List<CompanyBu> findByCompanyId(Long companyId);
+
+    //find one business unit by business unit and companyId
+    @Transactional
+    CompanyBu findByBusinessUnitIgnoreCaseAndCompanyId(String businessUnit, Long companyId);
 }

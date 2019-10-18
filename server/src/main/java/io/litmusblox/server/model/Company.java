@@ -16,6 +16,7 @@ import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author : Sumit
@@ -97,6 +98,21 @@ public class Company implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "companyId")
     private List<CompanyBu> companyBuList;
+
+    @Transient
+    private Set<String> newCompanyBu;
+
+    @Transient
+    private Set<String> deletedCompanyBu;
+
+    @Transient
+    private List<CompanyAddress> newCompanyAddress;
+
+    @Transient
+    private List<CompanyAddress> deletedCompanyAddress;
+
+    @Transient
+    private List<CompanyAddress> updatedCompanyAddress;
 
     public Company(@NotNull String companyName, @NotNull Boolean active, @NotNull Date createdOn, @NotNull Long createdBy) {
         this.companyName = companyName;

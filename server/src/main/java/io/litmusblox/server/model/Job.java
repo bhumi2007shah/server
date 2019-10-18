@@ -17,9 +17,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Entity class for Job table
@@ -96,7 +94,7 @@ public class Job implements Serializable {
     private MasterData function;
 
     @Column(name = "CURRENCY")
-    private String currency;
+    private String currency = "INR";
 
     @Column(name = "MIN_SALARY")
     private Long minSalary;
@@ -119,6 +117,14 @@ public class Job implements Serializable {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EXPERTISE")
     private MasterData expertise;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="HIRING_MANAGER")
+    private User hiringManager;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="RECRUITER")
+    private User recruiter;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -174,6 +180,9 @@ public class Job implements Serializable {
 
     @Transient
     private String mlErrorMessage;
+
+    @Transient
+    private Map<Long,Integer> candidateCountByStage = new HashMap<>();
 
     //Remove minExperience, maxExperience, experienceRange because add masterdata for experience
     //Also add jobdetail model in job

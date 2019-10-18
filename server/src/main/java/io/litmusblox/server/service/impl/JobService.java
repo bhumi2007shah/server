@@ -31,6 +31,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.groupingBy;
+
 /**
  * Implementation class for JobService
  *
@@ -119,6 +121,9 @@ public class JobService implements IJobService {
 
     @Transactional
     public Job addJob(Job job, String pageName) throws Exception {//add job with respective pageName
+
+        User recruiter = null;
+        User hiringManager = null;
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         log.info("Received request to add job for page " + pageName + " from user: " + loggedInUser.getEmail());
@@ -135,6 +140,20 @@ public class JobService implements IJobService {
             //get handle to existing job object
             oldJob = jobRepository.findById(job.getId()).orElse(null);
            // oldJob = tempJobObj.isPresent() ? tempJobObj.get() : null;
+        }
+
+        //set recruiter
+        if(null != job.getRecruiter() && null != job.getRecruiter().getId()){
+            recruiter =  userRepository.findById(job.getRecruiter().getId()).orElse(null);
+            if(null != recruiter)
+                job.setRecruiter(recruiter);
+        }
+
+        //set hiringManager
+        if(null != job.getHiringManager() && null != job.getHiringManager().getId()){
+            hiringManager =  userRepository.findById(job.getHiringManager().getId()).orElse(null);
+            if(null != hiringManager)
+                job.setHiringManager(hiringManager);
         }
 
         switch (IConstant.AddJobPages.valueOf(pageName)) {
@@ -196,7 +215,7 @@ public class JobService implements IJobService {
      * @param companyName name of the company for which jobs have to be found
      * @return List of jobs created by the logged in user
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public JobWorspaceResponseBean findAllJobsForUser(boolean archived, String companyName) throws Exception {
 
         log.info("Received request to request to find all jobs for user for archived = " + archived);
@@ -204,17 +223,18 @@ public class JobService implements IJobService {
 
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
+        String msg = loggedInUser.getEmail() + ", " + companyName + ": ";
 
         switch(loggedInUser.getRole()) {
             case IConstant.UserRole.Names.CLIENT_ADMIN:
-                log.info("Request from Client Admin, all jobs for the company will be returned");
+                log.info(msg + "Request from Client Admin, all jobs for the company will be returned");
                 jobsForCompany(responseBean, archived, loggedInUser.getCompany());
                 break;
             case IConstant.UserRole.Names.SUPER_ADMIN:
                 if (Util.isNull(companyName))
                     throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
-                log.info("Request from Super Admin for jobs of Company : " + companyName);
-                Company companyObjToUse = companyRepository.findByCompanyName(companyName);
+                log.info(msg + "Request from Super Admin for jobs of Company");
+                Company companyObjToUse = companyRepository.findByCompanyNameIgnoreCase(companyName);
                 if (null == companyObjToUse)
                     throw new ValidationException("Company not found : " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
                 jobsForCompany(responseBean, archived, companyObjToUse);
@@ -222,11 +242,12 @@ public class JobService implements IJobService {
             default:
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
         }
-        log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
+        log.info(msg + "Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
         return responseBean;
     }
 
     private void jobsForLoggedInUser(JobWorspaceResponseBean responseBean, boolean archived, User loggedInUser) {
+        long startTime = System.currentTimeMillis();
         if (archived) {
             responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNullOrderByCreatedOnDesc(loggedInUser));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
@@ -236,9 +257,12 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
+        getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
     private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, Company company) {
+        long startTime = System.currentTimeMillis();
         if (archived) {
             responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(company));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
@@ -247,6 +271,36 @@ public class JobService implements IJobService {
             responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(company));
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
+        }
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
+        getCandidateCountByStage(responseBean.getListOfJobs());
+    }
+
+    private void getCandidateCountByStage(List<Job> jobs) {
+        if(jobs != null & jobs.size() > 0) {
+            long startTime = System.currentTimeMillis();
+            //Converting list of jobs into map, so each job is available by key
+            Map<Long, Job> jobsMap = jobs.stream().collect(Collectors.toMap(Job::getId, Function.identity()));
+            log.info("Getting candidate count for " + jobs.size() + " jobs");
+            try {
+                List<Long> jobIds = new ArrayList<>();
+                jobIds.addAll(jobsMap.keySet());
+                //get counts by stage for ALL job ids in 1 db call
+                List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStageJobIds(jobIds);
+                //Format results in a map<jobId, resultset>
+                Map<Long, List<Object[]>> stageCountMapByJobId = stageCountList.stream().collect(groupingBy(obj -> ((Integer) obj[0]).longValue()));
+                log.info("Got stageCountByJobIds, row count: " + stageCountMapByJobId.size());
+                //Loop through map to assign count by stage for each job
+                stageCountMapByJobId.forEach((key, value) -> {
+                    Job job = jobsMap.get(key);
+                    value.stream().forEach(objArray -> {
+                        job.getCandidateCountByStage().put(((Integer) objArray[1]).longValue(), ((BigInteger) objArray[2]).intValue());
+                    });
+                });
+                log.info("Got candidate count by stage for " + jobs.size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 
@@ -334,7 +388,6 @@ public class JobService implements IJobService {
     }
 
     private void addJobOverview(Job job, Job oldJob, User loggedInUser) { //method for add job for Overview page
-
         //validate title
         if (job.getJobTitle().length() > IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
             job.setJobTitle(job.getJobTitle().substring(0, IConstant.TITLE_MAX_LENGTH));
@@ -343,10 +396,15 @@ public class JobService implements IJobService {
         if (null == userCompany) {
             throw new ValidationException("Cannot find company for logged in user", HttpStatus.EXPECTATION_FAILED);
         }
+
         job.setCompanyId(userCompany);
         String historyMsg = "Created";
 
         if (null != oldJob) {//only update existing job
+            if(null != job.getHiringManager())
+                oldJob.setHiringManager(job.getHiringManager());
+            if(null != job.getRecruiter())
+                oldJob.setRecruiter(job.getRecruiter());
             oldJob.setCompanyJobId(job.getCompanyJobId());
             oldJob.setJobTitle(job.getJobTitle());
             oldJob.setJobDescription(job.getJobDescription());

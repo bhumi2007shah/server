@@ -540,11 +540,117 @@ UPDATE master_data set value = 'Tourism (Tourism)' where value = 'Tourism';
 UPDATE master_data set value = 'Vocational-Training (Vocational Training)' where value = 'Vocational Training';
 INSERT into master_data(type, value) values ('education','Masters in Information Management (MIM)');
 
+UPDATE MASTER_DATA SET VALUE = '0 Days' WHERE VALUE = '0';
+UPDATE MASTER_DATA SET VALUE = '15 Days' WHERE VALUE = '15';
+UPDATE MASTER_DATA SET VALUE = '30 Days' WHERE VALUE = '30';
+UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE VALUE = '60';
+UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '45';
+UPDATE MASTER_DATA SET VALUE = '90 Days' WHERE VALUE = '90';
+
+ INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+('function','Accounting / Tax / Company Secretary / Audit'),
+('function','Agent'),
+('function','Airline / Reservations / Ticketing / Travel'),
+('function','Analytics & Business Intelligence'),
+('function','Anchoring / TV / Films / Production'),
+('function','Architects / Interior Design / Naval Arch'),
+
+('function','Art Director / Graphic / Web Designer'),
+('function','Banking / Insurance'),
+('function','Content / Editors / Journalists'),
+('function','Corporate Planning / Consulting / Strategy'),
+('function','Entrepreneur / Businessman / Outside Management Consultant'),
+('function','Export / Import'),
+('function','Fashion'),
+('function', 'Front Office Staff / Secretarial / Computer Operator'),
+('function','Hotels / Restaurant Management'),
+('function', 'HR / Admin / PM / IR / Training'),
+('function', 'ITES / BPO / Operations / Customer Service / Telecalling'),
+('function','Legal / Law'),
+('function','Medical Professional / Healthcare Practitioner / Technician'),
+('function','Mktg / Advtg / MR / Media Planning / PR / Corp. Comm'),
+('function','Packaging Development'),
+('function','Production / Service Engineering / Manufacturing / Maintenance'),
+('function','Project Management / Site Engineers'),
+('function','Purchase / SCM'),
+('function','R&D / Engineering Design'),
+('function','Sales / Business Development / Client Servicing'),
+('function','Security'),
+('function','Shipping'),
+('function','Software Development -'),
+('function','Software Development - Application Programming'),
+('function','Software Development - Client Server'),
+('function','Software Development - Database Administration'),
+('function','Software Development - e-commerce / Internet Technologies'),
+('function','Software Development - Embedded Technologies'),
+('function','Software Development - ERP / CRM'),
+('function','Software Development - Network Administration'),
+('function','Software Development - Others'),
+('function','Software Development - QA and Testing'),
+('function','Software Development - System Programming'),
+('function','Software Development - Telecom Software'),
+('function','Software Development - Systems / EDP / MIS'),
+('function','Teaching / Education / Language Specialist'),
+('function', 'Telecom / IT-Hardware / Tech. Staff / Support'),
+('function','Top Management'),
+('function','Any Other');
+
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ITES / BPO / Operations / Customer Service / Telecalling') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BPO');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'HR / Admin / PM / IR / Training') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Software Development -') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'HR / Admin / PM / IR / Training') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Office Administration');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales / Business Development / Client Servicing') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Sales');
+UPDATE JOB SET FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Production / Service Engineering / Manufacturing / Maintenance') WHERE FUNCTION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Manufacturing');
+
+DELETE FROM MASTER_DATA WHERE VALUE = 'BPO';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Human Resources (HR)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Information Technology (IT)';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Office Administration';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Sales';
+DELETE FROM MASTER_DATA WHERE VALUE = 'Manufacturing';
+
+--drop unique constraints of master_data for type and value
+UPDATE MASTER_DATA SET VALUE = '10 - 15 Years' WHERE VALUE = '20+ Years';
+UPDATE MASTER_DATA SET VALUE = '15 - 20 Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '10 - 15 Years');
+UPDATE MASTER_DATA SET VALUE = '20+ Years' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '15 - 20 Years');
+UPDATE MASTER_DATA SET VALUE = '45 Days' WHERE VALUE = '60 Days';
+UPDATE MASTER_DATA SET VALUE = '60 Days' WHERE ID = (SELECT MAX(ID) FROM MASTER_DATA WHERE VALUE = '45 Days')
+--add again unique constraints of master_data for type and value
+
+
 -- For ticket #182
 DELETE FROM JOB_CAPABILITY_STAR_RATING_MAPPING;
 
 ALTER TABLE JOB_CAPABILITY_STAR_RATING_MAPPING
 ADD COLUMN JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL;
+
+-- For ticket #173
+ALTER TABLE CV_PARSING_DETAILS
+ADD COLUMN CANDIDATE_ID INTEGER,
+ADD COLUMN RCHILLI_JSON_PROCESSED BOOL;
+-- For ticket #165
+alter table company_bu
+drop column updated_on, drop column updated_by;
+
+alter table company_address
+add column address_title varchar(100) not null unique default 'Default Address';
+
+
+--For ticket #166
+ALTER TABLE JOB DROP COLUMN CURRENCY;
+ALTER TABLE JOB ADD COLUMN CURRENCY VARCHAR(3) NOT NULL DEFAULT 'INR';
+
+ALTER TABLE JOB
+ADD COLUMN HIRING_MANAGER INTEGER REFERENCES USERS(ID),
+ADD COLUMN RECRUITER INTEGER REFERENCES USERS(ID);
+
+-- #180
+CREATE INDEX idx_jcm_stage ON job_candidate_mapping(stage);
+CREATE INDEX idx_jcm_jobid ON job_candidate_mapping(job_id);
+CREATE INDEX idx_job_createdby ON job(created_by);
+CREATE INDEX idx_job_datearchived ON job(date_archived);
+
 
 -- For ticket #147
 CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(

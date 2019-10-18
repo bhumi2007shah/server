@@ -18,5 +18,6 @@ import java.util.List;
  */
 public interface CompanyAddressRepository extends JpaRepository<CompanyAddress, Long> {
 
+    // find list of company address by company Id
     List<CompanyAddress> findByCompanyId(Long companyId);
 }

@@ -681,10 +681,6 @@ VALUES
 ( 'function','Anchoring / TV / Films / Production'),
 ( 'function','Architects / Interior Design / Naval Arch');
 
-
-
-
-
 insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)
 values
 (2,100,10,1),

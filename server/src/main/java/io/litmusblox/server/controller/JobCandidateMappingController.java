@@ -177,6 +177,7 @@ public class JobCandidateMappingController {
                 }},
                 new HashMap<String, List<String>>() {{
                     put("Job",Arrays.asList("id", "createdBy","createdOn","updatedBy","updatedOn","jobTitle","noOfPositions","jobDescription","mlDataAvailable","datePublished","status","scoringEngineJobAvailable","function","education","expertise","jobKeySkillsList","userEnteredKeySkill"));
+                    put("JobCapabilities", Arrays.asList("jobCapabilityStarRatingMappingList","jobId"));
                     put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage", "firstName", "lastName","email","mobile", "candidateSource"));
                     put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
                     put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));

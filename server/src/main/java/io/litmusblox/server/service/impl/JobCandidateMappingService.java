@@ -650,11 +650,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * Service method to fetch details of a single candidate for a job
      *
      * @param jobCandidateMappingId
-     * @return candidate object with required details
+     * @return jobCandidateMapping object with required details
      * @throws Exception
      */
     @Transactional
-    public Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception {
+    public JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findById(jobCandidateMappingId).orElse(null);
         if(null == objFromDb)
             throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -686,8 +686,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
-        returnObj.setDisplayName(objFromDb.getCandidateFirstName()+" "+objFromDb.getCandidateLastName());
-        return returnObj;
+        //returnObj.setDisplayName(objFromDb.getCandidateFirstName()+" "+objFromDb.getCandidateLastName());
+        return objFromDb;
     }
 
     /**
@@ -698,7 +698,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception {
+    public JobCandidateMapping getCandidateProfile(UUID profileSharingUuid) throws Exception {
         JcmProfileSharingDetails details = jcmProfileSharingDetailsRepository.findById(profileSharingUuid);
         if(null == details)
             throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);

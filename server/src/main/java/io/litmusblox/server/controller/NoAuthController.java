@@ -173,10 +173,11 @@ public class NoAuthController {
                     put("ScreeningQuestions", Arrays.asList("question"));
                 }},
                 new HashMap<String, List<String>>() {{
+                    put("Job",Arrays.asList("id", "createdBy","createdOn","updatedBy","updatedOn","jobTitle","noOfPositions","jobDescription","mlDataAvailable","datePublished","status","scoringEngineJobAvailable","function","education","expertise","jobKeySkillsList","userEnteredKeySkill"));
                     put("Candidate",Arrays.asList("id","createdBy","createdOn","updatedBy","updatedOn","uploadErrorMessage"));
                     put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company", "questionType"));
                     put("UserScreeningQuestion", Arrays.asList("createdOn","createdBy","updatedOn","userId","questionType"));
-                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy"));
+                    put("JobCandidateMapping", Arrays.asList("createdOn","createdBy","updatedOn","updatedBy","techResponseData"));
                     put("CandidateDetails", Arrays.asList("id","candidateId"));
                     put("CandidateEducationDetails", Arrays.asList("id","candidateId"));
                     put("CandidateLanguageProficiency", Arrays.asList("id","candidateId"));

@@ -55,6 +55,7 @@ public interface IConstant {
     String UPLOAD_FILE_TYPE="Upload file type";
     String LOCALHOST_LOOPBACK = "0:0:0:0:0:0:0:1";
     String YEAR_OF_PASSING = "yearOfPassing";
+    String DAYS = "Days";
 
 
     enum UserStatus {
@@ -157,7 +158,7 @@ public interface IConstant {
 
 
     enum MAX_FIELD_LENGTHS {
-        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), WORK_SUMMARY(255), GENDER(1), DEGREE(50), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
+        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), ONLINE_PROFILE_TYPE(20), WORK_SUMMARY(255), GENDER(1), DEGREE(50), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
 
         private int value;
 
@@ -196,5 +197,9 @@ public interface IConstant {
 
     enum COMPANY_PAGES{
         Company, BusinessUnit, UsersAndTeams, Addresses, ScreeningQuestions
+    }
+
+    enum CHATBOT_STATUS{
+        Complete
     }
 }

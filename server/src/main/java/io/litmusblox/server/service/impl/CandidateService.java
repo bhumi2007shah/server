@@ -248,6 +248,10 @@ public class CandidateService implements ICandidateService {
         candidateOnlineProfilesRepository.deleteByCandidateId(candidate.getId());
         //insert new ones
         candidateOnlineProfiles.forEach(obj -> {
+            if(!Util.isNull(obj.getProfileType()) && obj.getProfileType().length() > IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_TYPE.getValue()) {
+                obj.setProfileType(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_TYPE.name(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_TYPE.getValue(), obj.getProfileType()));
+            }
+
             if(!Util.isNull(obj.getUrl()) && obj.getUrl().length() > IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue()) {
                 obj.setUrl(Util.truncateField(candidate, IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.name(), IConstant.MAX_FIELD_LENGTHS.ONLINE_PROFILE_URL.getValue(), obj.getUrl()));
             }

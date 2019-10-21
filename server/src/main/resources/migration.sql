@@ -647,3 +647,6 @@ ADD COLUMN RECRUITER INTEGER REFERENCES USERS(ID);
 
 -- #180
 CREATE INDEX idx_jcm_stage ON job_candidate_mapping(stage);
+CREATE INDEX idx_jcm_jobid ON job_candidate_mapping(job_id);
+CREATE INDEX idx_job_createdby ON job(created_by);
+CREATE INDEX idx_job_datearchived ON job(date_archived);

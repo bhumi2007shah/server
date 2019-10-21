@@ -19,4 +19,6 @@ import java.util.List;
 public interface CvParsingDetailsRepository extends JpaRepository<CvParsingDetails, Long> {
 
     List<CvParsingDetails> findByRchilliJsonProcessed(boolean rchilliJsonProcessed);
+
+    List<CvParsingDetails> findByCvRatingApiFlagFalseAndParsingResponseTextNotNull();
 }

@@ -58,4 +58,11 @@ public class CvParsingDetails {
 
     @Column(name = "RCHILLI_JSON_PROCESSED")
     private Boolean rchilliJsonProcessed;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "JOB_CANDIDATE_MAPPING_ID")
+    private JobCandidateMapping jobCandidateMappingId;
+
+    @Column(name = "CV_RATING_API_FLAG")
+    private boolean cvRatingApiFlag = false;
 }

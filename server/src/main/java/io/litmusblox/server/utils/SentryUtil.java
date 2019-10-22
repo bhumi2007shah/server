@@ -20,10 +20,13 @@ import java.util.Map;
  */
 public class SentryUtil {
 
-    public static void logWithStaticAPI(String email, String message, Map<String, String> breadCrumb){
-
+    static {
         // You can also manually provide the DSN to the ``init`` method.
         Sentry.init(MasterDataBean.getInstance().getSentryDSN());
+    }
+    public static void logWithStaticAPI(String email, String message, Map<String, String> breadCrumb){
+
+       // Sentry.init(MasterDataBean.getInstance().getSentryDSN());
 
         Sentry.getContext().clear();//Clear context each time, so fresh data is sent
 

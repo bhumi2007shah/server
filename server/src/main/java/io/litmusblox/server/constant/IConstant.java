@@ -198,4 +198,8 @@ public interface IConstant {
     enum COMPANY_PAGES{
         Company, BusinessUnit, UsersAndTeams, Addresses, ScreeningQuestions
     }
+
+    enum CHATBOT_STATUS{
+        Complete
+    }
 }

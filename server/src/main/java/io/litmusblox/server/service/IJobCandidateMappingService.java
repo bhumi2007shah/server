@@ -116,7 +116,7 @@ public interface IJobCandidateMappingService {
      * @return candidate object with required details
      * @throws Exception
      */
-    Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception;
+    JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId) throws Exception;
 
     /**
      * Service method to fetch details of a single candidate for a job
@@ -125,7 +125,7 @@ public interface IJobCandidateMappingService {
      * @return candidate object with required details
      * @throws Exception
      */
-    Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception;
+    JobCandidateMapping getCandidateProfile(UUID profileSharingUuid) throws Exception;
 
     /**
      * Method to retrieve the job candidate mapping record based on the uuid

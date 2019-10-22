@@ -2,7 +2,9 @@
  * Copyright © Litmusblox 2019. All rights reserved.
  */
 
-package io.litmusblox.server.service.impl;
+package io.litmusblox.server.uploadProcessor.impl;
+
+import lombok.Data;
 
 import java.util.List;
 
@@ -13,11 +15,13 @@ import java.util.List;
  * Class Name : CvRatingResponse
  * Project Name : server
  */
+@Data
 public class CvRatingResponse {
     int overallRating;
     List<Keyword> keywords;
 }
 
+@Data
 class Keyword {
     List<SupportingKeyword> supportingKeywords;
     String name;
@@ -25,6 +29,7 @@ class Keyword {
     int occurrence;
 }
 
+@Data
 class SupportingKeyword {
     String name;
     int occurrence;

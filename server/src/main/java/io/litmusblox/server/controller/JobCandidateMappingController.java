@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.controller;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Candidate;
@@ -115,6 +116,7 @@ public class JobCandidateMappingController {
         long startTime = System.currentTimeMillis();
         ObjectMapper objectMapper=new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         Candidate candidate=objectMapper.readValue(candidateString, Candidate.class);
         UploadResponseBean responseBean = jobCandidateMappingService.uploadCandidateFromPlugin(candidate, jobId, candidateCv);
         log.info("Completed adding candidate from plugin in " + (System.currentTimeMillis()-startTime) + "ms.");

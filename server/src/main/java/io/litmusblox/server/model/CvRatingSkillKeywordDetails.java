@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
@@ -18,6 +19,7 @@ import javax.persistence.*;
 @Data
 @Entity
 @Table(name = "CV_RATING_SKILL_KEYWORD_DETAILS")
+@NoArgsConstructor
 public class CvRatingSkillKeywordDetails {
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -40,4 +42,11 @@ public class CvRatingSkillKeywordDetails {
 
     @Column(name = "OCCURRENCE")
     private int occurrence;
+
+    public CvRatingSkillKeywordDetails(String supportingKeywords, String skillName, int rating, int occurrence) {
+        this.supportingKeywords = supportingKeywords;
+        this.skillName = skillName;
+        this.rating = rating;
+        this.occurrence = occurrence;
+    }
 }

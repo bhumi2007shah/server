@@ -29,6 +29,6 @@ public interface JobKeySkillsRepository extends JpaRepository<JobKeySkills, Long
     @Transactional
     List<JobKeySkills> findByJobId(Long jobId);
 
-    @Query(value = "Select skill_name from skills_master where id in (select skillId from job_key_skills where job_id = :jobId and selected = 't')",nativeQuery = true)
+    @Query(value = "Select skill_name from skills_master where id in (select skill_id from job_key_skills where job_id = :jobId and selected = 't')",nativeQuery = true)
     List<String> findSkillNameByJobId (Long jobId);
 }

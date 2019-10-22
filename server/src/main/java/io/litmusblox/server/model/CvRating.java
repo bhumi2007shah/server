@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 @Data
 @Entity
 @Table(name="CV_RATING")
+@NoArgsConstructor
 public class CvRating {
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -36,4 +38,10 @@ public class CvRating {
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "cvRatingId", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails = new ArrayList<>();
+
+    public CvRating(Long jobCandidateMappingId, int overallRating, List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails) {
+        this.jobCandidateMappingId = jobCandidateMappingId;
+        this.overallRating = overallRating;
+        this.cvRatingSkillKeywordDetails = cvRatingSkillKeywordDetails;
+    }
 }

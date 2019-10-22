@@ -92,6 +92,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     JcmHistoryRepository jcmHistoryRepository;
 
+    @Resource
+    CvParsingDetailsRepository cvParsingDetailsRepository;
+
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
         return jobRepository.findById(jobId).get();
@@ -395,6 +398,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 responseBean.setCvErrorMsg(e.getMessage());
             }
 
+            //#189: save the text format of CV if available
+            if(responseBean.getSuccessfulCandidates().size() > 0) {
+                JobCandidateMapping jcm = jobCandidateMappingRepository.findByJobAndCandidate(getJob(jobId), responseBean.getSuccessfulCandidates().get(0));
+                cvParsingDetailsRepository.save(new CvParsingDetails(new Date(), candidate.getCandidateDetails().getTextCv(), responseBean.getSuccessfulCandidates().get(0).getId(),jcm));
+            }
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);

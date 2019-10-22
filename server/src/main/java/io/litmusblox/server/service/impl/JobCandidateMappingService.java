@@ -96,6 +96,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     CvParsingDetailsRepository cvParsingDetailsRepository;
 
+    @Resource
+    CvRatingRepository cvRatingRepository;
+
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
         return jobRepository.findById(jobId).get();
@@ -694,6 +697,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
+        objFromDb.setCvRating(cvRatingRepository.findByJobCandidateMappingId(objFromDb.getId()));
         return objFromDb;
     }
 

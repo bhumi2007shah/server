@@ -17,4 +17,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CvRatingRepository extends JpaRepository<CvRating, Long> {
+    CvRating findByJobCandidateMappingId(Long jobCandidateMappingId);
 }

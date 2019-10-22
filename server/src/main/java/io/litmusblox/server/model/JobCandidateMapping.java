@@ -143,6 +143,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @JsonProperty
     List<JcmProfileSharingDetails> notRespondedHiringManagers = new ArrayList<>();
 
+    @Transient
+    @JsonProperty
+    CvRating cvRating;
+
     public String getDisplayName() {
         return candidateFirstName + " " + candidateLastName;
     }

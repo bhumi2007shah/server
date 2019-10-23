@@ -452,15 +452,15 @@ public class CompanyService implements ICompanyService {
         List<CompanyAddress> bothAddresses = new ArrayList<>();
 
         //extract and collect addresses from company object.
-        addressTypes.entrySet().stream().forEach(addressTypeId->{
+        addressTypes.entrySet().stream().forEach(addressType->{
            company.getCompanyAddressList().stream().forEach(companyAddress->{
-               if(companyAddress.getAddressType().getId().equals(addressTypeId) && companyAddress.getAddressType().getValue().equals("Interview Location")){
+               if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Interview Location")){
                    interviewAddersses.add(companyAddress);
                }
-               else if(companyAddress.getAddressType().getId().equals(addressTypeId) && companyAddress.getAddressType().getValue().equals("Job Location")){
+               else if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Job Location")){
                    jobAddresses.add(companyAddress);
                }
-               else if(companyAddress.getAddressType().getId().equals(addressTypeId) && companyAddress.getAddressType().getValue().equals("Both")){
+               else if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Both")){
                    bothAddresses.add(companyAddress);
                }
            });

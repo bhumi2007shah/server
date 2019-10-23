@@ -99,7 +99,7 @@ public class LbUserDetailsService implements UserDetailsService {
 
         log.info("Completed processing login request in " + (System.currentTimeMillis() - startTime) +" ms.");
 
-        return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), userDetails));
+        return new LoginResponseBean(token, userDetails.getDisplayName(), userDetails.getCompany().getCompanyName(),jobCandidateMappingRepository.getUploadedCandidateCount(Date.from(LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant()), userDetails), userDetails.getCompany().getId());
     }
 
 
@@ -324,19 +324,15 @@ public class LbUserDetailsService implements UserDetailsService {
 
     /**
      * Service method to fetch a list of all users for a company
-     * @param companyName the company for which users need to be fetched
+     * @param companyId the company for which users need to be fetched
      * @return list of all users for the company
      * @throws Exception
      */
-    public List<UserWorkspaceBean> fetchUsers(String companyName) throws Exception {
+    public List<UserWorkspaceBean> fetchUsers(Long companyId) throws Exception {
         log.info("Received request to get list of users");
         long startTime = System.currentTimeMillis();
 
-        Company company = companyRepository.findByCompanyNameIgnoreCase(companyName);
-        if(null == company)
-            throw new ValidationException("Company not found: " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
-
-        List<User> userList = userRepository.findByCompanyId(company.getId());
+        List<User> userList = userRepository.findByCompanyId(companyId);
         List<UserWorkspaceBean> responseBeans = new ArrayList<>(userList.size());
         userList.forEach(user->{
             UserWorkspaceBean workspaceBean = new UserWorkspaceBean(user.getId(), user.getDisplayName(), user.getStatus());

@@ -184,6 +184,12 @@ public class Job implements Serializable {
     @Transient
     private Map<Long,Integer> candidateCountByStage = new HashMap<>();
 
+    @Transient
+    private List<String> roles;
+
+    @Transient
+    private String selectedRole;
+
     //Remove minExperience, maxExperience, experienceRange because add masterdata for experience
     //Also add jobdetail model in job
 }

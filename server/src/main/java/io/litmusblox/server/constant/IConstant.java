@@ -199,6 +199,19 @@ public interface IConstant {
         Company, BusinessUnit, UsersAndTeams, Addresses, ScreeningQuestions
     }
 
+    enum MlRolePredictionStatus {
+        NO_ERROR("no_Error"), JDC_JTM_ERROR("jdc_jtm_Error"), SUFF_ERROR("suff_Error");
+        private String value;
+
+        MlRolePredictionStatus(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
     enum CHATBOT_STATUS{
         Complete
     }

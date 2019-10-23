@@ -672,3 +672,7 @@ VALUES
 ('Hiring Team', 'hiringTeam', 6, 'F','Max'),
 ('Capabilities', 'capabilities', 7, 'T','Lite'),
 ('Preview', 'preview', 8, 'T','Lite');
+
+--For ticket #183
+INSERT INTO CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE)
+VALUES('maxCapabilities',10);

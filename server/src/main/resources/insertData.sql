@@ -142,7 +142,8 @@ insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('sendEmail',1),
 ('sendSms',1),
 ('maxCvFiles',20),
-('maxCapabilities',10);
+('maxCapabilities',10),
+('cvRatingTimeout', 30000);
 
 
  -- key skill master data
@@ -647,6 +648,17 @@ INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('ChatNotVisitedReminder1','Hi [[${commBean.receiverfirstname}]],%nHere is your link to create your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It''s required to submit completed profile to be considered for the job. The link is valid only for 48 hours. Click the link to begin. [[${commBean.chatlink}]] '),
 ('ChatNotVisitedReminder2','[[${commBean.receiverfirstname}]],%nJust a reminder to complete your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It will take just a few minutes to finish it.  It''s required that you finish the profile to be considered for the job.  This link will expire in 24 hours.%nClick the link to apply. [[${commBean.chatlink}]] ');
 
+INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
+VALUES
+('Overview', 'overview', 1, 'T','Lite'),
+('Expertise', 'expertise', 2, 'F','Lite'),
+('Job Detail', 'jobDetail', 3, 'F','Max'),
+('Screening Questions', 'screeningQuestions', 4, 'T','Lite'),
+('Key Skills', 'keySkills', 5, 'T','Lite'),
+('Hiring Team', 'hiringTeam', 6, 'F','Max'),
+('Capabilities', 'capabilities', 7, 'T','Lite'),
+('Preview', 'preview', 8, 'T','Lite');
+
 INSERT INTO MASTER_DATA (TYPE, VALUE, VALUE_TO_USE, COMMENTS)
 VALUES
  ( 'expertise','Beginner', 1, 'Candidate has 1-2 years of relevant work experience and works on given tasks on day to day basis. Exposure to job complexities is limited and needs support/guidance for complex tasks.'),
@@ -670,10 +682,6 @@ VALUES
 ( 'function','Analytics & Business Intelligence'),
 ( 'function','Anchoring / TV / Films / Production'),
 ( 'function','Architects / Interior Design / Naval Arch');
-
-
-
-
 
 insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)
 values

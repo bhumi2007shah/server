@@ -37,8 +37,6 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
 
-//import org.hibernate.Hibernate;
-
 /**
  * Implementation class for JobService
  *
@@ -188,9 +186,30 @@ public class JobService implements IJobService {
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
         }
 
+        populateDataForNextPage(job, pageName);
+
         log.info("Completed processing request to add job in " + (System.currentTimeMillis() - startTime) + "ms");
         return job;
     }
+
+    private void populateDataForNextPage(Job job, String pageName) throws Exception {
+        int currentPageIndex = MasterDataBean.getInstance().getJobPageNamesInOrder().indexOf(pageName);
+        if (currentPageIndex != -1) {
+            switch (IConstant.AddJobPages.valueOf(MasterDataBean.getInstance().getJobPageNamesInOrder().get(currentPageIndex+1))) {
+                case keySkills:
+                    //populate key skills for the job
+                    job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+                    break;
+                case capabilities:
+                    //populate the capabilities for the job
+                    job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 
     /**
      * Fetch details of currently logged in user and
@@ -701,7 +720,6 @@ public class JobService implements IJobService {
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
             if(newValue.getSelected()) {
-                //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
                 List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
                 if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
                     wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
@@ -712,8 +730,6 @@ public class JobService implements IJobService {
                         weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
                     }
                 }
-                //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);
-                //jobCapabilityStarRatingMappingRepository.saveAll(starRatingMappingList);
             }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());

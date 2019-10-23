@@ -59,7 +59,7 @@ public class RestClient {
      * @throws Exception
      */
     public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken) throws Exception {
-        return consumeRestApi(requestObj, apiUrl, requestType, authToken, null);
+        return consumeRestApi(requestObj, apiUrl, requestType, authToken, null, null);
     }
 
     /**
@@ -70,13 +70,18 @@ public class RestClient {
      * @param requestType GET / POST / PUT
      * @param authToken authorization information
      * @param queryParameters Map of query parameters if any
+     * @param customTimeout use this parameter when the rest client's connection should wait for a longer duration than the default value
      * @return
      * @throws Exception
      */
-    public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken, Optional<Map> queryParameters) throws Exception {
+    public String consumeRestApi(String requestObj, String apiUrl, HttpMethod requestType, String authToken, Optional<Map> queryParameters, Optional<Integer> customTimeout) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
         SimpleClientHttpRequestFactory requestFactory = (SimpleClientHttpRequestFactory)restTemplate.getRequestFactory();
-        requestFactory.setConnectTimeout(connectionTimeout);
+        if(null != customTimeout && customTimeout.isPresent())
+            requestFactory.setConnectTimeout(customTimeout.get().intValue());
+        else
+            requestFactory.setConnectTimeout(connectionTimeout);
+
         requestFactory.setReadTimeout(readTimeout);
 
         //log.info("Request object sent: " + requestObj);

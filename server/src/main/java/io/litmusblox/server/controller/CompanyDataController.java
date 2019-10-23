@@ -104,16 +104,16 @@ public class CompanyDataController {
 
     /**
      * REST Api to return a list of users for a given company
-     * @param company the company name for which the list of users needs to be sent
+     * @param companyId the company id for which the list of users needs to be sent
      * @return List of users
      * @throws Exception
      */
     @GetMapping("/usersForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<UserWorkspaceBean> findUserList(@RequestParam String company) throws Exception {
+    List<UserWorkspaceBean> findUserList(@RequestParam Long companyId) throws Exception {
        //we already have a method in LbUserDetailsService.java which returns list of users for a compay with extra data like no. of jobs created. reusing that.
-       return lbUserDetailsService.fetchUsers(company);
+       return lbUserDetailsService.fetchUsers(companyId);
     }
 
 
@@ -126,9 +126,9 @@ public class CompanyDataController {
     @GetMapping("/buForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<CompanyBu> findBuList(@RequestParam String company) throws Exception {
+    List<CompanyBu> findBuList(@RequestParam Long companyId) throws Exception {
         //call to the service layer that returns list of company BU
-        return companyService.getCompanyBuList(company);
+        return companyService.getCompanyBuList(companyId);
     }
 
     /**

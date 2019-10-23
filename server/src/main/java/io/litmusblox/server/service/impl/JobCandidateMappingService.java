@@ -93,6 +93,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     JcmHistoryRepository jcmHistoryRepository;
 
+    @Resource
+    CvParsingDetailsRepository cvParsingDetailsRepository;
+
+    @Resource
+    CvRatingRepository cvRatingRepository;
+
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
         return jobRepository.findById(jobId).get();
@@ -396,6 +402,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 responseBean.setCvErrorMsg(e.getMessage());
             }
 
+            //#189: save the text format of CV if available
+            if(responseBean.getSuccessfulCandidates().size() > 0) {
+                JobCandidateMapping jcm = jobCandidateMappingRepository.findByJobAndCandidate(getJob(jobId), responseBean.getSuccessfulCandidates().get(0));
+                cvParsingDetailsRepository.save(new CvParsingDetails(new Date(), candidate.getCandidateDetails().getTextCv(), responseBean.getSuccessfulCandidates().get(0).getId(),jcm));
+            }
         }
         else {//null candidate object
             log.error(IErrorMessages.INVALID_REQUEST_FROM_PLUGIN);
@@ -506,7 +517,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         queryParams.put("candidateId", jcm.getCandidate().getId());
                         queryParams.put("candidateUuid", jcm.getChatbotUuid());
                         log.info("Calling Scoring Engine api to add candidate to job");
-                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                        String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams), null);
                         log.info(scoringEngineResponse);
 
                         try {
@@ -686,6 +697,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
+        objFromDb.setCvRating(cvRatingRepository.findByJobCandidateMappingId(objFromDb.getId()));
         return objFromDb;
     }
 

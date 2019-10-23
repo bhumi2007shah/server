@@ -27,4 +27,5 @@ public class ConfigSettings {
     long maxUploadDataLimit;
     int mlCall;
     int maxCapabilities;
+    int cvRatingTimeout;
 }

@@ -23,4 +23,5 @@ public class LoginResponseBean {
     private String userName;
     private String company;
     private int candidatesProcessed;
+    private long companyId;
 }

@@ -7,6 +7,7 @@ package io.litmusblox.server.error;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.utils.SentryUtil;
 import lombok.extern.log4j.Log4j2;
+import org.hibernate.exception.DataException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
@@ -109,6 +110,15 @@ public class GlobalControllerExceptionHandler {
     public ApiErrorResponse handleUnexpectedRollback(UnexpectedRollbackException exception) {
         Map<String, String> breadCrumb = new HashMap<>();
         breadCrumb.put("ExceptionType","RollbackException");
+        SentryUtil.logWithStaticAPI(null, exception.getLocalizedMessage(), breadCrumb);
+        return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getLocalizedMessage());
+    }
+
+    @ExceptionHandler(value = { DataException.class })
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ApiErrorResponse handleDataException(DataException exception) {
+        Map<String, String> breadCrumb = new HashMap<>();
+        breadCrumb.put("ExceptionType","DataException");
         SentryUtil.logWithStaticAPI(null, exception.getLocalizedMessage(), breadCrumb);
         return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getLocalizedMessage());
     }

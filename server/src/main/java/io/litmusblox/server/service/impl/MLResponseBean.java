@@ -21,41 +21,42 @@ import java.util.List;
  */
 @Data
 public class MLResponseBean {
-    private List<Skills> skills;
-    private List<Capabilities> suggestedCapabilities;
-    private List<Capabilities> additionalCapabilities;
-    private String occuranceOfDistinctIndustry;
-    private List<Role> roles;
+    private TowerGeneration towerGeneration;
+    private RolePrediction rolePrediction;
 }
 
 @Data
 class Skills {
     private int id;
     private String name;
+    private int numberOfOccurrences;
 }
 
 @Data
 class Capabilities {
-    private int capabilityWeight;
-    private List<Keywords> keywords;
+    private int capCode;
     private String capability;
-    private int capScore;
-    private String percentage;
-    private String roleType;
-    private int id;
-}
-
-@Data
-class Keywords{
-    private String keySkill;
-    private int occurrence;
+    private double score;
+    private int capabilityWeight;
 }
 
 @Data
 class Role {
-    private String role;
+    private String roleName;
     private int score;
-    private String keywords;
-    private String percentage;
-    private int id;
+}
+
+@Data
+class TowerGeneration {
+    private List<Skills> skills;
+    private List<String> roles;
+    private List<Capabilities> suggestedCapabilities;
+    private List<Capabilities> additionalCapabilities;
+}
+
+@Data
+class RolePrediction {
+    private List<Role> jdRoles;
+    private List<Role> jtRoles;
+    private String status;
 }

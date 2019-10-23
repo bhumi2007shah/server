@@ -52,6 +52,7 @@ public class JobController {
                 put("CompanyScreeningQuestion", Arrays.asList("createdOn", "createdBy", "updatedOn", "updatedBy","company"));
                 put("UserScreeningQuestion", Arrays.asList("createdOn", "updatedOn","userId"));
                 put("JobScreeningQuestions", Arrays.asList("id","jobId","createdBy", "createdOn", "updatedOn","updatedBy"));
+                put("JobCapabilities", Arrays.asList("createdBy", "createdOn", "updatedOn","updatedBy"));
             }})
         );
     }
@@ -163,6 +164,7 @@ public class JobController {
                     put("ScreeningQuestions",new ArrayList<>(0));
                     put("CompanyScreeningQuestion",new ArrayList<>(0));
                     put("UserScreeningQuestion",new ArrayList<>(0));
+                    put("JobCapabilities",new ArrayList<>(0));
                 }}));
         //return jobService.getJobDetails(jobId);
     }

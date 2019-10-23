@@ -412,21 +412,21 @@ public class CompanyService implements ICompanyService {
     /**
      *
      * Service method to fetch a list of all BUs of a company
-     * @param companyName for which list to be fetched
+     * @param companyId for which list to be fetched
      * @return List of BUs
      * @throws Exception
      */
     @Override
-    public List<CompanyBu>getCompanyBuList(String companyName) throws Exception{
-        log.info("Received request to get list of BUs for company: "+companyName);
+    public List<CompanyBu>getCompanyBuList(Long companyId) throws Exception{
+        log.info("Received request to get list of BUs for companyId: "+companyId);
         long startTime = System.currentTimeMillis();
 
-        Company company = companyRepository.findByCompanyNameIgnoreCase(companyName);
+        Company company = companyRepository.findById(companyId).orElse(null);
 
         if(company==null)
-            throw new WebException("No company found with name: "+companyName, HttpStatus.UNPROCESSABLE_ENTITY );
+            throw new WebException("No company found with id: "+companyId, HttpStatus.UNPROCESSABLE_ENTITY );
 
-        log.info("Completed processing list of BUs for company: "+ companyName +" in " + (System.currentTimeMillis() - startTime) + "ms.");
+        log.info("Completed processing list of BUs for companyId: "+ companyId +" in " + (System.currentTimeMillis() - startTime) + "ms.");
         return company.getCompanyBuList();
     }
 

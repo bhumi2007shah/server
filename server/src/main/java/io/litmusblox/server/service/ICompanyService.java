@@ -48,11 +48,11 @@ public interface ICompanyService {
 
     /**
      *
-     * @param companyName for which BUs to be fetched
+     * @param companyId for which BUs to be fetched
      * @return List of company BUs
      * @throws Exception
      */
-    List<CompanyBu> getCompanyBuList(String companyName) throws Exception;
+    List<CompanyBu> getCompanyBuList(Long companyId) throws Exception;
 
     List<CompanyAddress> getCompanyAddressesByType(String companyName, MasterData addressType) throws Exception;
 

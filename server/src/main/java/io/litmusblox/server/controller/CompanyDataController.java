@@ -35,7 +35,7 @@ import java.util.List;
  * Class Name : CompanyDataController
  * Project Name : server
  */
-@CrossOrigin(allowedHeaders = "*")
+@CrossOrigin(origins = "*", methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.OPTIONS}, allowedHeaders = {"Content-Type", "Authorization","X-Requested-With", "accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"}, exposedHeaders = {"Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"})
 @RestController
 @RequestMapping("/api/company")
 @Log4j2
@@ -127,7 +127,7 @@ public class CompanyDataController {
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     List<CompanyBu> findBuList(@RequestParam String company) throws Exception {
-        //TODO: Make a call to the service layer and return appropriate list
+        //call to the service layer that returns list of company BU
         return companyService.getCompanyBuList(company);
     }
 

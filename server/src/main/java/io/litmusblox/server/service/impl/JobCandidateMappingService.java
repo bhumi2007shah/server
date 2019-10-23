@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
 import io.litmusblox.server.error.ValidationException;
@@ -367,6 +368,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             if (candidate.getCandidateCompanyDetails() != null && candidate.getCandidateCompanyDetails().size() >1) {
                 candidate.getCandidateCompanyDetails().stream().forEach(candidateCompanyDetails -> {
                     if(!Util.isNull(candidateCompanyDetails.getNoticePeriod()) && candidateCompanyDetails.getNoticePeriod().length() > 0) {
+                        candidateCompanyDetails.setNoticePeriod(candidateCompanyDetails.getNoticePeriod()+" "+IConstant.DAYS);
                         candidateCompanyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetails.getNoticePeriod()));
                         if (null == candidateCompanyDetails.getNoticePeriodInDb()) {
                             //value in request object is not available in db
@@ -505,6 +507,40 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         queryParams.put("candidateUuid", jcm.getChatbotUuid());
                         log.info("Calling Scoring Engine api to add candidate to job");
                         String scoringEngineResponse = RestClient.getInstance().consumeRestApi(null, scoringEngineBaseUrl + scoringEngineAddCandidateUrlSuffix, HttpMethod.PUT, null, Optional.of(queryParams));
+                        log.info(scoringEngineResponse);
+
+                        try {
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            TechChatbotRequestBean techChatbotRequestBean = objectMapper.readValue(scoringEngineResponse, TechChatbotRequestBean.class);
+                            jcm.setChatbotUpdatedOn(techChatbotRequestBean.getChatbotUpdatedOn());
+                            if (techChatbotRequestBean.getTechResponseJson() != null && !techChatbotRequestBean.getTechResponseJson().isEmpty()) {
+                                jcm.getTechResponseData().setTechResponse(techChatbotRequestBean.getTechResponseJson());
+                            }
+                            if (techChatbotRequestBean.getScore() > 0) {
+                                jcm.setScore(techChatbotRequestBean.getScore());
+                            }
+                            if (techChatbotRequestBean.getChatbotUpdatedOn() != null) {
+                                jcm.setChatbotUpdatedOn(techChatbotRequestBean.getChatbotUpdatedOn());
+                            }
+
+                            //Candidate has already completed the tech chatbot
+                            if (IConstant.CHATBOT_STATUS.Complete.name().equalsIgnoreCase(techChatbotRequestBean.getChatbotStatus())) {
+                                log.info("Found complete status from scoring engine: " + jcm.getEmail() + " ~ " + jcm.getId());
+                                //Set chatCompleteFlag = true
+                                JcmCommunicationDetails jcmCommunicationDetails = jcmCommunicationDetailsRepository.findByJcmId(jcm.getId());
+                                jcmCommunicationDetails.setChatCompleteFlag(true);
+                                jcmCommunicationDetailsRepository.save(jcmCommunicationDetails);
+
+                                //If hr chat flag is also complete, set chatstatus = complete
+                                if (jcmCommunicationDetails.isHrChatCompleteFlag()) {
+                                    log.info("Found complete status for hr chat: " + jcm.getEmail() + " ~ " + jcm.getId());
+                                    jcm.setChatbotStatus(techChatbotRequestBean.getChatbotStatus());
+                                }
+                            }
+                            jobCandidateMappingRepository.save(jcm);
+                        } catch (Exception e) {
+                            log.error("Error in response received from scoring engine " + e.getMessage());
+                        }
                     } catch (Exception e) {
                         log.error("Error while adding candidate on Scoring Engine: " + e.getMessage());
                     }
@@ -614,11 +650,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * Service method to fetch details of a single candidate for a job
      *
      * @param jobCandidateMappingId
-     * @return candidate object with required details
+     * @return jobCandidateMapping object with required details
      * @throws Exception
      */
     @Transactional
-    public Candidate getCandidateProfile(Long jobCandidateMappingId) throws Exception {
+    public JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findById(jobCandidateMappingId).orElse(null);
         if(null == objFromDb)
             throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -650,8 +686,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
-        returnObj.setDisplayName(objFromDb.getCandidateFirstName()+" "+objFromDb.getCandidateLastName());
-        return returnObj;
+        return objFromDb;
     }
 
     /**
@@ -662,7 +697,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @throws Exception
      */
     @Transactional(propagation = Propagation.REQUIRED)
-    public Candidate getCandidateProfile(UUID profileSharingUuid) throws Exception {
+    public JobCandidateMapping getCandidateProfile(UUID profileSharingUuid) throws Exception {
         JcmProfileSharingDetails details = jcmProfileSharingDetailsRepository.findById(profileSharingUuid);
         if(null == details)
             throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
@@ -784,7 +819,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
-        if(requestBean.getChatbotStatus().equals("Complete")) {
+        if(requestBean.getChatbotStatus().equals(IConstant.CHATBOT_STATUS.Complete.name())) {
             jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         }
     }

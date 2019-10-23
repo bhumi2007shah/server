@@ -32,7 +32,10 @@ import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
 
 //import org.hibernate.Hibernate;
 
@@ -205,16 +208,17 @@ public class JobService implements IJobService {
 
         User loggedInUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
+        String msg = loggedInUser.getEmail() + ", " + companyName + ": ";
 
         switch(loggedInUser.getRole()) {
             case IConstant.UserRole.Names.CLIENT_ADMIN:
-                log.info("Request from Client Admin, all jobs for the company will be returned");
+                log.info(msg + "Request from Client Admin, all jobs for the company will be returned");
                 jobsForCompany(responseBean, archived, loggedInUser.getCompany());
                 break;
             case IConstant.UserRole.Names.SUPER_ADMIN:
                 if (Util.isNull(companyName))
                     throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
-                log.info("Request from Super Admin for jobs of Company : " + companyName);
+                log.info(msg + "Request from Super Admin for jobs of Company");
                 Company companyObjToUse = companyRepository.findByCompanyNameIgnoreCase(companyName);
                 if (null == companyObjToUse)
                     throw new ValidationException("Company not found : " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -223,11 +227,12 @@ public class JobService implements IJobService {
             default:
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
         }
-        log.info("Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
+        log.info(msg + "Completed processing request to find all jobs for user in " + (System.currentTimeMillis() - startTime) + "ms");
         return responseBean;
     }
 
     private void jobsForLoggedInUser(JobWorspaceResponseBean responseBean, boolean archived, User loggedInUser) {
+        long startTime = System.currentTimeMillis();
         if (archived) {
             responseBean.setListOfJobs(jobRepository.findByCreatedByAndDateArchivedIsNotNullOrderByCreatedOnDesc(loggedInUser));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
@@ -237,11 +242,12 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCreatedByAndDateArchivedIsNotNull(loggedInUser)).intValue());
         }
-        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
     private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, Company company) {
+        long startTime = System.currentTimeMillis();
         if (archived) {
             responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(company));
             responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
@@ -251,24 +257,35 @@ public class JobService implements IJobService {
             responseBean.setOpenJobs(responseBean.getListOfJobs().size());
             responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
         }
-        log.info("Got " + responseBean.getListOfJobs().size() + " jobs");
+        log.info("Got " + responseBean.getListOfJobs().size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
     private void getCandidateCountByStage(List<Job> jobs) {
         if(jobs != null & jobs.size() > 0) {
+            long startTime = System.currentTimeMillis();
+            //Converting list of jobs into map, so each job is available by key
+            Map<Long, Job> jobsMap = jobs.stream().collect(Collectors.toMap(Job::getId, Function.identity()));
             log.info("Getting candidate count for " + jobs.size() + " jobs");
-            jobs.stream().forEach((job) -> {
-                try {
-                    List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(job.getId());
-
-                    stageCountList.stream().forEach(objArray -> {
-                        job.getCandidateCountByStage().put(((Integer) objArray[0]).longValue(), ((BigInteger) objArray[1]).intValue());
+            try {
+                List<Long> jobIds = new ArrayList<>();
+                jobIds.addAll(jobsMap.keySet());
+                //get counts by stage for ALL job ids in 1 db call
+                List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStageJobIds(jobIds);
+                //Format results in a map<jobId, resultset>
+                Map<Long, List<Object[]>> stageCountMapByJobId = stageCountList.stream().collect(groupingBy(obj -> ((Integer) obj[0]).longValue()));
+                log.info("Got stageCountByJobIds, row count: " + stageCountMapByJobId.size());
+                //Loop through map to assign count by stage for each job
+                stageCountMapByJobId.forEach((key, value) -> {
+                    Job job = jobsMap.get(key);
+                    value.stream().forEach(objArray -> {
+                        job.getCandidateCountByStage().put(((Integer) objArray[1]).longValue(), ((BigInteger) objArray[2]).intValue());
                     });
-                } catch (Exception e) {
-                    log.error(e.getMessage());
-                }
-            });
+                });
+                log.info("Got candidate count by stage for " + jobs.size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
+            } catch (Exception e) {
+                log.error(e.getMessage());
+            }
         }
     }
 

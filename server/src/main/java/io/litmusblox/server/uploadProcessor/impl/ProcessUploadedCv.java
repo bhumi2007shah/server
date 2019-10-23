@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.uploadProcessor.impl;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.model.CvParsingDetails;
@@ -11,6 +13,7 @@ import io.litmusblox.server.model.CvRating;
 import io.litmusblox.server.model.CvRatingSkillKeywordDetails;
 import io.litmusblox.server.repository.CvParsingDetailsRepository;
 import io.litmusblox.server.repository.CvRatingRepository;
+import io.litmusblox.server.repository.CvRatingSkillKeywordDetailsRepository;
 import io.litmusblox.server.repository.JobKeySkillsRepository;
 import io.litmusblox.server.service.impl.MlCvRatingRequestBean;
 import io.litmusblox.server.uploadProcessor.IProcessUploadedCV;
@@ -63,6 +66,9 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
     @Resource
     CvRatingRepository cvRatingRepository;
 
+    @Resource
+    CvRatingSkillKeywordDetailsRepository cvRatingSkillKeywordDetailsRepository;
+
     /**
      * Method that will be called by scheduler
      *
@@ -94,45 +100,57 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
         log.info("Found " + cvToRateList.size() + " records for CV rating process");
 
         cvToRateList.stream().forEach(cvToRate -> {
-            boolean processingError = false;
-            //call rest api with the text part of cv
-            log.info("Processing CV for job id: " + cvToRate.getJobCandidateMappingId().getJob().getId() + " and candidate id: " + cvToRate.getJobCandidateMappingId().getCandidate().getId());
-            List<String> jdKeySkills = jobKeySkillsRepository.findSkillNameByJobId(cvToRate.getJobCandidateMappingId().getJob().getId());
-            if (jdKeySkills.size() == 0)
-                log.error("Found no key skills for " + cvToRate.getJobCandidateMappingId().getJob().getId());
-            else {
-                try {
-                    callCvRatingApi(new MlCvRatingRequestBean(jdKeySkills, cvToRate.getParsingResponseText()), cvToRate.getId());
-                } catch (Exception e) {
-                    log.info("Error while performing CV rating operation " + e.getMessage());
-                    processingError = true;
+            try {
+                boolean processingError = false;
+                long cvRatingApiProcessingTime = -1;
+                //call rest api with the text part of cv
+                log.info("Processing CV for job id: " + cvToRate.getJobCandidateMappingId().getJob().getId() + " and candidate id: " + cvToRate.getJobCandidateMappingId().getCandidate().getId());
+                List<String> jdKeySkills = jobKeySkillsRepository.findSkillNameByJobId(cvToRate.getJobCandidateMappingId().getJob().getId());
+                if (jdKeySkills.size() == 0)
+                    log.error("Found no key skills for " + cvToRate.getJobCandidateMappingId().getJob().getId());
+                else {
+                    try {
+                        cvRatingApiProcessingTime = callCvRatingApi(new MlCvRatingRequestBean(jdKeySkills, cvToRate.getParsingResponseText()), cvToRate.getId());
+                    } catch (Exception e) {
+                        log.info("Error while performing CV rating operation " + e.getMessage());
+                        processingError = true;
+                    }
                 }
-            }
-            if(!processingError) {
-                cvToRate.setCvRatingApiFlag(true);
-                cvParsingDetailsRepository.save(cvToRate);
+                if (!processingError) {
+                    cvToRate.setCvRatingApiFlag(true);
+                    cvToRate.setCvRatingApiResponseTime(cvRatingApiProcessingTime);
+                    cvParsingDetailsRepository.save(cvToRate);
+                }
+            }catch(Exception ex) {
+                log.error("Error processing record to rate cv with jcmId: " + cvToRate.getJobCandidateMappingId().getId() + "\n" + ex.getMessage());
             }
         });
     }
 
-    private void callCvRatingApi(MlCvRatingRequestBean requestBean, Long jcmId) throws Exception {
+    private long callCvRatingApi(MlCvRatingRequestBean requestBean, Long jcmId) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+
+        long apiCallStartTime = System.currentTimeMillis();
         String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlCvRatingUrl, HttpMethod.POST, null);
         log.info("Response received from CV Rating Api: " + mlResponse);
+        long apiCallEndTime = System.currentTimeMillis();
 
         long startTime = System.currentTimeMillis();
-        CvRatingResponse responseBean = objectMapper.readValue(mlResponse, CvRatingResponse.class);
+        CvRatingResponseWrapper responseBean = objectMapper.readValue(mlResponse, CvRatingResponseWrapper.class);
 
-        cvRatingRepository.save(new CvRating(jcmId, responseBean.getOverallRating(), convertToCvRatingSkillKeywordDetails(responseBean.getKeywords())));
+        CvRating cvRatingObj = cvRatingRepository.save(new CvRating(jcmId, responseBean.getCvRatingResponse().getOverallRating()));
+        cvRatingSkillKeywordDetailsRepository.saveAll(convertToCvRatingSkillKeywordDetails(responseBean.getCvRatingResponse().getKeywords(), cvRatingObj.getId()));
 
         log.info("Time taken to process ml cv rating data data: " + (System.currentTimeMillis() - startTime) + "ms.");
-
+        return (apiCallEndTime - apiCallStartTime);
     }
 
-    private List<CvRatingSkillKeywordDetails> convertToCvRatingSkillKeywordDetails(List<Keyword> keywords) {
+    private List<CvRatingSkillKeywordDetails> convertToCvRatingSkillKeywordDetails(List<Keyword> keywords, Long cvRatingId) {
         List<CvRatingSkillKeywordDetails> targetList = new ArrayList<>(keywords.size());
         keywords.stream().forEach(keyword ->
-            targetList.add(new CvRatingSkillKeywordDetails(String.join(",",keyword.getSupportingKeywords().stream().map(supportingKeyword -> supportingKeyword.getName()).toArray(String[]::new)), keyword.getName(), keyword.getRating(), keyword.getOccurrence()))
+            targetList.add(new CvRatingSkillKeywordDetails(cvRatingId,String.join(",",keyword.getSupportingKeywords().stream().map(supportingKeyword -> supportingKeyword.getName()).toArray(String[]::new)), keyword.getName(), keyword.getRating(), keyword.getOccurrence()))
         );
         return targetList;
     }

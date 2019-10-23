@@ -12,11 +12,17 @@ import java.util.List;
  * @author : Shital Raval
  * Date : 18/10/19
  * Time : 10:13 AM
- * Class Name : CvRatingResponse
+ * Class Name : CvRatingResponseWrapper
  * Project Name : server
  */
+
 @Data
-public class CvRatingResponse {
+public class CvRatingResponseWrapper {
+    CvRatingResponse cvRatingResponse;
+}
+
+@Data
+class CvRatingResponse {
     int overallRating;
     List<Keyword> keywords;
 }

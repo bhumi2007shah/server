@@ -536,7 +536,8 @@ CREATE TABLE CV_PARSING_DETAILS (
     PARSING_RESPONSE text,
     ERROR_MESSAGE varchar(100),
     JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID),
-    CV_RATING_API_FLAG BOOL DEFAULT 'F' NOT NULL
+    CV_RATING_API_FLAG BOOL DEFAULT 'F' NOT NULL.
+    CV_RATING_API_RESPONSE_TIME smallint
 );
 
 ---------------------------------------------------------------------------------------------------------------------------

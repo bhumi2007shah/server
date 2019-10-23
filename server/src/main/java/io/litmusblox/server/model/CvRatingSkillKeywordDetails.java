@@ -43,7 +43,8 @@ public class CvRatingSkillKeywordDetails {
     @Column(name = "OCCURRENCE")
     private int occurrence;
 
-    public CvRatingSkillKeywordDetails(String supportingKeywords, String skillName, int rating, int occurrence) {
+    public CvRatingSkillKeywordDetails(Long cvRatingId, String supportingKeywords, String skillName, int rating, int occurrence) {
+        this.cvRatingId = cvRatingId;
         this.supportingKeywords = supportingKeywords;
         this.skillName = skillName;
         this.rating = rating;

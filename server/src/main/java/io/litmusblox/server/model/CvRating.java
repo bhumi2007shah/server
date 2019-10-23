@@ -39,9 +39,8 @@ public class CvRating {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "cvRatingId", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails = new ArrayList<>();
 
-    public CvRating(Long jobCandidateMappingId, int overallRating, List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails) {
+    public CvRating(Long jobCandidateMappingId, int overallRating) {
         this.jobCandidateMappingId = jobCandidateMappingId;
         this.overallRating = overallRating;
-        this.cvRatingSkillKeywordDetails = cvRatingSkillKeywordDetails;
     }
 }

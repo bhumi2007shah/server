@@ -534,7 +534,10 @@ CREATE TABLE CV_PARSING_DETAILS (
     PROCESSING_TIME smallint,
     PROCESSING_STATUS varchar(10),
     PARSING_RESPONSE text,
-    ERROR_MESSAGE varchar(100)
+    ERROR_MESSAGE varchar(100),
+    JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID),
+    CV_RATING_API_FLAG BOOL DEFAULT 'F' NOT NULL.
+    CV_RATING_API_RESPONSE_TIME smallint
 );
 
 ---------------------------------------------------------------------------------------------------------------------------
@@ -610,4 +613,34 @@ CREATE TABLE JOB_CAPABILITY_STAR_RATING_MAPPING (
    PERCENTAGE SMALLINT NOT NULL,
    STAR_RATING SMALLINT NOT NULL,
    CONSTRAINT UNIQUE_JOB_CAPABILITY_WEIGHTAGE_STAR_RATING UNIQUE(JOB_CAPABILITY_ID,WEIGHTAGE,STAR_RATING)
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(
+	ID serial PRIMARY KEY NOT NULL,
+	PAGE_NAME VARCHAR(25) NOT NULL,
+	PAGE_DISPLAY_NAME VARCHAR(25) NOT NULL,
+	PAGE_DISPLAY_ORDER SMALLINT NOT NULL,
+	DISPLAY_FLAG BOOL NOT NULL DEFAULT 'T',
+	SUBSCRIPTION_AVAILABILITY VARCHAR(5) NOT NULL DEFAULT 'LITE'
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CV_RATING (
+ID serial PRIMARY KEY NOT NULL,
+JOB_CANDIDATE_MAPPING_ID integer REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
+OVERALL_RATING smallint NOT NULL
+);
+
+---------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CV_RATING_SKILL_KEYWORD_DETAILS (
+ID serial PRIMARY KEY NOT NULL,
+CV_RATING_ID integer REFERENCES CV_RATING(ID) NOT NULL,
+SUPPORTING_KEYWORDS text NOT NULL,
+SKILL_NAME varchar(100) NOT NULL,
+RATING smallint NOT NULL,
+OCCURRENCE smallint NOT NULL
 );

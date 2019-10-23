@@ -5,6 +5,7 @@
 package io.litmusblox.server.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -19,6 +20,7 @@ import java.util.Date;
 @Data
 @Entity
 @Table(name = "CV_PARSING_DETAILS")
+@NoArgsConstructor
 public class CvParsingDetails {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -58,4 +60,21 @@ public class CvParsingDetails {
 
     @Column(name = "RCHILLI_JSON_PROCESSED")
     private Boolean rchilliJsonProcessed;
+
+    @OneToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "JOB_CANDIDATE_MAPPING_ID")
+    private JobCandidateMapping jobCandidateMappingId;
+
+    @Column(name = "CV_RATING_API_FLAG")
+    private boolean cvRatingApiFlag = false;
+
+    @Column(name="CV_RATING_API_RESPONSE_TIME")
+    private long cvRatingApiResponseTime;
+
+    public CvParsingDetails(Date processedOn, String parsingResponseText, Long candidateId, JobCandidateMapping jobCandidateMappingId) {
+        this.processedOn = processedOn;
+        this.parsingResponseText = parsingResponseText;
+        this.candidateId = candidateId;
+        this.jobCandidateMappingId = jobCandidateMappingId;
+    }
 }

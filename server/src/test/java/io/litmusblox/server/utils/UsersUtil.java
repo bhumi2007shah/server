@@ -1,14 +1,10 @@
 package io.litmusblox.server.utils;
 
-import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.User;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author : sameer

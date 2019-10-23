@@ -8,19 +8,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
- * POJO for ML request
- *
  * @author : Shital Raval
- * Date : 27/8/19
- * Time : 11:10 AM
- * Class Name : MLRequestBean
+ * Date : 18/10/19
+ * Time : 12:01 PM
+ * Class Name : MlCvRatingRequestBean
  * Project Name : server
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class MLRequestBean {
-    private String jobTitle;
-    private String jobDescription;
+@AllArgsConstructor
+public class MlCvRatingRequestBean {
+    List<String> jdKeyskills;
+    String resumeContent;
 }

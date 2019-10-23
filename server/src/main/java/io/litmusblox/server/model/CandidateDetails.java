@@ -105,6 +105,10 @@ public class CandidateDetails implements Serializable {
     @JsonProperty
     private String cvLocation;
 
+    @JsonProperty
+    @Transient
+    private String textCv;
+
     public CandidateDetails(Candidate candidateId, Double totalExperience) {
         this.candidateId = candidateId;
         this.totalExperience = totalExperience;

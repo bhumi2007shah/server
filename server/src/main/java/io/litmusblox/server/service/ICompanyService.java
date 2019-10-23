@@ -65,4 +65,11 @@ public interface ICompanyService {
      * @param loggedInUser
      */
     void saveCompanyHistory(Long companyId, String historyMsg, User loggedInUser);
+
+    /**
+     * Service method to get Company details by company id.
+     * @param companyId
+     * @return Company model
+     */
+    Company getCompanyDetail(Long companyId);
 }

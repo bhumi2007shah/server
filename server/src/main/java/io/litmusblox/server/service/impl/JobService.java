@@ -4,6 +4,8 @@
 
 package io.litmusblox.server.service.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
@@ -12,6 +14,7 @@ import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.repository.*;
 import io.litmusblox.server.service.*;
+import io.litmusblox.server.service.impl.ml.RolePredictionBean;
 import io.litmusblox.server.utils.RestClient;
 import io.litmusblox.server.utils.SentryUtil;
 import io.litmusblox.server.utils.Util;
@@ -33,8 +36,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.groupingBy;
-
-//import org.hibernate.Hibernate;
 
 /**
  * Implementation class for JobService
@@ -185,9 +186,30 @@ public class JobService implements IJobService {
                 throw new OperationNotSupportedException("Unknown page: " + pageName);
         }
 
+        populateDataForNextPage(job, pageName);
+
         log.info("Completed processing request to add job in " + (System.currentTimeMillis() - startTime) + "ms");
         return job;
     }
+
+    private void populateDataForNextPage(Job job, String pageName) throws Exception {
+        int currentPageIndex = MasterDataBean.getInstance().getJobPageNamesInOrder().indexOf(pageName);
+        if (currentPageIndex != -1) {
+            switch (IConstant.AddJobPages.valueOf(MasterDataBean.getInstance().getJobPageNamesInOrder().get(currentPageIndex+1))) {
+                case keySkills:
+                    //populate key skills for the job
+                    job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+                    break;
+                case capabilities:
+                    //populate the capabilities for the job
+                    job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
 
     /**
      * Fetch details of currently logged in user and
@@ -418,8 +440,17 @@ public class JobService implements IJobService {
         saveJobHistory(job.getId(), historyMsg + " job overview", loggedInUser);
         //make a call to ML api to obtain skills and capabilities
         if(MasterDataBean.getInstance().getConfigSettings().getMlCall()==1) {
+            if(null == job.getSelectedRole())
+                job.setSelectedRole(" ");
+
             try {
-                callMl(new MLRequestBean(job.getJobTitle(), job.getJobDescription()), job.getId());
+                RolePredictionBean rolePredictionBean = new RolePredictionBean();
+                RolePredictionBean.RolePrediction rolePrediction= new RolePredictionBean.RolePrediction();
+                rolePrediction.setJobTitle(job.getJobTitle());
+                rolePrediction.setJobDescription(job.getJobDescription());
+                rolePrediction.setRecruiterRoles(job.getSelectedRole());
+                rolePredictionBean.setRolePrediction(rolePrediction);
+                callMl(rolePredictionBean, job.getId(), job);
                 if(null == oldJob) {
                     job.setMlDataAvailable(true);
                     jobRepository.save(job);
@@ -438,23 +469,66 @@ public class JobService implements IJobService {
         job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
     }
 
-    private void callMl(MLRequestBean requestBean, long jobId) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
-        log.info("Response received: " + mlResponse);
-        long startTime = System.currentTimeMillis();
-        MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
-        int numUniqueSkills = handleSkillsFromML(responseBean.getSkills(), jobId);
-        if(numUniqueSkills != responseBean.getSkills().size()) {
-            log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
-            Map breadCrumb = new HashMap<String, String>();
+    private void callMl(RolePredictionBean requestBean, long jobId, Job job) throws Exception {
+        log.info("inside callMl method");
+        String mlResponse = null;
+        String mlRequest = null;
+        Map breadCrumb = new HashMap<String, String>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> roles = new ArrayList<>();
+
+            if(null != job.getSelectedRole()){
+                requestBean.getRolePrediction().setRecruiterRoles(job.getSelectedRole());
+            }
+            objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mlRequest = objectMapper.writeValueAsString(requestBean);
+            mlResponse = RestClient.getInstance().consumeRestApi(mlRequest, mlUrl, HttpMethod.POST,null);
+            log.info("Response received: " + mlResponse);
+            long startTime = System.currentTimeMillis();
+
+            //add data in breadCrumb
             breadCrumb.put("Job Id: ", String.valueOf(jobId));
-            SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
+            breadCrumb.put("Request", mlRequest);
+            breadCrumb.put("Response", mlResponse);
+
+            MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
+
+            //if ml status is jdc_jtm_Error
+            if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue())){
+                log.info("ml response status is jdc_jtm_Error for job id : "+jobId);
+                responseBean.getRolePrediction().getJdRoles().forEach(role -> {
+                    roles.add(role.getRoleName());
+                });
+                responseBean.getRolePrediction().getJtRoles().forEach(role -> {
+                    roles.add(role.getRoleName());
+                });
+                job.setRoles(roles);
+                return;
+            }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())){
+                //if ml status is suff_Error
+                log.info("ml response status is suff_Error for job id : "+jobId);
+                throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
+            }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.NO_ERROR.getValue())){
+                //if ml status is no_Error
+                log.info("ml response status is no_Error for job id : "+jobId);
+                int numUniqueSkills = handleSkillsFromML(responseBean.getTowerGeneration().getSkills(), jobId);
+                if(numUniqueSkills != responseBean.getTowerGeneration().getSkills().size()) {
+                    log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
+                    SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
+                }
+                Set<Integer> uniqueCapabilityIds = new HashSet<>();
+                handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
+                handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
+            }else{
+                SentryUtil.logWithStaticAPI(null, "ml status is different than expected", breadCrumb);
+            }
+            log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
+        }catch(Exception e) {
+            log.error("Error While processing ml call : "+e.getMessage());
+            SentryUtil.logWithStaticAPI(null, "Error While processing ml call : "+e.getMessage(), breadCrumb);
         }
-        Set<Integer> uniqueCapabilityIds = new HashSet<>();
-        handleCapabilitiesFromMl(responseBean.getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
-        handleCapabilitiesFromMl(responseBean.getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
-        log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
     /**
@@ -498,9 +572,9 @@ public class JobService implements IJobService {
         log.info("Size of capabilities list to process: " + capabilitiesList.size());
         List<JobCapabilities> jobCapabilitiesToSave = new ArrayList<>(capabilitiesList.size());
         capabilitiesList.forEach(capability->{
-            if (capability.getId() !=0 && !uniqueCapabilityIds.contains(capability.getId())) {
-                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getId()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
-                uniqueCapabilityIds.add(capability.getId());
+            if (capability.getCapCode() !=0 && !uniqueCapabilityIds.contains(capability.getCapCode())) {
+                jobCapabilitiesToSave.add(new JobCapabilities(Long.valueOf(capability.getCapCode()), capability.getCapability(), selectedByDefault, mapWeightage(capability.getCapabilityWeight()), new Date(), (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal(), jobId));
+                uniqueCapabilityIds.add(capability.getCapCode());
             }
         });
         jobCapabilitiesRepository.saveAll(jobCapabilitiesToSave);
@@ -634,6 +708,9 @@ public class JobService implements IJobService {
             throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
+        if(job.getJobCapabilityList().size()>MasterDataBean.getInstance().getConfigSettings().getMaxCapabilities())
+            throw new ValidationException("Job Capabilities more than max capabilities limit for jobId : "+ job.getId(), HttpStatus.BAD_REQUEST);
+
         //For each capability in the request, update the values for selected and importance_level
         Map<Long, JobCapabilities> newCapabilityValues = new HashMap();
         job.getJobCapabilityList().stream().forEach(jobCapability -> newCapabilityValues.put(jobCapability.getId(), jobCapability));
@@ -643,7 +720,6 @@ public class JobService implements IJobService {
         oldJob.getJobCapabilityList().forEach(oldCapability -> {
             JobCapabilities newValue = newCapabilityValues.get(oldCapability.getId());
             if(newValue.getSelected()) {
-                //List<JobCapabilityStarRatingMapping> starRatingMappingList = new ArrayList<>();
                 List<WeightageCutoffByCompanyMapping> wtgCompanyMappings = weightageCutoffByCompanyMappingRepository.findByCompanyIdAndWeightage(oldJob.getCompanyId().getId(), newValue.getWeightage());
                 if (null != wtgCompanyMappings && wtgCompanyMappings.size() > 0) {
                     wtgCompanyMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
@@ -654,8 +730,6 @@ public class JobService implements IJobService {
                         weightageCutoffMappings.stream().forEach(starRatingMapping -> oldCapability.getJobCapabilityStarRatingMappingList().add(new JobCapabilityStarRatingMapping(newValue.getId(), oldJob.getId(), newValue.getWeightage(), starRatingMapping.getCutoff(), starRatingMapping.getPercentage(), starRatingMapping.getStarRating())));
                     }
                 }
-                //oldCapability.setJobCapabilityStarRatingMappingList(starRatingMappingList);
-                //jobCapabilityStarRatingMappingRepository.saveAll(starRatingMappingList);
             }
             oldCapability.setWeightage(newValue.getWeightage());
             oldCapability.setSelected(newValue.getSelected());

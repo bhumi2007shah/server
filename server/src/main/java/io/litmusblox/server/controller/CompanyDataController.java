@@ -6,7 +6,10 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.constant.IConstant;
-import io.litmusblox.server.model.*;
+import io.litmusblox.server.model.Company;
+import io.litmusblox.server.model.CompanyAddress;
+import io.litmusblox.server.model.CompanyBu;
+import io.litmusblox.server.model.MasterData;
 import io.litmusblox.server.service.ICompanyService;
 import io.litmusblox.server.service.IScreeningQuestionService;
 import io.litmusblox.server.service.UserWorkspaceBean;
@@ -47,7 +50,6 @@ public class CompanyDataController {
 
     @Autowired
     LbUserDetailsService lbUserDetailsService;
-
 
     @GetMapping("/screeningQuestions")
     @ResponseBody
@@ -141,5 +143,18 @@ public class CompanyDataController {
     @ResponseStatus(HttpStatus.OK)
     Map<String, List<CompanyAddress>> findAddressByCompanyByType(@RequestParam String companyId) throws Exception {
         return companyService.getCompanyAddresses(Long.parseLong(companyId));
+    }
+
+    /**
+     * Rest api to get company details on basis of company id
+     * @param companyId
+     * @return
+     */
+    @GetMapping("/getCompany/{companyId}")
+    @ResponseBody
+    @ResponseStatus(HttpStatus.OK)
+    Company getCompanyDetail(@PathVariable ("companyId") Long companyId){
+        log.info("inside getCompanyDetail method");
+        return companyService.getCompanyDetail(companyId);
     }
 }

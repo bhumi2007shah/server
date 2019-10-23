@@ -4,7 +4,6 @@
 
 package io.litmusblox.server.repository;
 
-import io.litmusblox.server.model.Company;
 import io.litmusblox.server.model.CompanyBu;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;

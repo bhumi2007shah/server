@@ -18,4 +18,10 @@ public interface IProcessUploadedCV {
      * @throws Exception
      */
     void processCv();
+
+    /**
+     * Method that will be called by scheduler
+     * All eligible records of CV will be run against CV rating api and rated
+     */
+    void rateCv();
 }

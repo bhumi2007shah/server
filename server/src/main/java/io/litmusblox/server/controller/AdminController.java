@@ -52,7 +52,7 @@ public class AdminController {
 
     /**
      * REST Api to fetch a list of all users for a company
-     * @param companyName the company for which users need to be fetched
+     * @param companyId the company for which users need to be fetched
      * @return list of all users for the company
      * @throws Exception
      */
@@ -60,7 +60,7 @@ public class AdminController {
     @PreAuthorize(("hasRole('" + IConstant.UserRole.Names.SUPER_ADMIN + "') or hasRole('" + IConstant.UserRole.Names.CLIENT_ADMIN + "')"))
     @ResponseBody
     @ResponseStatus(value = HttpStatus.OK)
-    List<UserWorkspaceBean> fetchUsers(@RequestParam String companyName) throws Exception {
-        return userDetailsService.fetchUsers(companyName);
+    List<UserWorkspaceBean> fetchUsers(@RequestParam Long companyId) throws Exception {
+        return userDetailsService.fetchUsers(companyId);
     }
 }

@@ -708,7 +708,9 @@ public class JobService implements IJobService {
             throw new ValidationException("Job Capabilities " + IErrorMessages.EMPTY_AND_NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
 
-        if(job.getJobCapabilityList().size()>MasterDataBean.getInstance().getConfigSettings().getMaxCapabilities())
+        int selectedCapabilityCount = job.getJobCapabilityList().stream().filter(capability->capability.getSelected()).collect(Collectors.toList()).size();
+
+        if(selectedCapabilityCount>MasterDataBean.getInstance().getConfigSettings().getMaxCapabilities())
             throw new ValidationException("Job Capabilities more than max capabilities limit for jobId : "+ job.getId(), HttpStatus.BAD_REQUEST);
 
         //For each capability in the request, update the values for selected and importance_level

@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * REST controller for company specific data operations
@@ -111,39 +112,37 @@ public class CompanyDataController {
     @GetMapping("/usersForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<UserWorkspaceBean> findUserList(@RequestParam Long companyId) throws Exception {
+    List<UserWorkspaceBean> findUserList(@RequestParam String companyId) throws Exception {
        //we already have a method in LbUserDetailsService.java which returns list of users for a compay with extra data like no. of jobs created. reusing that.
-       return lbUserDetailsService.fetchUsers(companyId);
+       return lbUserDetailsService.fetchUsers(Long.parseLong(companyId));
     }
 
 
     /**
      * REST Api to return a list of BUs for a given company
-     * @param company the company name for which the list of BUs needs to be found
+     * @param companyId the company name for which the list of BUs needs to be found
      * @return List of BUs
      * @throws Exception
      */
     @GetMapping("/buForCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<CompanyBu> findBuList(@RequestParam Long companyId) throws Exception {
+    List<CompanyBu> findBuList(@RequestParam String companyId) throws Exception {
         //call to the service layer that returns list of company BU
-        return companyService.getCompanyBuList(companyId);
+        return companyService.getCompanyBuList(Long.parseLong(companyId));
     }
 
     /**
      * REST Api to return a list of addresses for the company by address type
-     * @param company the company name for which the list of addresses needs to be found
-     * @param addressType the type of address, like job location, interview or both. The master data corresponding to one of these selections should be passed to the api call
-     * @return List of company addresses
+     * @param companyId the company name for which the list of addresses needs to be found
+     * @return Map of address type and List of company addresses for that address type
      * @throws Exception
      */
-    @GetMapping("/addressByCompanyByType")
+    @GetMapping("/addressByCompany")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    List<CompanyAddress> findAddressByCompanyByType(@RequestParam String company, @RequestParam String addressType) throws Exception {
-        MasterData masterDataAddressType = new ObjectMapper().readValue(addressType, MasterData.class);
-        return companyService.getCompanyAddressesByType(company, masterDataAddressType);
+    Map<String, List<CompanyAddress>> findAddressByCompanyByType(@RequestParam String companyId) throws Exception {
+        return companyService.getCompanyAddresses(Long.parseLong(companyId));
     }
 
     /**

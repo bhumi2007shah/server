@@ -435,53 +435,64 @@ public class JobService implements IJobService {
 
     private void callMl(RolePredictionBean requestBean, long jobId, Job job) throws Exception {
         log.info("inside callMl method");
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<String> roles = new ArrayList<>();
+        String mlResponse = null;
+        String mlRequest = null;
+        Map breadCrumb = new HashMap<String, String>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<String> roles = new ArrayList<>();
 
-        if(null != job.getSelectedRole()){
-            requestBean.getRolePrediction().setRecruiterRoles(job.getSelectedRole());
-        }
-        objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        String mlResponse = RestClient.getInstance().consumeRestApi(objectMapper.writeValueAsString(requestBean), mlUrl, HttpMethod.POST,null);
-        log.info("Response received: " + mlResponse);
-        long startTime = System.currentTimeMillis();
-        MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
+            if(null != job.getSelectedRole()){
+                requestBean.getRolePrediction().setRecruiterRoles(job.getSelectedRole());
+            }
+            objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            mlRequest = objectMapper.writeValueAsString(requestBean);
+            mlResponse = RestClient.getInstance().consumeRestApi(mlRequest, mlUrl, HttpMethod.POST,null);
+            log.info("Response received: " + mlResponse);
+            long startTime = System.currentTimeMillis();
 
-        //if ml status is jdc_jtm_Error
-        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue())){
-            log.info("ml response status is jdc_jtm_Error for job id : "+jobId);
-            responseBean.getRolePrediction().getJdRoles().forEach(role -> {
-                roles.add(role.getRoleName());
-            });
-            responseBean.getRolePrediction().getJtRoles().forEach(role -> {
-                roles.add(role.getRoleName());
-            });
-            job.setRoles(roles);
-            return;
-        }
-
-        //if ml status is suff_Error
-        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())){
-            log.info("ml response status is suff_Error for job id : "+jobId);
-            throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
-        }
-
-        //if ml status is no_Error
-        if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.NO_ERROR.getValue())){
-            log.info("ml response status is no_Error for job id : "+jobId);
-            int numUniqueSkills = handleSkillsFromML(responseBean.getTowerGeneration().getSkills(), jobId);
-        if(numUniqueSkills != responseBean.getTowerGeneration().getSkills().size()) {
-            log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
-            Map breadCrumb = new HashMap<String, String>();
+            //add data in breadCrumb
             breadCrumb.put("Job Id: ", String.valueOf(jobId));
-            SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
+            breadCrumb.put("Request", mlRequest);
+            breadCrumb.put("Response", mlResponse);
+
+            MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
+
+            //if ml status is jdc_jtm_Error
+            if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue())){
+                log.info("ml response status is jdc_jtm_Error for job id : "+jobId);
+                responseBean.getRolePrediction().getJdRoles().forEach(role -> {
+                    roles.add(role.getRoleName());
+                });
+                responseBean.getRolePrediction().getJtRoles().forEach(role -> {
+                    roles.add(role.getRoleName());
+                });
+                job.setRoles(roles);
+                return;
+            }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())){
+                //if ml status is suff_Error
+                log.info("ml response status is suff_Error for job id : "+jobId);
+                throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
+            }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.NO_ERROR.getValue())){
+                //if ml status is no_Error
+                log.info("ml response status is no_Error for job id : "+jobId);
+                int numUniqueSkills = handleSkillsFromML(responseBean.getTowerGeneration().getSkills(), jobId);
+                if(numUniqueSkills != responseBean.getTowerGeneration().getSkills().size()) {
+                    log.error(IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse);
+                    SentryUtil.logWithStaticAPI(null, IErrorMessages.ML_DATA_DUPLICATE_SKILLS + mlResponse, breadCrumb);
+                }
+                Set<Integer> uniqueCapabilityIds = new HashSet<>();
+                handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
+                handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
+            }else{
+                SentryUtil.logWithStaticAPI(null, "ml status is different than expected", breadCrumb);
+            }
+            log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
+        }catch(Exception e) {
+            log.error("Error While processing ml call : "+e.getMessage());
+            SentryUtil.logWithStaticAPI(null, "Error While processing ml call : "+e.getMessage(), breadCrumb);
         }
-        Set<Integer> uniqueCapabilityIds = new HashSet<>();
-            handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
-            handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
-        }
-        log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
     }
 
     /**

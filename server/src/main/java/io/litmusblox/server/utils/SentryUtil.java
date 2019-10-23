@@ -36,9 +36,12 @@ public class SentryUtil {
         // Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
         //Breadcrumb is a map with key value pairs. Helps to send extra params to sentry to help troubleshoot
         if(breadCrumb != null && !breadCrumb.isEmpty()) {
-            Sentry.getContext().recordBreadcrumb(
-                    new BreadcrumbBuilder().setData(breadCrumb).build()
-            );
+            for (Map.Entry<String, String> entry : breadCrumb.entrySet()){
+                BreadcrumbBuilder breadcrumbBuilder = new BreadcrumbBuilder();
+                breadcrumbBuilder.setMessage(entry.getValue());
+                breadcrumbBuilder.setCategory(entry.getKey());
+                Sentry.getContext().recordBreadcrumb(breadcrumbBuilder.build());
+            }
         }
 
         if(null == email) {

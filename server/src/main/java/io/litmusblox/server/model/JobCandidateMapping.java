@@ -123,10 +123,6 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
     private CandidateTechResponseData techResponseData;
 
-    @OneToOne(cascade = {CascadeType.MERGE},fetch = FetchType.LAZY, mappedBy = "jobCandidateMappingId")
-    @JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
-    private CvParsingDetails cvParsingDetails;
-
     @Transient
     @JsonProperty
     private JcmCommunicationDetails jcmCommunicationDetails;

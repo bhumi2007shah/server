@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +23,7 @@ import java.util.List;
 @Entity
 @Table(name="CV_RATING")
 @NoArgsConstructor
+@JsonFilter("CvRating")
 public class CvRating {
     private static final long serialVersionUID = 6868521896546285046L;
 

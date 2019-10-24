@@ -466,9 +466,13 @@ public class CompanyService implements ICompanyService {
            });
         });
 
+        if(bothAddresses.size()>0){
+            interviewAddersses.addAll(bothAddresses);
+            jobAddresses.addAll(bothAddresses);
+        }
+
         companyAddressListByType.put("Interview Location", interviewAddersses);
         companyAddressListByType.put("Job Location", jobAddresses);
-        companyAddressListByType.put("Both", bothAddresses);
 
         log.info("Completed processing list of Addresses for companyId: "+ companyId +" in " + (System.currentTimeMillis() - startTime) + "ms.");
         return companyAddressListByType;

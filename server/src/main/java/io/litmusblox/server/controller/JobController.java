@@ -70,7 +70,7 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(
                 jobService.findAllJobsForUser((archived.isPresent() ? archived.get() : false),(companyName.isPresent()?companyName.get():null)),
                 (new HashMap<String, List<String>>(){{
-                    put("User",Arrays.asList("displayName"));
+                    put("User",Arrays.asList("id"));
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "expertise", "education", "noticePeriod", "function", "experienceRange", "userEnteredKeySkill", "updatedOn", "updatedBy"));

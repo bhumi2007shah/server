@@ -506,10 +506,6 @@ public class JobService implements IJobService {
                 });
                 job.setRoles(roles);
                 return;
-            }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())){
-                //if ml status is suff_Error
-                log.info("ml response status is suff_Error for job id : "+jobId);
-                throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
             }else if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.NO_ERROR.getValue())){
                 //if ml status is no_Error
                 log.info("ml response status is no_Error for job id : "+jobId);
@@ -522,9 +518,15 @@ public class JobService implements IJobService {
                 handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
                 handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
             }else{
-                SentryUtil.logWithStaticAPI(null, "ml status is different than expected", breadCrumb);
+                if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())) {
+                    //if ml status is suff_Error
+                    log.info("ml response status is suff_Error for job id : " + jobId);
+                    throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
+                }
+                SentryUtil.logWithStaticAPI(null, "ml status is different than expected or suff_error", breadCrumb);
             }
             log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
+
         }catch(Exception e) {
             log.error("Error While processing ml call : "+e.getMessage());
             SentryUtil.logWithStaticAPI(null, "Error While processing ml call : "+e.getMessage(), breadCrumb);

@@ -702,15 +702,17 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
         objFromDb.setCvRating(cvRatingRepository.findByJobCandidateMappingId(objFromDb.getId()));
-        List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails = cvRatingSkillKeywordDetailsRepository.findByCvRatingId(objFromDb.getCvRating().getId());
-        Map<Integer, List<CvRatingSkillKeywordDetails>> tempMap = cvRatingSkillKeywordDetails.stream().collect(Collectors.groupingBy(CvRatingSkillKeywordDetails::getRating));
-        Map<Integer, List<String>> cvSkillsByRating = new HashMap<>(tempMap.size());
-        tempMap.forEach((key, value) -> {
-            List<String> skills = new ArrayList<>(value.size());
-            value.stream().forEach(skillKeywordDetail -> skills.add(skillKeywordDetail.getSkillName()));
-            cvSkillsByRating.put(key, skills);
-        });
-        objFromDb.setCandidateSkillsByRating(cvSkillsByRating);
+        if(null != objFromDb.getCvRating()) {
+            List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails = cvRatingSkillKeywordDetailsRepository.findByCvRatingId(objFromDb.getCvRating().getId());
+            Map<Integer, List<CvRatingSkillKeywordDetails>> tempMap = cvRatingSkillKeywordDetails.stream().collect(Collectors.groupingBy(CvRatingSkillKeywordDetails::getRating));
+            Map<Integer, List<String>> cvSkillsByRating = new HashMap<>(tempMap.size());
+            tempMap.forEach((key, value) -> {
+                List<String> skills = new ArrayList<>(value.size());
+                value.stream().forEach(skillKeywordDetail -> skills.add(skillKeywordDetail.getSkillName()));
+                cvSkillsByRating.put(key, skills);
+            });
+            objFromDb.setCandidateSkillsByRating(cvSkillsByRating);
+        }
         return objFromDb;
     }
 

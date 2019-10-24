@@ -14,10 +14,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Model class for JOB_CANDIDATE_MAPPING table
@@ -142,6 +139,10 @@ public class JobCandidateMapping implements Serializable, Comparable {
     @Transient
     @JsonProperty
     CvRating cvRating;
+
+    @Transient
+    @JsonProperty
+    Map<Integer, List<String>> candidateSkillsByRating;
 
     public String getDisplayName() {
         return candidateFirstName + " " + candidateLastName;

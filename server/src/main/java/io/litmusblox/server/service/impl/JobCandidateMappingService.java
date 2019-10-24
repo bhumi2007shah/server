@@ -34,6 +34,7 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation class for methods exposed by IJobCandidateMappingService
@@ -98,6 +99,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     CvRatingRepository cvRatingRepository;
+
+    @Resource
+    CvRatingSkillKeywordDetailsRepository cvRatingSkillKeywordDetailsRepository;
 
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
@@ -698,6 +702,15 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         returnObj.setEmail(objFromDb.getEmail());
         returnObj.setMobile(objFromDb.getMobile());
         objFromDb.setCvRating(cvRatingRepository.findByJobCandidateMappingId(objFromDb.getId()));
+        List<CvRatingSkillKeywordDetails> cvRatingSkillKeywordDetails = cvRatingSkillKeywordDetailsRepository.findByCvRatingId(objFromDb.getCvRating().getId());
+        Map<Integer, List<CvRatingSkillKeywordDetails>> tempMap = cvRatingSkillKeywordDetails.stream().collect(Collectors.groupingBy(CvRatingSkillKeywordDetails::getRating));
+        Map<Integer, List<String>> cvSkillsByRating = new HashMap<>(tempMap.size());
+        tempMap.forEach((key, value) -> {
+            List<String> skills = new ArrayList<>(value.size());
+            value.stream().forEach(skillKeywordDetail -> skills.add(skillKeywordDetail.getSkillName()));
+            cvSkillsByRating.put(key, skills);
+        });
+        objFromDb.setCandidateSkillsByRating(cvSkillsByRating);
         return objFromDb;
     }
 

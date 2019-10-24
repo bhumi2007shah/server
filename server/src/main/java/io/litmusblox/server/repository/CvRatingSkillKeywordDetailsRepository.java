@@ -8,6 +8,8 @@ import io.litmusblox.server.model.CvRatingSkillKeywordDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author : Shital Raval
  * Date : 23/10/19
@@ -17,4 +19,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface CvRatingSkillKeywordDetailsRepository extends JpaRepository<CvRatingSkillKeywordDetails, Long> {
+    List<CvRatingSkillKeywordDetails> findByCvRatingId(Long id);
 }

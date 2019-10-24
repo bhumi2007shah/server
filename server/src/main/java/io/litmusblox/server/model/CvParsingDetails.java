@@ -69,7 +69,7 @@ public class CvParsingDetails {
     private boolean cvRatingApiFlag = false;
 
     @Column(name="CV_RATING_API_RESPONSE_TIME")
-    private long cvRatingApiResponseTime;
+    private Long cvRatingApiResponseTime;
 
     public CvParsingDetails(Date processedOn, String parsingResponseText, Long candidateId, JobCandidateMapping jobCandidateMappingId) {
         this.processedOn = processedOn;

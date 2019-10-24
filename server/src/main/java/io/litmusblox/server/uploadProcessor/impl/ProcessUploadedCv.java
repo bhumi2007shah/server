@@ -103,23 +103,28 @@ public class ProcessUploadedCv implements IProcessUploadedCV {
             try {
                 boolean processingError = false;
                 long cvRatingApiProcessingTime = -1;
-                //call rest api with the text part of cv
-                log.info("Processing CV for job id: " + cvToRate.getJobCandidateMappingId().getJob().getId() + " and candidate id: " + cvToRate.getJobCandidateMappingId().getCandidate().getId());
-                List<String> jdKeySkills = jobKeySkillsRepository.findSkillNameByJobId(cvToRate.getJobCandidateMappingId().getJob().getId());
-                if (jdKeySkills.size() == 0)
-                    log.error("Found no key skills for " + cvToRate.getJobCandidateMappingId().getJob().getId());
-                else {
-                    try {
-                        cvRatingApiProcessingTime = callCvRatingApi(new MlCvRatingRequestBean(jdKeySkills, cvToRate.getParsingResponseText()), cvToRate.getJobCandidateMappingId().getId());
-                    } catch (Exception e) {
-                        log.info("Error while performing CV rating operation " + e.getMessage());
-                        processingError = true;
+                if(null != cvToRate.getJobCandidateMappingId()) {
+                    //call rest api with the text part of cv
+                    log.info("Processing CV for job id: " + cvToRate.getJobCandidateMappingId().getJob().getId() + " and candidate id: " + cvToRate.getJobCandidateMappingId().getCandidate().getId());
+                    List<String> jdKeySkills = jobKeySkillsRepository.findSkillNameByJobId(cvToRate.getJobCandidateMappingId().getJob().getId());
+                    if (jdKeySkills.size() == 0)
+                        log.error("Found no key skills for " + cvToRate.getJobCandidateMappingId().getJob().getId());
+                    else {
+                        try {
+                            cvRatingApiProcessingTime = callCvRatingApi(new MlCvRatingRequestBean(jdKeySkills, cvToRate.getParsingResponseText()), cvToRate.getJobCandidateMappingId().getId());
+                        } catch (Exception e) {
+                            log.info("Error while performing CV rating operation " + e.getMessage());
+                            processingError = true;
+                        }
+                    }
+                    if (!processingError) {
+                        cvToRate.setCvRatingApiFlag(true);
+                        cvToRate.setCvRatingApiResponseTime(cvRatingApiProcessingTime);
+                        cvParsingDetailsRepository.save(cvToRate);
                     }
                 }
-                if (!processingError) {
-                    cvToRate.setCvRatingApiFlag(true);
-                    cvToRate.setCvRatingApiResponseTime(cvRatingApiProcessingTime);
-                    cvParsingDetailsRepository.save(cvToRate);
+                else {
+                    log.error("JCM Id not set for CV Parsing details record with id: " + cvToRate.getId());
                 }
             }catch(Exception ex) {
                 log.error("Error processing record to rate cv with jcmId: " + cvToRate.getJobCandidateMappingId().getId() + "\n" + ex.getMessage());

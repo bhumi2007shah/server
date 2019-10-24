@@ -518,12 +518,12 @@ public class JobService implements IJobService {
                 handleCapabilitiesFromMl(responseBean.getTowerGeneration().getSuggestedCapabilities(), jobId, true, uniqueCapabilityIds);
                 handleCapabilitiesFromMl(responseBean.getTowerGeneration().getAdditionalCapabilities(), jobId, false, uniqueCapabilityIds);
             }else{
+                SentryUtil.logWithStaticAPI(null, "ml status is different than expected or suff_error", breadCrumb);
                 if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.SUFF_ERROR.getValue())) {
                     //if ml status is suff_Error
                     log.info("ml response status is suff_Error for job id : " + jobId);
                     throw new ValidationException("There was no enough data in JD and JT for this job : " + jobId, HttpStatus.BAD_REQUEST);
                 }
-                SentryUtil.logWithStaticAPI(null, "ml status is different than expected or suff_error", breadCrumb);
             }
             log.info("Time taken to process ml data: " + (System.currentTimeMillis() - startTime) + "ms.");
 

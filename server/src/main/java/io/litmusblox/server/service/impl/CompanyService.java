@@ -30,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -431,28 +432,46 @@ public class CompanyService implements ICompanyService {
     }
 
     @Override
-    public List<CompanyAddress>getCompanyAddressesByType(String companyName, MasterData addressType)throws Exception{
-        log.info("Received request to get list of Addresses for company: "+companyName);
-        long startTime = System.currentTimeMillis();
-
-        //find company by company Name
-        Company company = companyRepository.findByCompanyNameIgnoreCase(companyName);
+    public Map<String, List<CompanyAddress>>getCompanyAddresses(Long companyId)throws Exception{
+        //find company by companyId
+        Company company = companyRepository.findById(companyId).orElse(null);
 
         //if company is null throw exception
         if(company==null)
-            throw new WebException("No company found with name: "+companyName, HttpStatus.UNPROCESSABLE_ENTITY );
+            throw new WebException("No company found with id: "+companyId, HttpStatus.UNPROCESSABLE_ENTITY );
 
-        //check if address type received belongs to addressType in master data, if not throw an Exception
-        if(MasterDataBean.getInstance().getAddressType().get(addressType.getId())==null)
-            throw new WebException("Invalid address type", HttpStatus.UNPROCESSABLE_ENTITY);
+        log.info("Received request to get list of Addresses for company: "+company.getCompanyName());
+        long startTime = System.currentTimeMillis();
 
-        //extract and collect addresses from company object whose addresstype id matches with the params addresstype id
-        List<CompanyAddress> companyAddresses = company.getCompanyAddressList().stream()
-                .filter(companyAddress -> {
-                    return companyAddress.getAddressType().getId().equals(addressType.getId());
-                }).collect(Collectors.toList());
-        log.info("Completed processing list of Addresses for company: "+ companyName +" in " + (System.currentTimeMillis() - startTime) + "ms.");
-        return companyAddresses;
+        Map<String, List<CompanyAddress>> companyAddressListByType = new HashMap<>();
+
+        Map<Long, String> addressTypes = MasterDataBean.getInstance().getAddressType();
+
+        List<CompanyAddress> interviewAddersses = new ArrayList<>();
+        List<CompanyAddress> jobAddresses = new ArrayList<>();
+        List<CompanyAddress> bothAddresses = new ArrayList<>();
+
+        //extract and collect addresses from company object.
+        addressTypes.entrySet().stream().forEach(addressType->{
+           company.getCompanyAddressList().stream().forEach(companyAddress->{
+               if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Interview Location")){
+                   interviewAddersses.add(companyAddress);
+               }
+               else if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Job Location")){
+                   jobAddresses.add(companyAddress);
+               }
+               else if(companyAddress.getAddressType().getId().equals(addressType.getKey()) && companyAddress.getAddressType().getValue().equals("Both")){
+                   bothAddresses.add(companyAddress);
+               }
+           });
+        });
+
+        companyAddressListByType.put("Interview Location", interviewAddersses);
+        companyAddressListByType.put("Job Location", jobAddresses);
+        companyAddressListByType.put("Both", bothAddresses);
+
+        log.info("Completed processing list of Addresses for companyId: "+ companyId +" in " + (System.currentTimeMillis() - startTime) + "ms.");
+        return companyAddressListByType;
     }
 
     @Transactional

@@ -186,7 +186,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateId = candidateFromDb.getId();
         if (null != candidateId) {
             candidateFromDb.setMobile(candidate.getMobile());
-            candidateFromDb.setEmail(candidate.getEmail());
+            candidateFromDb.setEmail(candidate.getEmail().toLowerCase());
             try {
                 //if telephone field has value, save to mobile history table
                 if (!Util.isNull(candidate.getTelephone()) && candidate.getTelephone().length() > 6) {

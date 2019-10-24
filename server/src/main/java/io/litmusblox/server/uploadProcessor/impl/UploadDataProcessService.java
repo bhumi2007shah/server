@@ -151,7 +151,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             if (!Util.validateEmail(cleanEmail)) {
                 throw new ValidationException(IErrorMessages.INVALID_EMAIL + " - " + candidate.getEmail(), HttpStatus.BAD_REQUEST);
             }
-            candidate.setEmail(cleanEmail);
+            candidate.setEmail(cleanEmail.toLowerCase());
         }
 
         StringBuffer msg = new  StringBuffer(candidate.getFirstName()).append(" ").append(candidate.getLastName()).append(" ~ ").append(candidate.getEmail());

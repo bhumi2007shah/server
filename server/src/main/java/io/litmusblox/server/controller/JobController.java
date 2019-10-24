@@ -97,6 +97,7 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(responseBean,
                 (new HashMap<String, List<String>>(){{
                     put("User",Arrays.asList("displayName"));
+                    put("CvRating", Arrays.asList("overallRating"));
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));

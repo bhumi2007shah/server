@@ -114,6 +114,9 @@ public class JobService implements IJobService {
     @Resource
     JobCapabilityStarRatingMappingRepository jobCapabilityStarRatingMappingRepository;
 
+    @Resource
+    CvRatingRepository cvRatingRepository;
+
     @Value("${mlApiUrl}")
     private String mlUrl;
 
@@ -351,6 +354,8 @@ public class JobService implements IJobService {
 
         jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
+            jcmFromDb.setCvRating(cvRatingRepository.findByJobCandidateMappingId(jcmFromDb.getId()));
+
             List<JcmProfileSharingDetails>jcmProfileSharingDetails = jcmProfileSharingDetailsRepository.findByJobCandidateMappingId(jcmFromDb.getId());
             jcmProfileSharingDetails.forEach(detail->{
                 detail.setHiringManagerName(detail.getProfileSharingMaster().getReceiverName());

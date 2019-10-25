@@ -198,6 +198,12 @@ public class JobService implements IJobService {
     private void populateDataForNextPage(Job job, String pageName) throws Exception {
         int currentPageIndex = MasterDataBean.getInstance().getJobPageNamesInOrder().indexOf(pageName);
         if (currentPageIndex != -1) {
+            if(MasterDataBean.getInstance().getJobPageNamesInOrder().get(currentPageIndex).equals(IConstant.AddJobPages.overview.name())) {
+                log.info("Setting jobkeyskills in job object");
+                job.setJobKeySkillsList(jobKeySkillsRepository.findByJobId(job.getId()));
+                log.info("Setting capabilities in job object");
+                job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
+            }
             switch (IConstant.AddJobPages.valueOf(MasterDataBean.getInstance().getJobPageNamesInOrder().get(currentPageIndex+1))) {
                 case keySkills:
                     //populate key skills for the job

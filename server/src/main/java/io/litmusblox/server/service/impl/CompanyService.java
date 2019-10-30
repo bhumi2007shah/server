@@ -257,6 +257,18 @@ public class CompanyService implements ICompanyService {
                     e.printStackTrace();
                 }
 
+                //check if company address title already exists
+                Boolean addressTitleExists = companyFromDb.getCompanyAddressList()
+                        .stream().filter(companyAddress -> {
+                            return companyAddress.getAddressTitle().equals(address.getAddressTitle());
+                        })
+                        .collect(Collectors.toList())
+                        .size() > 0;
+
+                if(addressTitleExists){
+                    errorResponse.put(address.getAddressTitle(), "Title Already exist");
+                }
+
                 //add error to errorResponse if no cordinates are found.
                 if(null==coordinates){
                     errorResponse.put(address.getAddressTitle(), "coordinates not found");
@@ -271,7 +283,7 @@ public class CompanyService implements ICompanyService {
                                             .size() > 0;
 
                     if (addressExists) {
-                        errorResponse.put(address.getAddressTitle(), "Already exist");
+                        errorResponse.put(address.getAddressTitle(), "Address already exist");
                     } else {
                         address.setCompanyId(company.getId());
                         address.setLatitude(coordinates.lat);

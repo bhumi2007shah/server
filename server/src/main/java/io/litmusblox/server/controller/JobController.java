@@ -5,6 +5,7 @@ package io.litmusblox.server.controller;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobCandidateMapping;
@@ -38,13 +39,14 @@ public class JobController {
     String addJob(@RequestBody String jobStr, @PathVariable ("pageName") String pageName) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         Job job = mapper.readValue(jobStr, Job.class);
 
         return Util.stripExtraInfoFromResponseBean(
             jobService.addJob(job, pageName),
             (new HashMap<String, List<String>>(){{
-                put("User",Arrays.asList("id"));
+                put("User",Arrays.asList("displayName","id"));
                 put("ScreeningQuestions", Arrays.asList("question","id"));
             }}),
             (new HashMap<String, List<String>>(){{
@@ -70,7 +72,7 @@ public class JobController {
         return Util.stripExtraInfoFromResponseBean(
                 jobService.findAllJobsForUser((archived.isPresent() ? archived.get() : false),(companyName.isPresent()?companyName.get():null)),
                 (new HashMap<String, List<String>>(){{
-                    put("User",Arrays.asList("id"));
+                    put("User",Arrays.asList("id", "displayName"));
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList","jobHiringTeamList","jobDetail", "expertise", "education", "noticePeriod", "function", "experienceRange", "userEnteredKeySkill", "updatedOn", "updatedBy"));

@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
-
+import org.apache.commons.lang.WordUtils;
 import java.io.*;
 import java.nio.file.FileSystem;
 import java.nio.file.*;
@@ -326,7 +326,7 @@ public class Util {
      * @return capitalized string i.e: if input is abc it will return Abc
      */
     public static String toSentenceCase(String value){
-        return value.substring(0,1).toUpperCase() + value.substring(1).toLowerCase();
+        return WordUtils.capitalize(value.toLowerCase());
     }
 
     public static Date getFormattedEndDate(String toDate, String dateFormat) {

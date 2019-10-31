@@ -721,3 +721,192 @@ ALTER TABLE CV_PARSING_DETAILS
 DROP COLUMN PARSED_TEXT,
 DROP COLUMN JOB_ID,
 DROP COLUMN EMAIL;
+
+--For ticket #185
+
+INSERT INTO MASTER_DATA (TYPE, VALUE)
+VALUES
+('education', 'Association of Chartered Certifed Accountants (ACCA)'),
+('education', 'Bachelor of Arts (BA)'),
+('education', 'Bachelors of Ayurveda Medicine & Surgery (BAMS)'),
+('education', 'Bachelor of Architecture (BArch)'),
+('education', 'Bachelor of Business Administration (BBA)'),
+('education', 'Bachelor of Business Management (BBM)'),
+('education', 'Bachelors of Business Studies (BBS)'),
+('education', 'Bachelor of Computer Applications (BCA)'),
+('education', 'Bachelor of Commerce in Computer Application (BCCA)'),
+('education', 'Business Capacity Management (BCM)'),
+('education', 'Bachelor of Commerce (BCom)'),
+('education', 'Bachelor of Computer Science (BCS)'),
+('education', 'Bachelor of Design (BDes)'),
+('education', 'Bachelor of Dental Science (BDS)'),
+('education', 'Bachelor of Engineering (BE)'),
+('education', 'Bachelor of Education (BEd)'),
+('education', 'Bachelor in Fine Arts (BFA)'),
+('education', 'Bachelor in Foreign Trade (BFT)'),
+('education', 'Bachelor of Hotel Management (BHM)'),
+('education', 'Bachelor of Homeopathic Medicine and Surgery (BHMS)'),
+('education', 'Bachelor of Information Technology (BIT)'),
+('education', 'Bachelor of Marketing Management (BMM)'),
+('education', 'Bachelor in Management Studies (BMS)'),
+('education', 'Bachelor of Pharmacy (BPharma)'),
+('education', 'Bachelor of Law (LLB)'),
+('education', 'Bachelor in Medicine and Bachelor of Surgery (MBBS)'),
+('education', 'Bachelor of Science (BSc)'),
+('education', 'Bachelor of  Science in Software Engineering (BSSE)'),
+('education', 'Bachelor of Technology. (BTech)'),
+('education', 'Bachelor of Veterinary Science (BVSc)'),
+('education', 'Chartered Accountant (CA)'),
+('education', 'Chartered Aaccountant Integrated Professional Competence Course (CA IPCC)'),
+('education', 'Chartered Financial Accountant  (CFA)'),
+('education', 'Commercial Art(Commercial Art)'),
+('education', 'Company Secretary (CS)'),
+('education', 'Cost and Works Accountancy (CWA)'),
+('education', 'Diploma (Diploma)'),
+('education', 'Diploma in Graphics & Animation (Diploma in Graphics & Animation)'),
+('education', 'Doctor Of Philosophy (PhD)' ),
+('education', 'Executive Post Graduate Diploma in Business Management (EMBA)'),
+('education', 'Fashion/Designing (Fashion/Designing)'),
+('education', 'Fellow of Chartered Accountants (FCA)'),
+('education', 'Graduate Diploma in Arts (GD Arts)'),
+('education', 'Graduate Diploma in Business Administration (GDBA)'),
+('education', 'Higher Secondary School Certificate (HSC)'),
+('education', 'Integrated PG Course (I PG Course)'),
+('education', 'Institute of Cost Accountants of India - Cost and Management Accountant (ICAI CMA)'),
+('education', 'Institute of Cost and Works Accountant of India (ICWA)'),
+('education', 'Journalism/Mass Comunication (Journalism/Mass Comm.)'),
+('education', 'Masters in Information Management (MIM)'),
+('education', 'Master of Law (LLM)'),
+('education', 'Master of Arts (MA)'),
+('education', 'Master of Architecture (MArch)'),
+('education', 'Master of Business Administration (MBA)'),
+('education', 'Master of Business Management (MBM)'),
+('education', 'Master of Computer Applications (MCA)'),
+('education', 'Master of Computer Management (MCM)'),
+('education', 'Master of Commerce (MCom)'),
+('education', 'Masters in Diploma in Business Administration (MDBA)'),
+('education', 'Management Development Programmes (MDP)'),
+('education', 'Masters of Engineering (ME)'),
+('education', 'Master of Education (MEd)'),
+('education', 'Mechanical, Electrical and Plumbing (MEP)'),
+('education', 'Masters in Fine Arts (MFA)'),
+('education', 'Masters of finance and control (MFC)'),
+('education', 'Master of Financial Management (MFM)'),
+('education', 'Masters in Management Studies (MMS)'),
+('education', 'Master of Pharmacy (MPharma)'),
+('education', 'Masters of Philosophy (MPhil)'),
+('education', 'Master of Personnel Management (MPM)'),
+('education', 'Masters of Science (MS)'),
+('education', 'Master of Science in Computer Science (MS CS)'),
+('education', 'Master of Computer Science (MCS)'),
+('education', 'Masters in Industrial Psychology (MS in Industrial Psychology)'),
+('education', 'Masters of Surgery / Doctor of Medicine (MS/MD)'),
+('education', 'Master of Science (MSc)'),
+('education', 'Master of Social Work (MSW)'),
+('education', 'Master of Technology (MTech)'),
+('education', 'Master of Veterinary Science (MVSc)'),
+('education', 'Post Graduate Diploma (PG Diploma)'),
+('education', 'Post Graduate Certification in Business Management (PGCBM)'),
+('education', 'Postgraduate Certificate in Human Resource Management (PGCHRM)'),
+('education', 'Post Graduate Diploma in Analytical Chemistry (PGDAC)'),
+('education', 'Post Graduate Diploma in Business Administration (PGDBA)'),
+('education', 'Post Graduate Diploma in Computer Application (PGDCA)'),
+('education', 'Post Graduate Degree in Management (PGDM)'),
+('education', 'Post Graduate Programme in Management (PGM)'),
+('education', 'Post Graduate Program (PGP)'),
+('education', 'Post Graduate Programme in Business Management (PGPBM)'),
+('education', 'Public Relations / Advertising (PR/Advertising)'),
+('education', 'Tourism (Tourism)'),
+('education', 'Vocational-Training (Vocational Training)'),
+('education', 'Other (Other)');
+
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Arts (BA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Company Secretary (CS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelors of Ayurveda Medicine & Surgery (BAMS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BAMS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Architecture (BArch)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BArch');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Business Administration (BBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Business Management (BBM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BBM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelors of Business Studies (BBS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BBS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Computer Applications (BCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Commerce in Computer Application (BCCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BCCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Business Capacity Management (BCM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BCM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Commerce (BCom)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BCom');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Computer Science (BCS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BCS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Design (BDes)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BDes');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Dental Science (BDS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BDS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Engineering (BE)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BE');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Education (BEd)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BEd');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor in Fine Arts (BFA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BFA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor in Foreign Trade (BFT)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BFT');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Hotel Management (BHM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BHM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Homeopathic Medicine and Surgery (BHMS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BHMS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Information Technology (BIT)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BIT');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Marketing Management (BMM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BMM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor in Management Studies (BMS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BMS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Pharmacy (BPharma)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BPharma');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Science (BSc)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BSc');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of  Science in Software Engineering (BSSE)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BSSE');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Technology. (BTech)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BTech');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Veterinary Science (BVSc)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'BVSc');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Commercial Art(Commercial Art)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Commercial Art');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Diploma (Diploma)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Diploma');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Diploma in Graphics & Animation (Diploma in Graphics & Animation)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Diploma in Graphics & Animation');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Fashion/Designing (Fashion/Designing)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Fashion/Designing');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Graduate Diploma in Business Administration (GDBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'GDBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Higher Secondary School Certificate (HSC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'HSC');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Law (LLB)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'LLB');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor in Medicine and Bachelor of Surgery (MBBS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MBBS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Vocational-Training (Vocational Training)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Vocational Training');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Association of Chartered Certifed Accountants (ACCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ACCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Accountant (CA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Aaccountant Integrated Professional Competence Course (CA IPCC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CA IPCC');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Financial Accountant  (CFA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CFA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Cost and Works Accountancy (CWA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CWA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Executive Post Graduate Diploma in Business Management (EMBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'EMBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Fellow of Chartered Accountants (FCA)'') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'FCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Integrated PG Course (I PG Course)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'I PG Course');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Institute of Cost Accountants of India - Cost and Management Accountant (ICAI CMA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ICAI/CMA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Institute of Cost and Works Accountant of India (ICWA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ICWA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Comunication (Journalism/Mass Comm.)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Comm');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Law (LLM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'LLM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Arts (MA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Architecture (MArch)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MArch');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Business Administration (MBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Degree in Management (PGDM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MBA/PGDM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Business Management (MBM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MBM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Computer Applications (MCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Computer Management (MCM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MCM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Commerce (MCom)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MCom');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master's in Diploma in Business Administration (MDBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MDBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Management Development Programmes (MDP)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MDP');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters of Engineering (ME)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ME');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Education (MEd)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MEd');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Mechanical, Electrical and Plumbing (MEP)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MEP');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters in Fine Arts (MFA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MFA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters of finance and control (MFC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MFC');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Financial Management (MFM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MFM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters in Management Studies (MMS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MMS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Pharmacy (MPharma)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MPharma');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters of Philosophy (MPhil)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MPhil');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Personnel Management (MPM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MPM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters of Science (MS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Science in Computer Science (MS CS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MS CS');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters in Industrial Psychology (MS in Industrial Psychology)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MS in Industrial Psychology');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Masters of Surgery / Doctor of Medicine (MS/MD)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MS/MD');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Science (MSc)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MSc');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Social Work (MSW)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MSW');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Technology (MTech)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MTech');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Veterinary Science (MVSc)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MVSc');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Other (Other)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Other');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma (PG Diploma)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PG Diploma');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Certification in Business Management (PGCBM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGCBM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Postgraduate Certificate in Human Resource Management (PGCHRM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGCHRM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Analytical Chemistry (PGDAC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDAC');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Business Administration (PGDBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDBA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Computer Application (PGDCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Programme in Management (PGM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Program (PGP)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGP');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Programme in Business Management (PGPBM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGPBM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Doctor Of Philosophy (PhD)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PHD');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Public Relations / Advertising (PR/Advertising)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PR/Advertising');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Tourism (Tourism)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Tourism');

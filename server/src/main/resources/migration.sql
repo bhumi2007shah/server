@@ -700,3 +700,24 @@ OCCURRENCE smallint NOT NULL
 
 INSERT INTO CONFIGURATION_SETTINGS (CONFIG_NAME, CONFIG_VALUE)
 VALUES ('cvRatingTimeout', 30000);
+
+--For ticket #204
+ALTER TABLE CV_PARSING_DETAILS
+ADD COLUMN PARSED_TEXT JSON,
+ADD COLUMN JOB_ID INTEGER,
+ADD COLUMN EMAIL varchar(50);
+--update parsing_response_json copy into parsedText column
+update cv_parsing_details cpd set parsed_text=(select CAST(parsing_response_json as json) from cv_parsing_details
+where id=cpd.id and parsing_response_json is not null);
+--Update email
+update cv_parsing_details cpd set email=(select parsed_text ->> 'Email' as email from cv_parsing_details where id=cpd.id and parsed_text is not null);
+--update jobId
+update cv_parsing_details cpd set job_id = (select CAST(SPLIT_PART(cv_file_name, '_', 2) as Integer) from cv_parsing_details where id=cpd.id);
+--update jcmId
+update cv_parsing_details set job_candidate_mapping_id = jcm.id from job_candidate_mapping jcm where cv_parsing_details.job_id = jcm.job_id
+and cv_parsing_details.email = jcm.email and cv_parsing_details.job_candidate_mapping_id is null and cv_parsing_details.email is not null;
+--Drop supportive columns from cv_parsing_details table
+ALTER TABLE CV_PARSING_DETAILS
+DROP COLUMN PARSED_TEXT,
+DROP COLUMN JOB_ID,
+DROP COLUMN EMAIL;

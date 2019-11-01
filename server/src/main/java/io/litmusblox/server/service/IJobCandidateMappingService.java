@@ -10,6 +10,7 @@ import io.litmusblox.server.model.JobScreeningQuestions;
 import io.litmusblox.server.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -116,7 +117,7 @@ public interface IJobCandidateMappingService {
      * @return candidate object with required details
      * @throws Exception
      */
-    JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId) throws Exception;
+    JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId, Date hiringManagerInterestDate) throws Exception;
 
     /**
      * Service method to fetch details of a single candidate for a job

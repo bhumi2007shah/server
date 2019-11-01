@@ -669,7 +669,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
      * @throws Exception
      */
     @Transactional
-    public JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId) throws Exception {
+    public JobCandidateMapping getCandidateProfile(Long jobCandidateMappingId, Date hiringManagerInterestDate) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findById(jobCandidateMappingId).orElse(null);
         if(null == objFromDb)
             throw new ValidationException("No job candidate mapping found for id: " + jobCandidateMappingId, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -713,6 +713,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             });
             objFromDb.setCandidateSkillsByRating(cvSkillsByRating);
         }
+
+        if(null != hiringManagerInterestDate)
+            objFromDb.setHiringManagerInterestDate(hiringManagerInterestDate);
+
         return objFromDb;
     }
 
@@ -729,7 +733,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if(null == details)
             throw new WebException("Profile not found", HttpStatus.UNPROCESSABLE_ENTITY);
 
-        return getCandidateProfile(details.getJobCandidateMappingId());
+        return getCandidateProfile(details.getJobCandidateMappingId(), details.getHiringManagerInterestDate());
     }
 
     /**

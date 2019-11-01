@@ -4,23 +4,18 @@
 
 package io.litmusblox.server.controller;
 
-import io.litmusblox.server.model.Country;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
 import lombok.NoArgsConstructor;
-import org.junit.Ignore;
+import lombok.extern.log4j.Log4j2;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,48 +28,36 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Class Name : MasterDataControllerTest
  * Project Name : server
  */
-@Ignore
+@ActiveProfiles("test")
 @NoArgsConstructor
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = MasterDataController.class, secure = false)
+@SpringBootTest
+@Log4j2
 class MasterDataControllerTest {
-
     @Autowired
-    private MockMvc mockMvc;
+    IMasterDataService masterDataService;
 
-    @MockBean
-    private IMasterDataService masterDataService;
-
-    @org.junit.jupiter.api.BeforeEach
-    void setUp() {
-
-        List<Country> mockList = new ArrayList<>();
-
-        //add a list of countries
-        Country mockCountry1 = Mockito.mock(Country.class);
-        mockList.add(mockCountry1);
-        Country mockCountry2 = Mockito.mock(Country.class);
-        mockList.add(mockCountry2);
-
-        MasterDataBean.getInstance().getCountryList().addAll(mockList);
-
-    }
-
-    @org.junit.jupiter.api.AfterEach
-    void tearDown() {
-    }
-
-    @org.junit.jupiter.api.Test
-    void reloadMasterData() {
+    void setup() {
+        try {
+            if (!MasterDataBean.getInstance().isLoaded()) {
+                masterDataService.loadStaticMasterData();
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            log.fatal("Failed to load default Configuration.");
+        }
     }
 
     @org.junit.jupiter.api.Test
     void fetchForItems() {
+        setup();
         try {
-            MasterDataResponse responseObj = masterDataService.fetchForItems(Arrays.asList(new String[]{"Countries"}));
-            assertThat(responseObj != null);
-            assertThat(responseObj.getCountries() != null);
-            assertThat(responseObj.getCountries().size() == 2);
+            MasterDataResponse responseObj = masterDataService.fetchForItems(Arrays.asList(new String[]{"countries"}));
+            assertThat(responseObj != null).isTrue();
+            assertThat(responseObj.getCountries() != null).isTrue();
+            assertThat(responseObj.getCountries().size() > 0).isTrue();
         } catch (Exception e) {
 
         }

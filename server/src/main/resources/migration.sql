@@ -726,7 +726,7 @@ DROP COLUMN EMAIL;
 
 INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES
-('education', 'Association of Chartered Certifed Accountants (ACCA)'),
+('education', 'Association of Chartered Certified Accountants (ACCA)'),
 ('education', 'Bachelor of Arts (BA)'),
 ('education', 'Bachelors of Ayurveda Medicine & Surgery (BAMS)'),
 ('education', 'Bachelor of Architecture (BArch)'),
@@ -757,7 +757,7 @@ VALUES
 ('education', 'Bachelor of Technology. (BTech)'),
 ('education', 'Bachelor of Veterinary Science (BVSc)'),
 ('education', 'Chartered Accountant (CA)'),
-('education', 'Chartered Aaccountant Integrated Professional Competence Course (CA IPCC)'),
+('education', 'Chartered Accountant Integrated Professional Competence Course (CA IPCC)'),
 ('education', 'Chartered Financial Accountant  (CFA)'),
 ('education', 'Commercial Art(Commercial Art)'),
 ('education', 'Company Secretary (CS)'),
@@ -774,8 +774,10 @@ VALUES
 ('education', 'Integrated PG Course (I PG Course)'),
 ('education', 'Institute of Cost Accountants of India - Cost and Management Accountant (ICAI CMA)'),
 ('education', 'Institute of Cost and Works Accountant of India (ICWA)'),
-('education', 'Journalism/Mass Comunication (Journalism/Mass Comm.)'),
+('education', 'Journalism/Mass Communication (Journalism/Mass Comm.)'),
+('education', 'Management Development Programmes (MDP)'),
 ('education', 'Masters in Information Management (MIM)'),
+('education', 'Masters in Diploma in Business Administration (MDBA)'),
 ('education', 'Master of Law (LLM)'),
 ('education', 'Master of Arts (MA)'),
 ('education', 'Master of Architecture (MArch)'),
@@ -784,11 +786,8 @@ VALUES
 ('education', 'Master of Computer Applications (MCA)'),
 ('education', 'Master of Computer Management (MCM)'),
 ('education', 'Master of Commerce (MCom)'),
-('education', 'Masters in Diploma in Business Administration (MDBA)'),
-('education', 'Management Development Programmes (MDP)'),
 ('education', 'Masters of Engineering (ME)'),
 ('education', 'Master of Education (MEd)'),
-('education', 'Mechanical, Electrical and Plumbing (MEP)'),
 ('education', 'Masters in Fine Arts (MFA)'),
 ('education', 'Masters of finance and control (MFC)'),
 ('education', 'Master of Financial Management (MFM)'),
@@ -805,9 +804,10 @@ VALUES
 ('education', 'Master of Social Work (MSW)'),
 ('education', 'Master of Technology (MTech)'),
 ('education', 'Master of Veterinary Science (MVSc)'),
+('education', 'Mechanical, Electrical and Plumbing (MEP)'),
 ('education', 'Post Graduate Diploma (PG Diploma)'),
 ('education', 'Post Graduate Certification in Business Management (PGCBM)'),
-('education', 'Postgraduate Certificate in Human Resource Management (PGCHRM)'),
+('education', 'Post Graduate Certificate in Human Resource Management (PGCHRM)'),
 ('education', 'Post Graduate Diploma in Analytical Chemistry (PGDAC)'),
 ('education', 'Post Graduate Diploma in Business Administration (PGDBA)'),
 ('education', 'Post Graduate Diploma in Computer Application (PGDCA)'),
@@ -857,9 +857,9 @@ UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Higher Sec
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor of Law (LLB)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'LLB');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Bachelor in Medicine and Bachelor of Surgery (MBBS)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MBBS');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Vocational-Training (Vocational Training)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Vocational Training');
-UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Association of Chartered Certifed Accountants (ACCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ACCA');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Association of Chartered Certified Accountants (ACCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ACCA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Accountant (CA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CA');
-UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Aaccountant Integrated Professional Competence Course (CA IPCC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CA IPCC');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Accountant Integrated Professional Competence Course (CA IPCC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CA IPCC');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Chartered Financial Accountant  (CFA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CFA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Cost and Works Accountancy (CWA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'CWA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Executive Post Graduate Diploma in Business Management (EMBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'EMBA');
@@ -867,7 +867,7 @@ UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Fellow of 
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Integrated PG Course (I PG Course)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'I PG Course');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Institute of Cost Accountants of India - Cost and Management Accountant (ICAI CMA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ICAI/CMA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Institute of Cost and Works Accountant of India (ICWA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'ICWA');
-UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Comunication (Journalism/Mass Comm.)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Comm');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Communication (Journalism/Mass Comm.)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Journalism/Mass Comm');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Law (LLM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'LLM');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Arts (MA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of Architecture (MArch)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'MArch');
@@ -900,7 +900,7 @@ UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Master of 
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Other (Other)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Other');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma (PG Diploma)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PG Diploma');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Certification in Business Management (PGCBM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGCBM');
-UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Postgraduate Certificate in Human Resource Management (PGCHRM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGCHRM');
+UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Certificate in Human Resource Management (PGCHRM)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGCHRM');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Analytical Chemistry (PGDAC)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDAC');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Business Administration (PGDBA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDBA');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Graduate Diploma in Computer Application (PGDCA)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PGDCA');

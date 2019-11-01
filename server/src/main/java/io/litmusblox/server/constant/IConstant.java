@@ -200,7 +200,7 @@ public interface IConstant {
     }
 
     enum MlRolePredictionStatus {
-        NO_ERROR("no_Error"), JDC_JTM_ERROR("jdc_jtm_Error"), SUFF_ERROR("suff_Error");
+        NO_ERROR("no_Error"), JDC_JTM_ERROR("jdc_jtm_Error"), SUFF_ERROR("suff_Error"), JDC_JTN_ERROR("jdc_jtn_Error"), JDB_JTM_ERROR("jdb_jtm_Error");
         private String value;
 
         MlRolePredictionStatus(String val) {

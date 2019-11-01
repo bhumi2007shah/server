@@ -507,8 +507,10 @@ public class JobService implements IJobService {
             MLResponseBean responseBean = objectMapper.readValue(mlResponse, MLResponseBean.class);
 
             //if ml status is jdc_jtm_Error
-            if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue())){
-                log.info("ml response status is jdc_jtm_Error for job id : "+jobId);
+            if(responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTM_ERROR.getValue()) ||
+            responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDC_JTN_ERROR.getValue()) ||
+                    responseBean.getRolePrediction().getStatus().equalsIgnoreCase(IConstant.MlRolePredictionStatus.JDB_JTM_ERROR.getValue())){
+                log.info("ml response status is " +responseBean.getRolePrediction().getStatus()+" for job id : "+jobId);
                 responseBean.getRolePrediction().getJdRoles().forEach(role -> {
                     roles.add(role.getRoleName());
                 });

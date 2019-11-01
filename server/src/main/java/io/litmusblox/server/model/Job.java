@@ -190,6 +190,9 @@ public class Job implements Serializable {
     @Transient
     private String selectedRole;
 
+    @Transient
+    private String companyDescription;
+
     //Remove minExperience, maxExperience, experienceRange because add masterdata for experience
     //Also add jobdetail model in job
 }

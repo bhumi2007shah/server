@@ -746,6 +746,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         objFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(objFromDb.getId()));
         objFromDb.getJob().setCompanyName(objFromDb.getJob().getCompanyId().getCompanyName());
+        objFromDb.getJob().setCompanyDescription(objFromDb.getJob().getCompanyId().getCompanyDescription());
         return objFromDb;
     }
 

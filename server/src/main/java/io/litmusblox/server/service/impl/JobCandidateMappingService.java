@@ -841,6 +841,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Transactional
     public void updateTechResponseStatus(TechChatbotRequestBean requestBean) throws Exception {
         JobCandidateMapping objFromDb = jobCandidateMappingRepository.findByChatbotUuid(requestBean.getChatbotUuid());
+        log.info("Got response for " + requestBean.getChatbotUuid() + " with status as " + requestBean.getChatbotStatus() + " score: " + requestBean.getScore());
         if(null == objFromDb)
             throw new WebException(IErrorMessages.UUID_NOT_FOUND+requestBean.getChatbotUuid(),HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -848,10 +849,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setScore(requestBean.getScore());
         objFromDb.setChatbotUpdatedOn(requestBean.getChatbotUpdatedOn());
         if(null != requestBean.getTechResponseJson()) {
+            log.info("Found tech response json for "  + requestBean.getChatbotUuid() + " with status as " + requestBean.getChatbotStatus() + " score: " + requestBean.getScore());
             objFromDb.getTechResponseData().setTechResponse(requestBean.getTechResponseJson());
         }
         jobCandidateMappingRepository.save(objFromDb);
         if(requestBean.getChatbotStatus().equals(IConstant.CHATBOT_STATUS.Complete.name())) {
+            log.info("Updated chatbot status for "  + requestBean.getChatbotUuid() + " with status as " + requestBean.getChatbotStatus() + " score: " + requestBean.getScore());
             jcmCommunicationDetailsRepository.updateByJcmId(objFromDb.getId());
         }
     }

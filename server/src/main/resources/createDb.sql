@@ -1,3 +1,6 @@
+SET session_replication_role TO 'replica'
+
+DROP TABLE MASTER_DATA;
 CREATE TABLE MASTER_DATA(
   ID serial PRIMARY KEY NOT NULL,
    TYPE VARCHAR (50) NOT NULL,
@@ -9,6 +12,7 @@ CREATE TABLE MASTER_DATA(
 
 ----------------------------------------------------
 
+DROP TABLE CONFIGURATION_SETTINGS;
 CREATE TABLE CONFIGURATION_SETTINGS(
   ID serial PRIMARY KEY NOT NULL,
    CONFIG_NAME VARCHAR (50) NOT NULL UNIQUE,
@@ -16,6 +20,8 @@ CREATE TABLE CONFIGURATION_SETTINGS(
 );
 
 ----------------------------------------------------
+
+DROP TABLE SKILLS_MASTER;
 CREATE TABLE SKILLS_MASTER(
   ID serial PRIMARY KEY NOT NULL,
    SKILL_NAME VARCHAR (100) NOT NULL
@@ -23,6 +29,7 @@ CREATE TABLE SKILLS_MASTER(
 
 ----------------------------------------------------
 
+DROP TABLE TEMP_SKILLS;
 CREATE TABLE TEMP_SKILLS(
   ID serial PRIMARY KEY NOT NULL,
    SKILL_NAME VARCHAR (100) NOT NULL,
@@ -31,6 +38,7 @@ CREATE TABLE TEMP_SKILLS(
 
 -------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE SCREENING_QUESTION;
 CREATE TABLE SCREENING_QUESTION(
    ID serial PRIMARY KEY NOT NULL,
    QUESTION VARCHAR (150) NOT NULL,
@@ -41,7 +49,7 @@ CREATE TABLE SCREENING_QUESTION(
 
 ---------------------------------------------------------------------------------------------------------------------
 
-
+DROP TABLE COUNTRY;
 CREATE TABLE COUNTRY(
   ID serial PRIMARY KEY NOT NULL,
    COUNTRY_NAME VARCHAR (15) NOT NULL,
@@ -53,6 +61,7 @@ CREATE TABLE COUNTRY(
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE USERS;
 CREATE TABLE USERS(
   ID serial PRIMARY KEY NOT NULL,
    EMAIL VARCHAR (50) NOT NULL,
@@ -77,6 +86,7 @@ CREATE TABLE USERS(
 
 -----------------------------------------------------------------------------------------------------------
 
+DROP TABLE COMPANY;
 CREATE TABLE COMPANY(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_NAME VARCHAR (255) NOT NULL,
@@ -100,7 +110,7 @@ ALTER TABLE USERS
 ADD CONSTRAINT fk_company FOREIGN KEY (COMPANY_ID) REFERENCES COMPANY (ID);
 -----------------------------------------------------------------------------------------------------------
 
-
+DROP TABLE COMPANY_ADDRESS;
 CREATE TABLE COMPANY_ADDRESS(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -116,6 +126,7 @@ CREATE TABLE COMPANY_ADDRESS(
 
 --------------------------------------------------------------------------------------------------------
 
+DROP TABLE COMPANY_BU;
 CREATE TABLE COMPANY_BU(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -128,6 +139,7 @@ CREATE TABLE COMPANY_BU(
 
 ---------------------------------------------------------------------------------------------------------
 
+DROP TABLE COMPANY_STAGE_STEP;
 CREATE TABLE COMPANY_STAGE_STEP(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -142,6 +154,7 @@ CREATE TABLE COMPANY_STAGE_STEP(
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE COMPANY_SCREENING_QUESTION;
 CREATE TABLE COMPANY_SCREENING_QUESTION(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -154,9 +167,9 @@ CREATE TABLE COMPANY_SCREENING_QUESTION(
    UPDATED_BY INTEGER REFERENCES USERS(ID)  
 );
 
-
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE USER_SCREENING_QUESTION;
 CREATE TABLE USER_SCREENING_QUESTION(
   ID serial PRIMARY KEY NOT NULL,
   USER_ID INTEGER REFERENCES USERS(ID) NOT NULL,
@@ -169,6 +182,7 @@ CREATE TABLE USER_SCREENING_QUESTION(
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB;
 CREATE TABLE JOB(
   ID serial PRIMARY KEY NOT NULL,
    COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -201,10 +215,7 @@ CREATE TABLE JOB(
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------
 
--- Remove Job detail table create script, because add job detail fields in job table
-
-------------------------------------------------------------------------------------------------------------------------------------------------
-
+DROP TABLE JOB_HIRING_TEAM;
 CREATE TABLE JOB_HIRING_TEAM(
   ID serial PRIMARY KEY NOT NULL,
    JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -219,6 +230,7 @@ CREATE TABLE JOB_HIRING_TEAM(
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_SCREENING_QUESTIONS;
 CREATE TABLE JOB_SCREENING_QUESTIONS(
   ID serial PRIMARY KEY NOT NULL,
   JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -234,6 +246,7 @@ CREATE TABLE JOB_SCREENING_QUESTIONS(
 
 --------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_KEY_SKILLS;
 CREATE TABLE JOB_KEY_SKILLS(
   ID serial PRIMARY KEY NOT NULL,
    JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -253,6 +266,7 @@ create unique index unique_job_temp_skill_id on job_key_skills (job_id, skill_id
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_HISTORY;
 CREATE TABLE JOB_HISTORY (
     ID serial PRIMARY KEY NOT NULL,
     JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -263,6 +277,7 @@ CREATE TABLE JOB_HISTORY (
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_CAPABILITIES;
 CREATE TABLE JOB_CAPABILITIES(
   ID serial PRIMARY KEY NOT NULL,
   JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -278,6 +293,7 @@ CREATE TABLE JOB_CAPABILITIES(
 
 --------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE;
 CREATE TABLE CANDIDATE(
   ID serial PRIMARY KEY NOT NULL,
    FIRST_NAME VARCHAR (45) NOT NULL,
@@ -291,7 +307,7 @@ CREATE TABLE CANDIDATE(
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
-
+DROP TABLE CANDIDATE_MOBILE_HISTORY;
 CREATE TABLE CANDIDATE_MOBILE_HISTORY(
   ID serial PRIMARY KEY NOT NULL,
    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -304,7 +320,7 @@ CREATE TABLE CANDIDATE_MOBILE_HISTORY(
 
 ----------------------------------------------------------------------------------------------------------------------------------------
 
-
+DROP TABLE CANDIDATE_EMAIL_HISTORY;
 CREATE TABLE CANDIDATE_EMAIL_HISTORY(
   ID serial PRIMARY KEY NOT NULL,
    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -315,7 +331,7 @@ CREATE TABLE CANDIDATE_EMAIL_HISTORY(
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
-
+DROP TABLE CANDIDATE_DETAILS;
 CREATE TABLE CANDIDATE_DETAILS(
   ID serial PRIMARY KEY NOT NULL,
    CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -344,6 +360,7 @@ CREATE TABLE CANDIDATE_DETAILS(
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_CANDIDATE_MAPPING;
 CREATE TABLE JOB_CANDIDATE_MAPPING (
    ID	serial PRIMARY KEY NOT NULL,
    JOB_ID INTEGER REFERENCES JOB(ID) NOT NULL,
@@ -369,6 +386,7 @@ CREATE TABLE JOB_CANDIDATE_MAPPING (
 
 ---------------------------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_SCREENING_QUESTION_RESPONSE;
 CREATE TABLE CANDIDATE_SCREENING_QUESTION_RESPONSE(
   ID serial PRIMARY KEY NOT NULL,
   JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
@@ -380,6 +398,8 @@ CREATE TABLE CANDIDATE_SCREENING_QUESTION_RESPONSE(
 ------------------------------------------------------------------------------------------------------------------------------
 
 --Add create db script for plugin
+
+DROP TABLE CANDIDATE_EDUCATION_DETAILS;
 CREATE TABLE CANDIDATE_EDUCATION_DETAILS (
 	 ID serial PRIMARY KEY NOT NULL,
 	  CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -391,6 +411,7 @@ CREATE TABLE CANDIDATE_EDUCATION_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_COMPANY_DETAILS;
 CREATE TABLE CANDIDATE_COMPANY_DETAILS (
   ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -405,6 +426,7 @@ CREATE TABLE CANDIDATE_COMPANY_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_PROJECT_DETAILS;
 CREATE TABLE CANDIDATE_PROJECT_DETAILS (
   ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -420,6 +442,7 @@ CREATE TABLE CANDIDATE_PROJECT_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_ONLINE_PROFILE;
 CREATE TABLE CANDIDATE_ONLINE_PROFILE (
   ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -428,12 +451,16 @@ CREATE TABLE CANDIDATE_ONLINE_PROFILE (
   );
 
 ---------------------------------------------------------------------------------------------------------------------------
+
+DROP TABLE SMS_TEMPLATES;
 CREATE TABLE SMS_TEMPLATES (
   ID serial PRIMARY KEY NOT NULL,
   TEMPLATE_NAME varchar(40) DEFAULT NULL,
   TEMPLATE_CONTENT varchar(400) DEFAULT NULL
 );
 ---------------------------------------------------------------------------------------------------------------------------
+
+DROP TABLE CANDIDATE_WORK_AUTHORIZATION;
 CREATE TABLE CANDIDATE_WORK_AUTHORIZATION (
   ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -443,6 +470,7 @@ CREATE TABLE CANDIDATE_WORK_AUTHORIZATION (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_LANGUAGE_PROFICIENCY;
 CREATE TABLE CANDIDATE_LANGUAGE_PROFICIENCY (
 ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -452,6 +480,7 @@ ID serial PRIMARY KEY NOT NULL,
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_SKILL_DETAILS;
 CREATE TABLE CANDIDATE_SKILL_DETAILS (
  ID serial PRIMARY KEY NOT NULL,
   CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -460,6 +489,8 @@ CREATE TABLE CANDIDATE_SKILL_DETAILS (
   EXP_IN_MONTHS smallint
   );
 ---------------------------------------------------------------------------------------------------------------------------
+
+DROP TABLE JCM_COMMUNICATION_DETAILS;
 CREATE TABLE JCM_COMMUNICATION_DETAILS (
    ID	serial PRIMARY KEY NOT NULL,
    JCM_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
@@ -480,6 +511,8 @@ CREATE TABLE JCM_COMMUNICATION_DETAILS (
    HR_CHAT_COMPLETE_FLAG BOOL DEFAULT 'f'
 );
 ---------------------------------------------------------------------------------------------------------------------------
+
+DROP TABLE EMAIL_LOG;
 CREATE TABLE EMAIL_LOG (
   ID serial PRIMARY KEY NOT NULL,
   TEMPLATE_NAME VARCHAR(30) DEFAULT NULL,
@@ -496,6 +529,7 @@ CREATE TABLE EMAIL_LOG (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE SMS_LOG;
 CREATE TABLE SMS_LOG (
   ID serial PRIMARY KEY NOT NULL,
   TEMPLATE_NAME VARCHAR(40) DEFAULT NULL,
@@ -506,6 +540,7 @@ CREATE TABLE SMS_LOG (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JCM_PROFILE_SHARING_MASTER;
 CREATE TABLE JCM_PROFILE_SHARING_MASTER (
     ID serial PRIMARY KEY NOT NULL,
     RECEIVER_NAME varchar(45) NOT NULL,
@@ -516,6 +551,7 @@ CREATE TABLE JCM_PROFILE_SHARING_MASTER (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JCM_PROFILE_SHARING_DETAILS;
 CREATE TABLE JCM_PROFILE_SHARING_DETAILS (
     ID UUID PRIMARY KEY DEFAULT uuid_generate_v1(),
     PROFILE_SHARING_MASTER_ID INTEGER REFERENCES JCM_PROFILE_SHARING_MASTER(ID) NOT NULL,
@@ -527,6 +563,7 @@ CREATE TABLE JCM_PROFILE_SHARING_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CV_PARSING_DETAILS;
 CREATE TABLE CV_PARSING_DETAILS (
     ID serial PRIMARY KEY NOT NULL,
     CV_FILE_NAME varchar(255),
@@ -542,6 +579,7 @@ CREATE TABLE CV_PARSING_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_OTHER_SKILL_DETAILS;
 CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
     ID serial PRIMARY KEY NOT NULL,
     CANDIDATE_ID INTEGER REFERENCES CANDIDATE(ID) NOT NULL,
@@ -552,6 +590,7 @@ CREATE TABLE CANDIDATE_OTHER_SKILL_DETAILS (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE COMPANY_HISTORY;
 CREATE TABLE COMPANY_HISTORY (
     ID serial PRIMARY KEY NOT NULL,
     COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -562,6 +601,7 @@ CREATE TABLE COMPANY_HISTORY (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CANDIDATE_TECH_RESPONSE_DATA;
 CREATE TABLE CANDIDATE_TECH_RESPONSE_DATA(
     ID serial PRIMARY KEY NOT NULL,
     JOB_CANDIDATE_MAPPING_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
@@ -571,6 +611,7 @@ CREATE TABLE CANDIDATE_TECH_RESPONSE_DATA(
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JCM_HISTORY;
 CREATE TABLE JCM_HISTORY(
 	ID serial PRIMARY KEY NOT NULL,
 	JCM_ID INTEGER REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
@@ -581,6 +622,7 @@ CREATE TABLE JCM_HISTORY(
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE WEIGHTAGE_CUTOFF_MAPPING;
 CREATE TABLE WEIGHTAGE_CUTOFF_MAPPING(
     ID serial PRIMARY KEY NOT NULL,
     WEIGHTAGE INTEGER DEFAULT NULL,
@@ -592,6 +634,7 @@ CREATE TABLE WEIGHTAGE_CUTOFF_MAPPING(
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE WEIGHTAGE_CUTOFF_BY_COMPANY_MAPPING;
 CREATE TABLE WEIGHTAGE_CUTOFF_BY_COMPANY_MAPPING(
     ID serial PRIMARY KEY NOT NULL,
     COMPANY_ID INTEGER REFERENCES COMPANY(ID) NOT NULL,
@@ -604,6 +647,7 @@ CREATE TABLE WEIGHTAGE_CUTOFF_BY_COMPANY_MAPPING(
 
 ------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE JOB_CAPABILITY_STAR_RATING_MAPPING;
 CREATE TABLE JOB_CAPABILITY_STAR_RATING_MAPPING (
    ID serial PRIMARY KEY NOT NULL,
    JOB_CAPABILITY_ID INTEGER REFERENCES JOB_CAPABILITIES(ID) NOT NULL,
@@ -617,6 +661,7 @@ CREATE TABLE JOB_CAPABILITY_STAR_RATING_MAPPING (
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CREATE_JOB_PAGE_SEQUENCE;
 CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(
 	ID serial PRIMARY KEY NOT NULL,
 	PAGE_NAME VARCHAR(25) NOT NULL,
@@ -628,6 +673,7 @@ CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CV_RATING;
 CREATE TABLE CV_RATING (
 ID serial PRIMARY KEY NOT NULL,
 JOB_CANDIDATE_MAPPING_ID integer REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
@@ -636,6 +682,7 @@ OVERALL_RATING smallint NOT NULL
 
 ---------------------------------------------------------------------------------------------------------------------------
 
+DROP TABLE CV_RATING_SKILL_KEYWORD_DETAILS;
 CREATE TABLE CV_RATING_SKILL_KEYWORD_DETAILS (
 ID serial PRIMARY KEY NOT NULL,
 CV_RATING_ID integer REFERENCES CV_RATING(ID) NOT NULL,
@@ -644,3 +691,5 @@ SKILL_NAME varchar(100) NOT NULL,
 RATING smallint NOT NULL,
 OCCURRENCE smallint NOT NULL
 );
+
+SET session_replication_role TO 'origin'

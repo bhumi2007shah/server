@@ -4,8 +4,9 @@
 
 package io.litmusblox.server.controller;
 
+import io.litmusblox.server.AbstractTest;
+import io.litmusblox.server.model.UserScreeningQuestion;
 import io.litmusblox.server.service.IMasterDataService;
-import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.MasterDataResponse;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,30 +34,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Log4j2
-class MasterDataControllerTest {
+class MasterDataControllerTest extends AbstractTest {
     @Autowired
     IMasterDataService masterDataService;
 
-    void setup() {
-        try {
-            if (!MasterDataBean.getInstance().isLoaded()) {
-                masterDataService.loadStaticMasterData();
-            }
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            log.fatal("Failed to load default Configuration.");
-        }
-    }
-
     @org.junit.jupiter.api.Test
     void fetchForItems() {
-        setup();
         try {
             MasterDataResponse responseObj = masterDataService.fetchForItems(Arrays.asList(new String[]{"countries"}));
             assertThat(responseObj != null).isTrue();
             assertThat(responseObj.getCountries() != null).isTrue();
+            log.info("No. of countries = " + responseObj.getCountries().size());
             assertThat(responseObj.getCountries().size() > 0).isTrue();
         } catch (Exception e) {
 
@@ -65,5 +53,24 @@ class MasterDataControllerTest {
 
     @org.junit.jupiter.api.Test
     void addMasterData() {
+        boolean testPass = true;
+        try {
+            String jsonData = "{\n" +
+                    "\t\"question\":\"What versions of angular have you worked on?\",\n" +
+                    "\t\"questionType\":{\n" +
+                    "\t\t\"id\":97\n" +
+                    "\t},\n" +
+                    "\t\"options\":[\"Angular 1\", \"Angular 2\", \"Angular 4\"],\n" +
+                    "\t\"userId\": {\n" +
+                    "\t\t\"id\":3\n" +
+                    "\t}\n" +
+                    "}";
+            masterDataService.addMasterData(jsonData, UserScreeningQuestion.IDENTIFIER);
+        } catch (Exception e) {
+            e.printStackTrace();
+            testPass = false;
+        }
+
+        assertThat(testPass).isTrue();
     }
 }

@@ -10,7 +10,6 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
 import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
 import ru.yandex.qatools.embed.postgresql.PostgresProcess;
@@ -20,6 +19,7 @@ import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
 import ru.yandex.qatools.embed.postgresql.distribution.Version;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 
@@ -32,7 +32,6 @@ import java.nio.file.Paths;
  */
 @Configuration
 @Log4j2
-@Sql({"classpath:createDb.sql", "classpath:insertData.sql"})
 public class EmbeddedPostgresConfiguration {
 
     @Bean(destroyMethod = "stop")
@@ -55,6 +54,9 @@ public class EmbeddedPostgresConfiguration {
                 PostgresStarter.getInstance(EmbeddedPostgres.cachedRuntimeConfig(Paths.get(binariesDir)));
         PostgresExecutable exec = runtime.prepare(postgresConfig);
         PostgresProcess process = exec.start();
+
+        process.importFromFile(new File(Thread.currentThread().getContextClassLoader().getResource("createDb.sql").getFile()));
+        process.importFromFile(new File(Thread.currentThread().getContextClassLoader().getResource("insertData.sql").getFile()));
 
         return process;
     }

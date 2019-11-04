@@ -1,3 +1,4 @@
+delete from country;
 INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHORT_CODE)
  VALUES
  ('Australia','+61', 9,'au'),
@@ -7,6 +8,7 @@ INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHOR
  ('United Kingdom','+44', 10,'gb'),
  ('United States','+1', 10,'us');
 
+delete from master_data;
 INSERT INTO MASTER_DATA (TYPE, VALUE)
 VALUES
  ('education', 'Association of Chartered Certifed Accountants (ACCA)'),
@@ -136,6 +138,7 @@ VALUES
  ( 'noticePeriod','Others');
 
 
+delete from configuration_settings;
 -- max limits for various parameters
 insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('maxScreeningQuestionsLimit',50),
@@ -149,6 +152,7 @@ insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('cvRatingTimeout', 30000);
 
 
+delete from skills_master;
  -- key skill master data
 insert into skills_master (skill_name) values
 ('Core Java'),
@@ -641,6 +645,7 @@ insert into skills_master (skill_name) values
 ('WindowsFAX'),
 ('FreeSwitch');
 
+delete from sms_templates;
 INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('ChatInvite','New Job - [[${commBean.jobtitle}]] at [[${commBean.sendercompany}]]%n[[${commBean.receiverfirstname}]],%n[[${commBean.senderfirstname}]] from [[${commBean.sendercompany}]] has invited you to apply for the [[${commBean.jobtitle}]] position. Click the link below to apply.%n[[${commBean.chatlink}]]'),
 ('ChatCompleted','Congratulations [[${commBean.receiverfirstname}]]!%nYour Profile is now complete for the [[${commBean.jobtitle}]] position. [[${commBean.senderfirstname}]] from [[${commBean.sendercompany}]] will be in touch with you if your profile is shortlisted.%n%nGood luck!'),
@@ -651,6 +656,7 @@ INSERT INTO SMS_TEMPLATES (TEMPLATE_NAME, TEMPLATE_CONTENT) VALUES
 ('ChatNotVisitedReminder1','Hi [[${commBean.receiverfirstname}]],%nHere is your link to create your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It''s required to submit completed profile to be considered for the job. The link is valid only for 48 hours. Click the link to begin. [[${commBean.chatlink}]] '),
 ('ChatNotVisitedReminder2','[[${commBean.receiverfirstname}]],%nJust a reminder to complete your Litmus Profile for [[${commBean.jobtitle}]] job at [[${commBean.sendercompany}]]. It will take just a few minutes to finish it.  It''s required that you finish the profile to be considered for the job.  This link will expire in 24 hours.%nClick the link to apply. [[${commBean.chatlink}]] ');
 
+delete from create_job_page_sequence;
 INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
 VALUES
 ('Overview', 'overview', 1, 'T','Lite'),
@@ -686,6 +692,7 @@ VALUES
 ( 'function','Anchoring / TV / Films / Production'),
 ( 'function','Architects / Interior Design / Naval Arch');
 
+delete from weightage_cutoff_mapping;
 insert into weightage_cutoff_mapping (weightage, percentage, cutoff, star_rating)
 values
 (2,100,10,1),

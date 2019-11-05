@@ -67,6 +67,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     CreateJobPageSequenceRepository createJobPageSequenceRepository;
 
+    @Resource
+    CurrencyRepository currencyRepository;
+
     @Autowired
     Environment environment;
 
@@ -85,6 +88,10 @@ public class MasterDataService implements IMasterDataService {
         createJobPageSequenceRepository.findByDisplayFlagIsTrueOrderByPageDisplayOrderAsc().stream().forEach(page-> {
             MasterDataBean.getInstance().getAddJobPages().add(page);
             MasterDataBean.getInstance().getJobPageNamesInOrder().add(page.getPageName());
+        });
+
+        currencyRepository.findAll().stream().forEach(currency -> {
+            MasterDataBean.getInstance().getCurrencyList().add(currency.getCurrencyShortName());
         });
 
         List<MasterData> masterDataFromDb = masterDataRepository.findAll();
@@ -211,6 +218,8 @@ public class MasterDataService implements IMasterDataService {
     private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
     private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
     private static final String ADD_JOB_PAGES = "addJobPages";
+    private static final String CURRENCY_LIST = "currencyList";
+
 
     /**
      * Method to fetch specific master data from cache
@@ -243,6 +252,9 @@ public class MasterDataService implements IMasterDataService {
                 break;
             case ID_FOR_SOURCE_STAGE:
                 master.setSourceStageId(MasterDataBean.getInstance().getSourceStage().getId());
+                break;
+            case CURRENCY_LIST:
+                master.setCurrencyList(MasterDataBean.getInstance().getCurrencyList());
                 break;
             default: //for all other properties, use reflection
 

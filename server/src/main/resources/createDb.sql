@@ -644,3 +644,12 @@ SKILL_NAME varchar(100) NOT NULL,
 RATING smallint NOT NULL,
 OCCURRENCE smallint NOT NULL
 );
+
+------------------------------------------------------------------------------------------------------------------------
+
+CREATE TABLE CURRENCY (
+ID serial PRIMARY KEY NOT NULL,
+CURRENCY_FULL_NAME varchar(25),
+CURRENCY_SHORT_NAME varchar(5),
+COUNTRY varchar(5)
+);

@@ -42,4 +42,5 @@ public class MasterDataResponse {
     private List<String> supportedCvFileFormats = new ArrayList<>();
     private long sourceStageId;
     private List<CreateJobPageSequence> addJobPages = new ArrayList<>();
+    private List<String> currencyList = new ArrayList<>();
 }

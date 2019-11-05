@@ -44,6 +44,10 @@ public interface JobCandidateMappingRepository extends JpaRepository<JobCandidat
     @Transactional
     JobCandidateMapping findByJobAndCandidate(Job job, Candidate candidate);
 
+    //find by jobId and CandidateId
+    @Transactional
+    JobCandidateMapping findByJobIdAndCandidateId(Long jobId, Long candidateId);
+
     @Query(value = "select COUNT(jcm) from JOB_CANDIDATE_MAPPING jcm where jcm.CREATED_ON >=:createdOn and jcm.CREATED_BY =:user", nativeQuery = true)
     Integer getUploadedCandidateCount(@Param("createdOn") Date createdOn, @Param("user") User user);
 

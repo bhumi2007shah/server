@@ -175,7 +175,7 @@ public class RChilliCvProcessor {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
             log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
         }
-        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId);
+        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId, job.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -218,7 +218,7 @@ public class RChilliCvProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId) {
+    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId, Long jobId) {
         log.info("Inside addCvParsingDetails method");
         try {
             //Add cv_parsing_details
@@ -243,6 +243,12 @@ public class RChilliCvProcessor {
             }
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetails.setErrorMessage(errorMessage);
+
+            JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobIdAndCandidateId(jobId, candidateId);
+
+            if(null != jobCandidateMapping)
+                cvParsingDetails.setJobCandidateMappingId(jobCandidateMapping);
+
             cvParsingDetailsRepository.save(cvParsingDetails);
             log.info("Save CvParsingDetails");
         } catch (Exception e) {

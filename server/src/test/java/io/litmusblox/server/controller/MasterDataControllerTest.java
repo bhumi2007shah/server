@@ -42,8 +42,11 @@ class MasterDataControllerTest extends AbstractTest {
     void fetchForItems() {
         try {
             MasterDataResponse responseObj = masterDataService.fetchForItems(Arrays.asList(new String[]{"countries"}));
-            assertThat(responseObj != null).isTrue();
-            assertThat(responseObj.getCountries() != null).isTrue();
+            assertThat(responseObj).isNotNull();
+            assertThat(responseObj.getCountries()).isNotNull();
+            String[] listOfTables = masterDataService.fetchListOfTables();
+            log.info("No. of tables = " + listOfTables.length);
+            log.info(Arrays.toString(listOfTables) + "\n");
             log.info("No. of countries = " + responseObj.getCountries().size());
             assertThat(responseObj.getCountries().size() > 0).isTrue();
         } catch (Exception e) {
@@ -52,6 +55,16 @@ class MasterDataControllerTest extends AbstractTest {
     }
 
     @org.junit.jupiter.api.Test
+    void listTables(){
+        try {
+            String[] listOfTables = masterDataService.fetchListOfTables();
+            assertThat(listOfTables).isNotEmpty();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //@org.junit.jupiter.api.Test
     void addMasterData() {
         boolean testPass = true;
         try {

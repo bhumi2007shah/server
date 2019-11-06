@@ -2,6 +2,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.MasterData;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -13,4 +14,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface MasterDataRepository extends JpaRepository<MasterData, Long> {
+//    @Query(nativeQuery = true, value = "select tablename from pg_tables where schemaname = 'public';")
+    @Query(nativeQuery = true, value = "select email from users;")
+    String[] fetchListOfTables();
 }

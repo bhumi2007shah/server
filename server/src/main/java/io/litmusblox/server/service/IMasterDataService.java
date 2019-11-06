@@ -47,4 +47,6 @@ public interface IMasterDataService {
      * @param masterDataType the type of master data to be persisted
      */
     void addMasterData(String jsonData, String masterDataType) throws Exception;
+
+    String[] fetchListOfTables() throws Exception;
 }

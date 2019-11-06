@@ -1,6 +1,7 @@
 delete from country;
 INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHORT_CODE)
  VALUES
+ ('test','+12', 10,'tt'),
  ('Australia','+61', 9,'au'),
  ('Canada','+1', 10,'ca'),
  ('India','+91', 10,'in'),

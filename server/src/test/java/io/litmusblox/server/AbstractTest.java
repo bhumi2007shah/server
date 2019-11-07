@@ -4,14 +4,18 @@
 
 package io.litmusblox.server;
 
-import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.IMasterDataService;
 import io.litmusblox.server.service.MasterDataBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +38,7 @@ public class AbstractTest {
     @Autowired
     LbUserDetailsService lbUserDetailsService;
 
-    public static String authKey = "";
+    public static Authentication authentication = null;
 
     @Before
     @Transactional
@@ -44,15 +48,26 @@ public class AbstractTest {
             if (!MasterDataBean.getInstance().isLoaded()) {
                 masterDataService.loadStaticMasterData();
             }
-
-            authKey = lbUserDetailsService.login(User.builder().email("test@litmusblox.io").password("123456").build()).getJwtToken();
         }
         catch (Exception e)
         {
             e.printStackTrace();
             log.fatal("Failed to load default Configuration.");
         }
+    }
 
+    @BeforeEach
+    void setApplicationContext() {
+        try {
+            UserDetails userDetails = this.lbUserDetailsService.loadUserByUsername("test@litmusblox.io");
+
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        authentication = SecurityContextHolder.getContext().getAuthentication();
     }
 
 }

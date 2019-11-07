@@ -5,7 +5,10 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -22,6 +25,9 @@ import java.io.Serializable;
 @Entity
 @Table(name = "MASTER_DATA")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MasterData implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285041L;

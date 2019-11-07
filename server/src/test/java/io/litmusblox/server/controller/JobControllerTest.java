@@ -4,49 +4,92 @@
 
 package io.litmusblox.server.controller;
 
-import io.litmusblox.server.AbstractTest;
-import io.litmusblox.server.service.IMasterDataService;
-import io.litmusblox.server.service.MasterDataResponse;
-import lombok.NoArgsConstructor;
+import io.litmusblox.server.model.Job;
+import io.litmusblox.server.service.IJobService;
 import lombok.extern.log4j.Log4j2;
+import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Arrays;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 /**
- * Unit test case for JobController
- *
- * @author : Shital Raval
- * Date : 5/11/19
- * Time : 11:42 AM
- * Class Name : JobControllerTest
+ * @author : shital
+ * Date : 7/11/19
+ * Time : 11:48 AM
+ * Class Name : JobControllerMvcTest
  * Project Name : server
  */
-@ActiveProfiles("test")
-@NoArgsConstructor
+@ExtendWith(MockitoExtension.class)
 @RunWith(SpringRunner.class)
-@SpringBootTest
 @Log4j2
-class JobControllerTest extends AbstractTest {
-    @Autowired
-    IMasterDataService masterDataService;
+public class JobControllerTest {
+    @InjectMocks
+    JobController jobController;
 
-    @org.junit.jupiter.api.Test
-    void fetchForItems() {
+    @Mock
+    IJobService jobService;
+
+    @Test
+    public void addJob() {
+        String jobRequest = "{\n" +
+                "\"jobTitle\":\"Java Developer\",\n" +
+                "\"noOfPositions\":2,\n" +
+                "\"education\": {\"id\": \"20\"},\n" +
+                "\"experienceRange\": {\"id\": \"120\"},\n" +
+                "\"expertise\": {\"id\": 117},\n" +
+                "\"function\": {\"id\": \"3\"},\n" +
+                "\"jobDescription\":\"We are looking for highly skilled programmers with experience building web applications in Java. Java Developers are responsible for analyzing user requirements and business objectives, determining application features and functionality and recommending changes to existing Java-based applications, among other duties.\n" +
+                "Java Developers need to compile detailed technical documentation and user assistance material, requiring excellent written communication.\n" +
+                "Java Developer Responsibilities:\n" +
+                "Designing and implementing Java-based applications.\n" +
+                "Analyzing user requirements to inform application design.\n" +
+                "Defining application objectives and functionality.\n" +
+                "Aligning application design with business goals.\n" +
+                "Developing and testing software.\n" +
+                "Debugging and resolving technical problems that arise.\n" +
+                "Producing detailed design documentation.\n" +
+                "Recommending changes to existing Java infrastructure.\n" +
+                "Developing multimedia applications.\n" +
+                "Developing documentation to assist users.\n" +
+                "Ensuring continuous professional self-development.\n" +
+                "Java Developer Requirements:\n" +
+                "Degree in Computer Science or related field.\n" +
+                "Experience with user interface design, database structures and statistical analyses.\n" +
+                "Analytical mindset and good problem-solving skills.\n" +
+                "Excellent written and verbal communication.\n" +
+                "Good organizational skills.\n" +
+                "Ability to work as part of a team.\n" +
+                "Attention to detail.\"\n" +
+                "}";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        Job job = Job.builder().id(1L).build();
+
+        boolean testPass = true;
         try {
-            MasterDataResponse responseObj = masterDataService.fetchForItems(Arrays.asList(new String[]{"countries"}));
-            assertThat(responseObj != null).isTrue();
-            assertThat(responseObj.getCountries() != null).isTrue();
-            log.info("No. of countries = " + responseObj.getCountries().size());
-            assertThat(responseObj.getCountries().size() > 0).isTrue();
-        } catch (Exception e) {
+            when(jobService.addJob(any(Job.class), any(String.class))).thenReturn(job);
 
+            String response = jobController.addJob(jobRequest,"overview");
+            assertThat(response).isNotNull();
+            log.info(response);
+            assertThat(response.indexOf("id")).isGreaterThan(0);
+
+        } catch(Exception e) {
+            e.printStackTrace();
+            testPass = false;
         }
+        assertThat(testPass).isTrue();
     }
+
 }

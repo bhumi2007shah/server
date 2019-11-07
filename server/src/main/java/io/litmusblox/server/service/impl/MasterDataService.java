@@ -257,9 +257,4 @@ public class MasterDataService implements IMasterDataService {
                 );
         }
     }
-
-    @Override
-    public String[] fetchListOfTables() throws Exception {
-        return masterDataRepository.fetchListOfTables();
-    }
 }

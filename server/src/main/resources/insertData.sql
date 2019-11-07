@@ -1,13 +1,27 @@
 delete from country;
 INSERT INTO COUNTRY (COUNTRY_NAME, COUNTRY_CODE, MAX_MOBILE_LENGTH, COUNTRY_SHORT_CODE)
  VALUES
- ('test','+12', 10,'tt'),
  ('Australia','+61', 9,'au'),
  ('Canada','+1', 10,'ca'),
  ('India','+91', 10,'in'),
  ('Singapore','+65', 8,'sg'),
  ('United Kingdom','+44', 10,'gb'),
  ('United States','+1', 10,'us');
+
+-- following inserts are NOT to be run in test and prod environments
+-- these will be used for unit testing purpose only
+ALTER TABLE users DISABLE TRIGGER ALL;
+
+-- password = 123456
+insert into users (id, email, password, first_name, last_name, mobile, company_id, role, country_id, created_on, status)
+values(1, 'test@litmusblox.io', '$2a$10$BwQoXoB2b9A9XE8Xc2KQbOdTGWVXYQ3QiiklqZBi/nYSRzvCPfJo.', 'Lb', 'Test', '9090909090', 2, 'Recruiter', 3, current_date, 'Active');
+
+insert into company (id, company_name, created_on, created_by)
+values(2, 'LB', current_date, 1);
+
+ALTER TABLE users ENABLE TRIGGER ALL;
+-- end of inserts only for unit tests
+
 
 delete from master_data;
 INSERT INTO MASTER_DATA (TYPE, VALUE)
@@ -104,7 +118,7 @@ VALUES
  ('education', 'Public Relations / Advertising (PR/Advertising)'),
  ('education', 'Tourism (Tourism)'),
  ('education', 'Vocational-Training (Vocational Training)'),
- ('education', 'Other (Other)');
+ ('education', 'Other (Other)'),
 
  ( 'questionType','Checkbox'),
  ( 'questionType','Radio button'),

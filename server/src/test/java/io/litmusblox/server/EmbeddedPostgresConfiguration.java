@@ -4,24 +4,17 @@
 
 package io.litmusblox.server;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import com.opentable.db.postgres.embedded.EmbeddedPostgres;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
-import ru.yandex.qatools.embed.postgresql.EmbeddedPostgres;
-import ru.yandex.qatools.embed.postgresql.PostgresExecutable;
-import ru.yandex.qatools.embed.postgresql.PostgresProcess;
-import ru.yandex.qatools.embed.postgresql.PostgresStarter;
-import ru.yandex.qatools.embed.postgresql.config.AbstractPostgresConfig;
-import ru.yandex.qatools.embed.postgresql.config.PostgresConfig;
-import ru.yandex.qatools.embed.postgresql.distribution.Version;
+import org.apache.ibatis.jdbc.ScriptRunner;
+import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.sql.Connection;
+import java.sql.Statement;
 
 /**
  * @author : Shital Raval
@@ -31,46 +24,43 @@ import java.nio.file.Paths;
  * Project Name : server
  */
 @Configuration
+@ComponentScan
+@Profile("test")
 @Log4j2
 public class EmbeddedPostgresConfiguration {
+    @Bean
+    @Primary
+    public DataSource inMemoryDS() throws Exception {
+        DataSource embeddedPostgresDS = EmbeddedPostgres.builder()
+                .start().getPostgresDatabase();
 
-    @Bean(destroyMethod = "stop")
-    public PostgresProcess postgresProcess() throws IOException {
-        log.info("Starting embedded Postgres");
+        try (Connection conn = embeddedPostgresDS.getConnection()) {
+            Statement statement = conn.createStatement();
+            statement.execute("CREATE DATABASE integrationTestsDb");
+            statement.execute("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
 
-        String tempDir = System.getProperty("java.io.tmpdir");
-        String dataDir = tempDir + "/database_for_tests";
-        String binariesDir = System.getProperty("java.io.tmpdir") + "/postgres_binaries";
+            ScriptRunner sr = new ScriptRunner(conn);
+            log.info("executing createDb script ");
 
-        PostgresConfig postgresConfig = new PostgresConfig(
-                Version.V10_3,
-                new AbstractPostgresConfig.Net("localhost", 5430),
-                new AbstractPostgresConfig.Storage("integration-tests-db", dataDir),
-                new AbstractPostgresConfig.Timeout(60_000),
-                new AbstractPostgresConfig.Credentials("test", "password")
-        );
+            try {
+                InputStream is = getClass().getResourceAsStream("/createDb.sql");
 
-        PostgresStarter<PostgresExecutable, PostgresProcess> runtime =
-                PostgresStarter.getInstance(EmbeddedPostgres.cachedRuntimeConfig(Paths.get(binariesDir)));
-        PostgresExecutable exec = runtime.prepare(postgresConfig);
-        PostgresProcess process = exec.start();
+                //Creating a reader object
+                Reader reader = new InputStreamReader(is);
+                //Running the script
+                sr.runScript(reader);
 
-        process.importFromFile(new File(Thread.currentThread().getContextClassLoader().getResource("createDb.sql").getFile()));
-        process.importFromFile(new File(Thread.currentThread().getContextClassLoader().getResource("insertData.sql").getFile()));
+                log.info("executing insert data script");
 
-        return process;
-    }
+                reader = new InputStreamReader(getClass().getResourceAsStream("/insertData.sql"));
+                sr.runScript(reader);
 
-    @Bean(destroyMethod = "close")
-    @DependsOn("postgresProcess")
-    DataSource dataSource(PostgresProcess postgresProcess) {
-        PostgresConfig postgresConfig = postgresProcess.getConfig();
+                log.info("Done with executing sql scripts");
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:postgresql://localhost:5430/" + postgresConfig.storage().dbName());
-        config.setUsername(postgresConfig.credentials().username());
-        config.setPassword(postgresConfig.credentials().password());
-
-        return new HikariDataSource(config);
+        return embeddedPostgresDS;
     }
 }

@@ -1,8 +1,11 @@
-package io.litmusblox.server.controller;
+/*
+ * Copyright © Litmusblox 2019. All rights reserved.
+ */
+
+package io.litmusblox.server.service;
 
 import io.litmusblox.server.AbstractTest;
 import io.litmusblox.server.model.User;
-import io.litmusblox.server.service.LoginResponseBean;
 import io.litmusblox.server.service.impl.LbUserDetailsService;
 import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -18,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author : sameer
  * Date : 18/09/19
  * Time : 10:29 AM
- * Class Name : AuthControllerTest
+ * Class Name : LbUserDetailsServiceTest
  * Project Name : server
  */
 @ActiveProfiles("test")
@@ -26,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @Log4j2
-class AuthControllerTest extends AbstractTest {
+class LbUserDetailsServiceTest extends AbstractTest {
 
     @Autowired
     LbUserDetailsService lbUserDetailsService;
@@ -38,13 +41,14 @@ class AuthControllerTest extends AbstractTest {
         try {
             User user = new User();
 
-            user.setEmail("shital@hexagonsearch.com");
+            user.setEmail("test@litmusblox.io");
             user.setPassword("123456");
 
             LoginResponseBean loginResponseBean = lbUserDetailsService.login(user);
             assertThat(loginResponseBean).isNotNull();
             assertThat(loginResponseBean.getCompany()).isNotNull();
         } catch (Exception e) {
+            e.printStackTrace();
             testPass = false;
         }
         assertThat(testPass).isTrue();

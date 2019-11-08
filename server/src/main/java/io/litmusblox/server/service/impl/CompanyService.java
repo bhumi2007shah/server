@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -181,12 +180,17 @@ public class CompanyService implements ICompanyService {
                 if (null != companyBuFromDb) {
                     errorResponse.put(businessUnit, "Already exist");
                 } else {
-                    CompanyBu companyBu = new CompanyBu();
-                    companyBu.setCompanyId(company.getId());
-                    companyBu.setBusinessUnit(businessUnit);
-                    companyBu.setCreatedBy(loggedInUser.getId());
-                    companyBu.setCreatedOn(new Date());
-                    companyBuRepository.save(companyBu);
+                    if(Util.isNotNull(businessUnit)){
+                        CompanyBu companyBu = new CompanyBu();
+                        companyBu.setCompanyId(company.getId());
+                        companyBu.setBusinessUnit(businessUnit);
+                        companyBu.setCreatedBy(loggedInUser.getId());
+                        companyBu.setCreatedOn(new Date());
+                        companyBuRepository.save(companyBu);
+                    }else{
+                        errorResponse.put(businessUnit, "businessUnit is null");
+                    }
+
                 }
             });
         }

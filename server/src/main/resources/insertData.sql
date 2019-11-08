@@ -163,6 +163,7 @@ insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('sendEmail',1),
 ('sendSms',1),
 ('maxCvFiles',20),
+('mlCall',1),
 ('maxCapabilities',10),
 ('cvRatingTimeout', 30000);
 

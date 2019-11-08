@@ -495,8 +495,10 @@ public class JobService implements IJobService {
             objectMapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             mlRequest = objectMapper.writeValueAsString(requestBean);
+            log.info("Sending request to ml for LB job id : "+jobId);
             mlResponse = RestClient.getInstance().consumeRestApi(mlRequest, mlUrl, HttpMethod.POST,null);
             log.info("Response received: " + mlResponse);
+            log.info("Getting response from ml for LB job id : "+jobId);
             long startTime = System.currentTimeMillis();
 
             //add data in breadCrumb

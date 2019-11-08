@@ -910,3 +910,19 @@ UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Post Gradu
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Doctor Of Philosophy (PhD)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PHD');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Public Relations / Advertising (PR/Advertising)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'PR/Advertising');
 UPDATE JOB SET EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Tourism (Tourism)') WHERE EDUCATION = (SELECT ID FROM MASTER_DATA WHERE VALUE = 'Tourism');
+
+--For ticket  #220
+CREATE TABLE CURRENCY (
+ID serial PRIMARY KEY NOT NULL,
+CURRENCY_FULL_NAME varchar(25),
+CURRENCY_SHORT_NAME varchar(5),
+COUNTRY varchar(5)
+);
+
+INSERT INTO public.currency(currency_full_name, currency_short_name, country) VALUES
+('Australian Dollar', 'AUD', 'au'),
+('Canadian Dollar', 'CAD', 'ca'),
+('Indian Rupee', 'INR', 'in'),
+('Singapore Dollar', 'SGD', 'sg'),
+('Pound Sterling', 'GBP', 'gb'),
+('US Dollar', 'USD', 'us');

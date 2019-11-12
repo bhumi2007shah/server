@@ -215,4 +215,8 @@ public interface IConstant {
     enum CHATBOT_STATUS{
         Complete
     }
+
+    //constants for create candidate if firstName, lastName.
+    String NOT_FIRST_NAME="Not";
+    String NOT_LAST_NAME="Available";
 }

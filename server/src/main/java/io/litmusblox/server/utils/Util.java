@@ -271,6 +271,12 @@ public class Util {
         if(mobileNo.length() > 10 && mobileNo.startsWith("91"))
             mobileNo = mobileNo.substring(2);
 
+        //if mobile number is greater than 10 digits and start with anything else than 91 and replace any non digit character
+        if(mobileNo.length() > 10 ){
+            mobileNo = mobileNo.replaceAll("\\D", "");
+            mobileNo = mobileNo.substring(mobileNo.length()-10);
+        }
+
         return mobileNo;
     }
 

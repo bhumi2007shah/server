@@ -76,6 +76,12 @@ public class RChilliCvProcessor {
     @Resource
     CandidateRepository candidateRepository;
 
+    @Resource
+    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+
+    @Resource
+    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
+
     @Transactional(readOnly = true)
     User getUser(long userId) {
         return userRepository.findById(userId).get();
@@ -121,10 +127,10 @@ public class RChilliCvProcessor {
 
              if(!rChilliErrorResponse) {
 
-                 rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
-                 rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
+                rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
+                rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
 
-                //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
+                log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -191,7 +197,30 @@ public class RChilliCvProcessor {
             log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
         }
         try {
-            candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+            if(isEmailOrMobilePresent(candidate)) {
+                if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
+                    if (Util.isNull(candidate.getCountryCode()))
+                        candidate.setCountryCode(user.getCountryId().getCountryCode());
+                    CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
+
+                    if (null != candidateMobileHistoryFromDb && candidateMobileHistoryFromDb.getCandidate().getEmail()!=null) {
+                            candidate.setEmail(candidateMobileHistoryFromDb.getCandidate().getEmail());
+                    } else {
+                        candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                    }
+                }
+                if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
+                    CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
+
+                    if (null != candidateEmailHistoryFromDb && candidateEmailHistoryFromDb.getCandidate().getMobile()!=null) {
+                            candidate.setMobile(candidateEmailHistoryFromDb.getCandidate().getMobile());
+                    }
+                }
+                candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+            }
+            else{
+                throw new Exception();
+            }
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
             log.error("Error while validate candidate data and save jcm received from RChilliJson : " + ve.getErrorMessage()+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
@@ -435,5 +464,13 @@ public class RChilliCvProcessor {
         }
         os.flush();
         return new CommonsMultipartFile(fileItem);
+    }
+
+    private boolean isEmailOrMobilePresent(Candidate candidate){
+        boolean mobileOrEmailPresent = false;
+        if(null != candidate.getEmail() || null != candidate.getMobile()){
+            mobileOrEmailPresent = true;
+        }
+        return mobileOrEmailPresent;
     }
 }

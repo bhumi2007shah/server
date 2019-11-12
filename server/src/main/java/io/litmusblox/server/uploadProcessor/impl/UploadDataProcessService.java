@@ -134,6 +134,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                 candidate.setFirstName(Util.toSentenceCase(cleanFirstName));
             }
         }
+        else{
+            candidate.setFirstName(IConstant.NOT_FIRST_NAME);
+        }
 
         if (null != candidate.getLastName()) {
             if (!Util.validateName(candidate.getLastName().trim())) {
@@ -143,6 +146,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
                     throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getLastName(), HttpStatus.BAD_REQUEST);
                 candidate.setLastName(Util.toSentenceCase(cleanLastName));
             }
+        }
+        else{
+            candidate.setLastName(IConstant.NOT_LAST_NAME);
         }
 
         if (!Util.validateEmail(candidate.getEmail())) {

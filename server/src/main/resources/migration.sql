@@ -926,3 +926,8 @@ INSERT INTO public.currency(currency_full_name, currency_short_name, country) VA
 ('Singapore Dollar', 'SGD', 'sg'),
 ('Pound Sterling', 'GBP', 'gb'),
 ('US Dollar', 'USD', 'us');
+
+--For ticket #227
+UPDATE CONFIGURATION_SETTINGS
+SET CONFIG_VALUE = 5000
+WHERE CONFIG_NAME = 'cvRatingTimeout';

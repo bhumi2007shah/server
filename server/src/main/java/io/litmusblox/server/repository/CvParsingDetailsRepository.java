@@ -25,6 +25,6 @@ public interface CvParsingDetailsRepository extends JpaRepository<CvParsingDetai
     List<CvParsingDetails> findByRchilliJsonProcessed(boolean rchilliJsonProcessed);
 
     @Transactional
-    @Query(nativeQuery = true, value = "select * from cv_parsing_details where cv_rating_api_flag is false and parsing_response_text is not null and length(parsing_response_text)>0")
+    @Query(nativeQuery = true, value = "select * from cv_parsing_details where cv_rating_api_flag is false and parsing_response_text is not null and length(parsing_response_text)>0 limit 10")
     List<CvParsingDetails> findCvRatingRecordsToProcess();
 }

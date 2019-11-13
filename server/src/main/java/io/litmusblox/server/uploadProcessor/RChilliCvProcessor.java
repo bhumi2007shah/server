@@ -214,13 +214,15 @@ public class RChilliCvProcessor {
                             .collect(Collectors.toList()).contains(candidate.getCountryCode())
                     ){
                         candidate.setCountryCode(user.getCountryId().getCountryCode());
-                        candidate.setMobile(
-                                candidate.getMobile().substring(
-                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(user.getCountryId().getCountryCode()))
-                                )
-                        );
+                        if(!candidate.getMobile().isEmpty()) {
+                            candidate.setMobile(
+                                    candidate.getMobile().substring(
+                                            (int) (candidate.getMobile().length() - Util.getCountryMap().get(user.getCountryId().getCountryCode()))
+                                    )
+                            );
+                        }
                     }
-                    else{
+                    else if(!candidate.getMobile().isEmpty()){
                         candidate.setMobile(
                                 candidate.getMobile().substring(
                                         (int) (candidate.getMobile().length()-Util.getCountryMap().get(candidate.getCountryCode()))
@@ -230,17 +232,24 @@ public class RChilliCvProcessor {
                 }
                 if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
                     CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
-
-                    if (null != candidateMobileHistoryFromDb && candidateMobileHistoryFromDb.getCandidate().getEmail()!=null) {
-                            candidate.setEmail(candidateMobileHistoryFromDb.getCandidate().getEmail());
-                    } else {
-                        candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                    if (null != candidateMobileHistoryFromDb) {
+                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateMobileHistoryFromDb.getCandidate());
+                        if(candidateEmailHistoryListFromDb.size()>0) {
+                            candidate.setEmail(candidateEmailHistoryListFromDb.get(0).getEmail());
+                        }
+                        else {
+                            candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                        }
                     }
                 }
+
                 if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
                     CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
-                    if (null != candidateEmailHistoryFromDb && candidateEmailHistoryFromDb.getCandidate().getMobile()!=null) {
-                            candidate.setMobile(candidateEmailHistoryFromDb.getCandidate().getMobile());
+                    if (null != candidateEmailHistoryFromDb) {
+                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateEmailHistoryFromDb.getCandidate());
+                        if(candidateMobileHistoryListFromDb.size()>0){
+                            candidate.setMobile(candidateMobileHistoryListFromDb.get(0).getMobile());
+                        }
                     }
                 }
                 candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);

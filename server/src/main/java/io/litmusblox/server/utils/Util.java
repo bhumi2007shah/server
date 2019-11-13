@@ -132,10 +132,7 @@ public class Util {
     }
 
     public static boolean validateMobile(String mobile, String countryCode) throws ValidationException  {
-        Map<String, Long> countryMap =new HashMap<>();
-        MasterDataBean.getInstance().getCountryList().forEach(country -> {
-            countryMap.put(country.getCountryCode(), country.getMaxMobileLength());
-        });
+        Map<String, Long> countryMap = getCountryMap();
 
         if(Util.isNull(mobile) || mobile.trim().length() == 0)
             throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + mobile, HttpStatus.BAD_REQUEST);
@@ -357,5 +354,13 @@ public class Util {
             // ignore
         }
         return null;
+    }
+
+    public static Map<String, Long>getCountryMap(){
+        Map<String, Long> countryMap =new HashMap<>();
+        MasterDataBean.getInstance().getCountryList().forEach(country -> {
+            countryMap.put(country.getCountryCode(), country.getMaxMobileLength());
+        });
+        return countryMap;
     }
 }

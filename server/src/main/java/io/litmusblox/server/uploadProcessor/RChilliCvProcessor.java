@@ -197,10 +197,37 @@ public class RChilliCvProcessor {
             log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
         }
         try {
+            // check if email or mobile is available
             if(isEmailOrMobilePresent(candidate)) {
-                if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
-                    if (Util.isNull(candidate.getCountryCode()))
+                //check if country code in null and set it to user's country code
+                if(Util.isNull(candidate.getCountryCode())){
+                    candidate.setCountryCode(user.getCountryId().getCountryCode());
+                }
+                else{
+                    //check if country code is supported by us and strip mobile number according to that,
+                    // else change country code to user's country code
+                    if(
+                            !candidate.getCountryCode().equals(IConstant.AUS_CODE) ||
+                                    !candidate.getCountryCode().equals(IConstant.INDIA_CODE) ||
+                                    !candidate.getCountryCode().equals(IConstant.CAN_CODE) ||
+                                    !candidate.getCountryCode().equals(IConstant.SING_CODE) ||
+                                    !candidate.getCountryCode().equals(IConstant.UK_CODE) ||
+                                    !candidate.getCountryCode().equals(IConstant.US_CODE)
+                    ){
                         candidate.setCountryCode(user.getCountryId().getCountryCode());
+                        candidate.setMobile(
+                                candidate.getMobile().substring(
+                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(candidate.getCountryCode()))
+                                )
+                        );
+                    }
+                    else{
+                        candidate.setMobile(
+                                candidate.getMobile().substring(candidate.getMobile().length()-10)
+                        );
+                    }
+                }
+                if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
                     CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
 
                     if (null != candidateMobileHistoryFromDb && candidateMobileHistoryFromDb.getCandidate().getEmail()!=null) {
@@ -211,7 +238,6 @@ public class RChilliCvProcessor {
                 }
                 if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
                     CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
-
                     if (null != candidateEmailHistoryFromDb && candidateEmailHistoryFromDb.getCandidate().getMobile()!=null) {
                             candidate.setMobile(candidateEmailHistoryFromDb.getCandidate().getMobile());
                     }

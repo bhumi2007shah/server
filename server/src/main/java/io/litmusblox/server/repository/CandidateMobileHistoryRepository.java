@@ -4,9 +4,12 @@
 
 package io.litmusblox.server.repository;
 
+import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.CandidateMobileHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author : Sumit
@@ -17,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 public interface CandidateMobileHistoryRepository extends JpaRepository<CandidateMobileHistory, Long> {
 
-    @Transactional
+    @Transactional(readOnly = true)
     CandidateMobileHistory findByMobileAndCountryCode(String mobile, String countryCode);
+
+    @Transactional(readOnly = true)
+    List<CandidateMobileHistory> findByCandidateIdOrderByIdDesc(Candidate candidate);
 }

@@ -20,9 +20,9 @@ import java.util.List;
  */
 public interface CandidateMobileHistoryRepository extends JpaRepository<CandidateMobileHistory, Long> {
 
-    @Transactional
+    @Transactional(readOnly = true)
     CandidateMobileHistory findByMobileAndCountryCode(String mobile, String countryCode);
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<CandidateMobileHistory> findByCandidateIdOrderByIdDesc(Candidate candidate);
 }

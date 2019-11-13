@@ -20,9 +20,9 @@ import java.util.List;
  */
 public interface CandidateEmailHistoryRepository extends JpaRepository<CandidateEmailHistory, Long> {
 
-    @Transactional
+    @Transactional(readOnly = true)
     CandidateEmailHistory findByEmail(String email);
 
-    @Transactional
+    @Transactional(readOnly = true)
     List<CandidateEmailHistory> findByCandidateIdOrderByIdDesc(Candidate candidateId);
 }

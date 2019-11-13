@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Service class to process the CV uploaded against RChilli application
@@ -207,23 +209,22 @@ public class RChilliCvProcessor {
                     //check if country code is supported by us and strip mobile number according to that,
                     // else change country code to user's country code
                     if(
-                            !candidate.getCountryCode().equals(IConstant.AUS_CODE) ||
-                                    !candidate.getCountryCode().equals(IConstant.INDIA_CODE) ||
-                                    !candidate.getCountryCode().equals(IConstant.CAN_CODE) ||
-                                    !candidate.getCountryCode().equals(IConstant.SING_CODE) ||
-                                    !candidate.getCountryCode().equals(IConstant.UK_CODE) ||
-                                    !candidate.getCountryCode().equals(IConstant.US_CODE)
+                            !Stream.of(IConstant.CountryCode.values())
+                            .map(IConstant.CountryCode::getValue)
+                            .collect(Collectors.toList()).contains(candidate.getCountryCode())
                     ){
                         candidate.setCountryCode(user.getCountryId().getCountryCode());
                         candidate.setMobile(
                                 candidate.getMobile().substring(
-                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(candidate.getCountryCode()))
+                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(user.getCountryId().getCountryCode()))
                                 )
                         );
                     }
                     else{
                         candidate.setMobile(
-                                candidate.getMobile().substring(candidate.getMobile().length()-10)
+                                candidate.getMobile().substring(
+                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(candidate.getCountryCode()))
+                                )
                         );
                     }
                 }

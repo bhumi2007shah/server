@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class for holding Utility methods to be used across the application
@@ -140,26 +142,26 @@ public class Util {
         if(!mobile.matches(IConstant.REGEX_FOR_MOBILE_VALIDATION))
             return false; //the caller should check for status, if it is false, due to regex failure, call again after cleaning up the mobile number
 
-        if(countryCode.equals(IConstant.INDIA_CODE)) {
+        if(countryCode.equals(IConstant.CountryCode.INDIA_CODE.getValue())) {
             Matcher m = INDIAN_MOBILE_PATTERN.matcher(mobile);
             if(!(m.find() && m.group().equals(mobile))) //did not pass the Indian mobile number pattern
                 throw new ValidationException(IErrorMessages.INVALID_INDIAN_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
         }
 
-        if(!countryCode.equals(IConstant.INDIA_CODE)){
-            if(countryCode.equals(IConstant.AUS_CODE) && mobile.length() != countryMap.get(IConstant.AUS_CODE))
+        if(!countryCode.equals(IConstant.CountryCode.INDIA_CODE.getValue())){
+            if(countryCode.equals(IConstant.CountryCode.AUS_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.AUS_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_AUSTRALIA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.CAN_CODE) && mobile.length() != countryMap.get(IConstant.CAN_CODE))
+            if(countryCode.equals(IConstant.CountryCode.CAN_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.CAN_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_CANADA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.UK_CODE) && mobile.length() != countryMap.get(IConstant.UK_CODE))
+            if(countryCode.equals(IConstant.CountryCode.UK_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.UK_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_UK_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.US_CODE) && mobile.length() != countryMap.get(IConstant.US_CODE))
+            if(countryCode.equals(IConstant.CountryCode.US_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.US_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_US_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.SING_CODE) && mobile.length() != countryMap.get(IConstant.SING_CODE))
+            if(countryCode.equals(IConstant.CountryCode.SING_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.SING_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_SINGAPORE_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
         }

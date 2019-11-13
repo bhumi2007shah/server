@@ -71,6 +71,13 @@ public class CandidateCompanyDetails {
         this.designation = designation;
     }
 
+    public CandidateCompanyDetails(Long candidateId, String companyName, Date startDate, Date endDate) {
+        this.candidateId = candidateId;
+        this.companyName = companyName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
+
     public CandidateCompanyDetails() {
         super();
     }

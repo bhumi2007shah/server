@@ -215,4 +215,6 @@ public interface IConstant {
     enum CHATBOT_STATUS{
         Complete
     }
+
+    String DATE_FORMAT = "yyyy-MM-dd";
 }

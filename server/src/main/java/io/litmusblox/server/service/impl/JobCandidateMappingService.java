@@ -31,9 +31,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -102,6 +104,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     @Resource
     CvRatingSkillKeywordDetailsRepository cvRatingSkillKeywordDetailsRepository;
+
+    @Resource
+    CandidateEducationDetailsRepository candidateEducationDetailsRepository;
 
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
@@ -869,33 +874,44 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     public void editCandidate(JobCandidateMapping jobCandidateMapping) {
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         JobCandidateMapping jcmFromDb = jobCandidateMappingRepository.findById(jobCandidateMapping.getId()).orElse(null);
+
         //Update or create mobile no
-        if(null!=jobCandidateMapping.getCandidate().getMobile() && !jobCandidateMapping.getCandidate().getMobile().isEmpty()){
-            validateMobile(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
-            CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+        if(null!=jobCandidateMapping.getMobile() && !jobCandidateMapping.getMobile().isEmpty()){
+            validateMobile(jobCandidateMapping.getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
+            CandidateMobileHistory candidateMobileHistory = candidateMobileHistoryRepository.findByMobileAndCountryCode(jobCandidateMapping.getMobile(), jobCandidateMapping.getCandidate().getCountryCode());
             if(null == candidateMobileHistory) {
-                candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
-                jcmFromDb.setMobile(jobCandidateMapping.getCandidate().getMobile());
+                candidateMobileHistoryRepository.save(new CandidateMobileHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getMobile(), jobCandidateMapping.getCandidate().getCountryCode(), new Date(), loggedInUser));
+                jcmFromDb.setMobile(jobCandidateMapping.getMobile());
             }else {
                 if(!jcmFromDb.getCandidate().getId().equals(candidateMobileHistory.getCandidate().getId()))
-                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_MOBILE + jobCandidateMapping.getCandidate().getMobile() + " " + jobCandidateMapping.getCandidate().getEmail(), HttpStatus.BAD_REQUEST);
+                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_MOBILE + jobCandidateMapping.getMobile() + " " + jobCandidateMapping.getEmail(), HttpStatus.BAD_REQUEST);
                 else
                     jcmFromDb.setMobile(candidateMobileHistory.getMobile());
             }
         }
         //Update or create email id
-        if(null!=jobCandidateMapping.getCandidate().getEmail() && !jobCandidateMapping.getCandidate().getEmail().isEmpty()) {
-            validateEmail(jobCandidateMapping.getCandidate().getEmail());
-            CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getCandidate().getEmail());
+        if(null!=jobCandidateMapping.getEmail() && !jobCandidateMapping.getEmail().isEmpty()) {
+            validateEmail(jobCandidateMapping.getEmail());
+            CandidateEmailHistory candidateEmailHistory = candidateEmailHistoryRepository.findByEmail(jobCandidateMapping.getEmail());
             if (null == candidateEmailHistory) {
-                candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getEmail(), new Date(), loggedInUser));
-                jcmFromDb.setEmail(jobCandidateMapping.getCandidate().getEmail());
+                candidateEmailHistoryRepository.save(new CandidateEmailHistory(jcmFromDb.getCandidate(), jobCandidateMapping.getEmail(), new Date(), loggedInUser));
+                jcmFromDb.setEmail(jobCandidateMapping.getEmail());
             } else {
                 if (!jcmFromDb.getCandidate().getId().equals(candidateEmailHistory.getCandidate().getId()))
-                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_EMAIL + jobCandidateMapping.getCandidate().getMobile() + " " + jobCandidateMapping.getCandidate().getEmail(), HttpStatus.BAD_REQUEST);
+                    throw new ValidationException(IErrorMessages.CANDIDATE_ID_MISMATCH_FROM_HISTORY_FOR_EMAIL + jobCandidateMapping.getMobile() + " " + jobCandidateMapping.getEmail(), HttpStatus.BAD_REQUEST);
                 else
                     jcmFromDb.setEmail(candidateEmailHistory.getEmail());
             }
+        }
+
+        //Update candidate firstName
+        if(Util.isNotNull(jobCandidateMapping.getCandidateFirstName())){
+            jcmFromDb.setCandidateFirstName(Util.validateCandidateName(jobCandidateMapping.getCandidateFirstName()));
+        }
+
+        //Update candidate lastName
+        if(Util.isNotNull(jobCandidateMapping.getCandidateLastName())){
+            jcmFromDb.setCandidateLastName(Util.validateCandidateName(jobCandidateMapping.getCandidateLastName()));
         }
 
         jobCandidateMappingRepository.save(jcmFromDb);
@@ -913,14 +929,60 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             candidateDetailsRepository.save(new CandidateDetails(jcmFromDb.getCandidate(), jobCandidateMapping.getCandidate().getCandidateDetails().getTotalExperience()));
         }
 
-        CandidateCompanyDetails objFromDb = null;
-        CandidateCompanyDetails candidateCompanyDetail = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
-        if(null != candidateCompanyDetail.getId())
-            objFromDb = candidateCompanyDetailsRepository.findById(candidateCompanyDetail.getId()).orElse(null);
-        if(null != objFromDb && null != candidateCompanyDetail.getNoticePeriod()){
-            objFromDb.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(candidateCompanyDetail.getNoticePeriod()));
-            candidateCompanyDetailsRepository.save(objFromDb);
+        //Update candidate education details
+        if(Util.isNotNull(jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).getDegree())){
+            AtomicBoolean isDegreePresent = new AtomicBoolean(false);
+            jcmFromDb.getCandidate().getCandidateEducationDetails().stream().forEach(candidateEducationDetails -> {
+                if(candidateEducationDetails.getDegree().equalsIgnoreCase(jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).getDegree())){
+                    isDegreePresent.set(true);
+                }
+            });
+            if(!isDegreePresent.get() ||  null == jcmFromDb.getCandidate().getCandidateEducationDetails()){
+                if(jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).getDegree().length()>IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue())
+                    jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).setDegree(Util.truncateField(jcmFromDb.getCandidate(),IConstant.MAX_FIELD_LENGTHS.DEGREE.name(), IConstant.MAX_FIELD_LENGTHS.DEGREE.getValue(),jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).getDegree()));
+
+                CandidateEducationDetails candidateEducationDetails = new CandidateEducationDetails(jcmFromDb.getCandidate().getId(), jobCandidateMapping.getCandidate().getCandidateEducationDetails().get(0).getDegree(), String.valueOf(Calendar.getInstance().get(Calendar.YEAR)));
+                candidateEducationDetailsRepository.save(candidateEducationDetails);
+            }
         }
+
+        //Update candidate company detail
+        CandidateCompanyDetails companyDetails = null;
+        CandidateCompanyDetails companyDetailsByRequest = jobCandidateMapping.getCandidate().getCandidateCompanyDetails().get(0);
+        if(Util.isNotNull(companyDetailsByRequest.getCompanyName())){
+            AtomicBoolean isCompanyPresent = new AtomicBoolean(false);
+            jcmFromDb.getCandidate().getCandidateCompanyDetails().stream().forEach(CompanyDetails -> {
+                if(CompanyDetails.getCompanyName().equalsIgnoreCase(companyDetailsByRequest.getCompanyName())){
+                    isCompanyPresent.set(true);
+                }
+            });
+            if(!isCompanyPresent.get() || null == jcmFromDb.getCandidate().getCandidateCompanyDetails()){
+                Date endDate = null;
+                Date startDate = null;
+
+                try {
+                    //in getCurrentOrBefore1YearDate method  pass boolean value
+                    //get Before 1 year date then pass true if get current date then pass false value
+                    endDate = Util.getCurrentOrBefore1YearDate(false);
+                    startDate = Util.getCurrentOrBefore1YearDate(true);
+                } catch (ParseException e) {
+                    log.error("Error while set start date and end date in candidate company detail : "+e.getMessage());
+                }
+                companyDetails = new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(), companyDetailsByRequest.getCompanyName(), startDate, endDate);
+                if(Util.isNotNull(companyDetailsByRequest.getNoticePeriod())){
+                    companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
+                }
+            }else{
+                if(null != companyDetailsByRequest.getId())
+                    companyDetails = candidateCompanyDetailsRepository.findById(companyDetailsByRequest.getId()).orElse(null);
+                if(null != companyDetails && null != companyDetailsByRequest.getNoticePeriod()){
+                    companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
+                }
+            }
+            candidateCompanyDetailsRepository.save(companyDetails);
+            log.info("Edit candidate info successfully");
+        }
+
     }
 
 

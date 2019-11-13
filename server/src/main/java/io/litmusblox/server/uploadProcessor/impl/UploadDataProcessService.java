@@ -129,9 +129,15 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             //validate candidate used in multiple places so create util method
              candidate.setFirstName(Util.validateCandidateName(candidate.getFirstName()));
         }
+        else{
+            candidate.setFirstName(IConstant.NOT_FIRST_NAME);
+        }
 
         if (null != candidate.getLastName()) {
             candidate.setLastName(Util.validateCandidateName(candidate.getLastName()));
+        }
+        else{
+            candidate.setLastName(IConstant.NOT_LAST_NAME);
         }
 
         if (!Util.validateEmail(candidate.getEmail())) {

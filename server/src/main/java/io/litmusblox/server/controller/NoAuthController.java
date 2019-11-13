@@ -8,8 +8,10 @@ import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.error.WebException;
 import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobScreeningQuestions;
+import io.litmusblox.server.model.User;
 import io.litmusblox.server.service.IJobCandidateMappingService;
 import io.litmusblox.server.service.TechChatbotRequestBean;
+import io.litmusblox.server.service.impl.LbUserDetailsService;
 import io.litmusblox.server.utils.Util;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class NoAuthController {
     IJobCandidateMappingService jobCandidateMappingService;
 
     @Autowired
+    LbUserDetailsService userDetailsService;
+
+    @Autowired
     private HttpServletRequest servletRequest;
 
     @Value("${scoringEngineIpAddress}")
@@ -63,7 +68,7 @@ public class NoAuthController {
         long startTime = System.currentTimeMillis();
         List<JobScreeningQuestions> response = jobCandidateMappingService.getJobScreeningQuestions(uuid);
         log.info("Completed fetching screening questions in " + (System.currentTimeMillis() - startTime) + "ms.");
-         return Util.stripExtraInfoFromResponseBean(response,
+        String responseStr = Util.stripExtraInfoFromResponseBean(response,
                 (new HashMap<String, List<String>>(){{
                     put("User", Arrays.asList("id"));
                 }}),
@@ -74,6 +79,11 @@ public class NoAuthController {
                     put("ScreeningQuestions", new ArrayList<>(0));
                 }}
         );
+        if(response.size() >0 ) {
+            User jobCreatedBy = userDetailsService.findById(response.get(0).getCreatedBy());
+            responseStr.replaceAll("`$companyName`",jobCreatedBy.getCompany().getCompanyName());
+        }
+        return responseStr;
     }
 
     /**

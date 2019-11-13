@@ -146,7 +146,7 @@ insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('sendSms',1),
 ('maxCvFiles',20),
 ('maxCapabilities',10),
-('cvRatingTimeout', 30000);
+('cvRatingTimeout', 5000);
 
 
  -- key skill master data

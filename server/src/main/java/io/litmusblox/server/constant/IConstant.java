@@ -18,12 +18,19 @@ public interface IConstant {
      String REGEX_FOR_COMPANY_JOB_ID = "^[\\-\\/\\.\\,\\a-zA-Z0-9\\s]*$";
      String REGEX_FOR_COMPANY_NAME ="^[\\&\\'\\-\\.a-zA-Z0-9\\s]+$";
 
-    String INDIA_CODE = "+91";
-    String AUS_CODE = "+61";
-    String CAN_CODE = "+1";
-    String UK_CODE = "+44";
-    String SING_CODE = "+65";
-    String US_CODE = "+1";
+     enum CountryCode{
+        INDIA_CODE("+91"), AUS_CODE("+61"), CAN_CODE("+1"), UK_CODE("+44"), SING_CODE("+65"), US_CODE("+1");
+
+         private String countryCode;
+         CountryCode(String val) {
+             this.countryCode = val;
+         }
+
+         public String getValue() {
+             return this.countryCode;
+         }
+     }
+
     String INDIAN_MOBILE_PATTERN = "(0/91)?[6-9][0-9]{9}";
     String JUNK_MOBILE_PATTERN = "([0-9])\\1{8,}";
     String REGEX_FOR_EMAIL_VALIDATION = "^[a-z0-9A-Z]+[\\w.]+@[a-zA-Z]+[a-zA-Z0-9.-]+[a-zA-Z]$";
@@ -215,6 +222,10 @@ public interface IConstant {
     enum CHATBOT_STATUS{
         Complete
     }
+
+    //constants for create candidate if firstName, lastName.
+    String NOT_FIRST_NAME="Not";
+    String NOT_LAST_NAME="Available";
 
     String DATE_FORMAT = "yyyy-MM-dd";
 }

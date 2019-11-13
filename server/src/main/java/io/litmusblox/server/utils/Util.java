@@ -32,6 +32,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Class for holding Utility methods to be used across the application
@@ -134,10 +136,7 @@ public class Util {
     }
 
     public static boolean validateMobile(String mobile, String countryCode) throws ValidationException  {
-        Map<String, Long> countryMap =new HashMap<>();
-        MasterDataBean.getInstance().getCountryList().forEach(country -> {
-            countryMap.put(country.getCountryCode(), country.getMaxMobileLength());
-        });
+        Map<String, Long> countryMap = getCountryMap();
 
         if(Util.isNull(mobile) || mobile.trim().length() == 0)
             throw new ValidationException(IErrorMessages.MOBILE_NULL_OR_BLANK + " - " + mobile, HttpStatus.BAD_REQUEST);
@@ -145,26 +144,26 @@ public class Util {
         if(!mobile.matches(IConstant.REGEX_FOR_MOBILE_VALIDATION))
             return false; //the caller should check for status, if it is false, due to regex failure, call again after cleaning up the mobile number
 
-        if(countryCode.equals(IConstant.INDIA_CODE)) {
+        if(countryCode.equals(IConstant.CountryCode.INDIA_CODE.getValue())) {
             Matcher m = INDIAN_MOBILE_PATTERN.matcher(mobile);
             if(!(m.find() && m.group().equals(mobile))) //did not pass the Indian mobile number pattern
                 throw new ValidationException(IErrorMessages.INVALID_INDIAN_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
         }
 
-        if(!countryCode.equals(IConstant.INDIA_CODE)){
-            if(countryCode.equals(IConstant.AUS_CODE) && mobile.length() != countryMap.get(IConstant.AUS_CODE))
+        if(!countryCode.equals(IConstant.CountryCode.INDIA_CODE.getValue())){
+            if(countryCode.equals(IConstant.CountryCode.AUS_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.AUS_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_AUSTRALIA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.CAN_CODE) && mobile.length() != countryMap.get(IConstant.CAN_CODE))
+            if(countryCode.equals(IConstant.CountryCode.CAN_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.CAN_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_CANADA_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.UK_CODE) && mobile.length() != countryMap.get(IConstant.UK_CODE))
+            if(countryCode.equals(IConstant.CountryCode.UK_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.UK_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_UK_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.US_CODE) && mobile.length() != countryMap.get(IConstant.US_CODE))
+            if(countryCode.equals(IConstant.CountryCode.US_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.US_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_US_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
-            if(countryCode.equals(IConstant.SING_CODE) && mobile.length() != countryMap.get(IConstant.SING_CODE))
+            if(countryCode.equals(IConstant.CountryCode.SING_CODE.getValue()) && mobile.length() != countryMap.get(IConstant.CountryCode.SING_CODE.getValue()))
                 throw new ValidationException(IErrorMessages.INVALID_SINGAPORE_MOBILE_NUMBER + " - " + mobile, HttpStatus.BAD_REQUEST);
 
         }
@@ -273,6 +272,12 @@ public class Util {
         if(mobileNo.length() > 10 && mobileNo.startsWith("91"))
             mobileNo = mobileNo.substring(2);
 
+        //if mobile number is greater than 10 digits and start with anything else than 91 and replace any non digit character
+        if(mobileNo.length() > 10 ){
+            mobileNo = mobileNo.replaceAll("\\D", "");
+            mobileNo = mobileNo.substring(mobileNo.length()-10);
+        }
+
         return mobileNo;
     }
 
@@ -353,6 +358,14 @@ public class Util {
             // ignore
         }
         return null;
+    }
+
+    public static Map<String, Long>getCountryMap(){
+        Map<String, Long> countryMap =new HashMap<>();
+        MasterDataBean.getInstance().getCountryList().forEach(country -> {
+            countryMap.put(country.getCountryCode(), country.getMaxMobileLength());
+        });
+        return countryMap;
     }
 
     public static String validateCandidateName(String name){

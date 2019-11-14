@@ -729,13 +729,22 @@ INSERT INTO public.currency(currency_full_name, currency_short_name, country) VA
 ('Pound Sterling', 'GBP', 'gb'),
 ('US Dollar', 'USD', 'us');
 
-INSERT INTO STAGE_MASTER(STAGE_NAME) VALUES
-('Source'),
-('Screen'),
-('Resume Submit'),
-('Interview'),
-('Make Offer'),
-('Offer'),
-('Join');
+INSERT INTO STAGE_MASTER(ID, STAGE_NAME) VALUES
+(1, 'Source'),
+(2, 'Screen'),
+(3, 'Resume Submit'),
+(4, 'Interview'),
+(5, 'Make Offer'),
+(6, 'Offer'),
+(7, 'Join');
 
-INSERT INTO STEPS_PER_STAGE ()
+INSERT INTO STEPS_PER_STAGE (STAGE_ID, STEP_NAME) VALUES
+(1, 'Source'),
+(2, 'Screen'),
+(3, 'Resume Submit'),
+(4, 'L1'),
+(4, 'L2'),
+(4, 'L3'),
+(5, 'Make Offer'),
+(6, 'Offer'),
+(7, 'Join');

@@ -953,3 +953,23 @@ STAGE_ID integer REFERENCES STAGE_MASTER(ID) NOT NULL,
 STEP_NAME varchar(15) NOT NULL,
 CONSTRAINT UNIQUE_STAGE_STEP UNIQUE(STAGE_ID, STEP_NAME)
 );
+
+INSERT INTO STAGE_MASTER(ID, STAGE_NAME) VALUES
+(1, 'Source'),
+(2, 'Screen'),
+(3, 'Resume Submit'),
+(4, 'Interview'),
+(5, 'Make Offer'),
+(6, 'Offer'),
+(7, 'Join');
+
+INSERT INTO STEPS_PER_STAGE (STAGE_ID, STEP_NAME) VALUES
+(1, 'Source'),
+(2, 'Screen'),
+(3, 'Resume Submit'),
+(4, 'L1'),
+(4, 'L2'),
+(4, 'L3'),
+(5, 'Make Offer'),
+(6, 'Offer'),
+(7, 'Join');

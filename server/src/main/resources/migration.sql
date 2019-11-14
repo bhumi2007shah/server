@@ -931,3 +931,12 @@ INSERT INTO public.currency(currency_full_name, currency_short_name, country) VA
 UPDATE CONFIGURATION_SETTINGS
 SET CONFIG_VALUE = 5000
 WHERE CONFIG_NAME = 'cvRatingTimeout';
+
+--Delete duplicate records from cvRatings
+delete from cv_rating_skill_keyword_details
+where cv_rating_skill_keyword_details.cv_rating_id in (
+select a.id from cv_rating a, cv_rating b
+where a.id < b.id and a.job_candidate_mapping_id = b.job_candidate_mapping_id);
+
+DELETE FROM cv_rating a USING cv_rating b
+WHERE a.id < b.id AND a.job_candidate_mapping_id = b.job_candidate_mapping_id;

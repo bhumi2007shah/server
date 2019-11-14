@@ -327,6 +327,17 @@ public class RChilliCvProcessor {
         String[] mobileString=null;
         String mobile=bean.getFormattedMobile().isEmpty() ? bean.getFormattedPhone() : bean.getFormattedMobile();
 
+        if(Util.isNull(bean.getFirstName())){
+            bean.setFirstName(IConstant.NOT_FIRST_NAME);
+        }
+
+        if(Util.isNull(bean.getLastName()) && !Util.isNull(bean.getFirstName())){
+            bean.setLastName("-");
+        }
+        else if(Util.isNull(bean.getLastName()) && Util.isNull(bean.getLastName())){
+            bean.setLastName(IConstant.NOT_LAST_NAME);
+        }
+
         if(mobile.contains(",")){
             mobileString =mobile.split(",");
             mobile = mobileString[0];

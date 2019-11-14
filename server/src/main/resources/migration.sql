@@ -932,6 +932,10 @@ UPDATE CONFIGURATION_SETTINGS
 SET CONFIG_VALUE = 5000
 WHERE CONFIG_NAME = 'cvRatingTimeout';
 
+--Add unique constraint for jcm id in cv_rating table
+ALTER TABLE CV_RATING
+ADD CONSTRAINT UNIQUE_CV_RATING_JCM UNIQUE(JOB_CANDIDATE_MAPPING_ID);
+
 --Delete duplicate records from cvRatings
 delete from cv_rating_skill_keyword_details
 where cv_rating_skill_keyword_details.cv_rating_id in (

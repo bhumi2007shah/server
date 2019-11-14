@@ -969,15 +969,20 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                     log.error("Error while set start date and end date in candidate company detail : "+e.getMessage());
                 }
                 companyDetails = new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(), companyDetailsByRequest.getCompanyName(), startDate, endDate);
-                if(Util.isNotNull(companyDetailsByRequest.getNoticePeriod())){
-                    companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
-                }
-            }else{
+
+            }else {
                 if(null != companyDetailsByRequest.getId())
                     companyDetails = candidateCompanyDetailsRepository.findById(companyDetailsByRequest.getId()).orElse(null);
-                if(null != companyDetails && null != companyDetailsByRequest.getNoticePeriod()){
+            }
+            if(null != companyDetails){
+                if(Util.isNotNull(companyDetailsByRequest.getNoticePeriod()))
                     companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
-                }
+
+                if(Util.isNotNull(companyDetailsByRequest.getSalary()))
+                    companyDetails.setSalary(companyDetailsByRequest.getSalary());
+
+                if(Util.isNotNull(companyDetailsByRequest.getDesignation()))
+                    companyDetails.setDesignation(companyDetailsByRequest.getDesignation());
             }
             candidateCompanyDetailsRepository.save(companyDetails);
             log.info("Edit candidate info successfully");

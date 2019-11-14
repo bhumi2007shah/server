@@ -4,9 +4,9 @@
 
 package io.litmusblox.server.repository;
 
-import io.litmusblox.server.model.Candidate;
 import io.litmusblox.server.model.CandidateMobileHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -24,5 +24,9 @@ public interface CandidateMobileHistoryRepository extends JpaRepository<Candidat
     CandidateMobileHistory findByMobileAndCountryCode(String mobile, String countryCode);
 
     @Transactional(readOnly = true)
-    List<CandidateMobileHistory> findByCandidateIdOrderByIdDesc(Candidate candidate);
+    List<CandidateMobileHistory> findByCandidateIdOrderByIdDesc(Long candidateId);
+
+    @Transactional(readOnly = true)
+    @Query(nativeQuery = true, value = "select candidate_id from candidate_mobile_history where mobile=:mobile and country_code=:countryCode")
+    Long findCandidateIdByMobileAndCountryCode(String mobile, String countryCode);
 }

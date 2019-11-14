@@ -959,7 +959,6 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             if(!isCompanyPresent.get() || null == jcmFromDb.getCandidate().getCandidateCompanyDetails()){
                 Date endDate = null;
                 Date startDate = null;
-
                 try {
                     //in getCurrentOrBefore1YearDate method  pass boolean value
                     //get Before 1 year date then pass true if get current date then pass false value
@@ -969,25 +968,40 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                     log.error("Error while set start date and end date in candidate company detail : "+e.getMessage());
                 }
                 companyDetails = new CandidateCompanyDetails(jcmFromDb.getCandidate().getId(), companyDetailsByRequest.getCompanyName(), startDate, endDate);
-
+                companyDetails = addCompanyDetailsInfo(companyDetails, companyDetailsByRequest);
+                if(null != jcmFromDb.getCandidate().getCandidateCompanyDetails()){
+                    List<CandidateCompanyDetails> oldCompanyList = jcmFromDb.getCandidate().getCandidateCompanyDetails();
+                    List<CandidateCompanyDetails> newCompanyList = new ArrayList<>(oldCompanyList.size()+1);
+                    newCompanyList.add(companyDetails);
+                    newCompanyList.addAll(oldCompanyList);
+                    candidateCompanyDetailsRepository.deleteAll(oldCompanyList);
+                    candidateCompanyDetailsRepository.flush();
+                    candidateCompanyDetailsRepository.saveAll(newCompanyList);
+                }
             }else {
-                if(null != companyDetailsByRequest.getId())
+                if(null != companyDetailsByRequest.getId()){
                     companyDetails = candidateCompanyDetailsRepository.findById(companyDetailsByRequest.getId()).orElse(null);
+                    companyDetails = addCompanyDetailsInfo(companyDetails, companyDetailsByRequest);
+                    candidateCompanyDetailsRepository.save(companyDetails);
+                }
             }
-            if(null != companyDetails){
-                if(Util.isNotNull(companyDetailsByRequest.getNoticePeriod()))
-                    companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
-
-                if(Util.isNotNull(companyDetailsByRequest.getSalary()))
-                    companyDetails.setSalary(companyDetailsByRequest.getSalary());
-
-                if(Util.isNotNull(companyDetailsByRequest.getDesignation()))
-                    companyDetails.setDesignation(companyDetailsByRequest.getDesignation());
-            }
-            candidateCompanyDetailsRepository.save(companyDetails);
             log.info("Edit candidate info successfully");
         }
 
+    }
+
+    private CandidateCompanyDetails addCompanyDetailsInfo(CandidateCompanyDetails companyDetails, CandidateCompanyDetails companyDetailsByRequest) {
+        if(null != companyDetails){
+            if (Util.isNotNull(companyDetailsByRequest.getNoticePeriod()))
+                companyDetails.setNoticePeriodInDb(MasterDataBean.getInstance().getNoticePeriodMapping().get(companyDetailsByRequest.getNoticePeriod()));
+
+            if (Util.isNotNull(companyDetailsByRequest.getSalary()))
+                companyDetails.setSalary(companyDetailsByRequest.getSalary());
+
+            if (Util.isNotNull(companyDetailsByRequest.getDesignation()))
+                companyDetails.setDesignation(companyDetailsByRequest.getDesignation());
+        }
+        return companyDetails;
     }
 
 

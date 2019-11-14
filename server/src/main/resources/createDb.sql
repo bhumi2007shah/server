@@ -633,7 +633,8 @@ CREATE TABLE CREATE_JOB_PAGE_SEQUENCE(
 CREATE TABLE CV_RATING (
 ID serial PRIMARY KEY NOT NULL,
 JOB_CANDIDATE_MAPPING_ID integer REFERENCES JOB_CANDIDATE_MAPPING(ID) NOT NULL,
-OVERALL_RATING smallint NOT NULL
+OVERALL_RATING smallint NOT NULL,
+CONSTRAINT UNIQUE_CV_RATING_JCM UNIQUE(JOB_CANDIDATE_MAPPING_ID)
 );
 
 ---------------------------------------------------------------------------------------------------------------------------

@@ -931,3 +931,7 @@ INSERT INTO public.currency(currency_full_name, currency_short_name, country) VA
 UPDATE CONFIGURATION_SETTINGS
 SET CONFIG_VALUE = 5000
 WHERE CONFIG_NAME = 'cvRatingTimeout';
+
+--Add unique constraint for jcm id in cv_rating table
+ALTER TABLE CV_RATING
+ADD CONSTRAINT UNIQUE_CV_RATING_JCM UNIQUE(JOB_CANDIDATE_MAPPING_ID);

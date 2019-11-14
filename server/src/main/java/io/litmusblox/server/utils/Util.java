@@ -27,6 +27,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -365,4 +367,31 @@ public class Util {
         });
         return countryMap;
     }
+
+    public static String validateCandidateName(String name){
+        log.info("Inside validate name");
+        String cleanFirstName = name;
+        if (!validateName(name.trim())) {
+            cleanFirstName = name.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
+            log.error("Special characters found, cleaning First name \"" + name + "\" to " + cleanFirstName);
+            if (!validateName(cleanFirstName))
+                throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + name, HttpStatus.BAD_REQUEST);
+            cleanFirstName = Util.toSentenceCase(cleanFirstName);
+        }
+        return cleanFirstName;
+    }
+
+    public static Date getCurrentOrBefore1YearDate(Boolean dateBefore1Year) throws ParseException {
+        LocalDateTime ldt = null;
+       if(dateBefore1Year)
+            ldt = LocalDateTime.now().minusYears(1);
+       else
+         ldt = LocalDateTime.now();
+
+        DateTimeFormatter formmat = DateTimeFormatter.ofPattern(IConstant.DATE_FORMAT, Locale.ENGLISH);
+        String formatter = formmat.format(ldt);
+        return new SimpleDateFormat(IConstant.DATE_FORMAT).parse(formatter);
+    }
+
+
 }

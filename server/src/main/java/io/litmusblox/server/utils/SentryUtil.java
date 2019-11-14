@@ -37,10 +37,12 @@ public class SentryUtil {
         //Breadcrumb is a map with key value pairs. Helps to send extra params to sentry to help troubleshoot
         if(breadCrumb != null && !breadCrumb.isEmpty()) {
             for (Map.Entry<String, String> entry : breadCrumb.entrySet()){
-                BreadcrumbBuilder breadcrumbBuilder = new BreadcrumbBuilder();
-                breadcrumbBuilder.setMessage(entry.getValue());
-                breadcrumbBuilder.setCategory(entry.getKey());
-                Sentry.getContext().recordBreadcrumb(breadcrumbBuilder.build());
+                if(null != entry.getValue() && null != entry.getKey()){
+                    BreadcrumbBuilder breadcrumbBuilder = new BreadcrumbBuilder();
+                    breadcrumbBuilder.setMessage(entry.getValue());
+                    breadcrumbBuilder.setCategory(entry.getKey());
+                    Sentry.getContext().recordBreadcrumb(breadcrumbBuilder.build());
+                }
             }
         }
 

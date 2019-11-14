@@ -231,9 +231,9 @@ public class RChilliCvProcessor {
                     }
                 }
                 if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
-                    CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
-                    if (null != candidateMobileHistoryFromDb) {
-                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateMobileHistoryFromDb.getCandidate());
+                    Long candidateIdFromMobileHistory = candidateMobileHistoryRepository.findCandidateIdByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
+                    if (null != candidateIdFromMobileHistory) {
+                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateIdFromMobileHistory);
                         if(candidateEmailHistoryListFromDb.size()>0) {
                             candidate.setEmail(candidateEmailHistoryListFromDb.get(0).getEmail());
                         }
@@ -241,12 +241,15 @@ public class RChilliCvProcessor {
                             candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
                         }
                     }
+                    else {
+                        candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                    }
                 }
 
                 if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
-                    CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
-                    if (null != candidateEmailHistoryFromDb) {
-                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateEmailHistoryFromDb.getCandidate());
+                    Long candidateIdFromEmailHistory = candidateEmailHistoryRepository.findCandidateIdByEmail(candidate.getEmail());
+                    if (null != candidateIdFromEmailHistory) {
+                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateIdFromEmailHistory);
                         if(candidateMobileHistoryListFromDb.size()>0){
                             candidate.setMobile(candidateMobileHistoryListFromDb.get(0).getMobile());
                         }

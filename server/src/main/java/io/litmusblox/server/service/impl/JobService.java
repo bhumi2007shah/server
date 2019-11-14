@@ -889,6 +889,8 @@ public class JobService implements IJobService {
         log.info("Completed publishing job with id: " + jobId);
         if(publishedJob.getJobCapabilityList().size() == 0)
             log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
+        else if(jobCapabilitiesRepository.findByJobIdAndSelected(jobId, true).size() == 0)
+            log.info("No capabilities have been selected for the job: {}. Scoring engine api call will NOT happen", jobId);
         else {
             log.info("Calling Scoring Engine Api to create a job");
             try {

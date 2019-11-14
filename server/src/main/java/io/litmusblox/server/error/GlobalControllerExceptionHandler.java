@@ -83,11 +83,11 @@ public class GlobalControllerExceptionHandler {
         int index = exception.getMessage().indexOf(templateStr);
         Map<String, String> breadCrumb = new HashMap<>();
         breadCrumb.put("ExceptionType","ConstraintViolationException");
-        if (index != -1) {
+        if(null != exception.getCause() && index != -1){
             SentryUtil.logWithStaticAPI(null, exception.getCause().getMessage().substring(index+templateStr.length(),exception.getCause().getMessage().lastIndexOf('}')-1), breadCrumb);
             return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),exception.getMessage().substring(index+templateStr.length(),exception.getMessage().lastIndexOf('}')-1));
         }
-        SentryUtil.logWithStaticAPI(null, exception.getCause().getMessage(), breadCrumb);
+        SentryUtil.logWithStaticAPI(null, (exception.getCause()!=null)?exception.getCause().getMessage():exception.getMessage(), breadCrumb);
         return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getMessage());
     }
 
@@ -97,11 +97,11 @@ public class GlobalControllerExceptionHandler {
         int index = exception.getCause().getMessage().indexOf(templateStr);
         Map<String, String> breadCrumb = new HashMap<>();
         breadCrumb.put("ExceptionType","RollbackException");
-        if (index != -1) {
+        if (null != exception.getCause() && index != -1) {
             SentryUtil.logWithStaticAPI(null, exception.getCause().getMessage().substring(index+templateStr.length(),exception.getCause().getMessage().lastIndexOf('}')-1), breadCrumb);
             return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(),exception.getCause().getMessage().substring(index+templateStr.length(),exception.getCause().getMessage().lastIndexOf('}')-1));
         }
-        SentryUtil.logWithStaticAPI(null, exception.getCause().getMessage(), breadCrumb);
+        SentryUtil.logWithStaticAPI(null, (exception.getCause()!=null)?exception.getCause().getMessage():exception.getMessage(), breadCrumb);
         return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), exception.getCause().getMessage());
     }
 

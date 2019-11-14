@@ -126,23 +126,18 @@ public class UploadDataProcessService implements IUploadDataProcessService {
 
         log.info("Inside validateDataAndSaveJcmAndJcmCommModel method");
         if (null != candidate.getFirstName()) {
-            if (!Util.validateName(candidate.getFirstName().trim())) {
-                String cleanFirstName = candidate.getFirstName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
-                log.error("Special characters found, cleaning First name \"" + candidate.getFirstName() + "\" to " + cleanFirstName);
-                if (!Util.validateName(cleanFirstName))
-                    throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getFirstName(), HttpStatus.BAD_REQUEST);
-                candidate.setFirstName(Util.toSentenceCase(cleanFirstName));
-            }
+            //validate candidate used in multiple places so create util method
+             candidate.setFirstName(Util.validateCandidateName(candidate.getFirstName()));
+        }
+        else{
+            candidate.setFirstName(IConstant.NOT_FIRST_NAME);
         }
 
         if (null != candidate.getLastName()) {
-            if (!Util.validateName(candidate.getLastName().trim())) {
-                String cleanLastName = candidate.getLastName().replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_NAME, "");
-                log.error("Special characters found, cleaning Last name \"" + candidate.getLastName() + "\" to " + cleanLastName);
-                if (!Util.validateName(cleanLastName))
-                    throw new ValidationException(IErrorMessages.NAME_FIELD_SPECIAL_CHARACTERS + " - " + candidate.getLastName(), HttpStatus.BAD_REQUEST);
-                candidate.setLastName(Util.toSentenceCase(cleanLastName));
-            }
+            candidate.setLastName(Util.validateCandidateName(candidate.getLastName()));
+        }
+        else{
+            candidate.setLastName(IConstant.NOT_LAST_NAME);
         }
 
         if (!Util.validateEmail(candidate.getEmail())) {

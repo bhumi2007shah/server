@@ -343,4 +343,8 @@ public class LbUserDetailsService implements UserDetailsService {
         log.info("Completed processing list of users in " + (System.currentTimeMillis() - startTime) + "ms.");
         return responseBeans;
     }
+
+    public User findById(Long userId) throws Exception {
+        return userRepository.getOne(userId);
+    }
 }

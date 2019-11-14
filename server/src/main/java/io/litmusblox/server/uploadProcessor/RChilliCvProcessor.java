@@ -38,6 +38,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Service class to process the CV uploaded against RChilli application
@@ -75,6 +77,12 @@ public class RChilliCvProcessor {
 
     @Resource
     CandidateRepository candidateRepository;
+
+    @Resource
+    CandidateEmailHistoryRepository candidateEmailHistoryRepository;
+
+    @Resource
+    CandidateMobileHistoryRepository candidateMobileHistoryRepository;
 
     @Transactional(readOnly = true)
     User getUser(long userId) {
@@ -121,8 +129,8 @@ public class RChilliCvProcessor {
 
              if(!rChilliErrorResponse) {
 
-                 rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
-                 rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
+                rchilliJsonResponse=rchilliJsonResponse.substring(rchilliJsonResponse.indexOf(":")+1,rchilliJsonResponse.lastIndexOf("}"));
+                rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
 
                 //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
                 ObjectMapper mapper = new ObjectMapper();
@@ -175,7 +183,7 @@ public class RChilliCvProcessor {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
             log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
         }
-        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId);
+        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId, job.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -191,7 +199,64 @@ public class RChilliCvProcessor {
             log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED + " : user id : " + user.getId());
         }
         try {
-            candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+            // check if email or mobile is available
+            if(isEmailOrMobilePresent(candidate)) {
+                //check if country code in null and set it to user's country code
+                if(Util.isNull(candidate.getCountryCode())){
+                    candidate.setCountryCode(user.getCountryId().getCountryCode());
+                }
+                else{
+                    //check if country code is supported by us and strip mobile number according to that,
+                    // else change country code to user's country code
+                    if(
+                            !Stream.of(IConstant.CountryCode.values())
+                            .map(IConstant.CountryCode::getValue)
+                            .collect(Collectors.toList()).contains(candidate.getCountryCode())
+                    ){
+                        candidate.setCountryCode(user.getCountryId().getCountryCode());
+                        if(!candidate.getMobile().isEmpty()) {
+                            candidate.setMobile(
+                                    candidate.getMobile().substring(
+                                            (int) (candidate.getMobile().length() - Util.getCountryMap().get(user.getCountryId().getCountryCode()))
+                                    )
+                            );
+                        }
+                    }
+                    else if(!candidate.getMobile().isEmpty()){
+                        candidate.setMobile(
+                                candidate.getMobile().substring(
+                                        (int) (candidate.getMobile().length()-Util.getCountryMap().get(candidate.getCountryCode()))
+                                )
+                        );
+                    }
+                }
+                if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
+                    CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
+                    if (null != candidateMobileHistoryFromDb) {
+                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateMobileHistoryFromDb.getCandidate());
+                        if(candidateEmailHistoryListFromDb.size()>0) {
+                            candidate.setEmail(candidateEmailHistoryListFromDb.get(0).getEmail());
+                        }
+                        else {
+                            candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                        }
+                    }
+                }
+
+                if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
+                    CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
+                    if (null != candidateEmailHistoryFromDb) {
+                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateEmailHistoryFromDb.getCandidate());
+                        if(candidateMobileHistoryListFromDb.size()>0){
+                            candidate.setMobile(candidateMobileHistoryListFromDb.get(0).getMobile());
+                        }
+                    }
+                }
+                candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
+            }
+            else{
+                throw new Exception();
+            }
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
             log.error("Error while validate candidate data and save jcm received from RChilliJson : " + ve.getErrorMessage()+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
@@ -218,7 +283,7 @@ public class RChilliCvProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId) {
+    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId, Long jobId) {
         log.info("Inside addCvParsingDetails method");
         try {
             //Add cv_parsing_details
@@ -243,6 +308,12 @@ public class RChilliCvProcessor {
             }
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetails.setErrorMessage(errorMessage);
+
+            JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobIdAndCandidateId(jobId, candidateId);
+
+            if(null != jobCandidateMapping)
+                cvParsingDetails.setJobCandidateMappingId(jobCandidateMapping);
+
             cvParsingDetailsRepository.save(cvParsingDetails);
             log.info("Save CvParsingDetails");
         } catch (Exception e) {
@@ -429,5 +500,13 @@ public class RChilliCvProcessor {
         }
         os.flush();
         return new CommonsMultipartFile(fileItem);
+    }
+
+    private boolean isEmailOrMobilePresent(Candidate candidate){
+        boolean mobileOrEmailPresent = false;
+        if(null != candidate.getEmail() || null != candidate.getMobile()){
+            mobileOrEmailPresent = true;
+        }
+        return mobileOrEmailPresent;
     }
 }

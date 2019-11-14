@@ -44,4 +44,11 @@ public class CandidateEducationDetails {
     @Column(name = "YEAR_OF_PASSING")
     private String yearOfPassing;
 
+    public CandidateEducationDetails(Long candidateId, String degree, String yearOfPassing) {
+        this.candidateId = candidateId;
+        this.degree = degree;
+        this.yearOfPassing = yearOfPassing;
+    }
+
+    public CandidateEducationDetails() { super(); }
 }

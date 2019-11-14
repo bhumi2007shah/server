@@ -165,7 +165,7 @@ insert into CONFIGURATION_SETTINGS(CONFIG_NAME, CONFIG_VALUE) values
 ('maxCvFiles',20),
 ('mlCall',1),
 ('maxCapabilities',10),
-('cvRatingTimeout', 30000);
+('cvRatingTimeout', 5000);
 
 
 delete from skills_master;
@@ -726,3 +726,11 @@ values
 (10,0,70,3),
 (10,0,80,4),
 (10,0,100,5);
+
+INSERT INTO public.currency(currency_full_name, currency_short_name, country) VALUES
+('Australian Dollar', 'AUD', 'au'),
+('Canadian Dollar', 'CAD', 'ca'),
+('Indian Rupee', 'INR', 'in'),
+('Singapore Dollar', 'SGD', 'sg'),
+('Pound Sterling', 'GBP', 'gb'),
+('US Dollar', 'USD', 'us');

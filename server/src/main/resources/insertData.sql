@@ -131,12 +131,6 @@ VALUES
  ( 'addressType','Interview Location'),
  ( 'addressType','Both'),
 
- ( 'stage','Source'),
- ( 'stage','Screen'),
- ( 'stage','Interview'),
- ( 'stage','Offer'),
- ( 'stage','Reject'),
-
  ( 'process','Hiring Manager'),
  ( 'process','Lead Recruiter'),
  ( 'process','Sourcing'),
@@ -734,3 +728,14 @@ INSERT INTO public.currency(currency_full_name, currency_short_name, country) VA
 ('Singapore Dollar', 'SGD', 'sg'),
 ('Pound Sterling', 'GBP', 'gb'),
 ('US Dollar', 'USD', 'us');
+
+INSERT INTO STAGE_MASTER(STAGE_NAME) VALUES
+('Source'),
+('Screen'),
+('Resume Submit'),
+('Interview'),
+('Make Offer'),
+('Offer'),
+('Join');
+
+INSERT INTO STEPS_PER_STAGE ()

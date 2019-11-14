@@ -944,3 +944,7 @@ where a.id < b.id and a.job_candidate_mapping_id = b.job_candidate_mapping_id);
 
 DELETE FROM cv_rating a USING cv_rating b
 WHERE a.id < b.id AND a.job_candidate_mapping_id = b.job_candidate_mapping_id;
+
+--For ticket #236
+ALTER TABLE CANDIDATE_EDUCATION_DETAILS
+ALTER COLUMN DEGREE TYPE VARCHAR(60);

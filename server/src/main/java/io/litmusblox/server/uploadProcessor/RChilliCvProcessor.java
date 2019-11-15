@@ -301,6 +301,7 @@ public class RChilliCvProcessor {
             if (isCandidateFailedToProcess){
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Failure.toString());
                 cvParsingDetails.setRchilliJsonProcessed(false);
+                cvParsingDetails.setCvRatingApiFlag(true); //to make sure the record doesn't get processed against CV Rating api
                 log.info("CvParsingDetails status is Failure errorMessage : "+errorMessage);
             }else
                 cvParsingDetails.setProcessingStatus(IConstant.UPLOAD_STATUS.Success.toString());

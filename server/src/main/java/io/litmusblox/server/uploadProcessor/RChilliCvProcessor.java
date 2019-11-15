@@ -312,6 +312,10 @@ public class RChilliCvProcessor {
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetails.setErrorMessage(errorMessage);
 
+            if (null != errorMessage)
+                cvParsingDetails.setCvRatingApiFlag(true); //to make sure the record doesn't get processed against CV Rating api
+
+
             JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobIdAndCandidateId(jobId, candidateId);
 
             if(null != jobCandidateMapping)

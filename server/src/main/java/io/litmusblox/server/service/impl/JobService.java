@@ -617,7 +617,7 @@ public class JobService implements IJobService {
             throw new ValidationException(IErrorMessages.SCREENING_QUESTIONS_VALIDATION_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
         }
         */
-        if(null != oldJob && !oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED)){
+        if(null != oldJob && oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED)){
             return;
         }
         String historyMsg = "Added";
@@ -642,7 +642,7 @@ public class JobService implements IJobService {
     }
 
     private void addJobKeySkills(Job job, Job oldJob, User loggedInUser) throws Exception { //update and add new key skill
-        if(null != oldJob && !oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
+        if(null != oldJob && oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
             return;
 
         List<JobKeySkills> mlProvidedKeySkills = jobKeySkillsRepository.findByJobIdAndMlProvided(oldJob.getId(), true);
@@ -729,7 +729,7 @@ public class JobService implements IJobService {
 
     private void addJobCapabilities(Job job, Job oldJob, User loggedInUser) { //add job capabilities
 
-        if(null != oldJob && !oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
+        if(null != oldJob && oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
             return;
 
         //if there are capabilities that were returned from ML, and the request for add job - capabilities has a 0 length array, throw an error, otherwise, proceed
@@ -899,7 +899,7 @@ public class JobService implements IJobService {
 
     private void addJobExpertise(Job job, Job oldJob){
 
-        if(null != oldJob && !oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
+        if(null != oldJob && oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED))
             return;
 
         MasterDataBean masterDataBean = MasterDataBean.getInstance();

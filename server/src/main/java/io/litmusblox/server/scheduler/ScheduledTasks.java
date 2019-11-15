@@ -31,7 +31,7 @@ public class ScheduledTasks {
         processUploadedCV.processCv();
     }
 
-    @Scheduled(fixedRate = 180000, initialDelay = 5000)
+    @Scheduled(fixedRate = 120000, initialDelay = 5000)
     public void rateAndProcessCv() {
         processUploadedCV.rateCv();
     }

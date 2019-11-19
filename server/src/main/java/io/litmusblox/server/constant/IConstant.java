@@ -228,4 +228,17 @@ public interface IConstant {
     String NOT_LAST_NAME="Available";
 
     String DATE_FORMAT = "yyyy-MM-dd";
+
+    enum UserType {
+        RECRUITING("Recruiting"), BUSINESS("Business");
+        private String value;
+
+        UserType(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
 }

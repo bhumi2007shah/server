@@ -947,7 +947,7 @@ WHERE a.id < b.id AND a.job_candidate_mapping_id = b.job_candidate_mapping_id;
 
 --For ticket #236
 ALTER TABLE CANDIDATE_EDUCATION_DETAILS
-ALTER COLUMN DEGREE TYPE VARCHAR(60);
+ALTER COLUMN DEGREE TYPE VARCHAR(100);
 
 --For update cv_rating_api_flag in cvParsingDetails duplicate jobCandidateMapping id
 update cv_parsing_details set cv_rating_api_flag = true where job_candidate_mapping_id in(

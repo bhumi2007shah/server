@@ -75,7 +75,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         for (Candidate candidate:candidateList) {
 
             if(recordsProcessed >= MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()) {
-                log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " +  candidate.getCreatedBy().getId());
+                log.error(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + " : user id : " +  loggedInUser.getId());
                 candidate.setUploadErrorMessage(IErrorMessages.MAX_CANDIDATE_PER_FILE_EXCEEDED + ". Max number of " +
                         "candidates per file is "+MasterDataBean.getInstance().getConfigSettings().getCandidatesPerFileLimit()+". All candidates from this candidate onwards have not been processed");
                 uploadResponseBean.getFailedCandidates().add(candidate);
@@ -84,7 +84,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             }
             //check for daily limit per user
             if ((recordsProcessed + candidateProcessed) >= MasterDataBean.getInstance().getConfigSettings().getDailyCandidateUploadPerUserLimit()) {
-                log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED  + " : user id : " +  candidate.getCreatedBy().getId());
+                log.error(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED  + " : user id : " +  loggedInUser.getId());
                 candidate.setUploadErrorMessage(IErrorMessages.MAX_CANDIDATES_PER_USER_PER_DAY_EXCEEDED);
                 uploadResponseBean.getFailedCandidates().add(candidate);
                 failureCount++;
@@ -132,15 +132,9 @@ public class UploadDataProcessService implements IUploadDataProcessService {
             //validate candidate used in multiple places so create util method
              candidate.setFirstName(Util.validateCandidateName(candidate.getFirstName()));
         }
-        else{
-            candidate.setFirstName(IConstant.NOT_FIRST_NAME);
-        }
 
         if (null != candidate.getLastName()) {
             candidate.setLastName(Util.validateCandidateName(candidate.getLastName()));
-        }
-        else{
-            candidate.setLastName(IConstant.NOT_LAST_NAME);
         }
 
         if (!Util.validateEmail(candidate.getEmail())) {

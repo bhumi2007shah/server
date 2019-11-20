@@ -99,7 +99,7 @@ public class RChilliCvProcessor {
      *
      * @param filePath
      */
-    public void processFile(String filePath) {
+    public void processFile(String filePath, String rchilliJson) {
         log.info("Inside processFile method");
         // remove task steps
         String fileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
@@ -113,15 +113,21 @@ public class RChilliCvProcessor {
         ResumeParserDataRchilliBean bean = null;
         long rchilliResponseTime = 0L, candidateId=0L;
         boolean isCandidateFailedToProcess = false, rChilliErrorResponse = false;
+        CvParsingDetails cvParsingDetails = null;
 
-        RestClient rest = RestClient.getInstance();
-        String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + fileName + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
-                + "\",\"subuserid\":\"" + environment.getProperty(IConstant.SUB_USER_ID) + "\"}";
         try {
             long startTime = System.currentTimeMillis();
-            rchilliJsonResponse=rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST,null);
-            rchilliResponseTime = System.currentTimeMillis() - startTime;
-            log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
+            if(rchilliJson==null) {
+                RestClient rest = RestClient.getInstance();
+                String jsonString = "{\"url\":\"" + environment.getProperty(IConstant.FILE_STORAGE_URL) + fileName + "\",\"userkey\":\"" + environment.getProperty(IConstant.USER_KEY) + "\",\"version\":\"" + environment.getProperty(IConstant.VERSION)
+                        + "\",\"subuserid\":\"" + environment.getProperty(IConstant.SUB_USER_ID) + "\"}";
+                rchilliJsonResponse = rest.consumeRestApi(jsonString, environment.getProperty(IConstant.RCHILLI_API_URL), HttpMethod.POST, null);
+                rchilliResponseTime = System.currentTimeMillis() - startTime;
+                log.info("Recevied response from RChilli in " + rchilliResponseTime + "ms.");
+            }
+            else{
+                rchilliJsonResponse = rchilliJson;
+            }
             if(null != rchilliJsonResponse && rchilliJsonResponse.contains("errorcode") && rchilliJsonResponse.contains("errormsg")) {
                 rChilliErrorResponse = true;
                 isCandidateFailedToProcess = true;
@@ -133,6 +139,15 @@ public class RChilliCvProcessor {
                 rchilliFormattedJson=rchilliJsonResponse.substring(0, rchilliJsonResponse.indexOf("DetailResume")-7)+"\n"+"}";
 
                 //log.info("RchilliJsonResponse  : "+rchilliJsonResponse);
+
+                 //Save record to cvParsingDetails table
+                 cvParsingDetails = new CvParsingDetails();
+                 cvParsingDetails.setCvFileName(fileName);
+                 cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
+                 cvParsingDetails.setProcessedOn(new Date());
+                 cvParsingDetailsRepository.save(cvParsingDetails);
+                 cvParsingDetailsRepository.flush();
+
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -142,8 +157,14 @@ public class RChilliCvProcessor {
                 candidate = setCandidateModel(bean, user, cvType);
 
                 candidateId = processCandidate(candidate, user, job);
-                if(candidateId==0)
-                    isCandidateFailedToProcess=true;
+
+
+                if(candidateId==0) {
+                    if (Util.isNull(candidate.getMobile())) {
+                        log.info("CV upload error: "+fileName+" uploaded by "+user.getFirstName()+" - "+user.getId()+ " in job: "+job.getId()+" does not have mobile number");
+                    }
+                    isCandidateFailedToProcess = true;
+                }
                 else{
                     isCandidateFailedToProcess=false;
                     candidate.setId(candidateId);
@@ -183,7 +204,7 @@ public class RChilliCvProcessor {
             log.error("Error while save candidate resume in drag and drop : " + fileName + " : " + ex.getMessage(), HttpStatus.BAD_REQUEST);
             log.error("For CandidateId : "+candidateId+", Email : "+candidate.getEmail()+", Mobile : "+candidate.getMobile());
         }
-        addCvParsingDetails(fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId, job.getId());
+        addUpdateCvParsingDetails(cvParsingDetails, fileName, rchilliResponseTime, (null!=rchilliFormattedJson)?rchilliFormattedJson:rchilliJsonResponse, isCandidateFailedToProcess, bean, (candidate != null)?candidate.getUploadErrorMessage():null, candidateId, job.getId());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -231,9 +252,9 @@ public class RChilliCvProcessor {
                     }
                 }
                 if (candidate.getEmail().isEmpty() && !candidate.getMobile().isEmpty()) {
-                    CandidateMobileHistory candidateMobileHistoryFromDb = candidateMobileHistoryRepository.findByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
-                    if (null != candidateMobileHistoryFromDb) {
-                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateMobileHistoryFromDb.getCandidate());
+                    Long candidateIdFromMobileHistory = candidateMobileHistoryRepository.findCandidateIdByMobileAndCountryCode(candidate.getMobile(), candidate.getCountryCode());
+                    if (null != candidateIdFromMobileHistory) {
+                        List<CandidateEmailHistory> candidateEmailHistoryListFromDb = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(candidateIdFromMobileHistory);
                         if(candidateEmailHistoryListFromDb.size()>0) {
                             candidate.setEmail(candidateEmailHistoryListFromDb.get(0).getEmail());
                         }
@@ -241,12 +262,15 @@ public class RChilliCvProcessor {
                             candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
                         }
                     }
+                    else {
+                        candidate.setEmail("notavailable" + System.currentTimeMillis() + "@notavailable.io");
+                    }
                 }
 
                 if (candidate.getMobile().isEmpty() && !candidate.getEmail().isEmpty()) {
-                    CandidateEmailHistory candidateEmailHistoryFromDb = candidateEmailHistoryRepository.findByEmail(candidate.getEmail());
-                    if (null != candidateEmailHistoryFromDb) {
-                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateEmailHistoryFromDb.getCandidate());
+                    Long candidateIdFromEmailHistory = candidateEmailHistoryRepository.findCandidateIdByEmail(candidate.getEmail());
+                    if (null != candidateIdFromEmailHistory) {
+                        List<CandidateMobileHistory> candidateMobileHistoryListFromDb = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(candidateIdFromEmailHistory);
                         if(candidateMobileHistoryListFromDb.size()>0){
                             candidate.setMobile(candidateMobileHistoryListFromDb.get(0).getMobile());
                         }
@@ -283,13 +307,16 @@ public class RChilliCvProcessor {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    private void addCvParsingDetails(String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId, Long jobId) {
+    private void addUpdateCvParsingDetails(CvParsingDetails cvParsingDetails, String fileName, long rchilliResponseTime, String rchilliFormattedJson, Boolean isCandidateFailedToProcess, ResumeParserDataRchilliBean bean, String errorMessage, Long candidateId, Long jobId) {
         log.info("Inside addCvParsingDetails method");
         try {
             //Add cv_parsing_details
-            CvParsingDetails cvParsingDetails = new CvParsingDetails();
-            cvParsingDetails.setCvFileName(fileName);
-            cvParsingDetails.setProcessedOn(new Date());
+            if(cvParsingDetails == null) {
+                cvParsingDetails = new CvParsingDetails();
+                cvParsingDetails.setCvFileName(fileName);
+                cvParsingDetails.setProcessedOn(new Date());
+            }
+
             cvParsingDetails.setProcessingTime(rchilliResponseTime);
 
             if(null != candidateId || candidateId != 0)
@@ -309,6 +336,10 @@ public class RChilliCvProcessor {
             cvParsingDetails.setParsingResponseJson(rchilliFormattedJson);
             cvParsingDetails.setErrorMessage(errorMessage);
 
+            if (null != errorMessage)
+                cvParsingDetails.setCvRatingApiFlag(true); //to make sure the record doesn't get processed against CV Rating api
+
+
             JobCandidateMapping jobCandidateMapping = jobCandidateMappingRepository.findByJobIdAndCandidateId(jobId, candidateId);
 
             if(null != jobCandidateMapping)
@@ -326,6 +357,19 @@ public class RChilliCvProcessor {
         String alternateMobile=null;
         String[] mobileString=null;
         String mobile=bean.getFormattedMobile().isEmpty() ? bean.getFormattedPhone() : bean.getFormattedMobile();
+
+        if(Util.isNull(bean.getFirstName())){
+            bean.setFirstName(IConstant.NOT_FIRST_NAME);
+        }
+
+        if(Util.isNull(bean.getLastName())){
+            bean.setLastName(IConstant.NOT_LAST_NAME);
+        }
+
+        if(Util.isNull(bean.getFullName())){
+            bean.setFullName(IConstant.NOT_FIRST_NAME+" "+IConstant.NOT_LAST_NAME);
+        }
+
 
         if(mobile.contains(",")){
             mobileString =mobile.split(",");
@@ -508,5 +552,32 @@ public class RChilliCvProcessor {
             mobileOrEmailPresent = true;
         }
         return mobileOrEmailPresent;
+    }
+
+    public void processFailedRchilli(String rchilliJsonFilePath, String filePath){
+        try {
+            File errorFile = new File(filePath);
+            if (errorFile.exists()) {
+                File rchilliJsonFile = new File(rchilliJsonFilePath);
+                if (rchilliJsonFile.exists()) {
+                    InputStream is = new FileInputStream(rchilliJsonFilePath);
+                    BufferedReader buf = new BufferedReader(new InputStreamReader(is));
+                    String line = buf.readLine();
+                    StringBuilder sb = new StringBuilder();
+                    while(line != null){
+                        sb.append(line).append("\n");
+                        line = buf.readLine();
+                    }
+                    String jsonString = sb.toString();
+                    processFile(filePath, jsonString);
+                } else {
+                    log.info("RchilliJSON is missing");
+                }
+            } else {
+                log.info(filePath + " does not exist");
+            }
+        } catch (Exception e){
+            log.info(e.getMessage());
+        }
     }
 }

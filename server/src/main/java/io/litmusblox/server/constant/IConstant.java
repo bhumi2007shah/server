@@ -72,12 +72,14 @@ public interface IConstant {
     enum UserRole {
         RECRUITER(Names.RECRUITER),
         SUPER_ADMIN(Names.SUPER_ADMIN),
-        CLIENT_ADMIN(Names.CLIENT_ADMIN);
+        CLIENT_ADMIN(Names.CLIENT_ADMIN),
+        RECRUITMENT_AGENCY(Names.RECRUITMENT_AGENCY);
 
         public class Names {
             public static final String RECRUITER = "Recruiter";
             public static final String SUPER_ADMIN = "SuperAdmin";
             public static final String CLIENT_ADMIN = "ClientAdmin";
+            public static final String RECRUITMENT_AGENCY = "RecruitmentAgency";
         }
 
         private final String label;
@@ -170,7 +172,7 @@ public interface IConstant {
 
 
     enum MAX_FIELD_LENGTHS {
-        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), ONLINE_PROFILE_TYPE(20), WORK_SUMMARY(255), GENDER(1), DEGREE(50), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
+        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), ONLINE_PROFILE_TYPE(20), WORK_SUMMARY(255), GENDER(1), DEGREE(100), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
 
         private int value;
 
@@ -233,4 +235,30 @@ public interface IConstant {
     String NOT_LAST_NAME="Available";
 
     String DATE_FORMAT = "yyyy-MM-dd";
+
+    enum UserType {
+        RECRUITING("Recruiting"), BUSINESS("Business");
+        private String value;
+
+        UserType(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    enum CompanyType {
+        INDIVIDUAL("Individual"), AGENCY("Agency");
+        private String value;
+
+        CompanyType(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
 }

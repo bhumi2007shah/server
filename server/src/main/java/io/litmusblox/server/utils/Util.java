@@ -258,10 +258,12 @@ public class Util {
         //remove all occurences of '
         mobileNo = mobileNo.replaceAll("\'","");
 
-        //check if number contains any prefix like 0 or +
-        //strip all occurences of 0 and +
-        while(mobileNo.charAt(0) == '0' || mobileNo.charAt(0) == '+') {
-            mobileNo = mobileNo.substring(1);
+        if(!Util.isNull(mobileNo)) {
+            //check if number contains any prefix like 0 or +
+            //strip all occurences of 0 and +
+            while (mobileNo.charAt(0) == '0' || mobileNo.charAt(0) == '+') {
+                mobileNo = mobileNo.substring(1);
+            }
         }
 
         //strip all white spaces

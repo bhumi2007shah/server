@@ -936,6 +936,37 @@ WHERE CONFIG_NAME = 'cvRatingTimeout';
 ALTER TABLE CV_RATING
 ADD CONSTRAINT UNIQUE_CV_RATING_JCM UNIQUE(JOB_CANDIDATE_MAPPING_ID);
 
+--Delete duplicate records from cvRatings
+delete from cv_rating_skill_keyword_details
+where cv_rating_skill_keyword_details.cv_rating_id in (
+select a.id from cv_rating a, cv_rating b
+where a.id < b.id and a.job_candidate_mapping_id = b.job_candidate_mapping_id);
+
+DELETE FROM cv_rating a USING cv_rating b
+WHERE a.id < b.id AND a.job_candidate_mapping_id = b.job_candidate_mapping_id;
+
+--For ticket #236
+ALTER TABLE CANDIDATE_EDUCATION_DETAILS
+ALTER COLUMN DEGREE TYPE VARCHAR(100);
+
+--For update cv_rating_api_flag in cvParsingDetails duplicate jobCandidateMapping id
+update cv_parsing_details set cv_rating_api_flag = true where job_candidate_mapping_id in(
+select a.job_candidate_mapping_id from cv_parsing_details a, cv_parsing_details b
+where a.id < b.id and a.job_candidate_mapping_id = b.job_candidate_mapping_id);
+
+--For ticket #234
+ALTER TABLE USERS
+ADD COLUMN USER_TYPE varchar(15) default 'Recruiting';
+
+--For ticket #232
+ALTER TABLE COMPANY
+ADD COLUMN COMPANY_TYPE VARCHAR(15) DEFAULT 'Individual' NOT NULL,
+ADD COLUMN RECRUITMENT_AGENCY_ID INTEGER REFERENCES COMPANY(ID);
+
+--Add Unique constraint in Jcm
+ALTER TABLE JOB_CANDIDATE_MAPPING
+ADD CONSTRAINT unique_job_candidate UNIQUE(JOB_ID, CANDIDATE_ID);
+
 --For ticket #224
 DELETE FROM MASTER_DATA WHERE TYPE = 'stage';
 

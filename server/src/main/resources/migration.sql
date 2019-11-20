@@ -957,3 +957,12 @@ where a.id < b.id and a.job_candidate_mapping_id = b.job_candidate_mapping_id);
 --For ticket #234
 ALTER TABLE USERS
 ADD COLUMN USER_TYPE varchar(15) default 'Recruiting';
+
+--For ticket #232
+ALTER TABLE COMPANY
+ADD COLUMN COMPANY_TYPE VARCHAR(15) DEFAULT 'Individual' NOT NULL,
+ADD COLUMN RECRUITMENT_AGENCY_ID INTEGER REFERENCES COMPANY(ID);
+
+--Add Unique constraint in Jcm
+ALTER TABLE JOB_CANDIDATE_MAPPING
+ADD CONSTRAINT unique_job_candidate UNIQUE(JOB_ID, CANDIDATE_ID);

@@ -72,12 +72,14 @@ public interface IConstant {
     enum UserRole {
         RECRUITER(Names.RECRUITER),
         SUPER_ADMIN(Names.SUPER_ADMIN),
-        CLIENT_ADMIN(Names.CLIENT_ADMIN);
+        CLIENT_ADMIN(Names.CLIENT_ADMIN),
+        RECRUITMENT_AGENCY(Names.RECRUITMENT_AGENCY);
 
         public class Names {
             public static final String RECRUITER = "Recruiter";
             public static final String SUPER_ADMIN = "SuperAdmin";
             public static final String CLIENT_ADMIN = "ClientAdmin";
+            public static final String RECRUITMENT_AGENCY = "RecruitmentAgency";
         }
 
         private final String label;
@@ -234,6 +236,19 @@ public interface IConstant {
         private String value;
 
         UserType(String val) {
+            this.value = val;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
+    enum CompanyType {
+        INDIVIDUAL("Individual"), AGENCY("Agency");
+        private String value;
+
+        CompanyType(String val) {
             this.value = val;
         }
 

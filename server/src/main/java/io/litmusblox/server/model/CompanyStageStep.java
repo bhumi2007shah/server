@@ -44,7 +44,7 @@ public class CompanyStageStep implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "STAGE")
-    private MasterData stage;
+    private StageMaster stage;
 
     @NotNull
     @Column(name = "CREATED_ON")
@@ -64,7 +64,7 @@ public class CompanyStageStep implements Serializable {
     @JoinColumn(name = "UPDATED_BY")
     private User updatedBy;
 
-    public CompanyStageStep(@NotNull String step, @NotNull Company companyId, @NotNull MasterData stage, @NotNull Date createdOn, @NotNull User createdBy) {
+    public CompanyStageStep(@NotNull String step, @NotNull Company companyId, @NotNull StageMaster stage, @NotNull Date createdOn, @NotNull User createdBy) {
         this.step = step;
         this.companyId = companyId;
         this.stage = stage;

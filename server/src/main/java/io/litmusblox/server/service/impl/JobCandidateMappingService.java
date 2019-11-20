@@ -441,7 +441,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
-        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null));
+        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null, objFromDb.getStage()));
     }
 
     /**
@@ -586,7 +586,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         List<JcmHistory> jcmHistoryList = new ArrayList<>();
 
         for(Long jcmId: jcmList){
-            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
+            JobCandidateMapping tempObj = jobCandidateMappingRepository.getOne(jcmId);
+            jcmHistoryList.add(new JcmHistory(tempObj, "Candidate invited", new Date(), loggedInUser, tempObj.getStage()));
         }
 
         if(jcmHistoryList.size()>0){
@@ -645,7 +646,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             recieverEmails.add(array[1]);
         }
 
-        jcmHistoryRepository.save(new JcmHistory(new JobCandidateMapping(requestBean.getJcmId().get(0)), "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser));
+        JobCandidateMapping tempObj = jobCandidateMappingRepository.getOne(requestBean.getJcmId().get(0));
+        jcmHistoryRepository.save(new JcmHistory(tempObj, "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser, tempObj.getStage()));
     }
 
     /**

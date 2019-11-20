@@ -27,7 +27,7 @@ public interface JobCandidateMappingRepository extends JpaRepository<JobCandidat
 
     //find by job and stage id
     @Transactional
-    List<JobCandidateMapping> findByJobAndStage(Job job, MasterData stage) throws Exception;
+    List<JobCandidateMapping> findByJobAndStage(Job job, JobStageStep stage) throws Exception;
 
     //find count of candidates per stage
     @Transactional

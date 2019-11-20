@@ -47,7 +47,7 @@ public class MasterDataBean {
     private Map<Long, String> questionType = new HashMap<>();
     private Map<Long, String> experienceRange = new HashMap<>();
     private Map<Long, String> addressType = new HashMap<>();
-    private Map<Long, String> stage = new HashMap<>();
+    private List<String> stage = new ArrayList<>();
     private Map<Long, String> process = new HashMap<>();
     private Map<Long, String> function = new HashMap<>();
     private Map<Long, MasterData> expertise = new HashMap<>();
@@ -58,9 +58,6 @@ public class MasterDataBean {
     private List<CreateJobPageSequence> addJobPages = new ArrayList<>();
     private List<String> jobPageNamesInOrder = new ArrayList<>();
     private List<String> currencyList = new ArrayList<>();
-
-    //added the master data for 'Source' status as that will be used for all candidates uploaded
-    private MasterData sourceStage = null;
 
     private Map<String, MasterData> noticePeriodMapping = new HashMap<>();
 

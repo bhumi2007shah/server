@@ -8,7 +8,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.litmusblox.server.model.Job;
-import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.service.IJobService;
 import io.litmusblox.server.service.SingleJobViewResponseBean;
 import io.litmusblox.server.utils.Util;
@@ -90,11 +89,11 @@ public class JobController {
      * @return response bean with all details as a json string
      * @throws Exception
      */
-    @PostMapping(value = "/jobViewByStage")
+    @PostMapping(value = "/jobViewByStage/{jobId}/{stage}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
-    String getJobViewByIdAndStage(@RequestBody JobCandidateMapping jobCandidateMapping) throws Exception {
-        SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobCandidateMapping);
+    String getJobViewByIdAndStage(@PathVariable ("jobId") Long jobId, @PathVariable ("stage") String stage) throws Exception {
+        SingleJobViewResponseBean responseBean = jobService.getJobViewById(jobId, stage);
 
         return Util.stripExtraInfoFromResponseBean(responseBean,
                 (new HashMap<String, List<String>>(){{

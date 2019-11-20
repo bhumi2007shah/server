@@ -112,8 +112,13 @@ public interface IConstant {
         Success, Failure, Partial_Success
     }
 
-    enum STAGE {
-        Source, Screen, Interview, Offer
+    enum Stage {
+        Source ("Source"), Screen ("Screen"), ResumeSubmit ("Resume Submit"), Interview ("Interview"), MakeOffer("Make Offer"), Offer ("Offer"), Join ("Join");
+        private String value;
+
+        Stage(String val) { this.value = val; }
+
+        public String getValue() { return this.value; }
     }
 
     enum UPLOAD_FORMATS_SUPPORTED {

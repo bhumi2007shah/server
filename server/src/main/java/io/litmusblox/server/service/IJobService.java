@@ -5,7 +5,6 @@
 package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
-import io.litmusblox.server.model.JobCandidateMapping;
 import io.litmusblox.server.model.JobHistory;
 
 import java.util.List;
@@ -42,12 +41,13 @@ public interface IJobService {
      * 1. list candidates for job for specified stage
      * 2. count of candidates by each stage
      *
-     * @param jobCandidateMapping The payload consisting of job id and stage
+     * @param jobId the job id for which data is to be retrieved
+     * @param stage the stage for which data is to be retrieved
      *
      * @return response bean with all details
      * @throws Exception
      */
-    SingleJobViewResponseBean getJobViewById(JobCandidateMapping jobCandidateMapping) throws Exception;
+    SingleJobViewResponseBean getJobViewById(Long jobId, String stage) throws Exception;
 
     /**
      * Service method to publish a job

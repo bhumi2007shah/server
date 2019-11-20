@@ -117,6 +117,9 @@ public class JobService implements IJobService {
     @Resource
     CvRatingRepository cvRatingRepository;
 
+    @Resource
+    JobStageStepRepository jobStageStepRepository;
+
     @Value("${mlApiUrl}")
     private String mlUrl;
 
@@ -326,20 +329,20 @@ public class JobService implements IJobService {
      * @throws Exception
      */
     @Transactional
-    public SingleJobViewResponseBean getJobViewById(JobCandidateMapping jobCandidateMapping) throws Exception {
-        log.info("Received request to request to find a list of all candidates for job: " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId());
+    public SingleJobViewResponseBean getJobViewById(Long jobId, String stage) throws Exception {
+        log.info("Received request to request to find a list of all candidates for job: {} and stage {} ",jobId, stage);
         long startTime = System.currentTimeMillis();
         //If the job is not published, do not process the request
-        Job job = jobRepository.getOne(jobCandidateMapping.getJob().getId());
+        Job job = jobRepository.getOne(jobId);
 
 
         if (null == job) {
-            StringBuffer info = new StringBuffer("Invalid job id ").append(jobCandidateMapping.getJob().getId());
+            StringBuffer info = new StringBuffer("Invalid job id ").append(jobId);
             log.info(info.toString());
             Map<String, String> breadCrumb = new HashMap<>();
-            breadCrumb.put("Job Id ",jobCandidateMapping.getJob().getId().toString());
+            breadCrumb.put("Job Id ",jobId.toString());
             breadCrumb.put("detail", info.toString());
-            throw new WebException("Invalid job id " + jobCandidateMapping.getJob().getId(),  HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
+            throw new WebException("Invalid job id " + jobId,  HttpStatus.UNPROCESSABLE_ENTITY, breadCrumb);
         }
         else {
             User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -356,7 +359,8 @@ public class JobService implements IJobService {
         }
 
         SingleJobViewResponseBean responseBean = new SingleJobViewResponseBean();
-        List<JobCandidateMapping> jcmList = jobCandidateMappingRepository.findByJobAndStage(jobCandidateMapping.getJob(), jobCandidateMapping.getStage());
+
+        List<JobCandidateMapping> jcmList = jobCandidateMappingRepository.findByJobAndStage(job, jobStageStepRepository.findStageIdForJob(jobId, stage));
 
         jcmList.forEach(jcmFromDb-> {
             jcmFromDb.setJcmCommunicationDetails(jcmCommunicationDetailsRepository.findByJcmId(jcmFromDb.getId()));
@@ -392,14 +396,28 @@ public class JobService implements IJobService {
 
         responseBean.setCandidateList(jcmList);
 
-        List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobCandidateMapping.getJob().getId());
+        Map<Long, String> stagesForJob = convertObjectArrayToMap(jobRepository.findStagesForJob(jobId));
+
+        List<Object[]> stageCountList = jobCandidateMappingRepository.findCandidateCountByStage(jobId);
 
         stageCountList.stream().forEach(objArray -> {
-            responseBean.getCandidateCountByStage().put(((Integer) objArray[0]).longValue(), ((BigInteger) objArray[1]).intValue());
+            String key = stagesForJob.get(((Integer) objArray[0]).longValue());
+            if (null == responseBean.getCandidateCountByStage().get(key))
+                responseBean.getCandidateCountByStage().put(key, ((BigInteger) objArray[1]).intValue());
+            else //stage exists in response bean, add the count of the other step to existing value
+                responseBean.getCandidateCountByStage().put(key,responseBean.getCandidateCountByStage().get(key)  + ((BigInteger) objArray[1]).intValue());
         });
-        log.info("Completed processing request to find candidates for job " + jobCandidateMapping.getJob().getId() + " and stage: " + jobCandidateMapping.getStage().getId() + " in "+ (System.currentTimeMillis() - startTime) + "ms");
+        log.info("Completed processing request to find candidates for job {}  and stage: {} in {} ms.", jobId, stage ,(System.currentTimeMillis() - startTime));
 
         return responseBean;
+    }
+
+    private Map<Long, String> convertObjectArrayToMap(List<Object[]> stagesForJob) {
+        Map<Long, String> convertedMap = new HashMap<>(stagesForJob.size());
+        stagesForJob.stream().forEach(objArray -> {
+            convertedMap.put(((Integer) objArray[0]).longValue(), objArray[1].toString());
+        });
+        return convertedMap;
     }
 
     private void addJobOverview(Job job, Job oldJob, User loggedInUser) { //method for add job for Overview page

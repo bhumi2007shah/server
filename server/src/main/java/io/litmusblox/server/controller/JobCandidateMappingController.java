@@ -244,4 +244,6 @@ public class JobCandidateMappingController {
         String rchilliJson = json.get("rchilliJson");
         rChilliCvProcessor.processFailedRchilli(rchilliJson, filePath);
     }
+
+
 }

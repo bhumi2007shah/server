@@ -139,8 +139,7 @@ public class LbUserDetailsService implements UserDetailsService {
 
             if (null == userCompany) {
                 //create a company
-                companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()));
-                companyService.saveCompanyHistory(companyObjToUse.getId(), "New company, "+companyObjToUse.getCompanyName()+", created", loggedInUser);
+                companyObjToUse = companyService.addCompany(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()), loggedInUser);
             } else {
                 companyObjToUse = userCompany;
             }

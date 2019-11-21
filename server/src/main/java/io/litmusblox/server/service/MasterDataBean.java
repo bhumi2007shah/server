@@ -2,10 +2,7 @@ package io.litmusblox.server.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.litmusblox.server.model.Country;
-import io.litmusblox.server.model.CreateJobPageSequence;
-import io.litmusblox.server.model.MasterData;
-import io.litmusblox.server.model.ScreeningQuestions;
+import io.litmusblox.server.model.*;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -62,6 +59,8 @@ public class MasterDataBean {
     private Map<String, MasterData> noticePeriodMapping = new HashMap<>();
 
     private ConfigSettings configSettings = new ConfigSettings();
+
+    private List<StepsPerStage> defaultStepsPerStage = new ArrayList<>();
 
     // sentryDSN is only read from application.properties file as per profile it is not save in database
     private String sentryDSN=null;

@@ -30,8 +30,9 @@ public class StepsPerStage implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "STAGE_ID")
-    private Long stageId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "STAGE_ID")
+    private StageMaster stageId;
 
     @NotNull
     @Column(name = "STEP_NAME")

@@ -909,9 +909,7 @@ public class JobService implements IJobService {
             job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
 
             CompanyStageStep companyStageStep = jobHiringTeam.getStageStepId();
-
-            companyStageStep = companyStageStepRepository.save(new CompanyStageStep(companyStageStep.getStep(), companyStageStep.getCompanyId(), companyStageStep.getStage(), new Date(), loggedInUser));
-            jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), companyStageStep, jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
+            jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), jobHiringTeam.getStageStepId(), jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
         }
     }
 
@@ -937,6 +935,7 @@ public class JobService implements IJobService {
     public void publishJob(Long jobId) throws Exception {
         log.info("Received request to publish job with id: " + jobId);
         Job publishedJob = changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
+        addJobStageStep(publishedJob);
         log.info("Completed publishing job with id: " + jobId);
         if(publishedJob.getJobCapabilityList().size() == 0)
             log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
@@ -953,6 +952,16 @@ public class JobService implements IJobService {
             }
         }
     }
+
+    private void addJobStageStep(Job publishedJob) {
+        List<CompanyStageStep> companyStageSteps = companyStageStepRepository.findByCompanyId(publishedJob.getCompanyId());
+        List<JobStageStep> jobStageSteps = new ArrayList<>(companyStageSteps.size());
+        for(CompanyStageStep companyStageStep: companyStageSteps) {
+            jobStageSteps.add(JobStageStep.builder().jobId(publishedJob.getId()).stageStepId(companyStageStep.getId()).createdBy(publishedJob.getCreatedBy()).createdOn(new Date()).build());
+        }
+        jobStageStepRepository.saveAll(jobStageSteps);
+    }
+
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     private String convertJobToRequestPayload(Long jobId, Job publishedJob) throws Exception {

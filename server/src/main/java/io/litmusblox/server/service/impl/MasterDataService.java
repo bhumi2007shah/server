@@ -73,6 +73,9 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     StageMasterRepository stageMasterRepository;
 
+    @Resource
+    StepsPerStageRepository stepsPerStageRepository;
+
     @Autowired
     Environment environment;
 
@@ -94,6 +97,7 @@ public class MasterDataService implements IMasterDataService {
         });
 
         stageMasterRepository.findAll().stream().forEach(stageMaster -> MasterDataBean.getInstance().getStage().add(stageMaster.getStageName()));
+        MasterDataBean.getInstance().getDefaultStepsPerStage().addAll(stepsPerStageRepository.findAll());
 
         currencyRepository.findAll().stream().forEach(currency -> {
             MasterDataBean.getInstance().getCurrencyList().add(currency.getCurrencyShortName());

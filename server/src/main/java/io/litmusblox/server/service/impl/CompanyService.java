@@ -54,17 +54,35 @@ public class CompanyService implements ICompanyService {
     @Autowired
     Environment environment;
 
-    @Autowired
+    @Resource
     CompanyHistoryRepository companyHistoryRepository;
 
-    @Autowired
+    @Resource
     CompanyBuRepository companyBuRepository;
 
-    @Autowired
+    @Resource
     JobRepository jobRepository;
 
-    @Autowired
+    @Resource
     CompanyAddressRepository companyAddressRepository;
+
+    @Resource
+    CompanyStageStepRepository companyStageStepRepository;
+
+    /**
+     * Service method to create a new company
+     * @param company the company object to save
+     * @param loggedInUser the user who created the company object
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    public Company addCompany(Company company, User loggedInUser) throws Exception {
+        companyRepository.save(company);
+        saveCompanyHistory(company.getId(), "New company, "+company.getCompanyName()+", created", loggedInUser);
+        addStageStepsForCompany(company, loggedInUser);
+        return company;
+    }
 
     //Update Company
     @Override
@@ -535,7 +553,19 @@ public class CompanyService implements ICompanyService {
         company.setCreatedBy(loggedInUser.getId());
         company = truncateField(company);
         companyRepository.save(company);
+
+        addStageStepsForCompany(company, loggedInUser);
     }
+
+    private void addStageStepsForCompany(Company company, User loggedInUser) {
+        //add default list of STEPS_PER_STAGE for the new company
+        List<CompanyStageStep> companyStageSteps = new ArrayList<>(MasterDataBean.getInstance().getDefaultStepsPerStage().size());
+        for(StepsPerStage stepsPerStage : MasterDataBean.getInstance().getDefaultStepsPerStage()) {
+            companyStageSteps.add(CompanyStageStep.builder().companyId(company).stage(stepsPerStage.getStageId()).step(stepsPerStage.getStepName()).createdOn(new Date()).createdBy(loggedInUser).build());
+        }
+        companyStageStepRepository.saveAll(companyStageSteps);
+    }
+
 
     @Override
     public List<Company> getCompanyListByAgency(Long recruitmentAgencyId) {

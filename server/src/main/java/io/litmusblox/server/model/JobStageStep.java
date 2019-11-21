@@ -4,11 +4,13 @@
 
 package io.litmusblox.server.model;
 
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author : Shital Raval
@@ -18,6 +20,7 @@ import java.io.Serializable;
  * Project Name : server
  */
 @Entity
+@Builder
 @Table(name = "JOB_STAGE_STEP")
 @Data
 public class JobStageStep implements Serializable {
@@ -36,4 +39,22 @@ public class JobStageStep implements Serializable {
     @NotNull
     @Column(name = "STAGE_STEP_ID")
     private Long stageStepId;
+
+    @NotNull
+    @Column(name = "CREATED_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date createdOn = new Date();
+
+    @NotNull
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CREATED_BY")
+    private User createdBy;
+
+    @Column(name = "UPDATED_ON")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updatedOn = new Date();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "UPDATED_BY")
+    private User updatedBy;
 }

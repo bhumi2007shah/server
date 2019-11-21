@@ -141,6 +141,8 @@ public class CompanyService implements ICompanyService {
             company.setActive(companyFromDb.getActive());
             company.setSubscription(companyFromDb.getSubscription());
         }
+        if(null == company.getIndustry().getId())
+            company.setIndustry(null);
         //Update Company
         companyRepository.save(company);
         saveCompanyHistory(company.getId(), "Update company information", loggedInUser);

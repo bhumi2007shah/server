@@ -132,16 +132,24 @@ public class LbUserDetailsService implements UserDetailsService {
         checkForDuplicateUser(user, loggedInUser.getRole());
         validateUser(user);
 
+        //TODO Need revisit this code after getting screens
         Company companyObjToUse = null;
-        if(IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())) {
+        if(null == user.getCompany().getRecruitmentAgencyId() && IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())) {
             //check if company exists
-            Company userCompany = companyRepository.findByCompanyNameIgnoreCase(user.getCompany().getCompanyName());
+            Company userCompany = companyRepository.findByCompanyNameIgnoreCaseAndRecruitmentAgencyIdIsNull(user.getCompany().getCompanyName());
 
             if (null == userCompany) {
                 //create a company
-                companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, new Date(), loggedInUser.getId()));
+                companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, user.getCompany().getCompanyType(),null, new Date(), loggedInUser.getId()));
                 companyService.saveCompanyHistory(companyObjToUse.getId(), "New company, "+companyObjToUse.getCompanyName()+", created", loggedInUser);
             } else {
+                companyObjToUse = userCompany;
+            }
+        }else if(null != user.getCompany().getRecruitmentAgencyId() && IConstant.UserRole.Names.RECRUITMENT_AGENCY.equals(loggedInUser.getRole())){
+            Company userCompany = companyRepository.findByCompanyNameIgnoreCaseAndRecruitmentAgencyId(user.getCompany().getCompanyName(), loggedInUser.getCompany().getId());
+            if(null==userCompany){
+                companyObjToUse = companyRepository.save(new Company(user.getCompany().getCompanyName(), true, IConstant.CompanyType.INDIVIDUAL.getValue(),loggedInUser.getCompany().getId(), new Date(), loggedInUser.getId()));
+            }else {
                 companyObjToUse = userCompany;
             }
         }
@@ -172,7 +180,7 @@ public class LbUserDetailsService implements UserDetailsService {
             else
                 throw new ValidationException("Invalid role in create user request: " + user.getRole(), HttpStatus.UNPROCESSABLE_ENTITY);
         }
-        if(user.getUserType().equals(IConstant.UserType.BUSINESS) || user.getUserType().equals(IConstant.UserType.RECRUITING))
+        if(user.getUserType().equals(IConstant.UserType.BUSINESS.getValue()) || user.getUserType().equals(IConstant.UserType.RECRUITING.getValue()))
             u.setUserType(user.getUserType());
         else
             u.setUserType(IConstant.UserType.RECRUITING.getValue());

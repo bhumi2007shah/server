@@ -74,7 +74,7 @@ public class CompanyService implements ICompanyService {
         log.info("Received request to update job from user: " + loggedInUser.getEmail());
         long startTime = System.currentTimeMillis();
 
-        Company companyFromDb=companyRepository.findByCompanyNameIgnoreCase(company.getCompanyName());
+        Company companyFromDb=companyRepository.findById(company.getId()).orElse(null);
         if(null==companyFromDb)
             throw new ValidationException("Company not found for this name "+company.getCompanyName(), HttpStatus.BAD_REQUEST);
 
@@ -397,7 +397,7 @@ public class CompanyService implements ICompanyService {
      */
     @Transactional(propagation = Propagation.REQUIRED)
     public void blockCompany(Company company, boolean blockCompany) throws Exception {
-        Company companyObjFromDb = companyRepository.findByCompanyNameIgnoreCase(company.getCompanyName());
+        Company companyObjFromDb = companyRepository.findById(company.getId()).orElse(null);
         if(null == companyObjFromDb)
             throw new ValidationException("Company not found: " + company.getCompanyName(), HttpStatus.BAD_REQUEST);
         companyObjFromDb.setActive(!blockCompany);

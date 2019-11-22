@@ -957,7 +957,7 @@ public class JobService implements IJobService {
         List<CompanyStageStep> companyStageSteps = companyStageStepRepository.findByCompanyId(publishedJob.getCompanyId());
         List<JobStageStep> jobStageSteps = new ArrayList<>(companyStageSteps.size());
         for(CompanyStageStep companyStageStep: companyStageSteps) {
-            jobStageSteps.add(JobStageStep.builder().jobId(publishedJob.getId()).stageStepId(companyStageStep.getId()).createdBy(publishedJob.getCreatedBy()).createdOn(new Date()).build());
+            jobStageSteps.add(JobStageStep.builder().jobId(publishedJob.getId()).stageStepId(companyStageStep).createdBy(publishedJob.getCreatedBy()).createdOn(new Date()).build());
         }
         jobStageStepRepository.saveAll(jobStageSteps);
     }
@@ -1063,5 +1063,21 @@ public class JobService implements IJobService {
             throw new WebException("Job with id " + jobId + "does not exist ", HttpStatus.UNPROCESSABLE_ENTITY);
         }
         return jobHistoryRepository.findByJobIdOrderByIdDesc(jobId);
+    }
+
+    /**
+     * Service method to return the stage steps for a job
+     *
+     * @param jobId the job id for which stage steps are to be returned
+     * @return list of stage steps
+     * @throws Exception
+     */
+    @Transactional(readOnly = true)
+    public List<JobStageStep> getJobStageStep(Long jobId) throws Exception {
+        log.info("Received request to find stage steps for job with id {}", jobId);
+        long startTime = System.currentTimeMillis();
+        List<JobStageStep> returnList = jobStageStepRepository.findByJobId(jobId);
+        log.info("Completed finding stage steps for jobId {} in {} ms", jobId, (System.currentTimeMillis() - startTime));
+        return returnList;
     }
 }

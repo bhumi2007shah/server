@@ -4,8 +4,11 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -21,8 +24,11 @@ import java.util.Date;
  */
 @Entity
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "JOB_STAGE_STEP")
 @Data
+@JsonFilter("JobStageStep")
 public class JobStageStep implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -37,8 +43,9 @@ public class JobStageStep implements Serializable {
     private Long jobId;
 
     @NotNull
-    @Column(name = "STAGE_STEP_ID")
-    private Long stageStepId;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "STAGE_STEP_ID")
+    private CompanyStageStep stageStepId;
 
     @NotNull
     @Column(name = "CREATED_ON")

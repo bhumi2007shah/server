@@ -8,6 +8,9 @@ import io.litmusblox.server.model.JobStageStep;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author : Shital Raval
@@ -23,5 +26,9 @@ public interface JobStageStepRepository extends JpaRepository<JobStageStep, Long
             "and job_stage_step.stage_step_id = company_stage_step.id\n" +
             "and job_id = :jobId\n" +
             "and stage_master.stage_name = :stage")
+    @Transactional(readOnly = true)
     JobStageStep findStageIdForJob(Long jobId, String stage);
+
+    @Transactional(readOnly = true)
+    List<JobStageStep> findByJobId(Long jobId) throws Exception;
 }

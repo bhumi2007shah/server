@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -245,5 +246,17 @@ public class JobCandidateMappingController {
         rChilliCvProcessor.processFailedRchilli(rchilliJson, filePath);
     }
 
-
+    /**
+     * REST API to set a specific stage like Interview, Offer etc
+     *
+     * @param jcmList The list of candidates for the job that need to be moved to the specified stage
+     * @param stage the new stage
+     * @throws Exception
+     */
+    @PutMapping("/setStage/{stage}")
+    @ResponseBody
+    @ResponseStatus(value = HttpStatus.OK)
+    void setStageForCandidates(@RequestBody List<Long> jcmList, @PathVariable("stage") @NotNull String stage) throws Exception {
+        jobCandidateMappingService.setStageForCandidates(jcmList, stage);
+    }
 }

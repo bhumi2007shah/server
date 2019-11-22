@@ -7,6 +7,7 @@ package io.litmusblox.server.repository;
 import io.litmusblox.server.model.*;
 import io.litmusblox.server.service.CandidateInteractionHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,4 +64,17 @@ public interface JobCandidateMappingRepository extends JpaRepository<JobCandidat
             "inner join job j on j.id = jcm.job_id\n" +
             "where jcm.candidate_id =:candidateId order by jcm.created_on desc", nativeQuery = true)
     List<CandidateInteractionHistory> getCandidateInteractionHistoryByCandidateId(Long candidateId);
+
+    @Transactional
+    @Modifying
+    @Query(nativeQuery = true, value = "update job_candidate_mapping set stage = :newStageId, rejected = false, updated_by = :updatedBy, updated_on = :updatedOn where stage = :oldStageId and id in :jcmList")
+    void updateStageStepId(List<Long> jcmList, Long oldStageId, Long newStageId, Long updatedBy, Date updatedOn);
+
+    @Transactional(readOnly = true)
+    @Query(nativeQuery = true, value = "select count(distinct stage) from job_candidate_mapping where id in :jcmList")
+    int countDistinctStageForJcmList(List<Long> jcmList) throws Exception;
+
+    @Modifying
+    @Query(nativeQuery = true, value = "update job_candidate_mapping set rejected=true, updated_by=:updatedBy, updated_on = :updatedOn where id in :jcmList")
+    void updateForRejectStage(List<Long> jcmList, Long updatedBy, Date updatedOn);
 }

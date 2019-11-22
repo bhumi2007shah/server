@@ -84,7 +84,8 @@ public class JobController {
      * 1. list candidates for job for specified stage
      * 2. count of candidates by each stage
      *
-     * @param jobCandidateMapping The payload consisting of job id and stage
+     * @param jobId The job id
+     * @param stage the stage
      *
      * @return response bean with all details as a json string
      * @throws Exception
@@ -187,5 +188,27 @@ public class JobController {
                     put("CompanyScreeningQuestion",new ArrayList<>(0));
                     put("UserScreeningQuestion",new ArrayList<>(0));
                 }}));
+    }
+
+    /**
+     * REST API to return the stage steps for a job
+     *
+     * @param jobId the job id for which stage steps are to be returned
+     * @return list of stage steps
+     * @throws Exception
+     */
+    @GetMapping(value = "/getStageStep/{jobId}")
+    @ResponseBody
+    String getJobStageStep(@PathVariable("jobId") Long jobId) throws Exception {
+        return Util.stripExtraInfoFromResponseBean(jobService.getJobStageStep(jobId),
+                (new HashMap<String, List<String>>(){{
+                    put("User",new ArrayList<>(0));
+                    put("Company", new ArrayList<>(0));
+                }}),
+                new HashMap<String, List<String>>() {{
+                    put("CompanyStageStep", Arrays.asList("id","createdOn", "createdBy","updatedOn","updatedBy","companyId"));
+                    put("JobStageStep", Arrays.asList("jobId","createdOn","createdBy","updatedOn", "updatedBy"));
+                    put("StageMaster", Arrays.asList("id"));
+        }});
     }
 }

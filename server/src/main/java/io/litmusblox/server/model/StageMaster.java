@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -20,6 +21,7 @@ import java.io.Serializable;
 @Entity
 @Table(name = "STAGE_MASTER")
 @Data
+@JsonFilter("StageMaster")
 public class StageMaster implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

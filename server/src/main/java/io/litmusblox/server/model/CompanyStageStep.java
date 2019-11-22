@@ -4,6 +4,7 @@
 
 package io.litmusblox.server.model;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,7 @@ import java.util.Date;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonFilter("CompanyStageStep")
 public class CompanyStageStep implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
@@ -48,7 +50,7 @@ public class CompanyStageStep implements Serializable {
     private Company companyId;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "STAGE")
     private StageMaster stage;
 

@@ -6,6 +6,7 @@ package io.litmusblox.server.service;
 
 import io.litmusblox.server.model.Job;
 import io.litmusblox.server.model.JobHistory;
+import io.litmusblox.server.model.JobStageStep;
 
 import java.util.List;
 
@@ -85,4 +86,13 @@ public interface IJobService {
      * @return a list of job history objects
      */
     List<JobHistory> getJobHistory(Long jobId) throws Exception;
+
+    /**
+     * Service method to return the stage steps for a job
+     *
+     * @param jobId the job id for which stage steps are to be returned
+     * @return list of stage steps
+     * @throws Exception
+     */
+    List<JobStageStep> getJobStageStep(Long jobId) throws Exception;
 }

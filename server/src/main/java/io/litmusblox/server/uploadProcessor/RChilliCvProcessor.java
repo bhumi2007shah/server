@@ -377,10 +377,10 @@ public class RChilliCvProcessor {
             alternateMobile=mobileString[1];
         }
 
-        //Format mobile no
-        mobile=Util.indianMobileConvertor(mobile);
+        //Format mobile no in common place
+        /*mobile=Util.indianMobileConvertor(mobile);
         if(null!=alternateMobile)
-            alternateMobile=Util.indianMobileConvertor(alternateMobile);
+            alternateMobile=Util.indianMobileConvertor(alternateMobile);*/
 
         Candidate candidate = new Candidate(bean.getFirstName(), bean.getLastName(), bean.getEmail(), mobile, null, new Date(), null);
         if(null!=alternateMobile)

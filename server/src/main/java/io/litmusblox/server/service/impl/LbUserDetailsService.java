@@ -68,6 +68,12 @@ public class LbUserDetailsService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Resource
+    CompanyAddressRepository companyAddressRepository;
+
+    @Resource
+    CompanyBuRepository companyBuRepository;
+
     @Autowired
     JwtTokenUtil jwtTokenUtil;
 
@@ -134,7 +140,7 @@ public class LbUserDetailsService implements UserDetailsService {
 
         //TODO Need revisit this code after getting screens
         Company companyObjToUse = null;
-        if(null == user.getCompany().getRecruitmentAgencyId() && IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole())) {
+        if(IConstant.UserRole.Names.SUPER_ADMIN.equals(loggedInUser.getRole()) && null == user.getCompany().getRecruitmentAgencyId()) {
             //check if company exists
             Company userCompany = companyRepository.findByCompanyNameIgnoreCaseAndRecruitmentAgencyIdIsNull(user.getCompany().getCompanyName());
 
@@ -158,8 +164,37 @@ public class LbUserDetailsService implements UserDetailsService {
         u.setFirstName(Util.toSentenceCase(user.getFirstName()));
         u.setLastName(Util.toSentenceCase(user.getLastName()));
         u.setEmail(user.getEmail().toLowerCase());
+
         if(null == companyObjToUse)
             companyObjToUse=loggedInUser.getCompany();
+
+        //add CompanyAddressId and CompanyBuId in user
+        if(null != user.getCompanyAddressId()){
+            Boolean isCompanyPresent = false;
+            if(null != loggedInUser.getCompany().getCompanyAddressList() && loggedInUser.getCompany().getCompanyAddressList().size()>0) {
+                List<Long> companyAddressList = new ArrayList<>();
+                loggedInUser.getCompany().getCompanyAddressList().forEach(companyAddress -> companyAddressList.add(companyAddress.getId()));
+                if(companyAddressList.contains(user.getCompanyAddressId())){
+                    u.setCompanyAddressId(user.getCompanyAddressId());
+                    isCompanyPresent = true;
+                }
+            }
+            if(!isCompanyPresent)
+                log.error("Company Address Id is not related to logged in user company, CompanyAddressId : "+user.getCompanyAddressId());
+        }
+        if(null != user.getCompanyBuId()){
+            Boolean isCompanyPresent = false;
+            if(null != loggedInUser.getCompany().getCompanyBuList() && loggedInUser.getCompany().getCompanyBuList().size()>0){
+                List<Long> companyBuList = new ArrayList<>();
+                loggedInUser.getCompany().getCompanyBuList().forEach(companyBu -> companyBuList.add(companyBu.getId()));
+                if(companyBuList.contains(user.getCompanyBuId())){
+                    u.setCompanyBuId(user.getCompanyBuId());
+                    isCompanyPresent = true;
+                }
+            }
+            if(!isCompanyPresent)
+                log.error("Company Bu Id is not related to logged in user company, CompanyBuId : "+user.getCompanyBuId());
+        }
         //u.setCompany((companyObjToUse==null)?loggedInUser.getCompany():companyObjToUse);
         u.setCompany(companyObjToUse);
         if (null == user.getRole()) {

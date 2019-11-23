@@ -183,6 +183,7 @@ public class UploadDataProcessService implements IUploadDataProcessService {
         }
         else {
             log.info("Found existing candidate: " + existingCandidate.getId());
+            candidate.setId(existingCandidate.getId());
         }
 
         log.info(msg);

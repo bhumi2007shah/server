@@ -1074,6 +1074,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
     private String validateMobile(String mobile, String countryCode){
         if(Util.isNotNull(mobile)) {
+            mobile = Util.indianMobileConvertor(mobile, countryCode);
             if (!Util.validateMobile(mobile, countryCode) && !countryCode.equals(IConstant.CountryCode.INDIA_CODE.getValue())) {
                 String cleanMobile = mobile.replaceAll(IConstant.REGEX_TO_CLEAR_SPECIAL_CHARACTERS_FOR_MOBILE, "");
                 log.error("Special characters found, cleaning mobile number \"" + mobile + "\" to " + cleanMobile);

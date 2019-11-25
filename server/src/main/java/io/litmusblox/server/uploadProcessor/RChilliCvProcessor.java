@@ -279,7 +279,8 @@ public class RChilliCvProcessor {
                 candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, !candidate.getMobile().isEmpty(), job);
             }
             else{
-                throw new Exception();
+                candidate.setEmail("notavailable"+System.currentTimeMillis()+"@notavailable.io");
+                candidate = uploadDataProcessService.validateDataAndSaveJcmAndJcmCommModel(null, candidate, user, true, job);
             }
         } catch (ValidationException ve) {
             candidate.setUploadErrorMessage(ve.getErrorMessage());
@@ -377,10 +378,10 @@ public class RChilliCvProcessor {
             alternateMobile=mobileString[1];
         }
 
-        //Format mobile no
-        mobile=Util.indianMobileConvertor(mobile);
+        //Format mobile no in common place
+        /*mobile=Util.indianMobileConvertor(mobile);
         if(null!=alternateMobile)
-            alternateMobile=Util.indianMobileConvertor(alternateMobile);
+            alternateMobile=Util.indianMobileConvertor(alternateMobile);*/
 
         Candidate candidate = new Candidate(bean.getFirstName(), bean.getLastName(), bean.getEmail(), mobile, null, new Date(), null);
         if(null!=alternateMobile)
@@ -548,7 +549,7 @@ public class RChilliCvProcessor {
 
     private boolean isEmailOrMobilePresent(Candidate candidate){
         boolean mobileOrEmailPresent = false;
-        if(null != candidate.getEmail() || null != candidate.getMobile()){
+        if(!Util.isNull(candidate.getEmail()) || !Util.isNull(candidate.getMobile())){
             mobileOrEmailPresent = true;
         }
         return mobileOrEmailPresent;

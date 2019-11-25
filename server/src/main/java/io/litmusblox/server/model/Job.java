@@ -5,7 +5,6 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.constant.IConstant;
@@ -73,7 +72,6 @@ public class Job implements Serializable {
     @NotNull
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "COMPANY_ID")
-    @JsonIgnore
     private Company companyId;
 
     @Column(name = "DATE_PUBLISHED")

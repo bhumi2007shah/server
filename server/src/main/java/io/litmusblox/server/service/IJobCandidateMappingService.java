@@ -36,7 +36,7 @@ public interface IJobCandidateMappingService {
      * @return the status of upload operation
      * @throws Exception
      */
-    UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId) throws Exception;
+    UploadResponseBean uploadIndividualCandidate(List<Candidate> candidates, Long jobId, boolean ignoreMobile) throws Exception;
 
     /**
      * Service method to add candidates from a file in one of the supported formats
@@ -91,7 +91,7 @@ public interface IJobCandidateMappingService {
      * @param jcmList list of jcm ids for chatbot invitation
      * @throws Exception
      */
-    void inviteCandidates(List<Long> jcmList) throws Exception;
+    InviteCandidateResponseBean inviteCandidates(List<Long> jcmList) throws Exception;
 
     /**
      * Service method to process sharing of candidate profiles with Hiring managers

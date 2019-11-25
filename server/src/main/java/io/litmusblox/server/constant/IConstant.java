@@ -13,23 +13,24 @@ package io.litmusblox.server.constant;
  */
 public interface IConstant {
 
-     // Regex
-     String REGEX_FOR_JOB_TITLE ="^[\\&\\/\\(\\)\\[\\]\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
-     String REGEX_FOR_COMPANY_JOB_ID = "^[\\-\\/\\.\\,\\a-zA-Z0-9\\s]*$";
-     String REGEX_FOR_COMPANY_NAME ="^[\\&\\'\\-\\.a-zA-Z0-9\\s]+$";
+    // Regex
+    String REGEX_FOR_JOB_TITLE = "^[\\&\\/\\(\\)\\[\\]\\+\\#\\-\\.\\,a-zA-Z0-9\\s\\t]+$";
+    String REGEX_FOR_COMPANY_JOB_ID = "^[\\-\\/\\.\\,\\a-zA-Z0-9\\s]*$";
+    String REGEX_FOR_COMPANY_NAME = "^[\\&\\'\\-\\.a-zA-Z0-9\\s]+$";
 
-     enum CountryCode{
+    enum CountryCode {
         INDIA_CODE("+91"), AUS_CODE("+61"), CAN_CODE("+1"), UK_CODE("+44"), SING_CODE("+65"), US_CODE("+1");
 
-         private String countryCode;
-         CountryCode(String val) {
-             this.countryCode = val;
-         }
+        private String countryCode;
 
-         public String getValue() {
-             return this.countryCode;
-         }
-     }
+        CountryCode(String val) {
+            this.countryCode = val;
+        }
+
+        public String getValue() {
+            return this.countryCode;
+        }
+    }
 
     String INDIAN_MOBILE_PATTERN = "(0/91)?[6-9][0-9]{9}";
     String JUNK_MOBILE_PATTERN = "([0-9])\\1{8,}";
@@ -50,16 +51,16 @@ public interface IConstant {
     Integer CANDIDATE_EMAIL_MAX_LENGTH = 50;
 
     String REPO_LOCATION = "repoLocation";
-    String TEMP_REPO_LOCATION="temprepolocation";
-    String ERROR_FILES_REPO_LOCATION="error_files";
+    String TEMP_REPO_LOCATION = "temprepolocation";
+    String ERROR_FILES_REPO_LOCATION = "error_files";
     String DATE_FORMAT_yyyymmdd_hhmm = "yyyyMMdd_HHmm";
     String STR_INDIA = "India";
 
     String TOKEN_HEADER = "Authorization";
     String TOKEN_PREFIX = "Bearer ";
     String CANDIDATE_CV = "CandidateCv";
-    String SENTRY_DSN="sentryDSN";
-    String UPLOAD_FILE_TYPE="Upload file type";
+    String SENTRY_DSN = "sentryDSN";
+    String UPLOAD_FILE_TYPE = "Upload file type";
     String LOCALHOST_LOOPBACK = "0:0:0:0:0:0:0:1";
     String YEAR_OF_PASSING = "yearOfPassing";
     String DAYS = "Days";
@@ -128,7 +129,7 @@ public interface IConstant {
     }
 
     enum CandidateSource {
-        SingleCandidateUpload("Individual"), File("File"), Plugin("Plugin"), DragDropCv("DragDropCv");
+        SingleCandidateUpload("Individual"), File("File"), Naukri("Naukri"), LinkedIn("LinkedIn"), IIMJobs("iimJobs"), DragDropCv("DragDropCv");
         private String value;
 
         CandidateSource(String val) {
@@ -144,35 +145,47 @@ public interface IConstant {
         FirstName("First Name"), LastName("Last Name"), Email("Email"), Mobile("Mobile");
         private String value;
 
-        LITMUSBLOX_FILE_COLUMNS(String val) { this.value = val; }
+        LITMUSBLOX_FILE_COLUMNS(String val) {
+            this.value = val;
+        }
 
-        public String getValue() { return this.value; }
+        public String getValue() {
+            return this.value;
+        }
     }
 
     enum NAUKRI_FILE_COLUMNS {
         SerialNumber("Serial Number"), CandidateName("Name of the Candidate"), ResumeId("Resume ID"), PostalAddress("Postal Address"), Telephone("Telephone No."), Mobile("Mobile No."), DOB("Date of Birth"), Email("Email"), WorkExperience("Work Experience"), ResumeTitle("Resume Title"), CurrentLocation("Current Location"), PreferredLocation("Preferred Location"), CurrentEmployer("Current Employer"), CurrentDesignation("Current Designation"), AnnualSalary("Annual Salary"), UGCourse("U.G. Course"), PGCourse("P. G. Course"), PPGCourse("P.P.G. Course"), LastActive("Last Active Date");
         private String value;
 
-        NAUKRI_FILE_COLUMNS(String val) { this.value = val; }
+        NAUKRI_FILE_COLUMNS(String val) {
+            this.value = val;
+        }
 
-        public String getValue() { return this.value; }
+        public String getValue() {
+            return this.value;
+        }
     }
 
     enum NAUKRI_XLS_FILE_COLUMNS {
         SerialNumber("Serial Number"), CandidateName("Name of the Candidate"), ResumeId("Resume ID"), PostalAddress("Postal Address"), Telephone("Telephone No."), Mobile("Mobile No."), DOB("Date of Birth"), Email("Email"), WorkExperience("Work Experience"), ResumeTitle("Resume Title"), CurrentLocation("Current Location"), PreferredLocation("Preferred Location"), CurrentEmployer("Current Employer"), CurrentDesignation("Current Designation"), AnnualSalary("Annual Salary"), UGCourse("U.G. Course"), PGCourse("P. G. Course"), PPGCourse("Post P. G. Course"), LastActive("Last Active Date");
         private String value;
 
-        NAUKRI_XLS_FILE_COLUMNS(String val) { this.value = val; }
+        NAUKRI_XLS_FILE_COLUMNS(String val) {
+            this.value = val;
+        }
 
-        public String getValue() { return this.value; }
+        public String getValue() {
+            return this.value;
+        }
     }
 
-    String[] supportedExtensions = new String[] {"xls", "xlsx", "xml", "csv"};
-    String[] cvUploadSupportedExtensions = new String[] {"doc","docx","html","pdf","rar","rtf","zip"};
+    String[] supportedExtensions = new String[]{"xls", "xlsx", "xml", "csv"};
+    String[] cvUploadSupportedExtensions = new String[]{"doc", "docx", "html", "pdf", "rar", "rtf", "zip"};
 
 
     enum MAX_FIELD_LENGTHS {
-        INSTITUTE_NAME (75), COMPANY_NAME (50), DESIGNATION (50), ADDRESS (255), KEY_SKILLS (255), ONLINE_PROFILE_URL(255), ONLINE_PROFILE_TYPE(20), WORK_SUMMARY(255), GENDER(1), DEGREE(100), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
+        INSTITUTE_NAME(75), COMPANY_NAME(50), DESIGNATION(50), ADDRESS(255), KEY_SKILLS(255), ONLINE_PROFILE_URL(255), ONLINE_PROFILE_TYPE(20), WORK_SUMMARY(255), GENDER(1), DEGREE(100), SKILL(50), ROLE(40), YEAR_OF_PASSING(4);
 
         private int value;
 
@@ -186,30 +199,30 @@ public interface IConstant {
     }
 
     enum CompanySubscription {
-        Lite,Max;
+        Lite, Max;
     }
 
     enum UPLOAD_TYPE {
-       Candidates,Logo,CandidateCv;
+        Candidates, Logo, CandidateCv;
     }
 
-    enum PROCESS_FILE_TYPE{
-        CsvFile,ExcelFile,HTMLFile,NaukriExcelFile
+    enum PROCESS_FILE_TYPE {
+        CsvFile, ExcelFile, HTMLFile, NaukriExcelFile
     }
 
-    enum FILE_TYPE{
-        rar,zip,other
+    enum FILE_TYPE {
+        rar, zip, other
     }
 
-    String USER_KEY="userKey";
+    String USER_KEY = "userKey";
     String VERSION = "version";
-    String SUB_USER_ID="subUserId";
-    String RCHILLI_API_URL="rchilliApiUrl";
-    String FILE_STORAGE_URL="fileStorageUrl";
-    String ERROR_FILES="error_files";
-    String NOT_AVAILABLE= "Not Available";
+    String SUB_USER_ID = "subUserId";
+    String RCHILLI_API_URL = "rchilliApiUrl";
+    String FILE_STORAGE_URL = "fileStorageUrl";
+    String ERROR_FILES = "error_files";
+    String NOT_AVAILABLE = "Not Available";
 
-    enum COMPANY_PAGES{
+    enum COMPANY_PAGES {
         Company, BusinessUnit, UsersAndTeams, Addresses, ScreeningQuestions
     }
 
@@ -226,13 +239,13 @@ public interface IConstant {
         }
     }
 
-    enum CHATBOT_STATUS{
+    enum CHATBOT_STATUS {
         Complete
     }
 
     //constants for create candidate if firstName, lastName.
-    String NOT_FIRST_NAME="Not";
-    String NOT_LAST_NAME="Available";
+    String NOT_FIRST_NAME = "Not";
+    String NOT_LAST_NAME = "Available";
 
     String DATE_FORMAT = "yyyy-MM-dd";
 
@@ -261,4 +274,6 @@ public interface IConstant {
             return this.value;
         }
     }
+
+    String NOT_AVAILABLE_EMAIL = "@notavailable.io";
 }

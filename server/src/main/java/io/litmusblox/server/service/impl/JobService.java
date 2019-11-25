@@ -244,19 +244,32 @@ public class JobService implements IJobService {
         JobWorspaceResponseBean responseBean = new JobWorspaceResponseBean();
         String msg = loggedInUser.getEmail() + ", " + companyName + ": ";
 
+        List<Company> companyList = new ArrayList<>();
         switch(loggedInUser.getRole()) {
             case IConstant.UserRole.Names.CLIENT_ADMIN:
                 log.info(msg + "Request from Client Admin, all jobs for the company will be returned");
-                jobsForCompany(responseBean, archived, loggedInUser.getCompany());
+                companyList = new ArrayList<>();
+                companyList.add(loggedInUser.getCompany());
+                jobsForCompany(responseBean, archived, companyList);
+                break;
+            case IConstant.UserRole.Names.RECRUITMENT_AGENCY:
+                if (Util.isNull(companyName))
+                    throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
+                Company company = companyRepository.findByCompanyNameIgnoreCaseAndCompanyType(companyName, IConstant.CompanyType.AGENCY.getValue());
+                if(null == company)
+                    throw new ValidationException("Recruitment agency not found for : "+companyName, HttpStatus.UNPROCESSABLE_ENTITY);
+                List<Company> companies = companyRepository.findByRecruitmentAgencyId(company.getId());
+                jobsForCompany(responseBean, archived, companies);
                 break;
             case IConstant.UserRole.Names.SUPER_ADMIN:
                 if (Util.isNull(companyName))
                     throw new ValidationException("Missing Company name in request", HttpStatus.UNPROCESSABLE_ENTITY);
                 log.info(msg + "Request from Super Admin for jobs of Company");
-                Company companyObjToUse = companyRepository.findByCompanyNameIgnoreCase(companyName);
+                Company companyObjToUse = companyRepository.findByCompanyNameIgnoreCaseAndRecruitmentAgencyIdIsNull(companyName);
+                companyList.add(companyObjToUse);
                 if (null == companyObjToUse)
                     throw new ValidationException("Company not found : " + companyName, HttpStatus.UNPROCESSABLE_ENTITY);
-                jobsForCompany(responseBean, archived, companyObjToUse);
+                jobsForCompany(responseBean, archived, companyList);
                 break;
             default:
                 jobsForLoggedInUser(responseBean, archived, loggedInUser);
@@ -280,17 +293,19 @@ public class JobService implements IJobService {
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
 
-    private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, Company company) {
+    private void jobsForCompany(JobWorspaceResponseBean responseBean, boolean archived, List<Company> companyList) {
         long startTime = System.currentTimeMillis();
-        if (archived) {
-            responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(company));
-            responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
-            responseBean.setOpenJobs((jobRepository.countByCompanyIdAndDateArchivedIsNull(company)).intValue());
-        } else {
-            responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(company));
-            responseBean.setOpenJobs(responseBean.getListOfJobs().size());
-            responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
-        }
+        companyList.stream().forEach(company -> {
+            if (archived) {
+                responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNotNullOrderByCreatedOnDesc(company));
+                responseBean.setArchivedJobs(responseBean.getListOfJobs().size());
+                responseBean.setOpenJobs((jobRepository.countByCompanyIdAndDateArchivedIsNull(company)).intValue());
+            } else {
+                responseBean.setListOfJobs(jobRepository.findByCompanyIdAndDateArchivedIsNullOrderByCreatedOnDesc(company));
+                responseBean.setOpenJobs(responseBean.getListOfJobs().size());
+                responseBean.setArchivedJobs((jobRepository.countByCompanyIdAndDateArchivedIsNotNull(company)).intValue());
+            }
+        });
         log.info("Got " + responseBean.getListOfJobs().size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");
         getCandidateCountByStage(responseBean.getListOfJobs());
     }
@@ -427,10 +442,12 @@ public class JobService implements IJobService {
         //validate title
         if (job.getJobTitle().length() > IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
             job.setJobTitle(job.getJobTitle().substring(0, IConstant.TITLE_MAX_LENGTH));
+        Company userCompany = null;
+        if(null != job.getCompanyId())
+            userCompany = companyRepository.getOne(job.getCompanyId().getId());
 
-        Company userCompany = companyRepository.getOne(loggedInUser.getCompany().getId());
         if (null == userCompany) {
-            throw new ValidationException("Cannot find company for logged in user", HttpStatus.EXPECTATION_FAILED);
+            throw new ValidationException("Cannot find company for current job", HttpStatus.EXPECTATION_FAILED);
         }
 
         job.setCompanyId(userCompany);

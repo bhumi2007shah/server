@@ -129,6 +129,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
     @Resource
     CandidateRepository candidateRepository;
 
+    @Resource
+    JobStageStepRepository jobStageStepRepository;
+
     @Transactional(readOnly = true)
     Job getJob(long jobId) {
         return jobRepository.findById(jobId).get();
@@ -413,7 +416,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 candidate.setCandidateSource(IConstant.CandidateSource.Naukri.getValue());
             }
             else if(candidate.getCandidateSource().contains(IConstant.CandidateSource.LinkedIn.getValue())){
-                candidate.setCandidateSource(IConstant.CandidateSource.Naukri.getValue());
+                candidate.setCandidateSource(IConstant.CandidateSource.LinkedIn.getValue());
             }
             else if(candidate.getCandidateSource().contains(IConstant.CandidateSource.IIMJobs.getValue())){
                 candidate.setCandidateSource(IConstant.CandidateSource.IIMJobs.getValue());
@@ -483,7 +486,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         objFromDb.setCandidateInterest(interest);
         objFromDb.setCandidateInterestDate(new Date());
         jobCandidateMappingRepository.save(objFromDb);
-        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null));
+        jcmHistoryRepository.save(new JcmHistory(objFromDb, "Candidate is"+ (interest?" interested.":" not interested."), new Date(), null, objFromDb.getStage()));
     }
 
     /**
@@ -620,6 +623,10 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         if(jcmList == null || jcmList.size() == 0)
             throw new WebException("Select candidates to invite",HttpStatus.UNPROCESSABLE_ENTITY);
 
+        //make sure all candidates are at the same stage
+        if(!areCandidatesInSameStage(jcmList))
+            throw new WebException("Select candidates that are all in Source stage", HttpStatus.UNPROCESSABLE_ENTITY);
+
         User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         //list to store candidates for which email contains "@notavailable.io" or mobile is null
@@ -634,6 +641,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         //fetch list of jcm from db using ids
         List<JobCandidateMapping>jobCandidateMappingList = jobCandidateMappingRepository.findAllById(jcmList);
 
+        Job jobObjToUse = null;
         //iterate over jcm list
         for(JobCandidateMapping jobCandidateMapping: jobCandidateMappingList){
 
@@ -646,6 +654,9 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 failedCandidates.add(jobCandidateMapping.getCandidate());
                 continue;
             }
+            if(null == jobObjToUse)
+                jobObjToUse = jobCandidateMapping.getJob();
+
             jcmListWithoutError.add(jobCandidateMapping.getId());
         }
 
@@ -660,9 +671,15 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         else{
             inviteCandidateResponseBean = new InviteCandidateResponseBean(IConstant.UPLOAD_STATUS.Success.toString(), jcmListWithoutError.size(), 0, failedCandidates);
             jcmCommunicationDetailsRepository.inviteCandidates(jcmListWithoutError);
-            updateJcmHistory(jcmListWithoutError, loggedInUser);
+            if(null == jobObjToUse && jcmListWithoutError.size() > 0) {
+                log.error("Job stage steps not found. Cannot move candidate from Source to Screen");
+            } else {
+                //set stage = Screening where stage = Source
+                Map<String, Long> stageIdMap = fetchStageStepForJob(jobObjToUse.getId(), true);
+                jobCandidateMappingRepository.updateStageStepId(jcmList, stageIdMap.get(IConstant.Stage.Source.getValue()), stageIdMap.get(IConstant.Stage.Screen.getValue()), loggedInUser.getId(), new Date());
+                updateJcmHistory(jcmListWithoutError, loggedInUser);
+            }
         }
-
         return inviteCandidateResponseBean;
     }
 
@@ -672,7 +689,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         List<JcmHistory> jcmHistoryList = new ArrayList<>();
 
         for (Long jcmId : jcmList) {
-            jcmHistoryList.add(new JcmHistory(new JobCandidateMapping(jcmId), "Candidate invited", new Date(), loggedInUser));
+            JobCandidateMapping tempObj = jobCandidateMappingRepository.getOne(jcmId);
+            jcmHistoryList.add(new JcmHistory(tempObj, "Candidate invited", new Date(), loggedInUser, tempObj.getStage()));
         }
 
         if (jcmHistoryList.size() > 0) {
@@ -680,6 +698,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         log.info("Added jmcHistory data");
+    }
+
+    private boolean areCandidatesInSameStage(List<Long> jcmList) throws Exception{
+        if(jobCandidateMappingRepository.countDistinctStageForJcmList(jcmList) != 1)
+            return false;
+        return true;
     }
 
 
@@ -731,7 +755,8 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             recieverEmails.add(array[1]);
         }
 
-        jcmHistoryRepository.save(new JcmHistory(new JobCandidateMapping(requestBean.getJcmId().get(0)), "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser));
+        JobCandidateMapping tempObj = jobCandidateMappingRepository.getOne(requestBean.getJcmId().get(0));
+        jcmHistoryRepository.save(new JcmHistory(tempObj, "Profiles shared with : "+String.join(", ", recieverEmails)+".", new Date(), loggedInUser, tempObj.getStage()));
     }
 
     /**
@@ -1388,5 +1413,59 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         }
 
         jobCandidateMappingRepository.save(jcmFromDb);
+    }
+
+    private Map<String, Long> fetchStageStepForJob(Long jobId, boolean callForInvite) throws Exception {
+        List<JobStageStep> jobStageStepList = jobStageStepRepository.findByJobId(jobId);
+        Map<String, Long> stageIdMap = new HashMap<>();
+
+        jobStageStepList.stream().forEach(jobStageStep-> {
+            if(callForInvite) {
+                if (jobStageStep.getStageStepId().getStage().getStageName().equals(IConstant.Stage.Source.getValue()) || jobStageStep.getStageStepId().getStage().getStageName().equals(IConstant.Stage.Screen.getValue()))
+                    stageIdMap.put(jobStageStep.getStageStepId().getStage().getStageName(), jobStageStep.getId());
+            }
+            else {
+                stageIdMap.put(jobStageStep.getStageStepId().getStage().getStageName(), jobStageStep.getId());
+            }
+        });
+        return stageIdMap;
+    }
+
+    /**
+     * Service to set a specific stage like Interview, Offer etc
+     *
+     * @param jcmList The list of candidates for the job that need to be moved to the specified stage
+     * @param stage   the new stage
+     * @throws Exception
+     */
+    @Transactional
+    public void setStageForCandidates(List<Long> jcmList, String stage) throws Exception {
+        long startTime = System.currentTimeMillis();
+        log.info("Setting {} jcms to {} stage", jcmList, stage);
+        //check that all the jcm are currently in the same stage
+        if(!areCandidatesInSameStage(jcmList))
+            throw new WebException("Select candidates that are all in Source stage", HttpStatus.UNPROCESSABLE_ENTITY);
+
+        User loggedInUser = (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        List<JcmHistory> jcmHistoryList = new ArrayList<>(jcmList.size());
+
+        //check if new stage is rejected stage
+        if (stage.equals(IConstant.Stage.Reject.getValue())) {
+            jobCandidateMappingRepository.updateForRejectStage(jcmList, loggedInUser.getId(), new Date());
+        }
+        else {
+
+            JobCandidateMapping jobCandidateMappingObj = jobCandidateMappingRepository.getOne(jcmList.get(0));
+            Map<String, Long> jobStageIds = fetchStageStepForJob(jobCandidateMappingObj.getJob().getId(), false);
+            jobCandidateMappingRepository.updateStageStepId(jcmList, jobCandidateMappingObj.getStage().getId(), jobStageIds.get(stage), loggedInUser.getId(), new Date());
+        }
+        jcmList.stream().forEach(jcm -> {
+            JobCandidateMapping mappingObj = jobCandidateMappingRepository.getOne(jcm);
+            jcmHistoryList.add(new JcmHistory(mappingObj, stage.equals(IConstant.Stage.Reject.getValue())?"Candidate Rejected from " + mappingObj.getStage().getStageStepId().getStage().getStageName() + " stage":"Candidate moved to " + stage, new Date(), loggedInUser, mappingObj.getStage()));
+
+        });
+        jcmHistoryRepository.saveAll(jcmHistoryList);
+
+        log.info("Completed moving candidates to {} stage in {} ms", stage, (System.currentTimeMillis() - startTime));
     }
 }

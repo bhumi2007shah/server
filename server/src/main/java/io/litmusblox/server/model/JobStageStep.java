@@ -5,7 +5,6 @@
 package io.litmusblox.server.model;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,21 +16,20 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * @author : Sumit
- * Date : 3/7/19
- * Time : 6:25 PM
- * Class Name : CompanyStageStep
+ * @author : Shital Raval
+ * Date : 19/11/19
+ * Time : 1:05 PM
+ * Class Name : JobStageStep
  * Project Name : server
  */
-@Data
 @Entity
 @Builder
-@Table(name = "COMPANY_STAGE_STEP")
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonFilter("CompanyStageStep")
-public class CompanyStageStep implements Serializable {
+@Table(name = "JOB_STAGE_STEP")
+@Data
+@JsonFilter("JobStageStep")
+public class JobStageStep implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;
 
@@ -41,18 +39,13 @@ public class CompanyStageStep implements Serializable {
     private Long id;
 
     @NotNull
-    @Column(name = "STEP")
-    private String step;
-
-    @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "COMPANY_ID")
-    private Company companyId;
+    @Column(name = "JOB_ID")
+    private Long jobId;
 
     @NotNull
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "STAGE")
-    private StageMaster stage;
+    @JoinColumn(name = "STAGE_STEP_ID")
+    private CompanyStageStep stageStepId;
 
     @NotNull
     @Column(name = "CREATED_ON")

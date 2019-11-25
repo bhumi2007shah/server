@@ -70,6 +70,12 @@ public class MasterDataService implements IMasterDataService {
     @Resource
     CurrencyRepository currencyRepository;
 
+    @Resource
+    StageMasterRepository stageMasterRepository;
+
+    @Resource
+    StepsPerStageRepository stepsPerStageRepository;
+
     @Autowired
     Environment environment;
 
@@ -90,6 +96,9 @@ public class MasterDataService implements IMasterDataService {
             MasterDataBean.getInstance().getJobPageNamesInOrder().add(page.getPageName());
         });
 
+        stageMasterRepository.findAll().stream().forEach(stageMaster -> MasterDataBean.getInstance().getStage().add(stageMaster.getStageName()));
+        MasterDataBean.getInstance().getDefaultStepsPerStage().addAll(stepsPerStageRepository.findAll());
+
         currencyRepository.findAll().stream().forEach(currency -> {
             MasterDataBean.getInstance().getCurrencyList().add(currency.getCurrencyShortName());
         });
@@ -109,10 +118,6 @@ public class MasterDataService implements IMasterDataService {
         //For every master data record from database, populate the corresponding map with key-value pairs
         masterDataFromDb.forEach(data -> {
                 ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
-                //special handling for Source stage
-                if (data.getType().equalsIgnoreCase("stage") && data.getValue().equalsIgnoreCase(IConstant.STAGE.Source.name())) {
-                    MasterDataBean.getInstance().setSourceStage(data);
-                }
                 if(data.getType().equalsIgnoreCase("noticePeriod"))
                     MasterDataBean.getInstance().getNoticePeriodMapping().put(data.getValue(), data);
 
@@ -216,7 +221,7 @@ public class MasterDataService implements IMasterDataService {
     private static final String CONFIG_SETTINGS = "configSettings";
     private static final String SUPPORTED_FILE_FORMATS = "supportedFileFormats";
     private static final String SUPPORTED_CV_FILE_FORMATS = "supportedCvFileFormats";
-    private static final String ID_FOR_SOURCE_STAGE = "sourceStageId";
+    private static final String STAGE_MASTER_DATA = "stage";
     private static final String ADD_JOB_PAGES = "addJobPages";
     private static final String CURRENCY_LIST = "currencyList";
 
@@ -232,6 +237,9 @@ public class MasterDataService implements IMasterDataService {
         switch (input) {
             case COUNTRY_MASTER_DATA:
                 master.getCountries().addAll(MasterDataBean.getInstance().getCountryList());
+                break;
+            case STAGE_MASTER_DATA:
+                master.getStage().addAll(MasterDataBean.getInstance().getStage());
                 break;
             case ADD_JOB_PAGES:
                 master.getAddJobPages().addAll(MasterDataBean.getInstance().getAddJobPages());
@@ -249,9 +257,6 @@ public class MasterDataService implements IMasterDataService {
                 break;
             case SUPPORTED_CV_FILE_FORMATS:
                 master.setSupportedCvFileFormats(Arrays.asList(IConstant.cvUploadSupportedExtensions));
-                break;
-            case ID_FOR_SOURCE_STAGE:
-                master.setSourceStageId(MasterDataBean.getInstance().getSourceStage().getId());
                 break;
             case CURRENCY_LIST:
                 master.setCurrencyList(MasterDataBean.getInstance().getCurrencyList());

@@ -168,4 +168,13 @@ public interface IJobCandidateMappingService {
      * @param jobCandidateMapping updated data from JobCandidateMapping model
      */
     void editCandidate(JobCandidateMapping jobCandidateMapping);
+
+    /**
+     * Service to set a specific stage like Interview, Offer etc
+     *
+     * @param jcmList The list of candidates for the job that need to be moved to the specified stage
+     * @param stage the new stage
+     * @throws Exception
+     */
+    void setStageForCandidates(List<Long> jcmList, String stage) throws Exception;
 }

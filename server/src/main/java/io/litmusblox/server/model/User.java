@@ -113,10 +113,10 @@ public class User implements Serializable, UserDetails {
     private Long updatedBy;
 
     @Column(name = "COMPANY_ADDRESS_ID")
-    private Long CompanyAddressId;
+    private Long companyAddressId;
 
     @Column(name = "COMPANY_BU_ID")
-    private Long CompanyBuId;
+    private Long companyBuId;
 
     @Transient
     @JsonProperty

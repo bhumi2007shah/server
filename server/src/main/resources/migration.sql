@@ -975,3 +975,7 @@ ALTER COLUMN ROLE TYPE VARCHAR(17);
 ALTER TABLE USERS
 ADD COLUMN COMPANY_ADDRESS_ID INTEGER REFERENCES COMPANY_ADDRESS(ID),
 ADD COLUMN COMPANY_BU_ID INTEGER REFERENCES COMPANY_BU(ID);
+
+--https://github.com/hexagonsearch/litmusblox-scheduler/issues/16
+--Clear all timestamps in the jcm_communication_details table if the chat_invite_flag is false
+update jcm_communication_details set chat_invite_timestamp_sms = null, chat_incomplete_reminder_1_timestamp_sms = null, chat_incomplete_reminder_2_timestamp_sms = null, link_not_visited_reminder_1_timestamp_sms = null, link_not_visited_reminder_2_timestamp_sms = null, chat_complete_timestamp_sms = null, chat_invite_timestamp_email = null, chat_incomplete_reminder_1_timestamp_email = null, chat_incomplete_reminder_2_timestamp_email = null, link_not_visited_reminder_1_timestamp_email = null, link_not_visited_reminder_2_timestamp_email = null, chat_complete_timestamp_email = null where chat_invite_flag = false;

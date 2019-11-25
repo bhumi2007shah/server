@@ -252,7 +252,7 @@ class JobServiceTest extends AbstractTest {
                     .education(MasterData.builder().id(15L).build())
                     .experienceRange(MasterData.builder().id(125L).build())
                     .expertise(MasterData.builder().id(122L).build())
-                    .function(MasterData.builder().id(135L).build())
+                    .function(MasterData.builder().id(130L).build())
                     .currency("INR")
                     .usersForCompany(new ArrayList<>())
                     .build();

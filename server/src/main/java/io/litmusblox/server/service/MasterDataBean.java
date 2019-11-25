@@ -2,10 +2,7 @@ package io.litmusblox.server.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.litmusblox.server.model.Country;
-import io.litmusblox.server.model.CreateJobPageSequence;
-import io.litmusblox.server.model.MasterData;
-import io.litmusblox.server.model.ScreeningQuestions;
+import io.litmusblox.server.model.*;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -47,7 +44,7 @@ public class MasterDataBean {
     private Map<Long, String> questionType = new HashMap<>();
     private Map<Long, String> experienceRange = new HashMap<>();
     private Map<Long, String> addressType = new HashMap<>();
-    private Map<Long, String> stage = new HashMap<>();
+    private List<String> stage = new ArrayList<>();
     private Map<Long, String> process = new HashMap<>();
     private Map<Long, String> function = new HashMap<>();
     private Map<Long, MasterData> expertise = new HashMap<>();
@@ -59,12 +56,11 @@ public class MasterDataBean {
     private List<String> jobPageNamesInOrder = new ArrayList<>();
     private List<String> currencyList = new ArrayList<>();
 
-    //added the master data for 'Source' status as that will be used for all candidates uploaded
-    private MasterData sourceStage = null;
-
     private Map<String, MasterData> noticePeriodMapping = new HashMap<>();
 
     private ConfigSettings configSettings = new ConfigSettings();
+
+    private List<StepsPerStage> defaultStepsPerStage = new ArrayList<>();
 
     // sentryDSN is only read from application.properties file as per profile it is not save in database
     private String sentryDSN=null;

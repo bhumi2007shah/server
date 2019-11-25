@@ -6,6 +6,8 @@ package io.litmusblox.server.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.litmusblox.server.constant.IConstant;
 import io.litmusblox.server.constant.IErrorMessages;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,6 +32,8 @@ import java.util.Set;
 @Table(name = "COMPANY")
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Company implements Serializable {
 
     private static final long serialVersionUID = 6868521896546285046L;

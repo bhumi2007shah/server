@@ -1468,4 +1468,28 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
 
         log.info("Completed moving candidates to {} stage in {} ms", stage, (System.currentTimeMillis() - startTime));
     }
+
+    /**
+     * Service to return error list for drag and drop CV's for a job
+     *
+     * @param jobId job id for which files with error wil be returned
+     * @return List of RChilliErrorResponseBean which have file name, processed date, status, jcmId, candidate name if available
+     * @throws Exception
+     */
+    public List<RChilliErrorResonseBean> getRchilliError(Long jobId) throws Exception{
+        List<RChilliErrorResonseBean> rChilliErrorResonseBeanList = new ArrayList<>();
+
+        //fetch records with error from cv parsing details table using jobId
+        List<CvParsingDetails> cvParsingDetailsList = cvParsingDetailsRepository.getRchilliErrorResonseBeanList(jobId);
+
+        //for each cv parsing record create rchilliResponseBean and push to rChilliResponseBeanList
+        cvParsingDetailsList.forEach(cvParsingDetails -> {
+            RChilliErrorResonseBean rChilliErrorResonseBean = new RChilliErrorResonseBean();
+            rChilliErrorResonseBean.setCvFileName(cvParsingDetails.getCvFileName());
+            rChilliErrorResonseBean.setProcessedOn(cvParsingDetails.getProcessedOn());
+            rChilliErrorResonseBean.setStatus(cvParsingDetails.getProcessingStatus());
+            rChilliErrorResonseBeanList.add(rChilliErrorResonseBean);
+        });
+        return rChilliErrorResonseBeanList;
+    }
 }

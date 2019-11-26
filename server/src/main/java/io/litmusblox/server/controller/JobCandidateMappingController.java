@@ -257,4 +257,14 @@ public class JobCandidateMappingController {
     void setStageForCandidates(@RequestBody List<Long> jcmList, @PathVariable("stage") @NotNull String stage) throws Exception {
         jobCandidateMappingService.setStageForCandidates(jcmList, stage);
     }
+
+    @GetMapping("cvuploaderror/{jobId}")
+    @ResponseBody
+    List<RChilliErrorResonseBean> getRchilliError(@PathVariable("jobId") @NotNull Long jobId)throws Exception{
+        log.info("Received request to fetch drag and drop cv error list for jobId: "+jobId);
+        long startTime = System.currentTimeMillis();
+        List<RChilliErrorResonseBean> rChilliErrorResonseBeanList=  jobCandidateMappingService.getRchilliError(jobId);
+        log.info("Completed processing frequest to fetch drag and drop cv error list for jobId: "+ jobId+ " in "+ (System.currentTimeMillis()-startTime) + "ms.");
+        return rChilliErrorResonseBeanList;
+    }
 }

@@ -25,7 +25,7 @@ sudo cp /home/lbprod/capabilityComplexityMaster.sql /var/www/html/capabilityComp
 #export candidateChatbotLinks.csv
 PGPASSWORD="H#X@g0nL1tmu$" psql -U postgres -h localhost -d litmusblox -A -F"," -c "select 
 company.company_name as \"Company Name\", 
-job.company_job_id as JobId, job.job_title as \"Job Title\", 
+job.id as JobId, job.job_title as \"Job Title\",
 concat(jcm.candidate_first_name, ' ',jcm.candidate_last_name) as \"Candidate Name\",
 jcm.chatbot_status as \"Chatbot Status\",
 concat('https://chatbot.litmusblox.io/#/',jcm.chatbot_uuid) as \"Chatbot Link\"
@@ -39,7 +39,7 @@ job on job.id = jcm.job_id;" > /home/lbprod/serverApplication/FileStore/download
 #export hrScreeningQuestionResponses.csv
 PGPASSWORD="H#X@g0nL1tmu$" psql -U postgres -h localhost -d litmusblox -U postgres -A -F"," -c "select
 company.company_name as \"Company Name\",
-job.company_job_id as \"Job Id\", job.job_title as \"Job Title\",
+job.id as \"Job Id\", job.job_title as \"Job Title\",
 concat(jcm.candidate_first_name, ' ',jcm.candidate_last_name) as \"Candidate Name\",
 jsq.ScreeningQn as \"Screening Qn\", jsq.ScreeningOp as \"Screening Op\",
 case

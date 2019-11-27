@@ -188,6 +188,7 @@ public class JobService implements IJobService {
                 break;
             case hiringTeam:
                 addJobHiringTeam(job, oldJob, loggedInUser);
+                job.setJobHiringTeamList(jobHiringTeamRepository.findByJobId(job.getId()));
                 break;
             case expertise:
                 addJobExpertise(job, oldJob);
@@ -220,6 +221,9 @@ public class JobService implements IJobService {
                     //populate the capabilities for the job
                     job.setJobCapabilityList(jobCapabilitiesRepository.findByJobId(job.getId()));
                     break;
+                /*case hiringTeam:
+                    job.setJobHiringTeamList(jobHiringTeamRepository.findByJobId(job.getId()));
+                    break;*/
                 default:
                     break;
             }
@@ -440,6 +444,8 @@ public class JobService implements IJobService {
     }
 
     private void addJobOverview(Job job, Job oldJob, User loggedInUser) { //method for add job for Overview page
+        boolean deleteExistingJobStageStep = (null != job.getId());
+
         //validate title
         if (job.getJobTitle().length() > IConstant.TITLE_MAX_LENGTH)  //Truncate job title if it is greater than max length
             job.setJobTitle(job.getJobTitle().substring(0, IConstant.TITLE_MAX_LENGTH));
@@ -453,6 +459,10 @@ public class JobService implements IJobService {
 
         job.setCompanyId(userCompany);
         String historyMsg = "Created";
+        if(deleteExistingJobStageStep){
+            jobStageStepRepository.deleteById(job.getId());
+            jobStageStepRepository.flush();
+        }
 
         if (null != oldJob && !oldJob.getStatus().equals(IConstant.JobStatus.PUBLISHED)) {//only update existing job
             if(null != job.getHiringManager())
@@ -484,6 +494,8 @@ public class JobService implements IJobService {
             oldJob = jobRepository.save(job);
         }
         //TODO: remove one JobRepository call
+        //Add job stage step for this job
+        addJobStageStep(oldJob);
         //Add Job details
         addJobDetail(job, oldJob, loggedInUser);
 
@@ -907,21 +919,21 @@ public class JobService implements IJobService {
 
     private void addJobHiringTeam(Job job, Job oldJob, User loggedInUser) throws Exception {
         log.info("inside addJobHiringTeam");
-        List<JobHiringTeam> jobHiringTeamList = new ArrayList<>();
         if(null != oldJob){
             jobHiringTeamRepository.deleteByJobId(oldJob.getId());
             jobHiringTeamRepository.flush();
         }
         AtomicLong i = new AtomicLong();
-        if(null != job.getHiringTeamStepMapping() && job.getHiringTeamStepMapping().size()>0)
-        job.getHiringTeamStepMapping().forEach(stageStep ->{
-            JobHiringTeam jobHiringTeam = jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), JobStageStep.builder().id(stageStep.get(1)).build(), User.builder().id(stageStep.get(1)).build(), i.longValue(), new Date(), loggedInUser));
-            i.getAndIncrement();
-            jobHiringTeamList.add(jobHiringTeam);
-        });
-        //List<JobHiringTeam> jobHiringTeamList = jobHiringTeamRepository.findByJobId(oldJob.getId());
-        oldJob.setJobHiringTeamList(jobHiringTeamList);
-        job.setJobHiringTeamList(jobHiringTeamList);
+        if(null != job.getHiringTeamStepMapping() && job.getHiringTeamStepMapping().size()>0) {
+            List<JobHiringTeam> jobHiringTeamList = new ArrayList<>(job.getJobHiringTeamList().size());
+            job.getHiringTeamStepMapping().forEach(stageStep -> {
+                jobHiringTeamList.add(new JobHiringTeam(oldJob.getId(), JobStageStep.builder().id(stageStep.get(0)).build(), User.builder().id(stageStep.get(1)).build(), i.longValue(), new Date(), loggedInUser));
+                i.getAndIncrement();
+            });
+            jobHiringTeamRepository.saveAll(jobHiringTeamList);
+            oldJob.setJobHiringTeamList(jobHiringTeamList);
+            jobHiringTeamRepository.flush();
+        }
         jobRepository.save(oldJob);
     }
 
@@ -947,7 +959,6 @@ public class JobService implements IJobService {
     public void publishJob(Long jobId) throws Exception {
         log.info("Received request to publish job with id: " + jobId);
         Job publishedJob = changeJobStatus(jobId,IConstant.JobStatus.PUBLISHED.getValue());
-        addJobStageStep(publishedJob);
         log.info("Completed publishing job with id: " + jobId);
         if(publishedJob.getJobCapabilityList().size() == 0)
             log.info("No capabilities exist for the job: " + jobId + " Scoring engine api call will NOT happen");
@@ -965,11 +976,11 @@ public class JobService implements IJobService {
         }
     }
 
-    private void addJobStageStep(Job publishedJob) {
-        List<CompanyStageStep> companyStageSteps = companyStageStepRepository.findByCompanyId(publishedJob.getCompanyId());
+    private void addJobStageStep(Job job) {
+        List<CompanyStageStep> companyStageSteps = companyStageStepRepository.findByCompanyId(job.getCompanyId());
         List<JobStageStep> jobStageSteps = new ArrayList<>(companyStageSteps.size());
         for(CompanyStageStep companyStageStep: companyStageSteps) {
-            jobStageSteps.add(JobStageStep.builder().jobId(publishedJob.getId()).stageStepId(companyStageStep).createdBy(publishedJob.getCreatedBy()).createdOn(new Date()).build());
+            jobStageSteps.add(JobStageStep.builder().jobId(job.getId()).stageStepId(companyStageStep).createdBy(job.getCreatedBy()).createdOn(new Date()).build());
         }
         jobStageStepRepository.saveAll(jobStageSteps);
     }

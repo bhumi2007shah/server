@@ -913,8 +913,8 @@ public class JobService implements IJobService {
             jobHiringTeamRepository.flush();
         }
         AtomicLong i = new AtomicLong();
-        if(null != job.getStageStepIdList() && job.getStageStepIdList().size()>0)
-        job.getStageStepIdList().forEach(stageStep ->{
+        if(null != job.getHiringTeamStepMapping() && job.getHiringTeamStepMapping().size()>0)
+        job.getHiringTeamStepMapping().forEach(stageStep ->{
             JobHiringTeam jobHiringTeam = jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), JobStageStep.builder().id(stageStep.get(1)).build(), User.builder().id(stageStep.get(1)).build(), i.longValue(), new Date(), loggedInUser));
             i.getAndIncrement();
             jobHiringTeamList.add(jobHiringTeam);

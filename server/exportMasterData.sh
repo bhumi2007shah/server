@@ -35,6 +35,9 @@ inner join
 job on job.id = jcm.job_id
 inner join
 company on job.company_id = company.id
+inner join
+jcm_communication_details jcmCom ON jcmCom.jcm_id = jcm.id
+where jcmCom.chat_invite_flag is true
 order by \"Company Name\", \"Job Title\", \"Chatbot Status\";" > /home/lbprod/serverApplication/FileStore/download/candidateChatbotLinks.csv
 
 #export hrScreeningQuestionResponses.csv

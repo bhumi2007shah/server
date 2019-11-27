@@ -1485,7 +1485,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         //for each cv parsing record create rchilliResponseBean and push to rChilliResponseBeanList
         cvParsingDetailsList.forEach(cvParsingDetails -> {
             RChilliErrorResonseBean rChilliErrorResonseBean = new RChilliErrorResonseBean();
-            rChilliErrorResonseBean.setCvFileName(cvParsingDetails.getCvFileName());
+            rChilliErrorResonseBean.setCvFileName(cvParsingDetails.getCvFileName().replaceAll("\\d+_\\d+_",""));
             rChilliErrorResonseBean.setProcessedOn(cvParsingDetails.getProcessedOn());
             rChilliErrorResonseBean.setStatus(cvParsingDetails.getProcessingStatus());
             rChilliErrorResonseBeanList.add(rChilliErrorResonseBean);

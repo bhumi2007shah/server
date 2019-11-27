@@ -32,9 +32,10 @@ concat('https://chatbot.litmusblox.io/#/',jcm.chatbot_uuid) as \"Chatbot Link\"
 from 
 job_candidate_mapping jcm 
 inner join 
-company on jcm.created_by = company.created_by 
-inner join 
-job on job.id = jcm.job_id;" > /home/lbprod/serverApplication/FileStore/download/candidateChatbotLinks.csv
+job on job.id = jcm.job_id
+inner join
+company on job.company_id = company.id
+order by \"Company Name\", \"Job Title\", \"Chatbot Status\";" > /home/lbprod/serverApplication/FileStore/download/candidateChatbotLinks.csv
 
 #export hrScreeningQuestionResponses.csv
 PGPASSWORD="H#X@g0nL1tmu$" psql -U postgres -h localhost -d litmusblox -U postgres -A -F"," -c "select

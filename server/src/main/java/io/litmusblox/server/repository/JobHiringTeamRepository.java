@@ -6,6 +6,7 @@ package io.litmusblox.server.repository;
 
 import io.litmusblox.server.model.JobHiringTeam;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author : Sumit
@@ -15,4 +16,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Project Name : server
  */
 public interface JobHiringTeamRepository extends JpaRepository<JobHiringTeam, Long> {
+
+    @Transactional
+    void deleteByJobId(Long jobId);
 }

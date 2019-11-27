@@ -32,6 +32,7 @@ import javax.annotation.Resource;
 import javax.naming.OperationNotSupportedException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -905,29 +906,23 @@ public class JobService implements IJobService {
     }
 
     private void addJobHiringTeam(Job job, Job oldJob, User loggedInUser) throws Exception {
-        List<User> userList = userRepository.findByCompanyId(loggedInUser.getCompany().getId());
-        List<Long> userId=new ArrayList<>();
-        userList.forEach(user->{userId.add(user.getId());});
-        for (JobHiringTeam jobHiringTeam : job.getJobHiringTeamList()) {
-
-           // jobHiringTeam.setUserId(loggedInUser);//temp code for testing
-            if (null == jobHiringTeam.getUserId() || !userId.contains(jobHiringTeam.getUserId().getId())) {
-                throw new ValidationException("Not valid User" + job.getId(), HttpStatus.BAD_REQUEST);
-            }
-
-            if (null == MasterDataBean.getInstance().getProcess().get(jobHiringTeam.getStageStepId().getStage().getId())) {
-                throw new ValidationException("In Job hiring team, process " + IErrorMessages.NULL_MESSAGE + job.getId(), HttpStatus.BAD_REQUEST);
-            }
-
-            //TODO:Check Lead Recruiter and Hiring manager are selected or not
-
-
-            job.getJobKeySkillsList().addAll(jobKeySkillsRepository.findByJobIdAndMlProvided(job.getId(), true));
-            job.getJobCapabilityList().addAll(jobCapabilitiesRepository.findByJobId(job.getId()));
-
-            CompanyStageStep companyStageStep = jobHiringTeam.getStageStepId();
-            jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), jobHiringTeam.getStageStepId(), jobHiringTeam.getUserId(), jobHiringTeam.getSequence(), new Date(), loggedInUser));
+        log.info("inside addJobHiringTeam");
+        List<JobHiringTeam> jobHiringTeamList = new ArrayList<>();
+        if(null != oldJob){
+            jobHiringTeamRepository.deleteByJobId(oldJob.getId());
+            jobHiringTeamRepository.flush();
         }
+        AtomicLong i = new AtomicLong();
+        if(null != job.getStageStepIdList() && job.getStageStepIdList().size()>0)
+        job.getStageStepIdList().forEach(stageStep ->{
+            JobHiringTeam jobHiringTeam = jobHiringTeamRepository.save(new JobHiringTeam(oldJob.getId(), JobStageStep.builder().id(stageStep.get(1)).build(), User.builder().id(stageStep.get(1)).build(), i.longValue(), new Date(), loggedInUser));
+            i.getAndIncrement();
+            jobHiringTeamList.add(jobHiringTeam);
+        });
+        //List<JobHiringTeam> jobHiringTeamList = jobHiringTeamRepository.findByJobId(oldJob.getId());
+        oldJob.setJobHiringTeamList(jobHiringTeamList);
+        job.setJobHiringTeamList(jobHiringTeamList);
+        jobRepository.save(oldJob);
     }
 
     private void addJobExpertise(Job job, Job oldJob){

@@ -985,8 +985,6 @@ update job_candidate_mapping set candidate_source= 'Naukri' where candidate_sour
 
 
 --For ticket #224
-DELETE FROM MASTER_DATA WHERE TYPE = 'stage';
-
 DROP TABLE IF EXISTS STAGE_MASTER;
 CREATE TABLE STAGE_MASTER (
 ID serial PRIMARY KEY NOT NULL,
@@ -1108,6 +1106,8 @@ SET STAGE = (
 );
 
 ALTER TABLE JCM_HISTORY ALTER COLUMN STAGE SET NOT NULL;
+
+DELETE FROM MASTER_DATA WHERE TYPE = 'stage';
 
 --For ticket #247
 ALTER TABLE JOB_HIRING_TEAM

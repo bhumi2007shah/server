@@ -21,10 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Controller class for following:
@@ -176,6 +173,7 @@ public class JobCandidateMappingController {
                     put("User", Arrays.asList("displayName"));
                     put("ScreeningQuestions", Arrays.asList("id","question","options"));
                     put("CvRating", Arrays.asList("overallRating"));
+                    put("JobStageStep", new ArrayList<>(0));
                 }},
                 new HashMap<String, List<String>>() {{
                     put("Job",Arrays.asList("id", "createdBy","createdOn","updatedBy","updatedOn","jobTitle","noOfPositions","jobDescription","mlDataAvailable","datePublished","status","scoringEngineJobAvailable","function","education","expertise","jobKeySkillsList","userEnteredKeySkill"));

@@ -74,13 +74,15 @@ public interface IConstant {
         RECRUITER(Names.RECRUITER),
         SUPER_ADMIN(Names.SUPER_ADMIN),
         CLIENT_ADMIN(Names.CLIENT_ADMIN),
-        RECRUITMENT_AGENCY(Names.RECRUITMENT_AGENCY);
+        RECRUITMENT_AGENCY(Names.RECRUITMENT_AGENCY),
+        BUSINESS_USER(Names.BUSINESS_USER);
 
         public class Names {
             public static final String RECRUITER = "Recruiter";
             public static final String SUPER_ADMIN = "SuperAdmin";
             public static final String CLIENT_ADMIN = "ClientAdmin";
             public static final String RECRUITMENT_AGENCY = "RecruitmentAgency";
+            public static final String BUSINESS_USER = "BusinessUser";
         }
 
         private final String label;
@@ -274,6 +276,12 @@ public interface IConstant {
             return this.value;
         }
     }
+
+    String HR_RECRUITER = "HR Recruiter";
+    String HR_HEAD = "HR Head";
+    String HIRING_MANAGER = "Hiring Manager";
+    String INTERVIEWER = "Interviewer";
+    String ADMIN = "Admin";
 
     String NOT_AVAILABLE_EMAIL = "@notavailable.io";
 }

@@ -999,7 +999,7 @@ public class JobService implements IJobService {
         });
         ScoringEngineJobBean jobRequestBean;
         if(null != expertise)
-             jobRequestBean = new ScoringEngineJobBean(jobId, expertise.getValueToUSe(),capabilityList);
+             jobRequestBean = new ScoringEngineJobBean(jobId, Long.parseLong(expertise.getValueToUSe()), capabilityList);
         else
              jobRequestBean = new ScoringEngineJobBean(jobId, null, capabilityList);
 

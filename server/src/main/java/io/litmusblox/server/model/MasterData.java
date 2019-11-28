@@ -46,7 +46,7 @@ public class MasterData implements Serializable {
     private String value;
 
     @Column(name = "VALUE_TO_USE")
-    private Long valueToUSe;
+    private String valueToUSe;
 
     @Column(name = "COMMENTS")
     private String comments;

@@ -117,7 +117,12 @@ public class MasterDataService implements IMasterDataService {
 
         //For every master data record from database, populate the corresponding map with key-value pairs
         masterDataFromDb.forEach(data -> {
+
+            if(data.getType().equalsIgnoreCase("role"))
+                MasterDataBean.getInstance().getRole().add(data.getValue());
+            else
                 ((Map)mapAccessor.getPropertyValue(data.getType())).put(data.getId(), data.getValue());
+
                 if(data.getType().equalsIgnoreCase("noticePeriod"))
                     MasterDataBean.getInstance().getNoticePeriodMapping().put(data.getValue(), data);
 
@@ -224,6 +229,7 @@ public class MasterDataService implements IMasterDataService {
     private static final String STAGE_MASTER_DATA = "stage";
     private static final String ADD_JOB_PAGES = "addJobPages";
     private static final String CURRENCY_LIST = "currencyList";
+    private static final String ROLE = "role";
 
 
     /**
@@ -260,6 +266,9 @@ public class MasterDataService implements IMasterDataService {
                 break;
             case CURRENCY_LIST:
                 master.setCurrencyList(MasterDataBean.getInstance().getCurrencyList());
+                break;
+            case ROLE:
+                master.getRole().addAll(MasterDataBean.getInstance().getRole());
                 break;
             default: //for all other properties, use reflection
 

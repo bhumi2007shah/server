@@ -150,7 +150,7 @@ public class LbUserDetailsService implements UserDetailsService {
             } else {
                 companyObjToUse = userCompany;
             }
-        }else if(null != user.getCompany().getRecruitmentAgencyId() && IConstant.UserRole.Names.RECRUITMENT_AGENCY.equals(loggedInUser.getRole())){
+        }else if(null != user.getCompany() && null != user.getCompany().getRecruitmentAgencyId() && IConstant.UserRole.Names.RECRUITMENT_AGENCY.equals(loggedInUser.getRole())){
             Company userCompany = companyRepository.findByCompanyNameIgnoreCaseAndRecruitmentAgencyId(user.getCompany().getCompanyName(), loggedInUser.getCompany().getId());
             if(null==userCompany){
                 companyObjToUse = companyService.addCompany(new Company(user.getCompany().getCompanyName(), true, IConstant.CompanyType.INDIVIDUAL.getValue(),loggedInUser.getCompany().getId(), new Date(), loggedInUser.getId()), loggedInUser);
@@ -200,6 +200,14 @@ public class LbUserDetailsService implements UserDetailsService {
            u.setRole(IConstant.UserRole.Names.RECRUITER);
         }
         else {
+
+            if(user.getRole().equals(IConstant.HR_RECRUITER))
+                user.setRole(IConstant.UserRole.Names.RECRUITER);
+            else if(user.getRole().equals(IConstant.HR_HEAD) || user.getRole().equals(IConstant.ADMIN))
+                user.setRole(IConstant.UserRole.Names.CLIENT_ADMIN);
+            else if(user.getRole().equals(IConstant.HIRING_MANAGER) || user.getRole().equals(IConstant.INTERVIEWER))
+                user.setRole(IConstant.UserRole.Names.BUSINESS_USER);
+
             //set role as present in the request
             //check that the role is valid and exists in the system
             if(Arrays.stream(IConstant.UserRole.values()).anyMatch((definedRole) -> definedRole.toString().equalsIgnoreCase(user.getRole()))) {

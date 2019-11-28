@@ -1115,3 +1115,14 @@ DROP COLUMN STAGE_STEP_ID;
 
 ALTER TABLE JOB_HIRING_TEAM
 ADD COLUMN STAGE_STEP_ID INTEGER REFERENCES JOB_STAGE_STEP(ID) NOT NULL;
+
+--For ticket #257
+ALTER TABLE MASTER_DATA
+ALTER COLUMN VALUE_TO_USE TYPE VARCHAR (20);
+
+INSERT INTO public.master_data(type, value, value_to_use) VALUES
+('role', 'HR Recruiter', 'Recruiter'),
+('role', 'HR Head', 'ClientAdmin'),
+('role', 'Admin', 'ClientAdmin'),
+('role', 'Hiring Manager', 'BusinessUser'),
+('role', 'Interviewer', 'BusinessUser');

@@ -177,4 +177,13 @@ public interface IJobCandidateMappingService {
      * @throws Exception
      */
     void setStageForCandidates(List<Long> jcmList, String stage) throws Exception;
+
+    /**
+     * Service to return error list for drag and drop CV's for a job
+     *
+     * @param jobId job id for which files with error wil be returned
+     * @return List of RChilliErrorResponseBean which have file name, processed date, status, jcmId, candidate name if available
+     * @throws Exception
+     */
+    List<RChilliErrorResonseBean> getRchilliError(Long jobId) throws Exception;
 }

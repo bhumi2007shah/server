@@ -31,4 +31,8 @@ public interface CvParsingDetailsRepository extends JpaRepository<CvParsingDetai
 
     @Transactional
     void deleteByJobCandidateMappingId(JobCandidateMapping jobCandidateMapping);
+
+    @Transactional
+    @Query(nativeQuery = true, value = "select * from cv_parsing_details where processing_status='Failure' and cv_file_name like (concat('%',:jobId,'%'))")
+    List<CvParsingDetails> getRchilliErrorResonseBeanList(Long jobId);
 }

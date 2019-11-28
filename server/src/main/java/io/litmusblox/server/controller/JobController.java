@@ -47,6 +47,7 @@ public class JobController {
             (new HashMap<String, List<String>>(){{
                 put("User",Arrays.asList("displayName","id"));
                 put("ScreeningQuestions", Arrays.asList("question","id"));
+                put("JobStageStep", Arrays.asList("id"));
             }}),
             (new HashMap<String, List<String>>(){{
                 put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));

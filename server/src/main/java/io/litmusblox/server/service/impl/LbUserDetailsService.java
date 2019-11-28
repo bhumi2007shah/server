@@ -376,7 +376,7 @@ public class LbUserDetailsService implements UserDetailsService {
         List<User> userList = userRepository.findByCompanyId(companyId);
         List<UserWorkspaceBean> responseBeans = new ArrayList<>(userList.size());
         userList.forEach(user->{
-            UserWorkspaceBean workspaceBean = new UserWorkspaceBean(user.getId(), user.getDisplayName(), user.getStatus());
+            UserWorkspaceBean workspaceBean = new UserWorkspaceBean(user.getId(), user.getDisplayName(), user.getStatus(), user.getCompanyAddressId(), user.getCompanyBuId());
             workspaceBean.setNumberOfJobsCreated(jobRepository.countByCreatedBy(user));
             responseBeans.add(workspaceBean);
         });

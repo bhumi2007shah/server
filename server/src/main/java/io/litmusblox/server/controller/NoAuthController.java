@@ -104,6 +104,7 @@ public class NoAuthController {
                 (new HashMap<String, List<String>>(){{
                     put("User", Arrays.asList("displayName"));
                     put("CandidateCompanyDetails", new ArrayList<>(0));
+                    put("JobStageStep", new ArrayList<>(0));
                 }}),
                 new HashMap<String, List<String>>() {{
                     put("Job",Arrays.asList("jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy","companyJobId","noOfPositions","mlDataAvailable","status","createdOn","createdBy","userEnteredKeySkill"));
@@ -180,8 +181,9 @@ public class NoAuthController {
         String response = Util.stripExtraInfoFromResponseBean(jobCandidateMappingService.getCandidateProfile(profileSharingUuid),
                 new HashMap<String, List<String>>() {{
                     put("User", Arrays.asList("displayName"));
-                    put("ScreeningQuestions", Arrays.asList("id","question"));
+                    put("ScreeningQuestions", Arrays.asList("id","question","options"));
                     put("CvRating", Arrays.asList("overallRating"));
+                    put("JobStageStep", new ArrayList<>(0));
                 }},
                 new HashMap<String, List<String>>() {{
                     put("Job",Arrays.asList("createdBy","createdOn","updatedBy","updatedOn","noOfPositions","jobDescription","mlDataAvailable","datePublished","status","scoringEngineJobAvailable","function","education","expertise","jobKeySkillsList","userEnteredKeySkill"));

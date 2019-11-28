@@ -47,6 +47,7 @@ public class JobController {
             (new HashMap<String, List<String>>(){{
                 put("User",Arrays.asList("displayName","id"));
                 put("ScreeningQuestions", Arrays.asList("question","id"));
+                put("JobStageStep", Arrays.asList("id"));
             }}),
             (new HashMap<String, List<String>>(){{
                 put("Job",Arrays.asList("createdOn","createdBy", "updatedOn", "updatedBy"));
@@ -90,7 +91,7 @@ public class JobController {
      * @return response bean with all details as a json string
      * @throws Exception
      */
-    @PostMapping(value = "/jobViewByStage/{jobId}/{stage}")
+    @GetMapping(value = "/jobViewByStage/{jobId}/{stage}")
     @ResponseBody
     @ResponseStatus(HttpStatus.OK)
     String getJobViewByIdAndStage(@PathVariable ("jobId") Long jobId, @PathVariable ("stage") String stage) throws Exception {
@@ -101,6 +102,7 @@ public class JobController {
                     put("User",Arrays.asList("displayName"));
                     put("CvRating", Arrays.asList("overallRating"));
                     put("CandidateEducationDetails", Arrays.asList("degree"));
+                    put("JobStageStep", new ArrayList<>(0));
                 }}),
                 (new HashMap<String, List<String>>(){{
                     put("Job",Arrays.asList("jobDescription","jobScreeningQuestionsList","jobKeySkillsList","jobCapabilityList", "updatedOn", "updatedBy"));

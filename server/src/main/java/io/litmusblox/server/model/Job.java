@@ -186,7 +186,7 @@ public class Job implements Serializable {
     private String mlErrorMessage;
 
     @Transient
-    private Map<Long,Integer> candidateCountByStage = new HashMap<>();
+    private Map<String,Integer> candidateCountByStage = new HashMap<>();
 
     @Transient
     private List<String> roles;

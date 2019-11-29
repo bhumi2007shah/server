@@ -969,7 +969,7 @@ ADD CONSTRAINT unique_job_candidate UNIQUE(JOB_ID, CANDIDATE_ID);
 
 --For ticket #230
 ALTER TABLE USERS
-ALTER COLUMN ROLE TYPE VARCHAR(17);
+    ALTER COLUMN ROLE TYPE VARCHAR(17);
 
 --For ticket #246
 ALTER TABLE USERS
@@ -982,6 +982,7 @@ update jcm_communication_details set chat_invite_timestamp_sms = null, chat_inco
 
 -- For ticket #241 - update all candidate source to naukri where candidate source is plugin
 update job_candidate_mapping set candidate_source= 'Naukri' where candidate_source='Plugin';
+
 
 
 --For ticket #224
@@ -1059,6 +1060,9 @@ ALTER TABLE JOB_CANDIDATE_MAPPING ADD CONSTRAINT job_candidate_mapping_stage_fke
 --clear old dirty data of jcm related to 'Draft' jobs
 DELETE FROM JCM_COMMUNICATION_DETAILS
 WHERE JCM_ID IN (SELECT ID FROM JOB_CANDIDATE_MAPPING WHERE JOB_ID IN (SELECT ID FROM JOB WHERE STATUS = 'Draft'));
+
+DELETE FROM CANDIDATE_SCREENING_QUESTION_RESPONSE
+WHERE JOB_CANDIDATE_MAPPING_ID IN (SELECT ID FROM JOB_CANDIDATE_MAPPING WHERE JOB_ID IN (SELECT ID FROM JOB WHERE STATUS = 'Draft'));
 
 DELETE FROM CANDIDATE_TECH_RESPONSE_DATA
 WHERE JOB_CANDIDATE_MAPPING_ID IN (SELECT ID FROM JOB_CANDIDATE_MAPPING WHERE JOB_ID IN (SELECT ID FROM JOB WHERE STATUS = 'Draft'));

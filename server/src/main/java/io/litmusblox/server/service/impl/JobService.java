@@ -333,7 +333,7 @@ public class JobService implements IJobService {
                 stageCountMapByJobId.forEach((key, value) -> {
                     Job job = jobsMap.get(key);
                     value.stream().forEach(objArray -> {
-                        job.getCandidateCountByStage().put(((Integer) objArray[1]).longValue(), ((BigInteger) objArray[2]).intValue());
+                        job.getCandidateCountByStage().put(objArray[1].toString(), ((BigInteger) objArray[2]).intValue());
                     });
                 });
                 log.info("Got candidate count by stage for " + jobs.size() + " jobs in " + (System.currentTimeMillis() - startTime) + "ms");

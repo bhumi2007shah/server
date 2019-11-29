@@ -1147,6 +1147,14 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         return emailUpdated;
     }
 
+    /**
+     * function to update candidate data nad jcm record with new email or mobile requested in candidate edit function.
+     * @param jobCandidateMapping - updated jcm record.
+     * @param jcmFromDb - jcm record from db with candidate id
+     * @param loggedInUser - user updating the jcm record.
+     * @return boolean whether jcmFromDbDeleted, in case id candidate with new email or mobile already existing and jcm from db has null mobile and email has @notavailable.
+     * Flowchart for this method - https://github.com/hexagonsearch/litmusblox-backend/issues/253
+     */
     private boolean updateOrCreateEmailMobile(JobCandidateMapping jobCandidateMapping, JobCandidateMapping jcmFromDb, User loggedInUser){
 
         boolean jcmFromDbDeleted = false;
@@ -1155,7 +1163,7 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
             // call getCandidateIdFromMobileHistory to fetch candidate id for new mobile from mobile history from db if exists.
             Long candidateIdFromMobileHistory = getCandidateIdFromMobileHistory(jobCandidateMapping.getMobile(), jobCandidateMapping.getCountryCode());
 
-            if (candidateIdFromMobileHistory != null) {
+            if (candidateIdFromMobileHistory != null && !jobCandidateMapping.getMobile().equals(jcmFromDb.getMobile())) {
                 //fetch candidate mobile history for new mobile as it is already existing if control reaches here.
                 CandidateMobileHistory candidateMobileHistory = getMobileHistory(jobCandidateMapping.getMobile(), jcmFromDb.getCountryCode());
 
@@ -1171,6 +1179,12 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                     jcmFromDbDeleted = true;
                 }
                 else{
+                    //update jcmFromDb with existing candidate's email.
+                    List<CandidateEmailHistory> existingCandidateEmailList = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(existingCandidate.getId());
+                    if(existingCandidateEmailList.size()>0){
+                        jcmFromDb.setEmail(existingCandidateEmailList.get(0).getEmail());
+                    }
+                    jcmFromDb.setMobile(jobCandidateMapping.getMobile());
                     //update jcm with existing candidate and delete candidate with email "@notavailable"
                     deleteAndUpdateCandidate(existingCandidate, jcmFromDb);
                 }
@@ -1207,6 +1221,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                             jcmFromDbDeleted = true;
                         }
                         else{
+                            List<CandidateMobileHistory> existingCandidateMobileList = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(existingCandidate.getId());
+                            if(existingCandidateMobileList.size()>0){
+                                jcmFromDb.setMobile(existingCandidateMobileList.get(0).getMobile());
+                            }
+                            jcmFromDb.setEmail(jobCandidateMapping.getEmail());
                             //update jcm with existing candidate and delete candidate with email "@notavailable"
                             deleteAndUpdateCandidate(existingCandidate, jcmFromDb);
                         }
@@ -1235,6 +1254,11 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                         jcmFromDbDeleted = true;
                     }
                     else{
+                        List<CandidateMobileHistory> existingCandidateMobileList = candidateMobileHistoryRepository.findByCandidateIdOrderByIdDesc(existingCandidate.getId());
+                        if(existingCandidateMobileList.size()>0){
+                            jcmFromDb.setMobile(existingCandidateMobileList.get(0).getMobile());
+                        }
+                        jcmFromDb.setEmail(jobCandidateMapping.getEmail());
                         //update jcm with existing candidate and delete candidate with email "@notavailable"
                         deleteAndUpdateCandidate(existingCandidate, jcmFromDb);
                     }
@@ -1244,23 +1268,33 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
                 }
             }
             else if(candidateIdFromMobileHistory!=null){
-                //fetch candidate mobile history for new mobile as it is already existing if control reaches here.
-                CandidateMobileHistory candidateMobileHistory = getMobileHistory(jobCandidateMapping.getMobile(), jcmFromDb.getCountryCode());
-
-                //extracting existing candidate from db for new email.
-                Candidate existingCandidate = candidateMobileHistory.getCandidate();
-
-                //check if existingCandidate belongs to same job
-                JobCandidateMapping jcmForExistingCandidate = jobCandidateMappingRepository.findByJobAndCandidate(jcmFromDb.getJob(), existingCandidate);
-
-                if(jcmForExistingCandidate!=null) {
-                    //call function to delete requested jcm record and change updated by to current user for exiting jcm
-                    deleteAndUpdateJcmRecord(jcmFromDb, jcmForExistingCandidate, loggedInUser);
-                    jcmFromDbDeleted = true;
+                if(jobCandidateMapping.getMobile().equals(jcmFromDb.getMobile())) {
+                    createUpdateEmail(jobCandidateMapping, jcmFromDb, loggedInUser);
                 }
-                else{
-                    //update jcm with existing candidate and delete candidate with email "@notavailable"
-                    deleteAndUpdateCandidate(existingCandidate, jcmFromDb);
+                else {
+                    //fetch candidate mobile history for new mobile as it is already existing if control reaches here.
+                    CandidateMobileHistory candidateMobileHistory = getMobileHistory(jobCandidateMapping.getMobile(), jcmFromDb.getCountryCode());
+
+                    //extracting existing candidate from db for new mobile.
+                    Candidate existingCandidate = candidateMobileHistory.getCandidate();
+
+                    //check if existingCandidate belongs to same job
+                    JobCandidateMapping jcmForExistingCandidate = jobCandidateMappingRepository.findByJobAndCandidate(jcmFromDb.getJob(), existingCandidate);
+
+                    if (jcmForExistingCandidate != null) {
+                        //call function to delete requested jcm record and change updated by to current user for exiting jcm
+                        deleteAndUpdateJcmRecord(jcmFromDb, jcmForExistingCandidate, loggedInUser);
+                        jcmFromDbDeleted = true;
+                    } else {
+                        //update jcmFromDb with existing candidate's email.
+                        List<CandidateEmailHistory> existingCandidateEmailList = candidateEmailHistoryRepository.findByCandidateIdOrderByIdDesc(existingCandidate.getId());
+                        if (existingCandidateEmailList.size() > 0) {
+                            jcmFromDb.setEmail(existingCandidateEmailList.get(0).getEmail());
+                        }
+                        jcmFromDb.setMobile(jobCandidateMapping.getMobile());
+                        //update jcm with existing candidate and delete candidate with email "@notavailable"
+                        deleteAndUpdateCandidate(existingCandidate, jcmFromDb);
+                    }
                 }
             }
             else {
@@ -1433,5 +1467,29 @@ public class JobCandidateMappingService implements IJobCandidateMappingService {
         jcmHistoryRepository.saveAll(jcmHistoryList);
 
         log.info("Completed moving candidates to {} stage in {} ms", stage, (System.currentTimeMillis() - startTime));
+    }
+
+    /**
+     * Service to return error list for drag and drop CV's for a job
+     *
+     * @param jobId job id for which files with error wil be returned
+     * @return List of RChilliErrorResponseBean which have file name, processed date, status, jcmId, candidate name if available
+     * @throws Exception
+     */
+    public List<RChilliErrorResonseBean> getRchilliError(Long jobId) throws Exception{
+        List<RChilliErrorResonseBean> rChilliErrorResonseBeanList = new ArrayList<>();
+
+        //fetch records with error from cv parsing details table using jobId
+        List<CvParsingDetails> cvParsingDetailsList = cvParsingDetailsRepository.getRchilliErrorResonseBeanList(jobId);
+
+        //for each cv parsing record create rchilliResponseBean and push to rChilliResponseBeanList
+        cvParsingDetailsList.forEach(cvParsingDetails -> {
+            RChilliErrorResonseBean rChilliErrorResonseBean = new RChilliErrorResonseBean();
+            rChilliErrorResonseBean.setCvFileName(cvParsingDetails.getCvFileName().replaceAll("\\d+_\\d+_",""));
+            rChilliErrorResonseBean.setProcessedOn(cvParsingDetails.getProcessedOn());
+            rChilliErrorResonseBean.setStatus(cvParsingDetails.getProcessingStatus());
+            rChilliErrorResonseBeanList.add(rChilliErrorResonseBean);
+        });
+        return rChilliErrorResonseBeanList;
     }
 }

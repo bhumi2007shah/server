@@ -33,5 +33,5 @@ public interface JobStageStepRepository extends JpaRepository<JobStageStep, Long
     List<JobStageStep> findByJobId(Long jobId) throws Exception;
 
     @Transactional
-    void deleteById(Long jobId);
+    void deleteByJobId(Long jobId);
 }

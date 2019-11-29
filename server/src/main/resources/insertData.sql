@@ -670,13 +670,13 @@ delete from create_job_page_sequence;
 INSERT INTO CREATE_JOB_PAGE_SEQUENCE (PAGE_DISPLAY_NAME, PAGE_NAME, PAGE_DISPLAY_ORDER, DISPLAY_FLAG,SUBSCRIPTION_AVAILABILITY)
 VALUES
 ('Overview', 'overview', 1, 'T','Lite'),
-('Expertise', 'expertise', 2, 'F','Lite'),
-('Job Detail', 'jobDetail', 3, 'F','Max'),
-('Screening Questions', 'screeningQuestions', 4, 'T','Lite'),
-('Key Skills', 'keySkills', 5, 'T','Lite'),
-('Hiring Team', 'hiringTeam', 6, 'F','Max'),
-('Capabilities', 'capabilities', 7, 'T','Lite'),
-('Preview', 'preview', 8, 'T','Lite');
+('Expertise', 'expertise', 3, 'F','Lite'),
+('Job Detail', 'jobDetail', 8, 'F','Max'),
+('Screening', 'screeningQuestions', 2, 'T','Lite'),
+('Key Skills', 'keySkills', 4, 'T','Lite'),
+('Hiring Team', 'hiringTeam', 6, 'T','Max'),
+('Capabilities', 'capabilities', 5, 'T','Lite'),
+('Preview', 'preview', 7, 'T','Lite');
 
 INSERT INTO MASTER_DATA (TYPE, VALUE, VALUE_TO_USE, COMMENTS)
 VALUES

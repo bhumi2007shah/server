@@ -460,7 +460,7 @@ public class JobService implements IJobService {
         job.setCompanyId(userCompany);
         String historyMsg = "Created";
         if(deleteExistingJobStageStep){
-            jobStageStepRepository.deleteById(job.getId());
+            jobStageStepRepository.deleteByJobId(job.getId());
             jobStageStepRepository.flush();
         }
 

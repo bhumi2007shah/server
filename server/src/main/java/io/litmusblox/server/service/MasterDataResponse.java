@@ -43,4 +43,6 @@ public class MasterDataResponse {
     private List<CreateJobPageSequence> addJobPages = new ArrayList<>();
     private List<String> currencyList = new ArrayList<>();
     private List<String> role = new ArrayList<>();
+
+
 }
